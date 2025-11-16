@@ -1,0 +1,34 @@
+#!/usr/bin/env python3
+"""
+Mandelbrot Set Visualization Executable
+Runs the Gulf of Mexico Mandelbrot fractal art generator
+"""
+
+import sys
+import os
+from pathlib import Path
+
+# Add GulfOfMexico to path
+sys.path.insert(0, str(Path(__file__).parent.parent))
+
+from gulfofmexico import run_file
+
+def main():
+    # Get the directory where this script is located
+    script_dir = Path(__file__).parent
+    mandelbrot_file = script_dir / "mandelbrot.gom"
+    
+    if not mandelbrot_file.exists():
+        print(f"Error: {mandelbrot_file} not found!", file=sys.stderr)
+        return 1
+    
+    # Run the Mandelbrot program
+    try:
+        run_file(str(mandelbrot_file))
+        return 0
+    except Exception as e:
+        print(f"Error running Mandelbrot: {e}", file=sys.stderr)
+        return 1
+
+if __name__ == "__main__":
+    sys.exit(main())
