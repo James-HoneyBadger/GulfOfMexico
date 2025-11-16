@@ -32,6 +32,7 @@ Built-in Functions:
     - I/O: print(), read(), write()
     - Control: sleep(), exit()
     - Data structures: Map(), use() for signals
+    - Graphics: Canvas(), Color() for drawing
     - Math functions: All from Python's math module
     - Regex: regex_match(), regex_findall(), regex_replace()
     - Word numbers: one, two, twenty, thirty, etc.
@@ -855,6 +856,307 @@ def __number_function_maker(num: int) -> BuiltinFunction:
     return BuiltinFunction(1, the_func)
 
 
+# Graphics functions
+def db_create_canvas(
+    width: GulfOfMexicoValue,
+    height: GulfOfMexicoValue,
+    bg_color: Optional[GulfOfMexicoValue] = None,
+) -> GulfOfMexicoValue:
+    """Create a new Canvas for drawing."""
+    if not isinstance(width, GulfOfMexicoNumber) or not isinstance(
+        height, GulfOfMexicoNumber
+    ):
+        raise NonFormattedError("Canvas width and height must be numbers")
+
+    try:
+        from gulfofmexico.graphics import GulfOfMexicoCanvas, GulfOfMexicoColor
+    except ImportError:
+        raise NonFormattedError(
+            "Graphics module not available. Install Pillow:\n" "  pip install Pillow"
+        )
+
+    # Parse background color if provided
+    background = GulfOfMexicoColor(255, 255, 255)  # default white
+    if bg_color and not isinstance(bg_color, GulfOfMexicoSpecialBlankValue):
+        if isinstance(bg_color, GulfOfMexicoString):
+            from gulfofmexico.graphics import parse_color
+
+            background = parse_color(bg_color.value)
+
+    canvas = GulfOfMexicoCanvas(int(width.value), int(height.value), background)
+
+    # Create canvas object with methods as namespace
+    canvas_obj = GulfOfMexicoObject("Canvas", {})
+    canvas_obj._gom_canvas = canvas  # Store the actual canvas
+
+    # Add canvas methods to namespace
+    canvas_obj.namespace.update(
+        {
+            "width": Name("width", GulfOfMexicoNumber(canvas.width)),
+            "height": Name("height", GulfOfMexicoNumber(canvas.height)),
+            "clear": Name(
+                "clear", BuiltinFunction(1, lambda c: _canvas_clear(canvas_obj, c))
+            ),
+            "pixel": Name(
+                "pixel",
+                BuiltinFunction(3, lambda x, y, c: _canvas_pixel(canvas_obj, x, y, c)),
+            ),
+            "rect": Name(
+                "rect",
+                BuiltinFunction(-1, lambda *args: _canvas_rect(canvas_obj, *args)),
+            ),
+            "circle": Name(
+                "circle",
+                BuiltinFunction(-1, lambda *args: _canvas_circle(canvas_obj, *args)),
+            ),
+            "line": Name(
+                "line",
+                BuiltinFunction(5, lambda *args: _canvas_line(canvas_obj, *args)),
+            ),
+            "polygon": Name(
+                "polygon",
+                BuiltinFunction(2, lambda pts, c: _canvas_polygon(canvas_obj, pts, c)),
+            ),
+            "text": Name(
+                "text",
+                BuiltinFunction(-1, lambda *args: _canvas_text(canvas_obj, *args)),
+            ),
+            "save": Name(
+                "save", BuiltinFunction(1, lambda path: _canvas_save(canvas_obj, path))
+            ),
+            "show": Name("show", BuiltinFunction(0, lambda: _canvas_show(canvas_obj))),
+            "translate": Name(
+                "translate",
+                BuiltinFunction(2, lambda x, y: _canvas_translate(canvas_obj, x, y)),
+            ),
+            "rotate": Name(
+                "rotate", BuiltinFunction(1, lambda a: _canvas_rotate(canvas_obj, a))
+            ),
+            "scale": Name(
+                "scale",
+                BuiltinFunction(-1, lambda *args: _canvas_scale(canvas_obj, *args)),
+            ),
+            "saveTransform": Name(
+                "saveTransform",
+                BuiltinFunction(0, lambda: _canvas_save_transform(canvas_obj)),
+            ),
+            "restoreTransform": Name(
+                "restoreTransform",
+                BuiltinFunction(0, lambda: _canvas_restore_transform(canvas_obj)),
+            ),
+        }
+    )
+
+    return canvas_obj
+
+
+def db_create_color(*args: GulfOfMexicoValue) -> GulfOfMexicoValue:
+    """Create a Color object from RGB or RGBA values."""
+    try:
+        from gulfofmexico.graphics import GulfOfMexicoColor, parse_color
+    except ImportError:
+        raise NonFormattedError("Graphics module not available")
+
+    # Handle named colors
+    if len(args) == 1 and isinstance(args[0], GulfOfMexicoString):
+        color = parse_color(args[0].value)
+    # RGB
+    elif len(args) == 3:
+        r = args[0].value if isinstance(args[0], GulfOfMexicoNumber) else None
+        g = args[1].value if isinstance(args[1], GulfOfMexicoNumber) else None
+        b = args[2].value if isinstance(args[2], GulfOfMexicoNumber) else None
+        color = GulfOfMexicoColor(r, g, b)
+    # RGBA
+    elif len(args) == 4:
+        r = args[0].value if isinstance(args[0], GulfOfMexicoNumber) else None
+        g = args[1].value if isinstance(args[1], GulfOfMexicoNumber) else None
+        b = args[2].value if isinstance(args[2], GulfOfMexicoNumber) else None
+        a = args[3].value if isinstance(args[3], GulfOfMexicoNumber) else None
+        color = GulfOfMexicoColor(r, g, b, a)
+    else:
+        raise NonFormattedError(
+            "Color requires 1 (name), 3 (RGB) or 4 (RGBA) arguments"
+        )
+
+    # Return as a GulfOfMexico object
+    color_obj = GulfOfMexicoObject("Color", {})
+    color_obj._gom_color = color
+    color_obj.namespace.update(
+        {
+            "r": Name("r", GulfOfMexicoNumber(color.r if color.r is not None else 127)),
+            "g": Name("g", GulfOfMexicoNumber(color.g if color.g is not None else 127)),
+            "b": Name("b", GulfOfMexicoNumber(color.b if color.b is not None else 127)),
+            "a": Name("a", GulfOfMexicoNumber(color.a if color.a is not None else 127)),
+            "hex": Name(
+                "hex", BuiltinFunction(0, lambda: GulfOfMexicoString(color.to_hex()))
+            ),
+        }
+    )
+    return color_obj
+
+
+# Canvas method wrappers
+def _get_canvas(canvas_obj: GulfOfMexicoObject):
+    """Extract the underlying canvas from a canvas object."""
+    if not hasattr(canvas_obj, "_gom_canvas"):
+        raise NonFormattedError("Not a valid Canvas object")
+    return canvas_obj._gom_canvas
+
+
+def _parse_color_arg(color_arg: GulfOfMexicoValue) -> str:
+    """Convert a GulfOfMexico value to a color specification."""
+    from gulfofmexico.graphics import GulfOfMexicoColor
+
+    if isinstance(color_arg, GulfOfMexicoString):
+        return color_arg.value
+    elif isinstance(color_arg, GulfOfMexicoObject) and hasattr(color_arg, "_gom_color"):
+        return color_arg._gom_color
+    elif isinstance(color_arg, GulfOfMexicoBoolean):
+        # Three-valued logic for colors!
+        if color_arg.value is True:
+            return "white"
+        elif color_arg.value is False:
+            return "black"
+        else:  # maybe
+            return "maybe"
+    return "black"
+
+
+def _canvas_clear(canvas_obj, color_arg):
+    canvas = _get_canvas(canvas_obj)
+    if isinstance(color_arg, GulfOfMexicoSpecialBlankValue):
+        canvas.clear()
+    else:
+        color = _parse_color_arg(color_arg)
+        canvas.clear(color)
+
+
+def _canvas_pixel(canvas_obj, x, y, color_arg):
+    canvas = _get_canvas(canvas_obj)
+    if not isinstance(x, GulfOfMexicoNumber) or not isinstance(y, GulfOfMexicoNumber):
+        raise NonFormattedError("pixel coordinates must be numbers")
+    color = _parse_color_arg(color_arg)
+    canvas.pixel(x.value, y.value, color)
+
+
+def _canvas_rect(canvas_obj, *args):
+    canvas = _get_canvas(canvas_obj)
+    if len(args) < 5:
+        raise NonFormattedError("rect requires x, y, width, height, color")
+    x, y, w, h = args[0].value, args[1].value, args[2].value, args[3].value
+    color = _parse_color_arg(args[4])
+    fill = True
+    if len(args) > 5 and isinstance(args[5], GulfOfMexicoBoolean):
+        fill = args[5].value if args[5].value is not None else True
+    canvas.rect(x, y, w, h, color, fill)
+
+
+def _canvas_circle(canvas_obj, *args):
+    canvas = _get_canvas(canvas_obj)
+    if len(args) < 4:
+        raise NonFormattedError("circle requires x, y, radius, color")
+    x, y, r = args[0].value, args[1].value, args[2].value
+    color = _parse_color_arg(args[3])
+    fill = True
+    if len(args) > 4 and isinstance(args[4], GulfOfMexicoBoolean):
+        fill = args[4].value if args[4].value is not None else True
+    canvas.circle(x, y, r, color, fill)
+
+
+def _canvas_line(canvas_obj, x1, y1, x2, y2, color_arg):
+    canvas = _get_canvas(canvas_obj)
+    if not all(isinstance(v, GulfOfMexicoNumber) for v in [x1, y1, x2, y2]):
+        raise NonFormattedError("line coordinates must be numbers")
+    color = _parse_color_arg(color_arg)
+    canvas.line(x1.value, y1.value, x2.value, y2.value, color)
+
+
+def _canvas_polygon(canvas_obj, points_list, color_arg):
+    canvas = _get_canvas(canvas_obj)
+    if not isinstance(points_list, GulfOfMexicoList):
+        raise NonFormattedError("polygon points must be a list")
+
+    points = []
+    for point in points_list.values:
+        if isinstance(point, GulfOfMexicoList) and len(point.values) >= 2:
+            x = (
+                point.values[0].value
+                if isinstance(point.values[0], GulfOfMexicoNumber)
+                else 0
+            )
+            y = (
+                point.values[1].value
+                if isinstance(point.values[1], GulfOfMexicoNumber)
+                else 0
+            )
+            points.append((x, y))
+
+    color = _parse_color_arg(color_arg)
+    canvas.polygon(points, color)
+
+
+def _canvas_text(canvas_obj, *args):
+    canvas = _get_canvas(canvas_obj)
+    if len(args) < 4:
+        raise NonFormattedError("text requires text, x, y, color")
+    text = db_to_string(args[0]).value
+    x, y = args[1].value, args[2].value
+    color = _parse_color_arg(args[3])
+    size = 16
+    if len(args) > 4 and isinstance(args[4], GulfOfMexicoNumber):
+        size = int(args[4].value)
+    canvas.text(text, x, y, color, size)
+
+
+def _canvas_save(canvas_obj, path_arg):
+    canvas = _get_canvas(canvas_obj)
+    if not isinstance(path_arg, GulfOfMexicoString):
+        raise NonFormattedError("save path must be a string")
+    canvas.save(path_arg.value)
+
+
+def _canvas_show(canvas_obj):
+    canvas = _get_canvas(canvas_obj)
+    canvas.show()
+
+
+def _canvas_translate(canvas_obj, x, y):
+    canvas = _get_canvas(canvas_obj)
+    if not isinstance(x, GulfOfMexicoNumber) or not isinstance(y, GulfOfMexicoNumber):
+        raise NonFormattedError("translate requires number arguments")
+    canvas.translate(x.value, y.value)
+
+
+def _canvas_rotate(canvas_obj, angle):
+    canvas = _get_canvas(canvas_obj)
+    if not isinstance(angle, GulfOfMexicoNumber):
+        raise NonFormattedError("rotate requires a number argument")
+    canvas.rotate(angle.value)
+
+
+def _canvas_scale(canvas_obj, *args):
+    canvas = _get_canvas(canvas_obj)
+    if len(args) < 1:
+        raise NonFormattedError("scale requires at least one argument")
+    sx = args[0].value if isinstance(args[0], GulfOfMexicoNumber) else 1
+    sy = (
+        args[1].value
+        if len(args) > 1 and isinstance(args[1], GulfOfMexicoNumber)
+        else sx
+    )
+    canvas.scale(sx, sy)
+
+
+def _canvas_save_transform(canvas_obj):
+    canvas = _get_canvas(canvas_obj)
+    canvas.save_transform()
+
+
+def _canvas_restore_transform(canvas_obj):
+    canvas = _get_canvas(canvas_obj)
+    canvas.restore_transform()
+
+
 # get ready, this is boutta be crazy
 MATH_FUNCTION_KEYWORDS = {
     name: Name(
@@ -916,6 +1218,8 @@ BUILTIN_FUNCTION_KEYWORDS = {
     "regex_match": Name("regex_match", BuiltinFunction(1, db_regex_match)),
     "regex_findall": Name("regex_findall", BuiltinFunction(1, db_regex_findall)),
     "regex_replace": Name("regex_replace", BuiltinFunction(1, db_regex_replace)),
+    "Canvas": Name("Canvas", BuiltinFunction(-1, db_create_canvas)),
+    "Color": Name("Color", BuiltinFunction(-1, db_create_color)),
 }
 BUILTIN_VALUE_KEYWORDS = {
     "true": Name("true", GulfOfMexicoBoolean(True)),

@@ -1,0 +1,62 @@
+// Graphics Example - Gulf of Mexico
+// Demonstrates drawing primitives, colors, and the -1 based coordinate system
+
+// Create a canvas (800x600 pixels)
+const canvas = Canvas(800, 600, "white")!
+
+// Drawing basic shapes with -1 based coordinates
+// Top-left corner is (-1, -1), not (0, 0)!
+
+// Draw a red rectangle at top-left
+canvas.rect(-1, -1, 100, 100, "red")!
+
+// Draw a blue circle
+canvas.circle(200, 200, 50, "blue")!
+
+// Draw a green line
+canvas.line(-1, -1, 400, 400, "green")!
+
+// Draw a polygon (triangle)
+const trianglePoints = [[-1, 300], [100, 300], [50, 200]]!
+canvas.polygon(trianglePoints, "purple")!
+
+// Using named colors
+canvas.circle(400, 100, 30, "orange")!
+canvas.circle(500, 100, 30, "cyan")!
+canvas.circle(600, 100, 30, "magenta")!
+
+// Text drawing
+canvas.text("Hello Gulf of Mexico!", 10, 450, "black", 24)!
+
+// Fractional indexing for pixels! (Gulf of Mexico magic)
+// Draw a pixel between integer coordinates
+canvas.pixel(250.5, 250.5, "red")!
+
+// Three-valued logic for colors
+// "maybe" creates a probabilistic color!
+canvas.circle(700, 300, 40, "maybe")!
+
+// Create custom colors with RGB
+const customRed = Color(255, 100, 100)!
+canvas.rect(100, 500, 50, 50, customRed)!
+
+// Colors with alpha transparency (RGBA)
+const semiTransparent = Color(0, 255, 0, 128)!  // 50% transparent green
+canvas.circle(300, 500, 40, semiTransparent)!
+
+// Probabilistic color with maybe
+// Pass maybe/undefined for color channels to make them random!
+const maybeColor = Color(255, maybe, 0)!  // Red, random green, no blue
+canvas.rect(400, 500, 60, 60, maybeColor)!
+
+// Save the canvas to a file
+canvas.save("graphics_demo.png")!
+
+print("Graphics drawn! Saved to graphics_demo.png")!
+print("Canvas size: ")!
+print(canvas.width)!
+print(" x ")!
+print(canvas.height)!
+
+exit()!
+
