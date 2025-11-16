@@ -10,9 +10,13 @@ keywords = ["interpreter", "esoteric", "programming-language"]
 
 [tool.poetry.dependencies]
 python = "^3.10"
-pynput = "1.7.6"
-pygithub = "2.2.0"
-requests = "2.31.0"
+pynput = "^1.7.7"
+pygithub = "^2.5.0"
+requests = "^2.32.4"
+urllib3 = "^2.5.0"
+certifi = "^2024.7.4"
+cryptography = "^44.0.1"
+idna = "^3.7"
 
 [tool.poetry.scripts]
 gom-ide = "gulfofmexico.ide.app:run"
