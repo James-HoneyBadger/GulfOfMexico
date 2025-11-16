@@ -5,7 +5,7 @@ description = "Experimental interpreter based on Lu Wilson's (TodePond) Gulf of 
 readme = "README.md"
 authors = ["James Temple <james@honey-badger.org>"]
 license = "Unlicense"
-repository = "https://github.com/James-HoneyBadger/GOM"
+repository = "https://github.com/James-HoneyBadger/GulfOfMexico"
 keywords = ["interpreter", "esoteric", "programming-language"]
 
 [tool.poetry.dependencies]

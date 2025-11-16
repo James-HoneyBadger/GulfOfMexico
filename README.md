@@ -5,8 +5,8 @@ This implementation is based on the conceptual design of **Gulf of Mexico**, the
 ## Installation
 
 ```bash
-git clone https://github.com/James-HoneyBadger/GOM.git
-cd GOM
+git clone https://github.com/James-HoneyBadger/GulfOfMexico.git
+cd GulfOfMexico
 pip install -e .
 ```
 

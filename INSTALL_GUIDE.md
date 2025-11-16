@@ -16,8 +16,8 @@ Getting the *perfect* programming language onto your imperfect computer.
 For the impatient among us (we get it):
 
 ```bash
-git clone https://github.com/James-HoneyBadger/GOM.git
-cd GOM
+git clone https://github.com/James-HoneyBadger/GulfOfMexico.git
+cd GulfOfMexico
 pip install -e .
 python -m gulfofmexico programs/examples/01_hello_world.gom
 ```
@@ -45,8 +45,8 @@ If you see something like `Python 3.10.x` or higher, you're golden.
 ### Step 1: Clone the Repository
 
 ```bash
-git clone https://github.com/James-HoneyBadger/GOM.git
-cd GOM
+git clone https://github.com/James-HoneyBadger/GulfOfMexico.git
+cd GulfOfMexico
 ```
 
 This downloads the entire Gulf of Mexico experience to your local machine. Exciting!
@@ -339,7 +339,7 @@ Or keep it around. You might come back. They always come back.
 - **Technical Reference**: [TECHNICAL_REFERENCE.md](TECHNICAL_REFERENCE.md)
 - **Programming Guide**: [PROGRAMMING_GUIDE.md](PROGRAMMING_GUIDE.md)
 - **Example Programs**: `programs/` directory
-- **GitHub Issues**: [Report problems](https://github.com/James-HoneyBadger/GOM/issues)
+- **GitHub Issues**: [Report problems](https://github.com/James-HoneyBadger/GulfOfMexico/issues)
 
 ## Success!
 

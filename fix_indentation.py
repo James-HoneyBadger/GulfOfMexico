@@ -39,7 +39,7 @@ def fix_indentation(content):
 
 def main():
     """Fix all .gom files in the project."""
-    gom_dir = Path("/home/james/GOM")
+    gom_dir = Path("/home/james/GulfOfMexico")
     gom_files = list(gom_dir.rglob("*.gom"))
 
     fixed_count = 0
