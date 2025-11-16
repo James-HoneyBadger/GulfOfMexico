@@ -1,0 +1,6 @@
+function greet(name) => {
+   return 99!
+}!
+
+const x = greet "test"!
+print "x =", x!

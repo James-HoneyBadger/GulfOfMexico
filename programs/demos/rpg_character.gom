@@ -1,0 +1,55 @@
+// Game Character Demo - Classes with multiple properties
+
+class Character {
+   var name = "Hero"!
+   var health = 100!
+   var mana = 50!
+   var level = 1!
+   
+   function takeDamage(damage) => {
+      health = health - damage!
+      print "${name} took ${damage} damage! Health: ${health}"!
+   }!
+   
+   function heal(amount) => {
+      health = health + amount!
+      print "${name} healed ${amount}. Health: ${health}"!
+   }!
+   
+   function castSpell(cost) => {
+      if mana > cost {
+         mana = mana - cost!
+         print "${name} cast spell! Mana: ${mana}"!
+         return true!
+      }
+      print "${name} not enough mana!"!
+      return false!
+   }!
+   
+   function levelUp() => {
+      level = level + 1!
+      health = health + 20!
+      mana = mana + 10!
+      print "${name} leveled up to ${level}!"!
+   }!
+}!
+
+print "=== RPG Character Demo ==="!
+print ""!
+
+const hero = new Character!
+hero.name = "Warrior"!
+print "Created ${hero.name} - HP: ${hero.health}, MP: ${hero.mana}, Level: ${hero.level}"!
+print ""!
+
+hero.takeDamage 30!
+hero.castSpell 15!
+hero.heal 20!
+hero.levelUp()!
+
+print ""!
+print "Final stats:"!
+print "Name: ${hero.name}"!
+print "Health: ${hero.health}"!
+print "Mana: ${hero.mana}"!
+print "Level: ${hero.level}"!

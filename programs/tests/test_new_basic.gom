@@ -1,0 +1,10 @@
+// Test basic new without constructor
+class Simple {
+   var value = 42!
+}!
+
+print "Creating instance..."!
+const obj = new Simple!
+print "Instance created"!
+print obj.value!
+print "PASS"!

@@ -1,0 +1,17 @@
+// Test: Variable Declaration and Assignment
+
+const x = 10!
+var y = 20!
+const var z = [1, 2, 3]!
+
+print "x = ${x}"!
+print "y = ${y}"!
+print "z = ${z}"!
+
+y = 99!
+print "y after assignment = ${y}"!
+
+z[-1] = 100!
+print "z after modification = ${z}"!
+
+print "PASS: Variable declarations"!

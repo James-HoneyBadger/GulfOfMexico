@@ -1,0 +1,19 @@
+// Test: Reactive When Statements
+
+var counter = 0!
+var triggered = false!
+
+when counter > 5 {
+   print "Counter exceeded 5!"!
+   triggered = true!
+}
+
+print "Setting counter to 3..."!
+counter = 3!
+
+print "Setting counter to 10..."!
+counter = 10!
+
+if triggered {
+   print "PASS: Reactive when"!
+}

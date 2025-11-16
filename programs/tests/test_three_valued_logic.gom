@@ -1,0 +1,19 @@
+// Test: Three-Valued Logic
+
+const yes = true!
+const no = false!
+const uncertain = maybe!
+
+print "true: ${yes}"!
+print "false: ${no}"!
+print "maybe: ${uncertain}"!
+
+const and_result = yes & no!
+const or_result = yes | no!
+const not_result = ;no!
+
+print "true & false: ${and_result}"!
+print "true | false: ${or_result}"!
+print ";false: ${not_result}"!
+
+print "PASS: Three-valued logic"!

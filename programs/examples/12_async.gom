@@ -1,0 +1,19 @@
+// Async Functions and Await
+
+async function fetchData() => {
+   print "Fetching data..."!
+   return 42!
+}!
+
+async function processData(value) => {
+   print "Processing: ${value}"!
+   return value * 2!
+}!
+
+// Call async functions
+const result = await fetchData()!
+print "Fetched result: ${result}"!
+
+const processed = await processData(result)!
+print "Processed result: ${processed}"!
+

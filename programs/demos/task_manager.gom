@@ -1,0 +1,48 @@
+// Task Manager Demo - Reactive task tracking
+
+class Task {
+   var name = "Untitled"!
+   var completed = false!
+   var priority = 1!
+   
+   function complete() => {
+      completed = true!
+      print "✓ Completed: ${name}"!
+   }!
+   
+   function info() => {
+      const status = completed!
+      print "Task: ${name} | Priority: ${priority} | Done: ${status}"!
+   }!
+}!
+
+print "=== Task Manager ==="!
+print ""!
+
+const task1 = new Task!
+task1.name = "Write documentation"!
+task1.priority = 3!
+
+const task2 = new Task!
+task2.name = "Fix bugs"!
+task2.priority = 5!
+
+const task3 = new Task!
+task3.name = "Add tests"!
+task3.priority = 4!
+
+print "Current tasks:"!
+task1.info()!
+task2.info()!
+task3.info()!
+
+print ""!
+print "Completing tasks..."!
+task2.complete()!
+task1.complete()!
+
+print ""!
+print "Updated tasks:"!
+task1.info()!
+task2.info()!
+task3.info()!

@@ -1,0 +1,9 @@
+// Test basic async/await with scheduler
+print "Start"!
+async function slow_task() => {
+   print "Task running..."!
+   return 42!
+}!
+const result = await slow_task()!
+print "Result: ${result}"!
+print "Done"!

@@ -1,0 +1,7 @@
+{
+	"InstallScripts" : 
+	[
+		"/home/james/GOM/compiler/build/cmake_install.cmake"
+	],
+	"Parallel" : false
+}

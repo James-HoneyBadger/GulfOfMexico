@@ -1,0 +1,7 @@
+class Person {
+   var name = "Unknown"!
+}!
+
+const alice = new Person!
+alice.name = "Alice"!
+print alice.name!

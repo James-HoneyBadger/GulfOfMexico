@@ -1,0 +1,28 @@
+// Conditional Statements
+
+const x = 42!
+
+if x > 50 {
+   print "x is greater than 50"!
+}
+
+if x < 50 {
+   print "x is less than 50"!
+}
+
+if x == 42 {
+   print "x is exactly 42!"!
+}
+
+// Nested conditionals
+const temp = 75!
+
+if temp > 80 {
+   print "It's hot!"!
+}
+
+if temp < 80 {
+   if temp > 60 {
+      print "It's nice!"!
+   }
+}

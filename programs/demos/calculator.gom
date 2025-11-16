@@ -1,0 +1,24 @@
+// Calculator Demo - Interactive calculator using functions
+
+function add(a, b) => a + b!
+function subtract(a, b) => a - b!
+function multiply(a, b) => a * b!
+function divide(a, b) => a / b!
+function power(a, b) => a ^ b!
+
+print "=== Gulf of Mexico Calculator ==="!
+
+const x = 15!
+const y = 3!
+
+print "Numbers: x = ${x}, y = ${y}"!
+print ""!
+
+print "Addition: ${x} + ${y} = ${add(x, y}")!
+print "Subtraction: ${x} - ${y} = ${subtract(x, y}")!
+print "Multiplication: ${x} * ${y} = ${multiply(x, y}")!
+print "Division: ${x} / ${y} = ${divide(x, y}")!
+print "Power: ${x} ^ ${y} = ${power(x, y}")!
+
+print ""!
+print "Complex expression: (${x} + ${y} * 2 = ${(x + y) * 2}")!

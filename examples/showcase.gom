@@ -1,0 +1,118 @@
+// GulfOfMexico Language Showcase
+// Demonstrates key features of the language
+
+// 1. Variable declarations with const
+const message = "Welcome to GulfOfMexico!"
+const version = 2.0
+const isAwesome = true
+
+print(message)!
+print("Version:")!
+print(version)!
+
+// 2. Arithmetic operations
+const a = 10
+const b = 20
+const sum = a + b
+const product = a * b
+const difference = b - a
+const quotient = b / a
+
+print("Arithmetic:")!
+print(sum)!
+print(product)!
+print(difference)!
+print(quotient)!
+
+// 2. Arrays and indexing
+const numbers = [100, 200, 300, 400, 500]
+print("Array operations:")!
+print(numbers[0])!
+print(numbers[2])!
+// Last element using -1 index
+print(numbers[-1])!
+
+// 4. Functions with arrow syntax
+function add(x, y) => x + y!
+function multiply(x, y) => x * y!
+function square(n) => n * n!
+
+print("Functions:")!
+print(add(15, 25))!
+print(multiply(7, 8))!
+print(square(9))!
+
+// 5. Nested function calls
+const result = add(multiply(3, 4), square(5))
+print("Nested calls:")!
+print(result)!  // (3*4) + (5*5) = 12 + 25 = 37
+
+// 6. Conditionals
+const x = 50
+const y = 30
+
+if x > y {
+   print("x is greater")!
+}
+
+if y < x {
+   print("y is less")!
+}
+
+const max = 100
+const min = 10
+
+if max > min {
+   const range = max - min
+   print("Range:")!
+   print(range)!
+}
+
+// 7. Complex expressions
+const fibonacci = [1, 1, 2, 3, 5, 8, 13, 21, 34]
+const fib_sum = fibonacci[0] + fibonacci[4] + fibonacci[8]
+print("Fibonacci sum:")!
+print(fib_sum)!  // 1 + 5 + 34 = 40
+
+// 8. Multiple array accesses
+const data = [10, 20, 30, 40, 50]
+const first = data[0]
+const last = data[-1]
+const middle = data[2]
+
+print("Array elements:")!
+print(first)!
+print(middle)!
+print(last)!
+
+// 9. Boolean operations
+const isPositive = true
+const isNegative = false
+
+if isPositive {
+   print("Positive!")!
+}
+
+// 10. Advanced arithmetic
+const calculation = ((10 + 5) * 3 - 20) / 5
+print("Complex calculation:")!
+print(calculation)!  // ((15 * 3) - 20) / 5 = 25 / 5 = 5
+
+// 11. Function composition
+function twice(n) => n * 2!
+function addTen(n) => n + 10!
+const composed = addTen(twice(20))
+
+print("Function composition:")!
+print(composed)!  // twice(20) = 40, addTen(40) = 50
+
+// 12. Working with expressions
+const price = 99.99
+const quantity = 3
+const tax = 0.08
+const total = (price * quantity) * (1 + tax)
+
+print("Shopping cart:")!
+print(total)!
+
+print("Showcase complete!")!

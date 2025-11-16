@@ -1,0 +1,14 @@
+// Test: Fractional Array Insertion
+
+const list = ["a", "c"]!
+print "Original: ${list}"!
+
+list[0.5] = "b"!
+print "After inserting at 0.5: ${list}"!
+
+const nums = [1, 4]!
+nums[0.5] = 2!
+nums[1.5] = 3!
+print "nums = ${nums}"!
+
+print "PASS: Fractional indexing"!

@@ -1,0 +1,120 @@
+#include <iostream>
+#include <string>
+#include <vector>
+#include <variant>
+#include <memory>
+#include <cmath>
+
+// Gulf of Mexico Runtime Library
+
+class GomValue {
+public:
+    std::variant<double, std::string, bool, std::vector<GomValue>> data;
+    
+    GomValue() : data(0.0) {}
+    GomValue(double d) : data(d) {}
+    GomValue(const std::string& s) : data(s) {}
+    GomValue(bool b) : data(b) {}
+    GomValue(const std::vector<GomValue>& v) : data(v) {}
+    
+    double as_number() const {
+        if (std::holds_alternative<double>(data)) return std::get<double>(data);
+        if (std::holds_alternative<bool>(data)) return std::get<bool>(data) ? 1.0 : 0.0;
+        if (std::holds_alternative<std::string>(data)) return std::stod(std::get<std::string>(data));
+        return 0.0;
+    }
+    
+    std::string as_string() const {
+        if (std::holds_alternative<std::string>(data)) return std::get<std::string>(data);
+        if (std::holds_alternative<double>(data)) return std::to_string(std::get<double>(data));
+        if (std::holds_alternative<bool>(data)) return std::get<bool>(data) ? "true" : "false";
+        return "undefined";
+    }
+    
+    bool as_bool() const {
+        if (std::holds_alternative<bool>(data)) return std::get<bool>(data);
+        if (std::holds_alternative<double>(data)) return std::get<double>(data) != 0.0;
+        if (std::holds_alternative<std::string>(data)) return !std::get<std::string>(data).empty();
+        return false;
+    }
+};
+
+bool gom_to_bool(const GomValue& v) {
+    return v.as_bool();
+}
+
+void gom_print(const GomValue& v) {
+    std::cout << v.as_string() << std::endl;
+}
+
+GomValue gom_binary_op(const GomValue& left, const std::string& op, const GomValue& right) {
+    if (op == "+") return GomValue(left.as_number() + right.as_number());
+    if (op == "-") return GomValue(left.as_number() - right.as_number());
+    if (op == "*") return GomValue(left.as_number() * right.as_number());
+    if (op == "/") return GomValue(left.as_number() / right.as_number());
+    if (op == "%") return GomValue(fmod(left.as_number(), right.as_number()));
+    if (op == "==") return GomValue(left.as_number() == right.as_number());
+    if (op == "!=") return GomValue(left.as_number() != right.as_number());
+    if (op == "<") return GomValue(left.as_number() < right.as_number());
+    if (op == ">") return GomValue(left.as_number() > right.as_number());
+    if (op == "<=") return GomValue(left.as_number() <= right.as_number());
+    if (op == ">=") return GomValue(left.as_number() >= right.as_number());
+    if (op == "&&") return GomValue(left.as_bool() && right.as_bool());
+    if (op == "||") return GomValue(left.as_bool() || right.as_bool());
+    if (op == "~=") return GomValue(std::abs(left.as_number() - right.as_number()) < 0.01);
+    return GomValue();
+}
+
+GomValue gom_unary_op(const std::string& op, const GomValue& operand) {
+    if (op == "-") return GomValue(-operand.as_number());
+    if (op == "!") return GomValue(!operand.as_bool());
+    return GomValue();
+}
+
+GomValue gom_index_access(const GomValue& obj, const GomValue& index) {
+    if (std::holds_alternative<std::vector<GomValue>>(obj.data)) {
+        const auto& vec = std::get<std::vector<GomValue>>(obj.data);
+        int idx = static_cast<int>(index.as_number());
+        // Support negative indexing (-1 = last element)
+        if (idx < 0) idx += vec.size();
+        if (idx >= 0 && idx < vec.size()) {
+            return vec[idx];
+        }
+    }
+    return GomValue();
+}
+
+int main() {
+    const GomValue x = GomValue(10.000000);
+    const GomValue y = GomValue(20.000000);
+    const GomValue sum = gom_binary_op(x, "+", y);
+    const GomValue product = gom_binary_op(x, "*", y);
+    gom_print(sum);
+    gom_print(product);
+    auto multiply = [&](GomValue a, GomValue b) -> GomValue {
+        return gom_binary_op(a, "*", b);
+    };
+    auto add = [&](GomValue a, GomValue b) -> GomValue {
+        return gom_binary_op(a, "+", b);
+    };
+    const GomValue result1 = multiply(GomValue(5.000000), GomValue(6.000000));
+    const GomValue result2 = add(result1, GomValue(10.000000));
+    gom_print(result1);
+    gom_print(result2);
+    const GomValue numbers = GomValue(std::vector<GomValue>{GomValue(10.000000), GomValue(20.000000), GomValue(30.000000), GomValue(40.000000), GomValue(50.000000)});
+    gom_print(gom_index_access(numbers, GomValue(0.000000)));
+    gom_print(gom_index_access(numbers, gom_unary_op("-", GomValue(1.000000))));
+    gom_print(gom_index_access(numbers, GomValue(2.000000)));
+    auto square = [&](GomValue n) -> GomValue {
+        return gom_binary_op(n, "*", n);
+    };
+    const GomValue squared = square(GomValue(7.000000));
+    gom_print(squared);
+    const GomValue a = GomValue(5.000000);
+    const GomValue b = GomValue(10.000000);
+    if (gom_to_bool(gom_binary_op(a, "<", b))) {
+        gom_print(GomValue(999.000000));
+    }
+    const GomValue complex = gom_binary_op(gom_binary_op(a, "+", b), "*", gom_binary_op(a, "-", b));
+    gom_print(complex);
+}

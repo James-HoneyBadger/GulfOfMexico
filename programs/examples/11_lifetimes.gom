@@ -1,0 +1,14 @@
+// Variable Lifetimes
+
+// Line-based lifetime (expires after 5 lines)
+const shortLived = 100 = 999!
+print "Line 1: shortLived = ${shortLived}"!
+print "Line 2: shortLived = ${shortLived}"!
+print "Line 3: shortLived = ${shortLived}"!
+print "Line 4: shortLived = ${shortLived}"!
+print "Line 5: shortLived = ${shortLived}"!
+
+// Time-based lifetime (expires after seconds)
+const temporary < 2.0 > = "I'll disappear soon"!
+print "temporary = ${temporary}"!
+

@@ -1,0 +1,39 @@
+// Async Data Processing Pipeline
+
+async function fetchData(source) => {
+   print "Fetching from ${source}..."!
+   return 100!
+}!
+
+async function processData(data) => {
+   print "Processing data: ${data}"!
+   return data * 2!
+}!
+
+async function validateData(data) => {
+   print "Validating data: ${data}"!
+   if data > 150 {
+      return true!
+   }
+   return false!
+}!
+
+print "=== Async Data Pipeline Demo ==="!
+print ""!
+
+const source = "API endpoint"!
+const rawData = await fetchData(source)!
+print "Raw data: ${rawData}"!
+print ""!
+
+const processed = await processData(rawData)!
+print "Processed data: ${processed}"!
+print ""!
+
+const isValid = await validateData(processed)!
+print "Validation result: ${isValid}"!
+print ""!
+
+if isValid {
+   print "✓ Data pipeline completed successfully!"!
+}

@@ -1,0 +1,27 @@
+[tool.poetry]
+name = "gulfofmexico"
+version = "0.1.1"
+description = "Experimental interpreter based on Lu Wilson's (TodePond) Gulf of Mexico conceptual design - featuring probabilistic variables, negative indexing, and temporal lifetimes"
+readme = "README.md"
+authors = ["James Temple <james@honey-badger.org>"]
+license = "Unlicense"
+repository = "https://github.com/James-HoneyBadger/GOM"
+keywords = ["interpreter", "esoteric", "programming-language"]
+
+[tool.poetry.dependencies]
+python = "^3.10"
+pynput = "1.7.6"
+pygithub = "2.2.0"
+requests = "2.31.0"
+
+[tool.poetry.scripts]
+gom-ide = "gulfofmexico.ide.app:run"
+
+[tool.poetry.extras]
+input = ["pynput"]
+globals = ["pygithub"]
+ide = ["PySide6>=6.6"]
+
+[build-system]
+requires = ["poetry_core>=1.0.0"]
+build-backend = "poetry.core.masonry.api"

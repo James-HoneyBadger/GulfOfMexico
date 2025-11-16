@@ -1,0 +1,6 @@
+function double(x) => {
+   return x + x!
+}!
+
+const result = double 5!
+print "Result:", result!

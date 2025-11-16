@@ -1,0 +1,7 @@
+function test() => {
+   const x = 42!
+   return x!
+}!
+
+   const result = test()!
+   print "Result:", result!

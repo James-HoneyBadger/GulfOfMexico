@@ -1,0 +1,6 @@
+function test() => {
+   return 42!
+}!
+
+const result = test()!
+print "Result:", result!

@@ -1,0 +1,17 @@
+// Cosine Pattern Demo
+// Prints 10 lines forming a cosine wave using characters randomly chosen beforehand.
+// (Characters are fixed in source; replace them or regenerate for different randomness.)
+
+// 10 lines: indentation approximates a cosine over one period.
+// Indents chosen from scaled cos values: 20,18,13,6,3,0,3,6,13,18
+
+print("                    @")!
+print("                  #")!
+print("             *")!
+print("      &")!
+print("   %")!
+print("?")!
+print("   X")!
+print("      =")!
+print("             +")!
+print("                  ~")!

@@ -1,0 +1,23 @@
+// Test: Array Indexing (starting at -1)
+
+const arr = [10, 20, 30, 40]!
+
+const first = arr[-1]!
+const second = arr[0]!
+const third = arr[1]!
+const fourth = arr[2]!
+
+print "arr[-1] = ${first}"!
+print "arr[0] = ${second}"!
+print "arr[1] = ${third}"!
+print "arr[2] = ${fourth}"!
+
+if first == 10 {
+   if second == 20 {
+      if third == 30 {
+         if fourth == 40 {
+            print "PASS: Array indexing"!
+         }
+      }
+   }
+}

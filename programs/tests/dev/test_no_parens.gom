@@ -1,0 +1,6 @@
+function add(a, b) => {
+   return a + b!
+}!
+
+const result = add 3, 5!
+print("Result:", result)!

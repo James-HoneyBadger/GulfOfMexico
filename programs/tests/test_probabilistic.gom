@@ -1,0 +1,14 @@
+// Test: Probabilistic Variables
+
+var value = 10!
+print "After confidence 1: ${value}"!
+
+var value = 20!!
+print "After confidence 2: ${value}"!
+
+var value = 15!!!
+print "After confidence 3: ${value}"!
+
+if value == 15 {
+   print "PASS: Probabilistic variables"!
+}

@@ -1,0 +1,63 @@
+// Test automatic constructors with init method
+
+// Test 1: Basic init with multiple args
+class Person {
+   var name = "Unknown"!
+   var age = 0!
+   
+   function init(n, a) => {
+      name = n!
+      age = a!
+   }!
+}!
+
+const alice = new(Person, "Alice", 30)!
+print "Test 1 - Multi-arg init:"!
+print alice.name!  // Should print: Alice
+print alice.age!   // Should print: 30
+
+// Test 2: Init with single arg
+class Counter {
+   var count = 0!
+   
+   function init(start) => {
+      count = start!
+   }!
+}!
+
+const counter = new(Counter, 100)!
+print "Test 2 - Single-arg init:"!
+print counter.count!  // Should print: 100
+
+// Test 3: Zero-arg constructor (backward compat)
+const counter2 = new Counter!
+print "Test 3 - No args (defaults):"!
+print counter2.count!  // Should print: 0
+
+// Test 4: Class without init (backward compat)
+class Simple {
+   var value = 42!
+}!
+
+const simple = new Simple!
+print "Test 4 - No init method:"!
+print simple.value!  // Should print: 42
+
+// Test 5: Init with computation
+class Rectangle {
+   var width = 0!
+   var height = 0!
+   var area = 0!
+   
+   function init(w, h) => {
+      width = w!
+      height = h!
+      area = w * h!
+   }!
+}!
+
+const rect = new(Rectangle, 5, 10)!
+print "Test 5 - Init with computation:"!
+print rect.area!  // Should print: 50
+
+print "PASS: Automatic constructors"!

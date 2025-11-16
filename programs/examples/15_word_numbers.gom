@@ -1,0 +1,23 @@
+// Word Number Variables
+
+const myZero = zero!
+const myOne = one!
+const myFive = five!
+const myTen = ten!
+const myFifteen = fifteen!
+
+print "zero = ${myZero}"!
+print "one = ${myOne}"!
+print "five = ${myFive}"!
+print "ten = ${myTen}"!
+print "fifteen = ${myFifteen}"!
+
+// Function-based numbers
+const myTwenty = twenty zero!
+const myThirty = thirty zero!
+const myFortyTwo = forty two!
+
+print "twenty = ${myTwenty}"!
+print "thirty = ${myThirty}"!
+print "forty + two = ${myFortyTwo}"!
+

@@ -1,0 +1,17 @@
+// Variable Declaration Examples
+
+// Immutable constant
+const x = 42!
+print "Constant x: ${x}"!
+
+// Mutable variable
+var count = 0!
+print "Initial count: ${count}"!
+
+count = 10!
+print "Updated count: ${count}"!
+
+// Mutable content, immutable reference
+const var list = [1, 2, 3]!
+list[-1] = 100!
+print "Modified list: ${list}"!

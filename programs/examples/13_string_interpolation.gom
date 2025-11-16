@@ -1,0 +1,19 @@
+// String Interpolation
+
+const name = "Alice"!
+const age = 25!
+const city = "Wonderland"!
+
+print "Hello, my name is ${name}."!
+print "I am ${age} years old."!
+print "I live in ${city}."!
+
+// Expressions in interpolation
+const x = 10!
+const y = 5!
+print "${x} + ${y} = ${x + y}"!
+print "${x} * ${y} = ${x * y}"!
+
+// Nested interpolation
+const greeting = "Welcome, ${name} from ${city}!"!
+print "${greeting}"!

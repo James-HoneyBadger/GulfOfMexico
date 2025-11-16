@@ -1,0 +1,17 @@
+// Test: String Interpolation
+
+const name = "Bob"!
+const age = 30!
+
+const greeting = "Hello, ${name}!"!
+const info = "You are ${age} years old."!
+
+print "${greeting}"!
+print "${info}"!
+
+const x = 5!
+const y = 3!
+const math = "${x} + ${y} = ${x + y}"!
+print "${math}"!
+
+print "PASS: String interpolation"!

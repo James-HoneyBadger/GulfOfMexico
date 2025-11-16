@@ -1,0 +1,20 @@
+// Equality Operators - Multiple levels of strictness
+
+const a = 42!
+const b = 42.0!
+const c = "42"!
+
+// Approximate equality (=)
+print "Approximate 42 = 42.0: ${a = b}"!
+print "Approximate 42 = '42': ${a = c}"!
+
+// Standard equality (==)
+print "Standard 42 == 42.0: ${a == b}"!
+print "Standard 42 == '42': ${a == c}"!
+
+// Strict equality (===)
+print "Strict 42 === 42.0: ${a === b}"!
+print "Strict 42 === '42': ${a === c}"!
+
+// Strictest equality (====)
+print "Strictest 42 ==== 42.0: ${a ==== b}"!

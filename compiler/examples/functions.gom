@@ -1,0 +1,5 @@
+// Function test
+function add(a, b) => a + b!
+
+const result = add(5, 7)!
+print(result)!
