@@ -665,29 +665,33 @@ print("3 + 5 =", add(3, 5))!
 print("4 * 6 =", multiply(4, 6))!`,
 
             graphics: `// Graphics and Canvas
-print("Creating canvas...")!
+print "Creating canvas..."!
 
 // Create a 400x300 canvas
 const canvas = Canvas(400, 300, "white")!
 
-print("Drawing shapes...")!
+print "Canvas created"!
 
-// Draw some colorful pixels
+// Create colors
 const red = Color(255, 0, 0)!
 const blue = Color(0, 0, 255)!
 const green = Color(0, 255, 0)!
 
-canvas.pixel(50, 50, red)!
-canvas.pixel(100, 100, blue)!
-canvas.pixel(150, 150, green)!
+print "Drawing pixels..."!
 
-print("Saving image...")!
+// Draw individual pixels
+canvas.pixel 50, 50, red!
+canvas.pixel 100, 100, blue!
+canvas.pixel 150, 150, green!
+canvas.pixel 200, 200, red!
+
+print "Saving image..."!
 
 // Save to file
-canvas.save("web_graphics_demo.png")!
+canvas.save "web_graphics_demo.png"!
 
-print("Graphics created!")!
-print("Check the Graphics pane!")!`,
+print "Graphics created!"!
+print "Check the Graphics pane!"!`,
 
             temporal: `// Temporal keywords
 var const x = 10!
