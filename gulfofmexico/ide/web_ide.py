@@ -33,8 +33,55 @@ class GOMWebIDEHandler(http.server.SimpleHTTPRequestHandler):
             self.handle_list_files()
         elif self.path.startswith("/load?"):
             self.handle_load_file()
+        elif self.path.startswith("/image/"):
+            # Serve generated images
+            self.handle_serve_image()
         else:
             super().do_GET()
+
+    def handle_serve_image(self):
+        """Serve a generated image file."""
+        try:
+            # Extract filename from path
+            filename = self.path.split("/image/", 1)[1]
+            filepath = self.workspace_dir / filename
+
+            # Security: ensure file is within workspace
+            filepath = filepath.resolve()
+            if not str(filepath).startswith(str(self.workspace_dir.resolve())):
+                raise ValueError("Access denied")
+
+            if not filepath.exists() or not filepath.suffix.lower() in [
+                ".png",
+                ".jpg",
+                ".jpeg",
+                ".gif",
+            ]:
+                raise ValueError("Image not found")
+
+            # Determine content type
+            content_type = {
+                ".png": "image/png",
+                ".jpg": "image/jpeg",
+                ".jpeg": "image/jpeg",
+                ".gif": "image/gif",
+            }.get(filepath.suffix.lower(), "application/octet-stream")
+
+            # Read and serve image
+            with open(filepath, "rb") as f:
+                content = f.read()
+
+            self.send_response(200)
+            self.send_header("Content-type", content_type)
+            self.send_header("Content-Length", len(content))
+            self.end_headers()
+            self.wfile.write(content)
+
+        except Exception as e:
+            self.send_response(404)
+            self.send_header("Content-type", "text/plain")
+            self.end_headers()
+            self.wfile.write(f"Error: {str(e)}".encode())
 
     def do_POST(self):
         """Handle POST requests for code execution and file operations."""
@@ -165,6 +212,9 @@ class GOMWebIDEHandler(http.server.SimpleHTTPRequestHandler):
         stdout_capture = io.StringIO()
         stderr_capture = io.StringIO()
 
+        # Track existing PNG files before execution
+        existing_pngs = set(self.workspace_dir.glob("*.png"))
+
         try:
             with redirect_stdout(stdout_capture), redirect_stderr(stderr_capture):
                 # Set up interpreter
@@ -200,17 +250,24 @@ class GOMWebIDEHandler(http.server.SimpleHTTPRequestHandler):
             output_val = stdout_capture.getvalue()
             error_val = stderr_capture.getvalue()
 
+            # Detect newly created PNG files
+            new_pngs = set(self.workspace_dir.glob("*.png")) - existing_pngs
+            images = [str(p.name) for p in new_pngs] if new_pngs else []
+
             response = {
                 "success": True,
                 "output": output_val,
                 "error": error_val,
                 "result": str(result) if result else "",
+                "images": images,  # List of newly created image files
             }
 
             # Log to real stderr (not captured)
             sys.stderr.write(
                 f"[WEB IDE] Output length: {len(output_val)}, content: {repr(output_val[:100])}\n"
             )
+            if images:
+                sys.stderr.write(f"[WEB IDE] Created images: {images}\n")
             sys.stderr.flush()
 
             return response
@@ -225,6 +282,7 @@ class GOMWebIDEHandler(http.server.SimpleHTTPRequestHandler):
                 "output": stdout_capture.getvalue(),
                 "error": f"{error_val}\n{type(e).__name__}: {str(e)}\n{tb}",
                 "result": "",
+                "images": [],
             }
 
             sys.stderr.write(f"[WEB IDE] Error: {e}\n{tb}\n")
@@ -314,10 +372,22 @@ class GOMWebIDEHandler(http.server.SimpleHTTPRequestHandler):
             flex-direction: column;
             border-right: 1px solid # 3e3e42;
         }
+        .right-panel {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+        }
         .output-pane {
             flex: 1;
             display: flex;
             flex-direction: column;
+            border-bottom: 1px solid # 3e3e42;
+        }
+        .graphics-pane {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            background: # 1e1e1e;
         }
         .pane-header {
             background: # 252526;
@@ -351,6 +421,25 @@ class GOMWebIDEHandler(http.server.SimpleHTTPRequestHandler):
             overflow-y: auto;
             white-space: pre-wrap;
             font-family: 'Consolas', 'Liberation Mono', 'Menlo', 'Courier', monospace;
+        }
+        # graphics {
+            flex: 1;
+            padding: 16px;
+            background: # 1e1e1e;
+            overflow: auto;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        # graphics img {
+            max-width: 100%;
+            max-height: 100%;
+            object-fit: contain;
+            border: 1px solid # 3e3e42;
+        }
+        .no-graphics {
+            color: # 858585;
+            font-style: italic;
         }
         .output-success {
             color: # 4ec9b0;
@@ -479,6 +568,7 @@ class GOMWebIDEHandler(http.server.SimpleHTTPRequestHandler):
             <option value="variables">Variables</option>
             <option value="arrays">Arrays (-1 indexing)</option>
             <option value="functions">Functions</option>
+            <option value="graphics">Graphics & Canvas</option>
             <option value="temporal">Temporal Keywords</option>
         </select>
     </div>
@@ -492,9 +582,15 @@ class GOMWebIDEHandler(http.server.SimpleHTTPRequestHandler):
 
 print(&quot;Hello Gulf of Mexico&quot;)!"></textarea>
         </div>
-        <div class="output-pane">
-            <div class="pane-header">Output</div>
-            <div id="output"></div>
+        <div class="right-panel">
+            <div class="output-pane">
+                <div class="pane-header">Output</div>
+                <div id="output"></div>
+            </div>
+            <div class="graphics-pane">
+                <div class="pane-header">Graphics</div>
+                <div id="graphics"><div class="no-graphics">No graphics generated yet</div></div>
+            </div>
         </div>
     </div>
 
@@ -568,6 +664,31 @@ func multiply(x, y) => x * y!
 print("3 + 5 =", add(3, 5))!
 print("4 * 6 =", multiply(4, 6))!`,
 
+            graphics: `// Graphics and Canvas
+print("Creating canvas...")!
+
+// Create a 400x300 canvas
+const canvas = Canvas(400, 300, "white")!
+
+print("Drawing shapes...")!
+
+// Draw some colorful pixels
+const red = Color(255, 0, 0)!
+const blue = Color(0, 0, 255)!
+const green = Color(0, 255, 0)!
+
+canvas.pixel(50, 50, red)!
+canvas.pixel(100, 100, blue)!
+canvas.pixel(150, 150, green)!
+
+print("Saving image...")!
+
+// Save to file
+canvas.save("web_graphics_demo.png")!
+
+print("Graphics created!")!
+print("Check the Graphics pane!")!`,
+
             temporal: `// Temporal keywords
 var const x = 10!
 print("Initial:", x)!
@@ -611,6 +732,7 @@ print("Previous:", previous(x))!`
                 console.log('Output:', result.output);
                 console.log('Error:', result.error);
                 console.log('Success:', result.success);
+                console.log('Images:', result.images);
 
                 let html = '';
                 if (result.output) {
@@ -626,6 +748,15 @@ print("Previous:", previous(x))!`
                 }
 
                 output.innerHTML = html;
+                
+                // Display graphics if any images were created
+                const graphics = document.getElementById('graphics');
+                if (result.images && result.images.length > 0) {
+                    const imageUrl = '/image/' + result.images[0] + '?t=' + Date.now();
+                    graphics.innerHTML = '<img src="' + imageUrl + '" alt="Generated graphics" />';
+                } else {
+                    graphics.innerHTML = '<div class="no-graphics">No graphics generated</div>';
+                }
             } catch (error) {
                 output.innerHTML = '<div class="output-error">Error: ' + escapeHtml(error.message) + '</div>';
             }
