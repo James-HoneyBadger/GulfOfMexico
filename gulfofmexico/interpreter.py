@@ -110,13 +110,16 @@ from gulfofmexico.processor.syntax_tree import (
     CodeStatement,
     CodeStatementKeywordable,
     Conditional,
+    CorporateSpeakStatement,
     DeleteStatement,
     ExportStatement,
     ExpressionStatement,
     FunctionDefinition,
     ImportStatement,
+    ProcrastinationStatement,
     ReturnStatement,
     ReverseStatement,
+    TryWhateverStatement,
     VariableAssignment,
     VariableDeclaration,
     WhenStatement,
@@ -1985,6 +1988,9 @@ def determine_statement_type(
         DeleteStatement: {"delete"},
         ReverseStatement: {"reverse"},
         ImportStatement: {"import"},
+        TryWhateverStatement: {"try"},
+        ProcrastinationStatement: {"later", "eventually", "whenever"},
+        CorporateSpeakStatement: {"synergize", "leverage", "paradigm_shift", "circle_back", "touch_base"},
     }
 
     for st in possible_statements:
@@ -2968,6 +2974,112 @@ def interpret_code_statements(
                     deleted_values.add(var.value)
                     if ns:
                         del ns[statement.name.value]
+
+            case TryWhateverStatement():
+                # Try to execute try block, if error occurs, run whatever block dismissively
+                try:
+                    interpret_code_statements(
+                        statement.try_code,
+                        namespaces + [{}],
+                        async_statements,
+                        when_statement_watchers + [{}],
+                        importable_names,
+                        exported_names,
+                    )
+                except Exception:
+                    # Passive-aggressive error handling - just run the whatever block
+                    interpret_code_statements(
+                        statement.whatever_code,
+                        namespaces + [{}],
+                        async_statements,
+                        when_statement_watchers + [{}],
+                        importable_names,
+                        exported_names,
+                    )
+
+            case ProcrastinationStatement():
+                # Procrastination - maybe execute the code, maybe not
+                print(f"[DEBUG] Procrastination block detected: {statement.keyword.value}")
+                probabilities = {
+                    "later": 0.50,      # 50% chance
+                    "eventually": 0.75, # 75% chance  
+                    "whenever": 0.90,   # 90% chance
+                }
+                keyword = statement.keyword.value
+                should_execute = random.random() < probabilities.get(keyword, 0.50)
+                print(f"[DEBUG] Should execute: {should_execute}")
+                
+                if should_execute:
+                    print(f"[DEBUG] Executing procrastination block")
+                    interpret_code_statements(
+                        statement.code,
+                        namespaces + [{}],
+                        async_statements,
+                        when_statement_watchers + [{}],
+                        importable_names,
+                        exported_names,
+                    )
+
+            case CorporateSpeakStatement():
+                # Corporate speak with satirical implementations
+                keyword = statement.keyword.value
+                args_values = [
+                    evaluate_expression(arg, namespaces, async_statements, when_statement_watchers)
+                    for arg in statement.args
+                ]
+                
+                match keyword:
+                    case "synergize":
+                        # Combine two values (concatenate or add)
+                        if len(args_values) >= 2:
+                            val1, val2 = args_values[0], args_values[1]
+                            if isinstance(val1, GulfOfMexicoString) or isinstance(val2, GulfOfMexicoString):
+                                result = GulfOfMexicoString(str(val1.value) + str(val2.value))
+                            elif isinstance(val1, GulfOfMexicoNumber) and isinstance(val2, GulfOfMexicoNumber):
+                                result = GulfOfMexicoNumber(val1.value + val2.value)
+                            else:
+                                result = GulfOfMexicoString(str(val1.value) + str(val2.value))
+                    
+                    case "leverage":
+                        # Multiply value by 2 (leverage for maximum impact!)
+                        if len(args_values) >= 1:
+                            val = args_values[0]
+                            if isinstance(val, GulfOfMexicoNumber):
+                                result = GulfOfMexicoNumber(val.value * 2)
+                            elif isinstance(val, GulfOfMexicoString):
+                                result = GulfOfMexicoString(val.value * 2)
+                            else:
+                                result = val
+                    
+                    case "paradigm_shift":
+                        # Negate or reverse the value (complete paradigm shift!)
+                        if len(args_values) >= 1:
+                            val = args_values[0]
+                            if isinstance(val, GulfOfMexicoNumber):
+                                result = GulfOfMexicoNumber(-val.value)
+                            elif isinstance(val, GulfOfMexicoBoolean):
+                                result = GulfOfMexicoBoolean(not val.value if val.value is not None else None)
+                            elif isinstance(val, GulfOfMexicoString):
+                                result = GulfOfMexicoString(val.value[::-1])
+                            else:
+                                result = val
+                    
+                    case "circle_back":
+                        # Defer execution (like 'later') - does nothing
+                        pass
+                    
+                    case "touch_base":
+                        # Print a status update (touching base with stakeholders)
+                        status_msgs = [
+                            "Let's touch base on this.",
+                            "I'll ping you later.",
+                            "Let's put a pin in that.",
+                            "Let's take this offline.",
+                            "Let's loop back on this.",
+                        ]
+                        msg = random.choice(status_msgs)
+                        print(f"[TOUCH_BASE] {msg}")
+
 
             case ReverseStatement():
                 # Reverse operation - reverses lists and strings in-place

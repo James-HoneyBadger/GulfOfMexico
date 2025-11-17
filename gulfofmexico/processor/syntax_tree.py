@@ -40,7 +40,10 @@ from gulfofmexico.base import (
     raise_error_at_line,
     raise_error_at_token,
 )
-from gulfofmexico.processor.expression_tree import ExpressionTreeNode
+from gulfofmexico.processor.expression_tree import (
+    ExpressionTreeNode,
+    build_expression_tree,
+)
 
 __all__ = [
     "FunctionDefinition",
@@ -56,6 +59,9 @@ __all__ = [
     "AfterStatement",
     "ExportStatement",
     "ImportStatement",
+    "TryWhateverStatement",
+    "ProcrastinationStatement",
+    "CorporateSpeakStatement",
 ]
 
 
@@ -231,6 +237,61 @@ class ImportStatement(CodeStatement, CodeStatementKeywordable, CodeStatementDebu
     keyword: Token
     names: list[Token]
     debug: int
+
+
+@dataclass
+class TryWhateverStatement(CodeStatement, CodeStatementKeywordable):
+    """Try/whatever passive-aggressive error handling.
+
+    Executes try block, but handles errors dismissively with whatever block.
+
+    Examples:
+        try { risky_operation()! } whatever { print "meh, didn't work"! }
+    """
+
+    keyword: Token  # 'try'
+    try_code: list[tuple[CodeStatement, ...]]
+    whatever_code: list[tuple[CodeStatement, ...]]
+
+
+@dataclass
+class ProcrastinationStatement(CodeStatement, CodeStatementKeywordable):
+    """Procrastination keywords: later, eventually, whenever.
+
+    Defers code execution with varying probability:
+    - later: 50% chance to execute
+    - eventually: 75% chance to execute
+    - whenever: 90% chance to execute
+
+    Examples:
+        later { do_homework()! }
+        eventually { clean_room()! }
+        whenever { reply_to_email()! }
+    """
+
+    keyword: Token  # 'later', 'eventually', or 'whenever'
+    code: list[tuple[CodeStatement, ...]]
+
+
+@dataclass
+class CorporateSpeakStatement(CodeStatement, CodeStatementKeywordable):
+    """Corporate speak keywords with satirical implementations.
+
+    Keywords:
+    - synergize: combine two values
+    - leverage: multiply value by 2
+    - paradigm_shift: negate value
+    - circle_back: defer execution (like later)
+    - touch_base: print status update
+
+    Examples:
+        synergize x, y!
+        leverage revenue!
+        paradigm_shift thinking!
+    """
+
+    keyword: Token
+    args: list[ExpressionTreeNode]
 
 
 # idea: create a class that evaluates at runtime what a statement is, so then execute it
@@ -578,6 +639,66 @@ def create_scoped_code_statement(
             )
         )
 
+    # Check for try/whatever statement (two scopes required)
+    if without_whitespace[0].value == "try":
+        # Look for 'whatever' keyword followed by second scope
+        # Find the end of first scope
+        first_scope_end = scope_open_index
+        bracket_count = 0
+        for i, token in enumerate(tokens[scope_open_index:], scope_open_index):
+            if token.type == TokenType.L_CURLY:
+                bracket_count += 1
+            elif token.type == TokenType.R_CURLY:
+                bracket_count -= 1
+                if bracket_count == 0:
+                    first_scope_end = i
+                    break
+
+        # Look for 'whatever' keyword after first scope
+        whatever_index = -1
+        for i in range(first_scope_end + 1, len(without_whitespace)):
+            if without_whitespace[i].value == "whatever":
+                whatever_index = i
+                break
+
+        if whatever_index != -1:
+            # Find second scope opening
+            second_scope_start = -1
+            for i, token in enumerate(tokens):
+                if token.type == TokenType.NAME and token.value == "whatever":
+                    # Find the { after whatever
+                    for j in range(i + 1, len(tokens)):
+                        if tokens[j].type == TokenType.L_CURLY:
+                            second_scope_start = j
+                            break
+                    break
+
+            if second_scope_start != -1:
+                # Extract whatever block code
+                whatever_code_tokens = tokens[
+                    second_scope_start + 1 : len(tokens) - ends_with_punc - 1
+                ]
+                whatever_statements = generate_syntax_tree(
+                    filename, whatever_code_tokens, code
+                )
+
+                return (
+                    TryWhateverStatement(
+                        keyword=without_whitespace[0],
+                        try_code=statements_inside_scope,
+                        whatever_code=whatever_statements,
+                    ),
+                )
+
+    # Check for procrastination keywords: later, eventually, whenever
+    if without_whitespace[0].value in ["later", "eventually", "whenever"]:
+        return (
+            ProcrastinationStatement(
+                keyword=without_whitespace[0],
+                code=statements_inside_scope,
+            ),
+        )
+
     possibilities.extend(
         [
             Conditional(
@@ -636,6 +757,40 @@ def create_unscoped_code_statement(
     debug_level = 0 if not is_debug else len(tokens[-1].value)
 
     tokens_no_ws = [t for t in tokens if t.type != TokenType.WHITESPACE]
+
+    # Check for corporate speak keywords
+    corporate_keywords = [
+        "synergize",
+        "leverage",
+        "paradigm_shift",
+        "circle_back",
+        "touch_base",
+    ]
+    if (
+        without_whitespace[0].type == TokenType.NAME
+        and without_whitespace[0].value in corporate_keywords
+    ):
+        # Parse arguments (everything between keyword and !)
+        args_tokens = tokens[int(tokens[0].type == TokenType.WHITESPACE) + 1 : -1]
+        # Split by comma to get individual arguments
+        args = []
+        current_arg = []
+        for token in args_tokens:
+            if token.type == TokenType.COMMA:
+                if current_arg:
+                    args.append(build_expression_tree(filename, current_arg, code))
+                    current_arg = []
+            elif token.type != TokenType.WHITESPACE:
+                current_arg.append(token)
+        if current_arg:
+            args.append(build_expression_tree(filename, current_arg, code))
+
+        return (
+            CorporateSpeakStatement(
+                keyword=without_whitespace[0],
+                args=args,
+            ),
+        )
 
     # it's a function!!!!!!!!!!!!!!!!!
     has_func_point = [t.type == TokenType.FUNC_POINT for t in tokens]

@@ -1,0 +1,43 @@
+// Procrastination Keywords Example
+// Demonstrates later, eventually, and whenever blocks
+
+print "=== Procrastination in Action ==="!
+
+// later: 50% chance of execution
+print "Task 1: Do homework (later)"!
+later {
+   print "  ✓ Actually doing homework now"!
+}
+
+// eventually: 75% chance of execution  
+print "Task 2: Clean room (eventually)"!
+eventually {
+   print "  ✓ Fine, I'll clean my room"!
+}
+
+// whenever: 90% chance of execution
+print "Task 3: Reply to email (whenever)"!
+whenever {
+   print "  ✓ Replying to that email from 3 weeks ago"!
+}
+
+// Multiple procrastination blocks
+print "\nRun this multiple times to see different outcomes!"!
+
+later {
+   print "Maybe I'll do the laundry..."!
+}
+
+later {
+   print "Or maybe I'll take out the trash..."!
+}
+
+eventually {
+   print "I should probably call mom back..."!
+}
+
+whenever {
+   print "Okay fine, I'll pay that bill!"!
+}
+
+print "\n=== Procrastination complete (or is it?) ==="!

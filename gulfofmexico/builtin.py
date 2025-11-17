@@ -591,6 +591,16 @@ KEYWORDS = {
         "reverse",
         "export",
         "import",
+        "try",
+        "whatever",
+        "later",
+        "eventually",
+        "whenever",
+        "synergize",
+        "leverage",
+        "paradigm_shift",
+        "circle_back",
+        "touch_base",
     ]
     + FUNCTION_KEYWORDS
 }
