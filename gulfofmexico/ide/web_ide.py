@@ -695,14 +695,25 @@ print "Canvas created"!
 const red = Color(255, 0, 0)!
 const blue = Color(0, 0, 255)!
 const green = Color(0, 255, 0)!
+const yellow = Color(255, 255, 0)!
 
-print "Drawing pixels..."!
+print "Drawing shapes..."!
 
-// Draw individual pixels
-canvas.pixel 50, 50, red!
-canvas.pixel 100, 100, blue!
-canvas.pixel 150, 150, green!
-canvas.pixel 200, 200, red!
+// Draw a big red circle
+canvas.circle 100, 100, 40, red!
+
+// Draw a blue rectangle  
+canvas.rect 180, 50, 100, 80, blue!
+
+// Draw a green line
+canvas.line 50, 200, 350, 250, green, 5!
+
+// Draw some visible pixels in a pattern
+var var x = -1!
+while x < 50 {
+   canvas.pixel x * 3, 280, yellow!
+   x = x + 1!
+}!
 
 print "Saving image..."!
 
