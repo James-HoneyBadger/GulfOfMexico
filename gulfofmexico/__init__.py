@@ -57,9 +57,9 @@ def run_file(main_filename: str) -> None:
     """
 
     with open(main_filename, "r", encoding="utf-8") as f:
-        code_lines = f.readlines()
-
-    # split up into separate 'files' by finding which lines start with
+        code_lines = (
+            f.readlines()
+        )  # split up into separate 'files' by finding which lines start with
     # multiple equal signs
     files: list[tuple[Optional[str], str]] = []
     if any(matches := [re.match(r"=====.*", line) for line in code_lines]):

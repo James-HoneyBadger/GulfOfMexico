@@ -66,6 +66,9 @@ __all__ = [
     "SuperstitiousStatement",
     "QuantumStatement",
     "TimeTravelStatement",
+    "GaslightingStatement",
+    "BlockchainStatement",
+    "AIBuzzwordStatement",
 ]
 
 
@@ -374,6 +377,64 @@ class TimeTravelStatement(CodeStatement, CodeStatementKeywordable):
 
     keyword: Token  # 'past' or 'future'
     args: list[ExpressionTreeNode]
+
+
+@dataclass
+class GaslightingStatement(CodeStatement, CodeStatementKeywordable):
+    """Gaslighting variables: variables that deny their existence.
+
+    The definitely_not keyword creates variables that:
+    - Claim they were never set
+    - Return random values when accessed
+    - Deny any changes made to them
+
+    Examples:
+        definitely_not x 42!           // Creates gaslighting variable
+        print x!                        // "I don't know what you're talking about"
+    """
+
+    keyword: Token  # 'definitely_not'
+    name: Token
+    value: list[Token]
+    debug: int
+
+
+@dataclass
+class BlockchainStatement(CodeStatement, CodeStatementKeywordable):
+    """Blockchain buzzword satire.
+
+    Keywords:
+    - blockchain: Wrap code in unnecessary blockchain technology
+    - immutable_ledger: Make values "immutable" (but not really)
+    - smart_contract: Execute code with "smart contract" logic
+    - mine: Mine for cryptocurrency (actually just wastes CPU)
+
+    Examples:
+        blockchain { deploy_code()! }
+        mine 10!                       // Mine 10 blocks
+    """
+
+    keyword: Token
+    code: Optional[list[tuple[CodeStatement, ...]]]
+    args: Optional[list[ExpressionTreeNode]]
+
+
+@dataclass
+class AIBuzzwordStatement(CodeStatement, CodeStatementKeywordable):
+    """AI/ML buzzword satire.
+
+    Keywords:
+    - deep_learning: Apply "deep learning" (adds random noise)
+    - neural_network: Process with "neural network" (does nothing)
+    - ai_powered: Make code "AI-powered" (adds thinking delays)
+
+    Examples:
+        deep_learning { process_data()! }
+        ai_powered result = calculate()!
+    """
+
+    keyword: Token
+    code: list[tuple[CodeStatement, ...]]
 
 
 # idea: create a class that evaluates at runtime what a statement is, so then execute it
@@ -804,6 +865,29 @@ def create_scoped_code_statement(
             ),
         )
 
+    # Check for blockchain keywords
+    if without_whitespace[0].value in ["blockchain", "smart_contract"]:
+        return (
+            BlockchainStatement(
+                keyword=without_whitespace[0],
+                code=statements_inside_scope,
+                args=None,
+            ),
+        )
+
+    # Check for AI buzzword keywords
+    if without_whitespace[0].value in [
+        "deep_learning",
+        "neural_network",
+        "ai_powered",
+    ]:
+        return (
+            AIBuzzwordStatement(
+                keyword=without_whitespace[0],
+                code=statements_inside_scope,
+            ),
+        )
+
     possibilities.extend(
         [
             Conditional(
@@ -1028,6 +1112,29 @@ def create_unscoped_code_statement(
         and without_whitespace[1].type == TokenType.NAME
     )
 
+    # Check for gaslighting statement: definitely_not x 42!
+    can_be_gaslighting = (
+        len(without_whitespace) >= 4
+        and without_whitespace[0].type == TokenType.NAME
+        and without_whitespace[0].value == "definitely_not"
+        and without_whitespace[1].type == TokenType.NAME
+    )
+
+    # Check for blockchain mine statement: mine 10!
+    can_be_mine = (
+        len(without_whitespace) >= 2
+        and without_whitespace[0].type == TokenType.NAME
+        and without_whitespace[0].value == "mine"
+    )
+
+    # Check for immutable_ledger statement: immutable_ledger x 100!
+    can_be_immutable_ledger = (
+        len(without_whitespace) >= 4
+        and without_whitespace[0].type == TokenType.NAME
+        and without_whitespace[0].value == "immutable_ledger"
+        and without_whitespace[1].type == TokenType.NAME
+    )
+
     # make a list of all possible things, starting with plain expression
     possibilities: list[CodeStatement] = [ExpressionStatement(tokens[:-1], debug_level)]
     # Consider ReverseStatement as a possibility (do not short-circuit)
@@ -1099,6 +1206,47 @@ def create_unscoped_code_statement(
                     value_start_index:-1
                 ],  # After variable name until punctuation
                 debug=debug_level,
+            )
+        )
+    if can_be_gaslighting:
+        # Similar to quantum - find where variable name ends
+        var_name_token = without_whitespace[1]
+        value_start_index = 0
+        for i, t in enumerate(tokens):
+            if t == var_name_token:
+                value_start_index = i + 1
+                break
+
+        possibilities.append(
+            GaslightingStatement(
+                keyword=without_whitespace[0],
+                name=without_whitespace[1],
+                value=tokens[value_start_index:-1],
+                debug=debug_level,
+            )
+        )
+    if can_be_immutable_ledger:
+        # Similar structure to gaslighting
+        var_name_token = without_whitespace[1]
+        value_start_index = 0
+        for i, t in enumerate(tokens):
+            if t == var_name_token:
+                value_start_index = i + 1
+                break
+
+        possibilities.append(
+            BlockchainStatement(
+                keyword=without_whitespace[0],
+                code=None,
+                args=tokens[value_start_index:-1],
+            )
+        )
+    if can_be_mine:
+        possibilities.append(
+            BlockchainStatement(
+                keyword=without_whitespace[0],
+                code=None,
+                args=tokens[1:-1],  # Everything after 'mine' until punctuation
             )
         )
     if can_be_var_declaration:

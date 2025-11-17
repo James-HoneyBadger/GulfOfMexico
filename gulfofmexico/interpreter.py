@@ -106,6 +106,8 @@ from gulfofmexico.processor.expression_tree import (
 )
 from gulfofmexico.processor.syntax_tree import (
     AfterStatement,
+    AIBuzzwordStatement,
+    BlockchainStatement,
     ClassDeclaration,
     CodeStatement,
     CodeStatementKeywordable,
@@ -116,6 +118,7 @@ from gulfofmexico.processor.syntax_tree import (
     ExportStatement,
     ExpressionStatement,
     FunctionDefinition,
+    GaslightingStatement,
     ImportStatement,
     ProcrastinationStatement,
     QuantumStatement,
@@ -2004,6 +2007,14 @@ def determine_statement_type(
         EmotionalStatement: {"happy", "sad", "angry", "excited", "tired"},
         SuperstitiousStatement: {"lucky", "unlucky", "cross_fingers", "knock_on_wood"},
         QuantumStatement: {"quantum"},
+        GaslightingStatement: {"definitely_not"},
+        BlockchainStatement: {
+            "blockchain",
+            "immutable_ledger",
+            "smart_contract",
+            "mine",
+        },
+        AIBuzzwordStatement: {"deep_learning", "neural_network", "ai_powered"},
     }
 
     for st in possible_statements:
@@ -3265,6 +3276,163 @@ def interpret_code_statements(
                     print(f"⚛️  [QUANTUM] Variable '{var_name}' in quantum state")
 
                 # Don't assign to namespace yet - it exists only in superposition!
+
+            case GaslightingStatement():
+                # Gaslighting variables - deny their existence
+                var_name = statement.name.value
+
+                # Evaluate the value
+                expr_tree = build_expression_tree(filename, statement.value, code)
+                value = evaluate_expression(
+                    expr_tree,
+                    namespaces,
+                    filename,
+                    code,
+                )
+
+                # Store as gaslighting variable with random behavior
+                print(f"🤥 [GASLIGHTING] Creating variable '{var_name}' (or am I?)")
+
+                # Actually create it but mark it as gaslighting
+                from gulfofmexico.builtin import GASLIGHTING_VARS
+
+                GASLIGHTING_VARS[var_name] = value
+
+                # Also add to namespace so it "exists"
+                namespaces[-1][var_name] = Name(var_name, value)
+
+            case BlockchainStatement():
+                # Blockchain buzzword satire
+                keyword = statement.keyword.value
+
+                match keyword:
+                    case "blockchain":
+                        print("⛓️  [BLOCKCHAIN] Initiating decentralized consensus...")
+                        import time
+
+                        time.sleep(0.3)  # "Mining" delay
+                        interpret_code_statements(
+                            statement.code,
+                            namespaces + [{}],
+                            async_statements,
+                            when_statement_watchers + [{}],
+                            importable_names,
+                            exported_names,
+                        )
+                        print(
+                            "⛓️  [BLOCKCHAIN] Transaction validated on distributed ledger!"
+                        )
+
+                    case "smart_contract":
+                        print(
+                            "📜 [SMART_CONTRACT] Deploying trustless code execution..."
+                        )
+                        interpret_code_statements(
+                            statement.code,
+                            namespaces + [{}],
+                            async_statements,
+                            when_statement_watchers + [{}],
+                            importable_names,
+                            exported_names,
+                        )
+                        print("📜 [SMART_CONTRACT] Contract executed on chain!")
+
+                    case "mine":
+                        # Mining - waste CPU cycles
+                        expr_tree = build_expression_tree(
+                            filename, statement.args, code
+                        )
+                        blocks = evaluate_expression(
+                            expr_tree, namespaces, filename, code
+                        )
+                        num_blocks = (
+                            int(blocks.value)
+                            if isinstance(blocks, GulfOfMexicoNumber)
+                            else 1
+                        )
+
+                        print(f"⛏️  [MINING] Mining {num_blocks} block(s)...")
+                        import time
+                        import random
+
+                        for i in range(num_blocks):
+                            time.sleep(0.2)  # Simulate mining
+                            hash_val = random.randint(1000, 9999)
+                            print(f"⛏️  [MINING] Block {i+1} mined! Hash: 0x{hash_val}")
+
+                        print(
+                            f"⛏️  [MINING] Earned {num_blocks * 0.00001} cryptocurrency!"
+                        )
+
+                    case "immutable_ledger":
+                        # Store value as "immutable" (but we can still change it because irony)
+                        print(
+                            "📒 [IMMUTABLE_LEDGER] Recording on permanent blockchain..."
+                        )
+                        # Just execute the args as an expression
+                        expr_tree = build_expression_tree(
+                            filename, statement.args, code
+                        )
+                        value = evaluate_expression(
+                            expr_tree, namespaces, filename, code
+                        )
+                        print(
+                            f"📒 [IMMUTABLE_LEDGER] Value permanently recorded: {value}"
+                        )
+
+            case AIBuzzwordStatement():
+                # AI/ML buzzword satire
+                keyword = statement.keyword.value
+
+                match keyword:
+                    case "deep_learning":
+                        print("🧠 [DEEP_LEARNING] Initializing neural networks...")
+                        print("🧠 [DEEP_LEARNING] Training on big data...")
+                        import time
+
+                        time.sleep(0.4)
+                        interpret_code_statements(
+                            statement.code,
+                            namespaces + [{}],
+                            async_statements,
+                            when_statement_watchers + [{}],
+                            importable_names,
+                            exported_names,
+                        )
+                        print("🧠 [DEEP_LEARNING] Model trained to 99.9% accuracy!")
+
+                    case "neural_network":
+                        print("🤖 [NEURAL_NETWORK] Forwarding through hidden layers...")
+                        interpret_code_statements(
+                            statement.code,
+                            namespaces + [{}],
+                            async_statements,
+                            when_statement_watchers + [{}],
+                            importable_names,
+                            exported_names,
+                        )
+                        print("🤖 [NEURAL_NETWORK] Backpropagation complete!")
+
+                    case "ai_powered":
+                        print("🤖 [AI_POWERED] Applying machine learning algorithms...")
+                        import time
+                        import random
+
+                        time.sleep(0.3)
+
+                        # Add some "AI thinking"
+                        confidence = random.randint(85, 99)
+                        print(f"🤖 [AI_POWERED] AI confidence: {confidence}%")
+
+                        interpret_code_statements(
+                            statement.code,
+                            namespaces + [{}],
+                            async_statements,
+                            when_statement_watchers + [{}],
+                            importable_names,
+                            exported_names,
+                        )
+                        print("🤖 [AI_POWERED] AI processing complete!")
 
             case ReverseStatement():
                 # Reverse operation - reverses lists and strings in-place

@@ -46,7 +46,7 @@ from time import sleep
 import math
 from abc import ABCMeta, abstractmethod
 from dataclasses import dataclass, field
-from typing import Callable, Optional, Union
+from typing import Any, Callable, Optional, Union
 from gulfofmexico.base import NonFormattedError
 
 from gulfofmexico.processor.syntax_tree import CodeStatement
@@ -72,6 +72,7 @@ FLOAT_TO_INT_PREC = 0.00000001
 # Global storage for quantum and time travel features
 QUANTUM_STATES: dict[str, list] = {}
 TIME_TRAVEL_HISTORY: dict[str, list] = {}
+GASLIGHTING_VARS: dict[str, Any] = {}
 
 
 def is_int(x: Union[float, int]) -> bool:
@@ -615,6 +616,14 @@ KEYWORDS = {
         "cross_fingers",
         "knock_on_wood",
         "quantum",
+        "definitely_not",
+        "blockchain",
+        "immutable_ledger",
+        "smart_contract",
+        "mine",
+        "deep_learning",
+        "neural_network",
+        "ai_powered",
     ]
     + FUNCTION_KEYWORDS
 }
