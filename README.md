@@ -174,6 +174,27 @@ try {
 }
 ```
 
+### Quantum Programming ⚛️
+Variables exist in superposition until observed:
+
+```
+quantum x [1, 2, 3, 4, 5]!       // Superposition of 5 states
+const result = observe("x")!      // Collapses to single value
+quantum uncertain maybe!          // true/false superposition
+```
+
+### Time Travel ⏰
+Access past and future variable states:
+
+```
+var x 10!
+x = 20!
+x = 30!
+
+const old_val = past("x", 2)!    // Returns 10
+const prediction = future("x")!   // Random prediction
+```
+
 **See `programs/examples/00_complete_showcase.gom` for all features in action!**
 
 ## Syntax

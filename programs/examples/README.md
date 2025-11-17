@@ -79,6 +79,28 @@ This directory contains example programs demonstrating all features of the Gulf 
 - **25_ultimate_satire.gom** - All satirical features together
 - **00_complete_showcase.gom** - THE DEFINITIVE SHOWCASE! 🎉
 
+### 🌌 Quantum & Time Travel (26-28)
+
+#### Quantum Programming ⚛️
+- **26_quantum_programming.gom**
+  - `quantum x [1,2,3]` - Variables in superposition
+  - `observe("x")` - Collapse wavefunction
+  - `quantum uncertain maybe` - True/false superposition
+  
+  Run multiple times to see different quantum collapses!
+
+#### Time Travel Programming ⏰
+- **27_time_travel.gom**
+  - `past("var", n)` - Access value from n steps ago
+  - `future("var")` - Predict future (random)
+  - Track variable history through time
+
+#### Ultimate Quantum Time Combo 🌌⏰
+- **28_quantum_time_spectacular.gom**
+  - Combines quantum, time travel, emotional, and superstitious
+  - Quantum states + temporal paradoxes
+  - Reality is probabilistic!
+
 ## 🎯 Feature Categories
 
 ### Unique Language Features
@@ -98,6 +120,11 @@ This directory contains example programs demonstrating all features of the Gulf 
 - ⏰ **Procrastination keywords** - Maybe later, eventually, whenever
 - 💼 **Corporate speak** - Synergize your paradigms!
 - 😴 **Passive-aggressive errors** - try/whatever blocks
+
+### Quantum & Time Features
+- ⚛️ **Quantum programming** - Superposition variables
+- 🔮 **Time travel** - Access past/future values
+- 🌌 **Reality manipulation** - Nothing is certain!
 
 ### Graphics & Art
 - 🎨 Canvas drawing with PIL backend
@@ -123,9 +150,11 @@ run_file('programs/examples/24_superstitious_programming.gom')
 ## 💡 Tips
 
 1. **Procrastination examples** - Run multiple times to see different probabilistic outcomes
-2. **Graphics examples** - Check for generated .png files in the current directory
-3. **Emotional examples** - Mood changes based on program execution state
-4. **Superstitious examples** - Luck is real in Gulf of Mexico! 🎲
+2. **Quantum examples** - Each observation collapses to a different random state - try multiple runs!
+3. **Graphics examples** - Check for generated .png files in the current directory
+4. **Emotional examples** - Mood changes based on program execution state
+5. **Superstitious examples** - Luck is real in Gulf of Mexico! 🎲
+6. **Time travel** - Build up variable history before accessing the past
 
 ## 🌊 Philosophy
 
@@ -133,8 +162,12 @@ Gulf of Mexico is not just a programming language - it's a satirical commentary 
 - Modern programming paradigms
 - Corporate tech culture
 - The absurdity of syntax wars
+- Quantum mechanics and temporal paradoxes
 - The importance of not taking code too seriously
 
-**Remember**: If your code doesn't have feelings, is it even alive? 
+**Remember**: 
+- If your code doesn't have feelings, is it even alive? 😊
+- Reality is just a probabilistic wavefunction ⚛️
+- Time is an illusion, and so are bugs ⏰
 
 Happy coding! (Or sad coding, or angry coding, depending on your mood! 😊😢😠)
