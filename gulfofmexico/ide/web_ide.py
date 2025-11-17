@@ -212,7 +212,10 @@ class GOMWebIDEHandler(http.server.SimpleHTTPRequestHandler):
         stdout_capture = io.StringIO()
         stderr_capture = io.StringIO()
 
-        # Track existing PNG files before execution
+        # Track existing PNG files before execution with their modification times
+        import time
+
+        execution_start = time.time()
         existing_pngs = set(self.workspace_dir.glob("*.png"))
 
         try:
@@ -250,9 +253,17 @@ class GOMWebIDEHandler(http.server.SimpleHTTPRequestHandler):
             output_val = stdout_capture.getvalue()
             error_val = stderr_capture.getvalue()
 
-            # Detect newly created PNG files
-            new_pngs = set(self.workspace_dir.glob("*.png")) - existing_pngs
-            images = [str(p.name) for p in new_pngs] if new_pngs else []
+            # Detect newly created or modified PNG files
+            all_pngs = set(self.workspace_dir.glob("*.png"))
+            new_pngs = all_pngs - existing_pngs
+            # Also check for modified existing files
+            modified_pngs = {
+                p
+                for p in existing_pngs
+                if p.exists() and p.stat().st_mtime > execution_start
+            }
+            changed_pngs = new_pngs | modified_pngs
+            images = sorted([str(p.name) for p in changed_pngs]) if changed_pngs else []
 
             response = {
                 "success": True,
