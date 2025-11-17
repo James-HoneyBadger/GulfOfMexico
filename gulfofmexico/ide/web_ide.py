@@ -670,10 +670,10 @@ function add(a, b) => {
    return a + b!
 }!
 
-func multiply(x, y) => x * y!
+fn multiply(x, y) => x * y!
 
-print("3 + 5 =", add(3, 5))!
-print("4 * 6 =", multiply(4, 6))!`,
+print "3 + 5 =", add 3, 5!
+print "4 * 6 =", multiply 4, 6!`,
 
             graphics: `// Graphics and Canvas
 print "Creating canvas..."!
@@ -706,13 +706,13 @@ print "Check the Graphics pane!"!`,
 
             temporal: `// Temporal keywords
 var const x = 10!
-print("Initial:", x)!
+print "Initial:", x!
 x = 20!
-print("Current:", current(x))!
-print("Previous:", previous(x))!
+print "Current:", current x!
+print "Previous:", previous x!
 x = 30!
-print("Current:", current(x))!
-print("Previous:", previous(x))!`
+print "Current:", current x!
+print "Previous:", previous x!`
         };
 
         function loadExample(key) {
