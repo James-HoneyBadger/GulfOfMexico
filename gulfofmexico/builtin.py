@@ -752,12 +752,16 @@ def db_to_string(val: GulfOfMexicoValue) -> GulfOfMexicoString:
 
 def db_print(*vals: GulfOfMexicoValue) -> None:
     import sys
+    import os
 
     output = " ".join([db_to_string(v).value for v in vals])
     print(output)
     sys.stdout.flush()
-    sys.stderr.write(f"[DB_PRINT] Called with: {repr(output)}\n")
-    sys.stderr.flush()
+
+    # Only show debug output if DEBUG environment variable is set
+    if os.environ.get("GULFOFMEXICO_DEBUG"):
+        sys.stderr.write(f"[DB_PRINT] Called with: {repr(output)}\n")
+        sys.stderr.flush()
 
 
 def db_to_number(val: GulfOfMexicoValue) -> GulfOfMexicoNumber:

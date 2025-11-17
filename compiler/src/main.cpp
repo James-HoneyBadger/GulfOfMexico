@@ -10,8 +10,9 @@ void printUsage(const char* progName) {
     std::cerr << "\nGulf of Mexico Compiler\n";
     std::cerr << "Compiles .gom source files to C++\n\n";
     std::cerr << "Options:\n";
-    std::cerr << "  -o <file>    Output file (default: a.cpp)\n";
-    std::cerr << "  -h, --help   Show this help message\n";
+    std::cerr << "  -o <file>      Output file (default: a.cpp)\n";
+    std::cerr << "  -v, --verbose  Show compilation progress\n";
+    std::cerr << "  -h, --help     Show this help message\n";
 }
 
 std::string readFile(const std::string& filename) {
@@ -41,6 +42,7 @@ int main(int argc, char* argv[]) {
     
     std::string inputFile;
     std::string outputFile = "a.cpp";
+    bool verbose = false;
     
     // Parse arguments
     for (int i = 1; i < argc; i++) {
@@ -48,6 +50,8 @@ int main(int argc, char* argv[]) {
         if (arg == "-h" || arg == "--help") {
             printUsage(argv[0]);
             return 0;
+        } else if (arg == "-v" || arg == "--verbose") {
+            verbose = true;
         } else if (arg == "-o" && i + 1 < argc) {
             outputFile = argv[++i];
         } else if (arg[0] != '-') {
@@ -66,7 +70,7 @@ int main(int argc, char* argv[]) {
     }
     
     try {
-        std::cout << "Compiling " << inputFile << "...\n";
+        if (verbose) std::cout << "Compiling " << inputFile << "...\n";
         
         // Read source
         std::string source = readFile(inputFile);
@@ -74,24 +78,26 @@ int main(int argc, char* argv[]) {
         // Lexical analysis
         gom::Lexer lexer(source);
         auto tokens = lexer.tokenize();
-        std::cout << "Lexer: Generated " << tokens.size() << " tokens\n";
+        if (verbose) std::cout << "Lexer: Generated " << tokens.size() << " tokens\n";
         
         // Parsing
         gom::Parser parser(tokens);
         auto ast = parser.parse();
-        std::cout << "Parser: Built AST with " << ast->statements.size() << " statements\n";
+        if (verbose) std::cout << "Parser: Built AST with " << ast->statements.size() << " statements\n";
         
         // Code generation
         gom::CodeGenerator codegen;
         std::string cppCode = codegen.generate(*ast);
-        std::cout << "CodeGen: Generated C++ code\n";
+        if (verbose) std::cout << "CodeGen: Generated C++ code\n";
         
         // Write output
         writeFile(outputFile, cppCode);
-        std::cout << "Success: Written to " << outputFile << "\n";
-        std::cout << "\nTo compile the output:\n";
-        std::cout << "  g++ -std=c++17 " << outputFile << " -o program\n";
-        std::cout << "  ./program\n";
+        if (verbose) {
+            std::cout << "Success: Written to " << outputFile << "\n";
+            std::cout << "\nTo compile the output:\n";
+            std::cout << "  g++ -std=c++17 " << outputFile << " -o program\n";
+            std::cout << "  ./program\n";
+        }
         
         return 0;
         

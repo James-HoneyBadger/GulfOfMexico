@@ -111,12 +111,17 @@ def run_file(main_filename: str) -> None:
                 importable_names[target_filename] = {}
             importable_names[target_filename][name] = value
 
-    print(
-        "\033[33mCode has finished executing. Press ^C once or twice "
-        "to stop waiting for when-statements and "
-        "after-statements.\033[039m",
-        flush=True,
-    )
+    # Only show completion message if there are async/when statements that might be pending
+    # Check if we have any when-statements or after-statements to wait for
+    import os
+
+    if os.environ.get("GULFOFMEXICO_VERBOSE"):
+        print(
+            "\033[33mCode has finished executing. Press ^C once or twice "
+            "to stop waiting for when-statements and "
+            "after-statements.\033[039m",
+            flush=True,
+        )
     try:
         while True:
             sleep(1)  # just waiting for any clicks, when statements, etc

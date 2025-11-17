@@ -49,15 +49,24 @@ python -m gulfofmexico -c "print(42)!"
 
 # Launch IDE
 python -m gulfofmexico.ide
+
+# Enable debug output (shows [DB_PRINT] messages)
+GULFOFMEXICO_DEBUG=1 python -m gulfofmexico script.gom
+
+# Enable verbose mode (shows completion messages)
+GULFOFMEXICO_VERBOSE=1 python -m gulfofmexico script.gom
 ```
 
 ### C++ Compiler
 ```bash
-# Compile a program
+# Compile a program (quiet mode)
 cd compiler/build
 ./gomcc program.gom -o program.cpp
 g++ -std=c++17 program.cpp -o program
 ./program
+
+# Compile with verbose output (shows progress)
+./gomcc program.gom -o program.cpp --verbose
 
 # Example with built-in functions
 ./gomcc ../examples/test_analysis.gom -o test.cpp
