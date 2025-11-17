@@ -26,6 +26,7 @@ from gulfofmexico.builtin import (
     Variable,
     GulfOfMexicoUndefined,
 )
+import gulfofmexico.builtin as builtin
 from gulfofmexico.processor.lexer import tokenize
 from gulfofmexico.processor.syntax_tree import generate_syntax_tree
 from gulfofmexico.base import InterpretationError
@@ -398,8 +399,21 @@ class GomRepl:
                 exported_names,
             )
         except InterpretationError as e:
+            # Flush any buffered debug logs to assist troubleshooting
+            try:
+                builtin.flush_debug_logs()
+            except Exception:
+                pass
             print(f"\x1b[31m{e}\x1b[0m")
             return
+        except Exception:
+            # Unexpected exception: flush debug logs and re-raise to show
+            # the full traceback for debugging purposes.
+            try:
+                builtin.flush_debug_logs()
+            except Exception:
+                pass
+            raise
 
         # Handle exported names
         for target_filename, name, value in exported_names:

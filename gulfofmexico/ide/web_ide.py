@@ -5,6 +5,7 @@ import http.server
 import socketserver
 import json
 import sys
+import os
 from pathlib import Path
 from urllib.parse import parse_qs, urlparse
 import threading
@@ -14,6 +15,17 @@ from gulfofmexico.processor.lexer import tokenize
 from gulfofmexico.processor.syntax_tree import generate_syntax_tree
 from gulfofmexico.interpreter import interpret_code_statements_main_wrapper
 from gulfofmexico.builtin import KEYWORDS
+
+# Local debug flag for the web IDE. When set, verbose internal messages
+# are written to stderr. Otherwise these internal messages are suppressed
+# to avoid noisy logs during normal usage.
+WEB_IDE_DEBUG = bool(os.environ.get("GULFOFMEXICO_DEBUG"))
+
+
+def _webide_debug(msg: str) -> None:
+    if WEB_IDE_DEBUG:
+        sys.stderr.write(msg)
+        sys.stderr.flush()
 
 
 class GOMWebIDEHandler(http.server.SimpleHTTPRequestHandler):
@@ -51,8 +63,7 @@ class GOMWebIDEHandler(http.server.SimpleHTTPRequestHandler):
             filename = filename.split("?")[0]
             filepath = self.workspace_dir / filename
 
-            sys.stderr.write(f"[IMAGE] Serving image: {filename} from {filepath}\n")
-            sys.stderr.flush()
+            _webide_debug(f"[IMAGE] Serving image: {filename} from {filepath}\n")
 
             # Security: ensure file is within workspace
             filepath = filepath.resolve()
@@ -101,11 +112,9 @@ class GOMWebIDEHandler(http.server.SimpleHTTPRequestHandler):
 
         if self.path == "/execute":
             code = data.get("code", "")
-            sys.stderr.write(f"[HTTP] Execute request for code: {repr(code[:50])}\n")
-            sys.stderr.flush()
+            _webide_debug(f"[HTTP] Execute request for code: {repr(code[:50])}\n")
             result = self.execute_code(code)
-            sys.stderr.write(f"[HTTP] Sending response: {result}\n")
-            sys.stderr.flush()
+            _webide_debug(f"[HTTP] Sending response: {result}\n")
             self.send_response(200)
             self.send_header("Content-type", "application/json")
             self.end_headers()
@@ -214,8 +223,7 @@ class GOMWebIDEHandler(http.server.SimpleHTTPRequestHandler):
         import sys
         from contextlib import redirect_stdout, redirect_stderr
 
-        sys.stderr.write(f"[WEB IDE] Received code: {repr(code[:50])}\n")
-        sys.stderr.flush()
+    _webide_debug(f"[WEB IDE] Received code: {repr(code[:50])}\n")
 
         stdout_capture = io.StringIO()
         stderr_capture = io.StringIO()
@@ -235,25 +243,20 @@ class GOMWebIDEHandler(http.server.SimpleHTTPRequestHandler):
                 interpreter.code = code
 
                 # Tokenize and parse
-                sys.__stderr__.write("[WEB IDE] Tokenizing...\n")
-                sys.__stderr__.flush()
+                _webide_debug("[WEB IDE] Tokenizing...\n")
                 tokens = tokenize("web_ide", code)
-                sys.__stderr__.write(f"[WEB IDE] Got {len(tokens)} tokens\n")
-                sys.__stderr__.flush()
+                _webide_debug(f"[WEB IDE] Got {len(tokens)} tokens\n")
 
                 statements = generate_syntax_tree("web_ide", tokens, code)
-                sys.__stderr__.write(f"[WEB IDE] Got {len(statements)} statements\n")
-                sys.__stderr__.flush()
+                _webide_debug(f"[WEB IDE] Got {len(statements)} statements\n")
 
                 # Execute
                 namespaces = [KEYWORDS.copy()]
-                sys.__stderr__.write("[WEB IDE] Executing...\n")
-                sys.__stderr__.flush()
+                _webide_debug("[WEB IDE] Executing...\n")
                 result = interpret_code_statements_main_wrapper(
                     statements, namespaces, [], [{}], {}, []
                 )
-                sys.__stderr__.write("[WEB IDE] Execution complete\n")
-                sys.__stderr__.flush()
+                _webide_debug("[WEB IDE] Execution complete\n")
 
                 # Force flush
                 sys.stdout.flush()
@@ -282,12 +285,11 @@ class GOMWebIDEHandler(http.server.SimpleHTTPRequestHandler):
             }
 
             # Log to real stderr (not captured)
-            sys.stderr.write(
+            _webide_debug(
                 f"[WEB IDE] Output length: {len(output_val)}, content: {repr(output_val[:100])}\n"
             )
             if images:
-                sys.stderr.write(f"[WEB IDE] Created images: {images}\n")
-            sys.stderr.flush()
+                _webide_debug(f"[WEB IDE] Created images: {images}\n")
 
             return response
         except Exception as e:

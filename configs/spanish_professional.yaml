@@ -1,0 +1,240 @@
+# Gulf of Mexico - Modo Serio (Español)
+# Configuración profesional en español
+
+metadata:
+  name: "Golfo de México (Profesional)"
+  version: "1.0.0"
+  description: "Versión profesional en español sin características satíricas"
+  author: "Comunidad"
+
+keywords:
+  # Palabras clave de control
+  if:
+    original: "if"
+    custom: "si"
+    category: "control"
+    description: "Declaración condicional"
+  
+  when:
+    original: "when"
+    custom: "cuando"
+    category: "control"
+    description: "Programación reactiva"
+  
+  after:
+    original: "after"
+    custom: "después"
+    category: "control"
+    description: "Ejecución temporal"
+  
+  # Funciones
+  function:
+    original: "function"
+    custom: "función"
+    category: "function"
+    description: "Definición de función"
+  
+  async:
+    original: "async"
+    custom: "asíncrono"
+    category: "function"
+    description: "Función asíncrona"
+  
+  await:
+    original: "await"
+    custom: "esperar"
+    category: "function"
+    description: "Esperar resultado asíncrono"
+  
+  return:
+    original: "return"
+    custom: "retornar"
+    category: "function"
+    description: "Retornar valor"
+  
+  # Variables
+  const:
+    original: "const"
+    custom: "const"
+    category: "variable"
+    description: "Declaración constante"
+  
+  var:
+    original: "var"
+    custom: "var"
+    category: "variable"
+    description: "Declaración variable"
+  
+  # Clases
+  class:
+    original: "class"
+    custom: "clase"
+    category: "oop"
+    description: "Definición de clase"
+  
+  # Especiales
+  delete:
+    original: "delete"
+    custom: "eliminar"
+    category: "special"
+    description: "Eliminar variable"
+  
+  reverse:
+    original: "reverse"
+    custom: "reverso"
+    category: "special"
+    description: "Operación reversa"
+  
+  export:
+    original: "export"
+    custom: "exportar"
+    category: "module"
+    description: "Exportar a archivo"
+  
+  import:
+    original: "import"
+    custom: "importar"
+    category: "module"
+    description: "Importar de archivo"
+
+functions:
+  # Funciones de E/S
+  print:
+    name: "imprimir"
+    arity: -1
+    implementation: "builtin.db_print"
+    description: "Imprimir a stdout"
+    enabled: true
+  
+  read:
+    name: "leer"
+    arity: 0
+    implementation: "builtin.db_read"
+    description: "Leer de stdin"
+    enabled: true
+  
+  write:
+    name: "escribir"
+    arity: 2
+    implementation: "builtin.db_write"
+    description: "Escribir a archivo"
+    enabled: true
+  
+  # Conversiones de tipo
+  Number:
+    name: "Número"
+    arity: 1
+    implementation: "builtin.db_to_number"
+    description: "Convertir a número"
+    enabled: true
+  
+  String:
+    name: "Texto"
+    arity: 1
+    implementation: "builtin.db_to_string"
+    description: "Convertir a texto"
+    enabled: true
+  
+  Boolean:
+    name: "Booleano"
+    arity: 1
+    implementation: "builtin.db_to_boolean"
+    description: "Convertir a booleano"
+    enabled: true
+  
+  # Estructuras de datos
+  List:
+    name: "Lista"
+    arity: -1
+    implementation: "builtin.GulfOfMexicoList"
+    description: "Crear lista"
+    enabled: true
+  
+  Map:
+    name: "Mapa"
+    arity: 0
+    implementation: "builtin.GulfOfMexicoMap"
+    description: "Crear mapa"
+    enabled: true
+  
+  # Utilidades
+  length:
+    name: "longitud"
+    arity: 1
+    implementation: "builtin.db_len"
+    description: "Obtener longitud"
+    enabled: true
+  
+  sleep:
+    name: "dormir"
+    arity: 1
+    implementation: "builtin.db_sleep"
+    description: "Dormir por segundos"
+    enabled: true
+
+operators:
+  "+":
+    symbol: "+"
+    precedence: 10
+    associativity: "left"
+    enabled: true
+  "-":
+    symbol: "-"
+    precedence: 10
+    associativity: "left"
+    enabled: true
+  "*":
+    symbol: "*"
+    precedence: 20
+    associativity: "left"
+    enabled: true
+  "/":
+    symbol: "/"
+    precedence: 20
+    associativity: "left"
+    enabled: true
+  "^":
+    symbol: "^"
+    precedence: 30
+    associativity: "right"
+    enabled: true
+  "==":
+    symbol: "=="
+    precedence: 5
+    associativity: "none"
+    enabled: true
+
+syntax_options:
+  # Mantener indexación de Gulf of Mexico
+  array_start_index: -1
+  allow_fractional_indexing: true
+  
+  # Sin punto y coma
+  require_semicolons: false
+  statement_terminator: "!"
+  
+  # Sistema flexible de comillas
+  flexible_quoting: true
+  string_interpolation: true
+  interpolation_symbol: "$"
+  
+  # Comentarios estilo C
+  single_line_comment: "//"
+  multi_line_comment_start: null
+  multi_line_comment_end: null
+  
+  # Sistema de tipos
+  three_valued_logic: true
+  probabilistic_variables: true
+  temporal_variables: true
+  
+  # Sin características satíricas
+  enable_satirical_keywords: false
+  enable_quantum_features: false
+  enable_time_travel: false
+  enable_gaslighting: false
+
+runtime:
+  debug_mode: false
+  strict_mode: true
+  compatibility_mode: "standard"

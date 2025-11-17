@@ -1,0 +1,112 @@
+# Gulf of Mexico Language Configuration
+# Python-like variant
+
+metadata:
+  name: "Gulf of Mexico (Python-like)"
+  version: "1.0.0"
+  description: "Python-style syntax for Gulf of Mexico"
+  author: "Community"
+
+keywords:
+  # Use 'def' instead of 'function'
+  function:
+    original: "function"
+    custom: "def"
+    category: "function"
+    description: "Function definition (Python-style)"
+  
+  # Keep most keywords the same
+  if:
+    original: "if"
+    custom: "if"
+    category: "control"
+    description: "Conditional statement"
+  
+  when:
+    original: "when"
+    custom: "when"
+    category: "control"
+    description: "Reactive programming"
+  
+  class:
+    original: "class"
+    custom: "class"
+    category: "oop"
+    description: "Class definition"
+  
+  return:
+    original: "return"
+    custom: "return"
+    category: "function"
+    description: "Return value"
+
+functions:
+  # Keep standard function names
+  print:
+    name: "print"
+    arity: -1
+    implementation: "builtin.db_print"
+    description: "Print to stdout"
+    enabled: true
+  
+  len:
+    name: "len"
+    arity: 1
+    implementation: "builtin.db_len"
+    description: "Get length"
+    enabled: true
+  
+  range:
+    name: "range"
+    arity: 2
+    implementation: "builtin.db_range"
+    description: "Create range"
+    enabled: true
+
+operators:
+  "+":
+    symbol: "+"
+    precedence: 10
+    associativity: "left"
+    enabled: true
+  
+  "*":
+    symbol: "*"
+    precedence: 20
+    associativity: "left"
+    enabled: true
+
+syntax_options:
+  # Python-like: 0-based indexing, no fractional
+  array_start_index: 0
+  allow_fractional_indexing: false
+  
+  # Python-like: no statement terminators
+  require_semicolons: false
+  statement_terminator: ""
+  
+  # Keep Gulf of Mexico features
+  flexible_quoting: true
+  string_interpolation: true
+  interpolation_symbol: "$"
+  
+  # Comments
+  single_line_comment: "#"
+  multi_line_comment_start: null
+  multi_line_comment_end: null
+  
+  # Type system
+  three_valued_logic: true
+  probabilistic_variables: true
+  temporal_variables: true
+  
+  # Disable satirical features for serious use
+  enable_satirical_keywords: false
+  enable_quantum_features: false
+  enable_time_travel: false
+  enable_gaslighting: false
+
+runtime:
+  debug_mode: false
+  strict_mode: false
+  compatibility_mode: "standard"

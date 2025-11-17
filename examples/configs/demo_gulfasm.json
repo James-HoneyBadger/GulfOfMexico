@@ -1,0 +1,267 @@
+{
+  "metadata": {
+    "name": "GulfASM",
+    "version": "1.0.0",
+    "description": "Assembly-like minimalist language",
+    "author": "Extreme Demo",
+    "target_interpreter": "python"
+  },
+  "keywords": {
+    "mov": {
+      "original": "mov",
+      "custom": "mov",
+      "category": "instruction",
+      "description": "Move value to register"
+    },
+    "add": {
+      "original": "add",
+      "custom": "add",
+      "category": "instruction",
+      "description": "Add values"
+    },
+    "sub": {
+      "original": "sub",
+      "custom": "sub",
+      "category": "instruction",
+      "description": "Subtract values"
+    },
+    "jmp": {
+      "original": "jmp",
+      "custom": "jmp",
+      "category": "control",
+      "description": "Jump to label"
+    },
+    "cmp": {
+      "original": "cmp",
+      "custom": "cmp",
+      "category": "instruction",
+      "description": "Compare values"
+    },
+    "label": {
+      "original": "label",
+      "custom": "label",
+      "category": "control",
+      "description": "Define label"
+    },
+    "call": {
+      "original": "call",
+      "custom": "call",
+      "category": "control",
+      "description": "Call procedure"
+    },
+    "ret": {
+      "original": "ret",
+      "custom": "ret",
+      "category": "control",
+      "description": "Return from procedure"
+    }
+  },
+  "functions": {
+    "syscall": {
+      "name": "syscall",
+      "arity": {
+        "name": "syscall",
+        "arity": -1,
+        "implementation": null,
+        "description": "System call",
+        "enabled": true
+      },
+      "implementation": null,
+      "description": "",
+      "enabled": true
+    }
+  },
+  "operators": {
+    "+": {
+      "symbol": "+",
+      "precedence": 10,
+      "associativity": "left",
+      "enabled": true
+    },
+    "-": {
+      "symbol": "-",
+      "precedence": 10,
+      "associativity": "left",
+      "enabled": true
+    },
+    "*": {
+      "symbol": "*",
+      "precedence": 20,
+      "associativity": "left",
+      "enabled": true
+    },
+    "/": {
+      "symbol": "/",
+      "precedence": 20,
+      "associativity": "left",
+      "enabled": true
+    },
+    "^": {
+      "symbol": "^",
+      "precedence": 30,
+      "associativity": "right",
+      "enabled": true
+    },
+    "==": {
+      "symbol": "==",
+      "precedence": 5,
+      "associativity": "none",
+      "enabled": true
+    },
+    "===": {
+      "symbol": "===",
+      "precedence": 5,
+      "associativity": "none",
+      "enabled": true
+    },
+    "====": {
+      "symbol": "====",
+      "precedence": 5,
+      "associativity": "none",
+      "enabled": true
+    },
+    "~=": {
+      "symbol": "~=",
+      "precedence": 5,
+      "associativity": "none",
+      "enabled": true
+    },
+    ";=": {
+      "symbol": ";=",
+      "precedence": 5,
+      "associativity": "none",
+      "enabled": true
+    },
+    ">": {
+      "symbol": ">",
+      "precedence": 5,
+      "associativity": "none",
+      "enabled": true
+    },
+    "<": {
+      "symbol": "<",
+      "precedence": 5,
+      "associativity": "none",
+      "enabled": true
+    },
+    ">=": {
+      "symbol": ">=",
+      "precedence": 5,
+      "associativity": "none",
+      "enabled": true
+    },
+    "<=": {
+      "symbol": "<=",
+      "precedence": 5,
+      "associativity": "none",
+      "enabled": true
+    },
+    "&": {
+      "symbol": "&",
+      "precedence": 3,
+      "associativity": "left",
+      "enabled": true
+    },
+    "|": {
+      "symbol": "|",
+      "precedence": 2,
+      "associativity": "left",
+      "enabled": true
+    },
+    "!": {
+      "symbol": "!",
+      "precedence": 40,
+      "associativity": "right",
+      "enabled": true
+    },
+    "=": {
+      "symbol": "=",
+      "precedence": 1,
+      "associativity": "right",
+      "enabled": true
+    },
+    ".": {
+      "symbol": ".",
+      "precedence": 50,
+      "associativity": "left",
+      "enabled": true
+    },
+    "++": {
+      "symbol": "++",
+      "precedence": 40,
+      "associativity": "none",
+      "enabled": true
+    },
+    "--": {
+      "symbol": "--",
+      "precedence": 40,
+      "associativity": "none",
+      "enabled": true
+    }
+  },
+  "syntax_options": {
+    "array_start_index": 0,
+    "allow_fractional_indexing": false,
+    "flexible_quoting": false,
+    "string_interpolation": false,
+    "interpolation_symbol": "$",
+    "single_line_comment": ";",
+    "multi_line_comment_start": null,
+    "multi_line_comment_end": null,
+    "require_semicolons": false,
+    "statement_terminator": "",
+    "three_valued_logic": false,
+    "probabilistic_variables": false,
+    "temporal_variables": false,
+    "enable_satirical_keywords": false,
+    "enable_quantum_features": false,
+    "enable_time_travel": false,
+    "enable_gaslighting": false
+  },
+  "parsing_config": {
+    "block_start": "{",
+    "block_end": "}",
+    "list_start": "[",
+    "list_end": "]",
+    "tuple_start": "(",
+    "tuple_end": ")",
+    "dict_start": "{",
+    "dict_end": "}",
+    "statement_separator": ";",
+    "parameter_separator": ",",
+    "key_value_separator": ":",
+    "string_delimiters": [
+      "\"",
+      "'",
+      "\"\"\""
+    ],
+    "escape_character": "\\",
+    "allow_raw_strings": true,
+    "raw_string_prefix": "r",
+    "member_access": ".",
+    "index_access_start": "[",
+    "index_access_end": "]",
+    "function_call_start": "(",
+    "function_call_end": ")",
+    "if_then_separator": null,
+    "else_keyword": "else",
+    "elif_keyword": "elif",
+    "function_param_start": "(",
+    "function_param_end": ")",
+    "function_arrow": null,
+    "return_type_separator": null,
+    "class_inheritance_separator": ":",
+    "class_body_start": "{",
+    "class_body_end": "}",
+    "import_separator": ".",
+    "from_keyword": "from",
+    "as_keyword": "as",
+    "allow_custom_operators": true,
+    "allow_operator_overloading": true
+  },
+  "runtime": {
+    "debug_mode": false,
+    "strict_mode": false,
+    "compatibility_mode": "standard"
+  }
+}

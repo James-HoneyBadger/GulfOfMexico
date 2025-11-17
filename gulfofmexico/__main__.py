@@ -16,6 +16,12 @@ Usage Modes:
     4. Debug mode (show Python traceback):
        $ python -m gulfofmexico -s script.gom
 
+    5. Debug output (show internal debug messages):
+       $ python -m gulfofmexico --debug script.gom
+
+    6. Verbose output (show completion messages):
+       $ python -m gulfofmexico --verbose script.gom
+
 All modes use the production interpreter in gulfofmexico/interpreter.py.
 The experimental gulfofmexico/engine/ is never used.
 
@@ -28,6 +34,7 @@ Execution Path:
 from __future__ import annotations
 
 import argparse
+import os
 import sys
 from typing import Optional
 
@@ -104,7 +111,23 @@ def _main(argv: Optional[list[str]] = None) -> int:
         help="show full Python traceback on errors",
     )
     parser.add_argument("-c", dest="inline_code", help="run inline code and exit")
+    parser.add_argument(
+        "--debug",
+        action="store_true",
+        help="show internal debug messages (same as GULFOFMEXICO_DEBUG=1)",
+    )
+    parser.add_argument(
+        "--verbose",
+        action="store_true",
+        help="show verbose completion messages (same as GULFOFMEXICO_VERBOSE=1)",
+    )
     ns = parser.parse_args(args)
+
+    # Set environment variables based on flags
+    if ns.debug:
+        os.environ["GULFOFMEXICO_DEBUG"] = "1"
+    if ns.verbose:
+        os.environ["GULFOFMEXICO_VERBOSE"] = "1"
 
     # Inline code mode
     if ns.inline_code is not None:

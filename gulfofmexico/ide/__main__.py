@@ -23,6 +23,8 @@ Command-Line Options:
     -o, --open FILE: Open file(s) on startup (multiple allowed)
     --run: Execute code immediately after opening files
     --web: Force web IDE instead of trying Qt GUI
+    --debug: Show internal debug messages
+    --verbose: Show verbose output
 """
 
 from __future__ import annotations
@@ -30,6 +32,7 @@ from __future__ import annotations
 
 if __name__ == "__main__":
     import argparse
+    import os
 
     parser = argparse.ArgumentParser(description="Gulf of Mexico IDE")
     parser.add_argument(
@@ -48,7 +51,23 @@ if __name__ == "__main__":
         action="store_true",
         help="Force web-based IDE instead of Qt GUI.",
     )
+    parser.add_argument(
+        "--debug",
+        action="store_true",
+        help="Show internal debug messages (same as GULFOFMEXICO_DEBUG=1).",
+    )
+    parser.add_argument(
+        "--verbose",
+        action="store_true",
+        help="Show verbose output (same as GULFOFMEXICO_VERBOSE=1).",
+    )
     args = parser.parse_args()
+
+    # Set environment variables based on flags
+    if args.debug:
+        os.environ["GULFOFMEXICO_DEBUG"] = "1"
+    if args.verbose:
+        os.environ["GULFOFMEXICO_VERBOSE"] = "1"
 
     # Use web IDE if forced
     if args.web:

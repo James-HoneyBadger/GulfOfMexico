@@ -758,10 +758,57 @@ def db_print(*vals: GulfOfMexicoValue) -> None:
     print(output)
     sys.stdout.flush()
 
-    # Only show debug output if DEBUG environment variable is set
+
+# Buffer for debug messages. We collect debug-related messages here and only
+# flush them to stderr when an unexpected error occurs (or when the
+# GULFOFMEXICO_DEBUG env var is explicitly set).
+_DEBUG_LOGS: list[str] = []
+
+
+def db_print(*vals: GulfOfMexicoValue) -> None:
+    """Primary print function exposed to GOM programs.
+
+    This prints program output to stdout immediately. Debug metadata that was
+    previously written to stderr (the "[DB_PRINT] ..." lines) is now buffered
+    in `_DEBUG_LOGS`. The buffer is flushed to stderr only when an error
+    occurs or when the environment variable `GULFOFMEXICO_DEBUG` is set.
+    """
+    import sys
+    import os
+
+    output = " ".join([db_to_string(v).value for v in vals])
+    print(output)
+    sys.stdout.flush()
+
+    # Prepare debug entry
+    debug_entry = f"[DB_PRINT] Called with: {repr(output)}"
+
+    # If explicit debug mode is enabled, write immediately. Otherwise buffer.
     if os.environ.get("GULFOFMEXICO_DEBUG"):
-        sys.stderr.write(f"[DB_PRINT] Called with: {repr(output)}\n")
+        sys.stderr.write(debug_entry + "\n")
         sys.stderr.flush()
+    else:
+        _DEBUG_LOGS.append(debug_entry)
+
+
+def flush_debug_logs() -> None:
+    """Flush buffered debug messages to stderr.
+
+    Called by the interpreter when an exception occurs so the developer can see
+    the recent internal debug lines that led up to the failure.
+    """
+    import sys
+    import os
+
+    if not _DEBUG_LOGS:
+        return
+
+    # If the user explicitly asked for debug, we may have already written lines.
+    # Still write any buffered messages to stderr for completeness.
+    for entry in _DEBUG_LOGS:
+        sys.stderr.write(entry + "\n")
+    sys.stderr.flush()
+    _DEBUG_LOGS.clear()
 
 
 def db_to_number(val: GulfOfMexicoValue) -> GulfOfMexicoNumber:

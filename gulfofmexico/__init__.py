@@ -101,9 +101,21 @@ def run_file(main_filename: str) -> None:
         )
         load_global_gulfofmexico_variables(namespaces)
         load_public_global_variables(namespaces)
-        interpret_code_statements_main_wrapper(
-            statements, namespaces, [], [{}], importable_names, exported_names
-        )
+        try:
+            interpret_code_statements_main_wrapper(
+                statements, namespaces, [], [{}], importable_names, exported_names
+            )
+        except Exception:
+            # Flush any buffered debug logs so debugging information is available
+            # when a program errors out. Re-raise after flushing to preserve
+            # the original traceback behavior.
+            try:
+                import gulfofmexico.builtin as _builtin
+
+                _builtin.flush_debug_logs()
+            except Exception:
+                pass
+            raise
 
         # take exported names and put them where they belong
         for target_filename, name, value in exported_names:

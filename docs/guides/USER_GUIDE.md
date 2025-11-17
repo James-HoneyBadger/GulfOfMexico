@@ -93,6 +93,31 @@ print "sum =", r!
 :quit                # exit REPL
 ```
 
+## Debugging
+
+The interpreter now buffers internal debug messages (the `[DB_PRINT]` lines) and
+only prints them when a program errors out. This keeps normal execution output
+clean. To force immediate debug output during active troubleshooting:
+
+**Method 1: Use CLI flags (recommended)**
+```bash
+python -m gulfofmexico --debug your_program.gom
+python -m gulfofmexico --verbose your_program.gom
+python -m gulfofmexico.ide --debug
+```
+
+**Method 2: Use environment variables**
+```bash
+GULFOFMEXICO_DEBUG=1 python -m gulfofmexico your_program.gom
+GULFOFMEXICO_VERBOSE=1 python -m gulfofmexico your_program.gom
+```
+
+To see all available options:
+```bash
+python -m gulfofmexico --help
+python -m gulfofmexico.ide --help
+```
+
 ## Understanding the Basics
 
 ### Statements End with !
