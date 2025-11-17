@@ -47,7 +47,12 @@ class GOMWebIDEHandler(http.server.SimpleHTTPRequestHandler):
         try:
             # Extract filename from path
             filename = self.path.split("/image/", 1)[1]
+            # Remove query string if present
+            filename = filename.split("?")[0]
             filepath = self.workspace_dir / filename
+
+            sys.stderr.write(f"[IMAGE] Serving image: {filename} from {filepath}\n")
+            sys.stderr.flush()
 
             # Security: ensure file is within workspace
             filepath = filepath.resolve()
@@ -769,10 +774,13 @@ print "Previous:", previous x!`
                 
                 // Display graphics if any images were created
                 const graphics = document.getElementById('graphics');
+                console.log('Images in result:', result.images);
                 if (result.images && result.images.length > 0) {
                     const imageUrl = '/image/' + result.images[0] + '?t=' + Date.now();
+                    console.log('Setting image URL:', imageUrl);
                     graphics.innerHTML = '<img src="' + imageUrl + '" alt="Generated graphics" />';
                 } else {
+                    console.log('No images found, showing placeholder');
                     graphics.innerHTML = '<div class="no-graphics">No graphics generated</div>';
                 }
             } catch (error) {
