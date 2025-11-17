@@ -839,6 +839,21 @@ But hey, it's *perfect*, remember?
 
 This implementation is based on the conceptual design by [Lu Wilson (TodePond)](https://github.com/TodePond/GulfOfMexico). Some features may differ from other implementations. This is fine. Embrace variety.
 
+## Example Programs
+
+The repository includes **80+ example programs** organized by category:
+
+- **Basics**: `programs/01_basics/` - Hello world through conditionals
+- **Features**: `programs/02_features/` - Equality, logic, reactive, async, lifetimes
+- **Graphics**: `programs/03_graphics/` - Canvas, transforms, generative art
+- **Satirical**: `programs/04_satirical/` - Emotional, quantum, time travel programming
+- **Analysis**: `programs/05_analysis/` - Statistics, finance, business, scientific
+- **Compiler Tests**: `programs/06_compiler_tests/` - C++ compiler validation
+- **Demos**: `programs/demos/` - Complete applications (banking, RPG, task manager)
+- **Tests**: `programs/tests/` - Unit and integration tests
+
+See [programs/README.md](programs/README.md) for complete documentation and [VALIDATION_REPORT.md](VALIDATION_REPORT.md) for validation results.
+
 ---
 
 *You've now mastered the technical depths of Gulf of Mexico. Use this knowledge wisely, or foolishly. Both are valid.*

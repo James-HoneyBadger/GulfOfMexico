@@ -74,11 +74,12 @@ python -m gulfofmexico.repl
 Inside the REPL you can load files (including multi-file demos with `=====` sections):
 
 ```text
-:load programs/examples/01_hello_world.gom
+:load programs/01_basics/01_hello_world.gom
+:load programs/demos/grand_deluxe_demo.gom
 ```
 
 Handy commands: `:vars`, `:history [n]`, `:run [n|last]`, `:reset`, `:quit`.
-See USER_GUIDE.md → “Using the REPL” for more.
+See USER_GUIDE.md → "Using the REPL" for more.
 
 ## Core Language Features
 
@@ -279,7 +280,43 @@ const old_val = past("x", 2)!    // Returns 10
 const prediction = future("x")!   // Random prediction
 ```
 
-**See `programs/examples/00_complete_showcase.gom` for all features in action!**
+**See `programs/demos/grand_deluxe_demo.gom` for all features in action!**
+
+## 📚 Example Programs
+
+Over **80 example programs** organized by category:
+
+- **`programs/01_basics/`** - Core language features (hello world, variables, arrays, functions, classes)
+- **`programs/02_features/`** - Advanced features (equality, three-valued logic, reactive, async, lifetimes)
+- **`programs/03_graphics/`** - Graphics and visualization (canvas, transforms, generative art, Mandelbrot)
+- **`programs/04_satirical/`** - Satirical keywords (emotional, superstitious, corporate, quantum, time travel)
+- **`programs/05_analysis/`** - Data analysis (base conversion, statistics, finance, business, scientific)
+- **`programs/06_compiler_tests/`** - C++ compiler test programs
+- **`programs/demos/`** - Complete demo applications (banking, calculator, task manager, RPG character)
+- **`programs/tests/`** - Unit and integration tests
+
+See [programs/README.md](programs/README.md) for complete documentation and syntax guidelines.
+
+### Quick Examples
+
+```bash
+# Core basics
+python -m gulfofmexico programs/01_basics/01_hello_world.gom
+python -m gulfofmexico programs/01_basics/05_functions.gom
+
+# Advanced features
+python -m gulfofmexico programs/02_features/10_reactive.gom
+python -m gulfofmexico programs/02_features/12_async.gom
+
+# Graphics
+python -m gulfofmexico programs/03_graphics/19_mandelbrot.gom
+
+# Satirical fun
+python -m gulfofmexico programs/04_satirical/25_ultimate_satire.gom
+
+# Ultimate showcase (all features)
+python -m gulfofmexico programs/demos/grand_deluxe_demo.gom
+```
 
 ## Syntax
 
@@ -387,14 +424,17 @@ export helper to main!
 import helper!
 print(helper())!
 ```
-
 ## IDE
 
 ```bash
 python -m gulfofmexico.ide       # Qt GUI with web fallback
 python -m gulfofmexico.ide --web # Force web interface
+./run_web_ide.sh                 # Convenience script for web IDE
 ```
 
+Web IDE: `http://localhost:8080/ide`
+
+The Web IDE includes embedded examples and supports loading any `.gom` file from the programs directory. Try loading `programs/demos/grand_deluxe_demo.gom` to see all features in action!
 Web IDE: `http://localhost:8080/ide`
 
 ## Requirements

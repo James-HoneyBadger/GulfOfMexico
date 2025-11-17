@@ -78,7 +78,8 @@ print "sum =", r!
 - Load and run a file (also supports multi-file sections using `===== section =====`):
 
 ```text
-:load programs/examples/01_hello_world.gom
+:load programs/01_basics/01_hello_world.gom
+:load programs/demos/banking_system.gom
 ```
 
 - Handy commands (type `:help` inside REPL for the full list):

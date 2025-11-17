@@ -826,4 +826,17 @@ const result query("SELECT * FROM users")!
 
 Gulf of Mexico is a language that challenges conventions and makes you think differently. Don't fight it—enjoy the journey into the absurd. Write clear code, test thoroughly, and remember: it's *perfect* by design.
 
+## Learning Resources
+
+Explore the organized example programs:
+
+- **Start here**: `programs/01_basics/` - Core language features
+- **Advanced**: `programs/02_features/` - Reactive, async, three-valued logic
+- **Visual**: `programs/03_graphics/` - Canvas and generative art
+- **Fun**: `programs/04_satirical/` - Emotional, quantum, time travel programming
+- **Practical**: `programs/05_analysis/` - Statistics, finance, business analysis
+- **Complete showcase**: `programs/demos/grand_deluxe_demo.gom`
+
+See [programs/README.md](programs/README.md) for the complete catalog and syntax guidelines.
+
 Happy coding! 🌊

@@ -19,7 +19,7 @@ For the impatient among us (we get it):
 git clone https://github.com/James-HoneyBadger/GulfOfMexico.git
 cd GulfOfMexico
 pip install -e .
-python -m gulfofmexico programs/examples/01_hello_world.gom
+python -m gulfofmexico programs/01_basics/01_hello_world.gom
 ```
 
 If that worked, congratulations! You're done. If not, keep reading.
@@ -237,20 +237,26 @@ Type away! Exit with `Ctrl+D` (Linux/Mac) or `Ctrl+Z` then Enter (Windows).
 
 ### Example Programs
 
-We've included a bunch:
+We've included 80+ organized examples:
 
 ```bash
 # Hello World
-python -m gulfofmexico programs/examples/01_hello_world.gom
+python -m gulfofmexico programs/01_basics/01_hello_world.gom
 
 # Feature showcase
 python -m gulfofmexico programs/demos/feature_showcase.gom
 
+# Ultimate demo (all features)
+python -m gulfofmexico programs/demos/grand_deluxe_demo.gom
+
 # Calculator
 python -m gulfofmexico programs/demos/calculator.gom
+
+# Graphics
+python -m gulfofmexico programs/03_graphics/19_mandelbrot.gom
 ```
 
-Browse the `programs/` directory for more.
+Browse the `programs/` directory for more. See [programs/README.md](programs/README.md) for the complete catalog.
 
 ## Troubleshooting
 
@@ -338,7 +344,8 @@ Or keep it around. You might come back. They always come back.
 - **User Guide**: [USER_GUIDE.md](USER_GUIDE.md)
 - **Technical Reference**: [TECHNICAL_REFERENCE.md](TECHNICAL_REFERENCE.md)
 - **Programming Guide**: [PROGRAMMING_GUIDE.md](PROGRAMMING_GUIDE.md)
-- **Example Programs**: `programs/` directory
+- **Example Programs**: [programs/README.md](programs/README.md) - Complete catalog of 80+ examples
+- **Validation Report**: [VALIDATION_REPORT.md](VALIDATION_REPORT.md) - Test results and status
 - **GitHub Issues**: [Report problems](https://github.com/James-HoneyBadger/GulfOfMexico/issues)
 
 ## Success!
@@ -346,7 +353,7 @@ Or keep it around. You might come back. They always come back.
 If you've made it this far, you should have a working Gulf of Mexico installation. Fire up a program and experience the *perfection*.
 
 ```bash
-python -m gulfofmexico programs/examples/01_hello_world.gom
+python -m gulfofmexico programs/01_basics/01_hello_world.gom
 ```
 
 Welcome to the Gulf! 🌊
