@@ -309,27 +309,27 @@ class GOMWebIDEHandler(http.server.SimpleHTTPRequestHandler):
             height: 100vh;
             display: flex;
             flex-direction: column;
-            background: # 1e1e1e;
-            color: # d4d4d4;
+            background: #1e1e1e;
+            color: #d4d4d4;
         }
         .header {
-            background: # 2d2d30;
+            background: #2d2d30;
             padding: 10px 20px;
-            border-bottom: 1px solid # 3e3e42;
+            border-bottom: 1px solid #3e3e42;
             display: flex;
             justify-content: space-between;
             align-items: center;
         }
         .header h1 {
             font-size: 18px;
-            color: # cccccc;
+            color: #cccccc;
         }
         .buttons {
             display: flex;
             gap: 10px;
         }
         button {
-            background: # 0e639c;
+            background: #0e639c;
             color: white;
             border: none;
             padding: 8px 16px;
@@ -338,28 +338,28 @@ class GOMWebIDEHandler(http.server.SimpleHTTPRequestHandler):
             font-size: 14px;
         }
         button:hover {
-            background: # 1177bb;
+            background: #1177bb;
         }
         button:active {
-            background: # 0d5a8f;
+            background: #0d5a8f;
         }
         .clear-btn {
-            background: # c72e2e;
+            background: #c72e2e;
         }
         .clear-btn:hover {
-            background: # e04343;
+            background: #e04343;
         }
         .save-btn {
-            background: # 0e8c39;
+            background: #0e8c39;
         }
         .save-btn:hover {
-            background: # 14a94b;
+            background: #14a94b;
         }
         .load-btn {
-            background: # 6c5ce7;
+            background: #6c5ce7;
         }
         .load-btn:hover {
-            background: # 7d6ef7;
+            background: #7d6ef7;
         }
         .container {
             display: flex;
@@ -370,7 +370,7 @@ class GOMWebIDEHandler(http.server.SimpleHTTPRequestHandler):
             flex: 1;
             display: flex;
             flex-direction: column;
-            border-right: 1px solid # 3e3e42;
+            border-right: 1px solid #3e3e42;
         }
         .right-panel {
             flex: 1;
@@ -381,28 +381,28 @@ class GOMWebIDEHandler(http.server.SimpleHTTPRequestHandler):
             flex: 1;
             display: flex;
             flex-direction: column;
-            border-bottom: 1px solid # 3e3e42;
+            border-bottom: 1px solid #3e3e42;
         }
         .graphics-pane {
             flex: 1;
             display: flex;
             flex-direction: column;
-            background: # 1e1e1e;
+            background: #1e1e1e;
         }
         .pane-header {
-            background: # 252526;
+            background: #252526;
             padding: 8px 16px;
-            border-bottom: 1px solid # 3e3e42;
+            border-bottom: 1px solid #3e3e42;
             font-size: 12px;
-            color: # cccccc;
+            color: #cccccc;
             text-transform: uppercase;
             letter-spacing: 0.5px;
         }
-        # editor {
+        #editor {
             flex: 1;
             padding: 16px;
-            background: # 1e1e1e;
-            color: # d4d4d4;
+            background: #1e1e1e;
+            color: #d4d4d4;
             font-size: 14px;
             line-height: 1.6;
             resize: none;
@@ -414,8 +414,8 @@ class GOMWebIDEHandler(http.server.SimpleHTTPRequestHandler):
         # output {
             flex: 1;
             padding: 16px;
-            background: # 1e1e1e;
-            color: # d4d4d4;
+            background: #1e1e1e;
+            color: #d4d4d4;
             font-size: 14px;
             line-height: 1.6;
             overflow-y: auto;
@@ -425,7 +425,7 @@ class GOMWebIDEHandler(http.server.SimpleHTTPRequestHandler):
         # graphics {
             flex: 1;
             padding: 16px;
-            background: # 1e1e1e;
+            background: #1e1e1e;
             overflow: auto;
             display: flex;
             align-items: center;
@@ -435,32 +435,32 @@ class GOMWebIDEHandler(http.server.SimpleHTTPRequestHandler):
             max-width: 100%;
             max-height: 100%;
             object-fit: contain;
-            border: 1px solid # 3e3e42;
+            border: 1px solid #3e3e42;
         }
         .no-graphics {
-            color: # 858585;
+            color: #858585;
             font-style: italic;
         }
         .output-success {
-            color: # 4ec9b0;
+            color: #4ec9b0;
         }
         .output-error {
-            color: # f48771;
+            color: #f48771;
         }
         .status-bar {
-            background: # 007acc;
+            background: #007acc;
             color: white;
             padding: 4px 16px;
             font-size: 12px;
         }
         .examples {
             padding: 10px;
-            background: # 252526;
+            background: #252526;
         }
         .examples select {
-            background: # 3c3c3c;
-            color: # cccccc;
-            border: 1px solid # 3e3e42;
+            background: #3c3c3c;
+            color: #cccccc;
+            border: 1px solid #3e3e42;
             padding: 6px 12px;
             border-radius: 4px;
             font-size: 14px;
@@ -477,27 +477,27 @@ class GOMWebIDEHandler(http.server.SimpleHTTPRequestHandler):
             background-color: rgba(0,0,0,0.6);
         }
         .modal-content {
-            background-color: # 2d2d30;
+            background-color: #2d2d30;
             margin: 10% auto;
             padding: 20px;
-            border: 1px solid # 3e3e42;
+            border: 1px solid #3e3e42;
             border-radius: 8px;
             width: 80%;
             max-width: 500px;
-            color: # d4d4d4;
+            color: #d4d4d4;
         }
         .modal-content h2 {
             margin-bottom: 20px;
-            color: # cccccc;
+            color: #cccccc;
         }
         .modal-content input {
             width: 100%;
             padding: 10px;
             margin: 10px 0;
-            background: # 3c3c3c;
-            border: 1px solid # 3e3e42;
+            background: #3c3c3c;
+            border: 1px solid #3e3e42;
             border-radius: 4px;
-            color: # d4d4d4;
+            color: #d4d4d4;
             font-size: 14px;
             font-family: 'Consolas', 'Liberation Mono', 'Menlo', 'Courier', monospace;
         }
@@ -505,10 +505,10 @@ class GOMWebIDEHandler(http.server.SimpleHTTPRequestHandler):
             width: 100%;
             padding: 10px;
             margin: 10px 0;
-            background: # 3c3c3c;
-            border: 1px solid # 3e3e42;
+            background: #3c3c3c;
+            border: 1px solid #3e3e42;
             border-radius: 4px;
-            color: # d4d4d4;
+            color: #d4d4d4;
             font-size: 14px;
             max-height: 200px;
         }
@@ -519,14 +519,14 @@ class GOMWebIDEHandler(http.server.SimpleHTTPRequestHandler):
             justify-content: flex-end;
         }
         .close {
-            color: # aaa;
+            color: #aaa;
             float: right;
             font-size: 28px;
             font-weight: bold;
             cursor: pointer;
         }
         .close:hover {
-            color: # fff;
+            color: #fff;
         }
         .file-list {
             max-height: 300px;
@@ -536,16 +536,16 @@ class GOMWebIDEHandler(http.server.SimpleHTTPRequestHandler):
         .file-item {
             padding: 8px;
             margin: 4px 0;
-            background: # 3c3c3c;
-            border: 1px solid # 3e3e42;
+            background: #3c3c3c;
+            border: 1px solid #3e3e42;
             border-radius: 4px;
             cursor: pointer;
         }
         .file-item:hover {
-            background: # 4c4c4c;
+            background: #4c4c4c;
         }
         .file-item.selected {
-            background: # 0e639c;
+            background: #0e639c;
         }
     </style>
 </head>
@@ -615,7 +615,7 @@ print(&quot;Hello Gulf of Mexico&quot;)!"></textarea>
             <span class="close" onclick="closeLoadModal()">&times;</span>
             <h2>Load File</h2>
             <div class="file-list" id="fileList">
-                <div style="color: # 858585;">Loading files...</div>
+                <div style="color: #858585;">Loading files...</div>
             </div>
             <div class="modal-buttons">
                 <button onclick="closeLoadModal()">Cancel</button>
@@ -714,7 +714,7 @@ print("Previous:", previous(x))!`
             const code = document.getElementById('editor').value;
             const output = document.getElementById('output');
 
-            output.innerHTML = '<div style="color: # 858585;">Running...</div>';
+            output.innerHTML = '<div style="color: #858585;">Running...</div>';
 
             try {
                 const response = await fetch('/execute', {
@@ -744,7 +744,7 @@ print("Previous:", previous(x))!`
                 if (!result.success) {
                     html += '<div class="output-error">[X] Execution failed</div>';
                 } else if (!result.output && !result.error) {
-                    html += '<div style="color: # 858585;">[OK] Executed successfully (no output)</div>';
+                    html += '<div style="color: #858585;">[OK] Executed successfully (no output)</div>';
                 }
 
                 output.innerHTML = html;
@@ -826,7 +826,7 @@ print("Previous:", previous(x))!`
                         `<div class="file-item" onclick="selectFile('${file}')">${file}</div>`
                     ).join('');
                 } else {
-                    fileList.innerHTML = '<div style="color: # 858585;">No .gom files found</div>';
+                    fileList.innerHTML = '<div style="color: #858585;">No .gom files found</div>';
                 }
             } catch (error) {
                 document.getElementById('fileList').innerHTML =
