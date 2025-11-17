@@ -1,0 +1,58 @@
+// Time Travel Programming: Access Past and Future Values!
+// Because why live in the present when you can access ANY time?
+
+print "⏰ TIME TRAVEL PROGRAMMING DEMO ⏰"!
+print "==================================="!
+print ""!
+
+print "1. Setting up a variable that changes over time..."!
+var counter 0!
+
+print "2. Incrementing counter through time..."!
+counter = 10!
+counter = 20!
+counter = 30!
+counter = 40!
+counter = 50!
+
+print ""!
+print "3. Current value of counter: ${counter}"!
+
+print ""!
+print "4. Accessing PAST values..."!
+const past_1 = past("counter", 1)!
+const past_3 = past("counter", 3)!
+const past_5 = past("counter", 5)!
+
+print "   1 step ago: ${past_1}"!
+print "   3 steps ago: ${past_3}"!
+print "   5 steps ago: ${past_5}"!
+
+print ""!
+print "5. Predicting the FUTURE..."!
+const future_val = future("counter")!
+print "   Future prediction: ${future_val}"!
+print "   (Disclaimer: The future is unknowable and random!)"!
+
+print ""!
+print "6. Creating a timeline paradox..."!
+var x 100!
+const past_x = past("x", 1)!
+print "   Past value that doesn't exist: ${past_x}"!
+print "   (Returns 0 for non-existent history)"!
+
+print ""!
+print "7. Time travel with different variables..."!
+var temperature 20!
+temperature = 22!
+temperature = 25!
+temperature = 30!
+
+const yesterday_temp = past("temperature", 2)!
+print "   Temperature 2 steps ago: ${yesterday_temp}°C"!
+
+const predicted_temp = future("temperature")!
+print "   Predicted future temperature: ${predicted_temp}°C"!
+
+print ""!
+print "⏰ Time is just a social construct anyway! ⏰"!

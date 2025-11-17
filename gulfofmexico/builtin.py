@@ -69,6 +69,10 @@ __all__ = [
 
 FLOAT_TO_INT_PREC = 0.00000001
 
+# Global storage for quantum and time travel features
+QUANTUM_STATES: dict[str, list] = {}
+TIME_TRAVEL_HISTORY: dict[str, list] = {}
+
 
 def is_int(x: Union[float, int]) -> bool:
     return min(x % 1, 1 - x % 1) < FLOAT_TO_INT_PREC
@@ -610,6 +614,7 @@ KEYWORDS = {
         "unlucky",
         "cross_fingers",
         "knock_on_wood",
+        "quantum",
     ]
     + FUNCTION_KEYWORDS
 }
@@ -1176,6 +1181,64 @@ def _canvas_restore_transform(canvas_obj):
     canvas.restore_transform()
 
 
+def db_observe(var_name: GulfOfMexicoString) -> GulfOfMexicoValue:
+    """Collapse quantum superposition to a single value."""
+    if not isinstance(var_name, GulfOfMexicoString):
+        raise NonFormattedError("observe requires a string variable name")
+
+    import random
+
+    name = var_name.value
+    if name in QUANTUM_STATES:
+        superposition = QUANTUM_STATES[name]
+        if superposition:
+            collapsed_value = random.choice(superposition)
+            print(f"⚛️  [OBSERVE] Wavefunction collapsed! '{name}' = {collapsed_value}")
+            # Remove from superposition after observation
+            del QUANTUM_STATES[name]
+            return collapsed_value
+
+    raise NonFormattedError(f"Variable '{var_name.value}' not in quantum state")
+
+
+def db_past(
+    var_name: GulfOfMexicoString, steps: GulfOfMexicoNumber
+) -> GulfOfMexicoValue:
+    """Access past value of a variable."""
+    if not isinstance(var_name, GulfOfMexicoString):
+        raise NonFormattedError("past requires a string variable name")
+    if not isinstance(steps, GulfOfMexicoNumber):
+        raise NonFormattedError("past requires number of steps back")
+
+    name = var_name.value
+    n = int(steps.value)
+
+    if name in TIME_TRAVEL_HISTORY:
+        history = TIME_TRAVEL_HISTORY[name]
+        if len(history) > n:
+            past_value = history[-(n + 1)]
+            print(f"⏰ [TIME TRAVEL] Retrieved '{name}' from {n} steps ago")
+            return past_value
+
+    print(f"⏰ [TIME TRAVEL] No history for '{name}' at -{n} steps, returning 0")
+    return GulfOfMexicoNumber(0)
+
+
+def db_future(var_name: GulfOfMexicoString) -> GulfOfMexicoValue:
+    """Predict future value of a variable (spoiler: it's random)."""
+    if not isinstance(var_name, GulfOfMexicoString):
+        raise NonFormattedError("future requires a string variable name")
+
+    import random
+
+    # Future is unknowable, so we return a random prediction
+    prediction = GulfOfMexicoNumber(random.randint(0, 100))
+    print(
+        f"🔮 [FUTURE] Predicting '{var_name.value}' will be {prediction.value} (maybe)"
+    )
+    return prediction
+
+
 # get ready, this is boutta be crazy
 MATH_FUNCTION_KEYWORDS = {
     name: Name(
@@ -1239,6 +1302,9 @@ BUILTIN_FUNCTION_KEYWORDS = {
     "regex_replace": Name("regex_replace", BuiltinFunction(1, db_regex_replace)),
     "Canvas": Name("Canvas", BuiltinFunction(-1, db_create_canvas)),
     "Color": Name("Color", BuiltinFunction(-1, db_create_color)),
+    "observe": Name("observe", BuiltinFunction(1, db_observe)),
+    "past": Name("past", BuiltinFunction(2, db_past)),
+    "future": Name("future", BuiltinFunction(1, db_future)),
 }
 BUILTIN_VALUE_KEYWORDS = {
     "true": Name("true", GulfOfMexicoBoolean(True)),

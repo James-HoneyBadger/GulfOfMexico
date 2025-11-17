@@ -118,9 +118,11 @@ from gulfofmexico.processor.syntax_tree import (
     FunctionDefinition,
     ImportStatement,
     ProcrastinationStatement,
+    QuantumStatement,
     ReturnStatement,
     ReverseStatement,
     SuperstitiousStatement,
+    TimeTravelStatement,
     TryWhateverStatement,
     VariableAssignment,
     VariableDeclaration,
@@ -2001,6 +2003,7 @@ def determine_statement_type(
         },
         EmotionalStatement: {"happy", "sad", "angry", "excited", "tired"},
         SuperstitiousStatement: {"lucky", "unlucky", "cross_fingers", "knock_on_wood"},
+        QuantumStatement: {"quantum"},
     }
 
     for st in possible_statements:
@@ -3220,6 +3223,48 @@ def interpret_code_statements(
                         except Exception:
                             # Silently suppress errors (the wood protected us)
                             print("🪵 [KNOCK_ON_WOOD] The wood absorbed the bad luck!")
+
+            case QuantumStatement():
+                # Quantum programming - superposition variables
+                # Create a variable that holds multiple possible values until observed
+                var_name = statement.name.value
+
+                # Evaluate the superposition value (statement.value is already tokens)
+                expr_tree = build_expression_tree(filename, statement.value, code)
+                superposition_value = evaluate_expression(
+                    expr_tree,
+                    namespaces,
+                    filename,
+                    code,
+                )
+
+                # Import global quantum states storage
+                from gulfofmexico.builtin import QUANTUM_STATES
+
+                # If it's a list, store all values as superposition
+                if isinstance(superposition_value, GulfOfMexicoList):
+                    QUANTUM_STATES[var_name] = superposition_value.values.copy()
+                    print(
+                        f"⚛️  [QUANTUM] Variable '{var_name}' in superposition of {len(superposition_value.values)} states"
+                    )
+                elif (
+                    isinstance(superposition_value, GulfOfMexicoBoolean)
+                    and superposition_value.value == 2
+                ):
+                    # 'maybe' creates true/false superposition
+                    QUANTUM_STATES[var_name] = [
+                        GulfOfMexicoBoolean(1),  # true
+                        GulfOfMexicoBoolean(0),  # false
+                    ]
+                    print(
+                        f"⚛️  [QUANTUM] Variable '{var_name}' in true/false superposition"
+                    )
+                else:
+                    # Single value quantum state
+                    QUANTUM_STATES[var_name] = [superposition_value]
+                    print(f"⚛️  [QUANTUM] Variable '{var_name}' in quantum state")
+
+                # Don't assign to namespace yet - it exists only in superposition!
 
             case ReverseStatement():
                 # Reverse operation - reverses lists and strings in-place

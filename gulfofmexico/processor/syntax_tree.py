@@ -64,6 +64,8 @@ __all__ = [
     "CorporateSpeakStatement",
     "EmotionalStatement",
     "SuperstitiousStatement",
+    "QuantumStatement",
+    "TimeTravelStatement",
 ]
 
 
@@ -335,6 +337,43 @@ class SuperstitiousStatement(CodeStatement, CodeStatementKeywordable):
 
     keyword: Token
     code: list[tuple[CodeStatement, ...]]
+
+
+@dataclass
+class QuantumStatement(CodeStatement, CodeStatementKeywordable):
+    """Quantum programming: variables in superposition.
+
+    The quantum keyword creates variables that exist in multiple states
+    simultaneously until observed. Observation collapses the superposition
+    to a single value.
+
+    Examples:
+        quantum x [1, 2, 3]!        // x is in superposition
+        const y observe(x)!          // collapse to single value
+        quantum result maybe!        // quantum uncertainty
+    """
+
+    keyword: Token  # 'quantum'
+    name: Token
+    value: list[Token]  # Expression tokens for the superposition value
+    debug: int
+
+
+@dataclass
+class TimeTravelStatement(CodeStatement, CodeStatementKeywordable):
+    """Time travel: access past/future variable states.
+
+    Functions:
+    - past(var, n): Access variable value from n executions ago
+    - future(var): Predict future value (spoiler: it's random)
+
+    Examples:
+        const old_value past(x, 3)!     // value from 3 iterations ago
+        const prediction future(x)!      // predicted future value
+    """
+
+    keyword: Token  # 'past' or 'future'
+    args: list[ExpressionTreeNode]
 
 
 # idea: create a class that evaluates at runtime what a statement is, so then execute it
@@ -981,6 +1020,14 @@ def create_unscoped_code_statement(
 
     can_be_var_declaration &= 2 <= len(names_in_row) <= 4
 
+    # Check for quantum statement: quantum x [1,2,3]!
+    can_be_quantum = (
+        len(without_whitespace) >= 4
+        and without_whitespace[0].type == TokenType.NAME
+        and without_whitespace[0].value == "quantum"
+        and without_whitespace[1].type == TokenType.NAME
+    )
+
     # make a list of all possible things, starting with plain expression
     possibilities: list[CodeStatement] = [ExpressionStatement(tokens[:-1], debug_level)]
     # Consider ReverseStatement as a possibility (do not short-circuit)
@@ -1032,6 +1079,25 @@ def create_unscoped_code_statement(
                 names=[t for t in without_whitespace[1:-3] if t.type == TokenType.NAME],
                 to_keyword=without_whitespace[-3],
                 target_file=without_whitespace[-2],
+                debug=debug_level,
+            )
+        )
+    if can_be_quantum:
+        # Find where the variable name ends in tokens (need to skip whitespace)
+        var_name_token = without_whitespace[1]
+        value_start_index = 0
+        for i, t in enumerate(tokens):
+            if t == var_name_token:
+                value_start_index = i + 1
+                break
+
+        possibilities.append(
+            QuantumStatement(
+                keyword=without_whitespace[0],
+                name=without_whitespace[1],
+                value=tokens[
+                    value_start_index:-1
+                ],  # After variable name until punctuation
                 debug=debug_level,
             )
         )
