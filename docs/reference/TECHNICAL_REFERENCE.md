@@ -848,9 +848,9 @@ The repository includes **80+ example programs** organized by category:
 - **Graphics**: `programs/03_graphics/` - Canvas, transforms, generative art
 - **Satirical**: `programs/04_satirical/` - Emotional, quantum, time travel programming
 - **Analysis**: `programs/05_analysis/` - Statistics, finance, business, scientific
-- **Compiler Tests**: `programs/06_compiler_tests/` - C++ compiler validation
+- **Compiler Examples**: `compiler/examples/` - C++ compiler validation
 - **Demos**: `programs/demos/` - Complete applications (banking, RPG, task manager)
-- **Tests**: `programs/tests/` - Unit and integration tests
+- Internal GOM test programs were removed in Nov 2025. Python unit tests live in `tests/`.
 
 See [programs/README.md](programs/README.md) for complete documentation and [VALIDATION_REPORT.md](VALIDATION_REPORT.md) for validation results.
 

@@ -60,16 +60,6 @@ programs/
 │   ├── 41_business.gom
 │   └── 42_scientific.gom
 │
-├── 06_compiler_tests/      C++ compiler test programs
-│   ├── arrays.gom
-│   ├── comprehensive_test.gom
-│   ├── functions.gom
-│   ├── satirical_features.gom
-│   ├── satirical_test.gom
-│   ├── test_analysis.gom
-│   ├── test_builtins.gom
-│   └── test_maps.gom
-│
 ├── demos/                  Complete demo applications
 │   ├── grand_deluxe_demo.gom     ★ Ultimate feature showcase
 │   ├── async_pipeline.gom
@@ -80,10 +70,6 @@ programs/
 │   ├── reactive_counter.gom
 │   ├── rpg_character.gom
 │   └── task_manager.gom
-│
-├── tests/                  Unit and integration tests
-│   ├── test_*.gom
-│   └── dev/
 │
 └── examples/               Legacy examples folder
     └── 00_complete_showcase.gom
@@ -153,13 +139,7 @@ g++ -std=c++17 output.cpp -o program
 - **Business**: ROI, profit margins, CAGR
 - **Scientific**: linear regression, derivatives, integration
 
-### 06_compiler_tests - C++ Compiler
-Tests for the gomcc C++ compiler covering:
-- Built-in functions (math, stats, finance)
-- Map/Dictionary support
-- Array operations
-- Satirical keywords
-- Comprehensive feature coverage
+ 
 
 ## Syntax Guidelines
 

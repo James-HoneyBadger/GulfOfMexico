@@ -1,4 +1,5 @@
 # Example: Using Custom Language Configurations
+> Archived document: Reflects pre-Nov 2025 repository structure.
 
 This directory demonstrates how to use custom language configurations with Gulf of Mexico programs.
 
@@ -6,9 +7,6 @@ This directory demonstrates how to use custom language configurations with Gulf 
 
 **Configuration:** `demo_basic.json`
 **Features:**
-- `def` instead of `function`
-- `output` instead of `print`
-- 0-based array indexing
 
 **Code:** `example_pythonic.gom`
 ```gom

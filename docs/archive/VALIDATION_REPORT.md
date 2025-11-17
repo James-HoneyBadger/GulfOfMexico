@@ -1,3 +1,5 @@
+# Validation Report
+> Archived document: Reflects pre-Nov 2025 repository layout (includes `programs/tests/` and `programs/06_compiler_tests/`). Current user-facing directories are `programs/examples/` and `programs/demos/`; compiler examples live in `compiler/examples/`.
 # Gulf of Mexico Programs - Organization & Validation Report
 
 ## Summary

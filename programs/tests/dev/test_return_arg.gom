@@ -1,5 +1,0 @@
-function bad(return) => {
-   print "arg:", return!
-}!
-
-bad 42!

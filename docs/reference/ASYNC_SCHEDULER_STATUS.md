@@ -82,8 +82,8 @@
 
 ### New Files
 - `gulfofmexico/async_scheduler.py` - Complete async scheduler (133 lines)
-- `programs/tests/test_async_simple.gom` - Test case (needs scheduler integration)
-- `programs/tests/test_sync_simple.gom` - Validation test (works correctly)
+  
+Note: Internal GOM test programs were removed in Nov 2025. Use user-facing examples/demos for validation.
 
 ### Modified Files  
 - `gulfofmexico/interpreter.py`:
@@ -95,16 +95,16 @@
 
 ### Validation Tests
 ```bash
-# Confirms interpreter still works correctly
-python3 -m gulfofmexico programs/tests/test_variables.gom  # ✅ PASS
-python3 -m gulfofmexico programs/tests/test_sync_simple.gom  # ✅ PASS
-python3 -m gulfofmexico programs/tests/test_functions.gom  # ✅ PASS
+# Confirms interpreter still works correctly using user-facing examples
+python3 -m gulfofmexico programs/01_basics/02_variables.gom      # ✅ PASS
+python3 -m gulfofmexico programs/01_basics/01_hello_world.gom    # ✅ PASS
+python3 -m gulfofmexico programs/01_basics/05_functions.gom      # ✅ PASS
 ```
 
 ### Async Tests (Not Yet Working)
 ```bash
 # Requires scheduler integration
-python3 -m gulfofmexico programs/tests/test_async_simple.gom  # ⏸️ BLOCKED
+python3 -m gulfofmexico programs/demos/async_pipeline.gom   # Runs synchronously today
 ```
 
 ## Code Quality

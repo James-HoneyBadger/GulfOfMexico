@@ -1,4 +1,5 @@
 # GOM - Gulf of Mexico Programming Language
+> Archived README: Reflects pre-Nov 2025 repository layout, including internal GOM test folders (`programs/tests/`, `programs/06_compiler_tests/`). See current examples in `programs/examples/` and demos in `programs/demos/`.
 
 This implementation is based on the conceptual design of **Gulf of Mexico**, the perfect programming language created by Lu Wilson (TodePond) (https://github.com/TodePond/GulfOfMexico).
 

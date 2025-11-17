@@ -2,6 +2,8 @@
 
 Best practices, patterns, and practical wisdom for writing *perfect* code in the *perfect* language.
 
+> Note (Nov 2025): Internal GOM test programs used for designing/debugging the language were removed. Use user-facing examples in `programs/examples/`, demos in `programs/demos/`, and Python unit tests in `tests/`.
+
 ## Table of Contents
 
 1. [Philosophy and Mindset](#philosophy-and-mindset)
@@ -563,16 +565,21 @@ if actual !== expected {
 }
 ```
 
-### Organize Tests by Category
+### Organize Examples by Category
+
+User-facing programs are organized for learning and exploration:
 
 ```
-programs/tests/
-├── test_variables.gom
-├── test_arrays.gom
-├── test_functions.gom
-├── test_classes.gom
-└── test_reactive.gom
+programs/
+├── 01_basics/      # Hello world, variables, arrays, functions, classes, conditionals
+├── 02_features/    # Equality, three-valued logic, reactive, lifetimes, async, strings, arithmetic
+├── 03_graphics/    # Canvas, transforms, generative art, mandelbrot
+├── 04_satirical/   # Satirical/comedy features
+├── 05_analysis/    # Statistics, finance, business, scientific
+└── demos/          # Complete demo applications
 ```
+
+Note: Internal GOM test programs were removed in Nov 2025. Use the examples/demos above or Python test suite in `tests/`.
 
 ## Debugging Techniques
 

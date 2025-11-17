@@ -101,10 +101,9 @@ Current implementation status vs. design specifications for the Gulf of Mexico i
    - `scripts/README.md` - Batch runners
 
 3. **File Organization** - Clean structure:
-   - `programs/demos/` - Feature demonstrations
    - `programs/examples/` - Numbered learning examples
-   - `programs/tests/` - Test programs
-   - `programs/tests/dev/` - Development/debug tests
+   - `programs/demos/` - Feature demonstrations
+   - Note: Internal GOM test programs were removed in Nov 2025. Use Python tests in `tests/` and the user-facing examples/demos above.
 
 ## 🚧 Known Limitations
 

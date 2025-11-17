@@ -125,10 +125,9 @@ GulfOfMexico/
 │       ├── demo_gulfql.json        # SQL-like language
 │       └── demo_gulfasm.json       # Assembly-like language
 │
-├── programs/                        # Example GOM programs
+├── programs/                        # Example GOM programs (user-facing)
 │   ├── examples/                   # Learning examples
-│   ├── demos/                      # Feature demonstrations
-│   └── tests/                      # Test programs
+│   └── demos/                      # Feature demonstrations
 │
 ├── configs/                         # Preset language configs
 │   ├── python_like.yaml            # Python-style preset
@@ -273,6 +272,12 @@ Upcoming documentation:
 - [ ] Interactive playground documentation
 - [ ] Community-contributed language variants
 - [ ] LSP documentation (when implemented)
+
+---
+
+## 📝 Changelog
+
+- 2025-11-17: Cleanup of internal GOM test programs. Active docs and scripts updated to reference only user-facing examples in `programs/examples/` and `programs/demos/`; compiler samples in `compiler/examples/`; Python unit tests in `tests/`. See [CHANGELOG.md](CHANGELOG.md) for details.
 
 ---
 

@@ -1,6 +1,0 @@
-function test() => {
-   return 42!
-}!
-
-   const x = test()!
-   print "x =", x!

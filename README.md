@@ -2,16 +2,20 @@
 
 [![Python 3.8+](https://img.shields.io/badge/python-3.8+-blue.svg)](https://www.python.org/downloads/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+[![What's New](https://img.shields.io/badge/What’s%20New-CHANGELOG-brightgreen)](CHANGELOG.md)
 
 > *The perfect programming language* - Based on the conceptual design by **Lu Wilson (TodePond)** ([original repo](https://github.com/TodePond/GulfOfMexico))
 
 ## 📖 Quick Links
 
 - **[Complete Documentation](DOCUMENTATION.md)** - Full documentation index
+- **[What’s New](CHANGELOG.md)** - Latest changes
 - **[Installation Guide](docs/guides/INSTALL_GUIDE.md)** - Setup instructions
 - **[User Guide](docs/guides/USER_GUIDE.md)** - Complete user documentation
 - **[Programming Guide](docs/guides/PROGRAMMING_GUIDE.md)** - Language features
 - **[Language Construction Set](docs/language/LANGUAGE_CONSTRUCTION_QUICKSTART.md)** - Create custom language variants
+
+> Note (Nov 2025): Internal GOM test programs used for designing/debugging the language were removed. Use user-facing examples in `programs/examples/`, demos in `programs/demos/`, compiler examples in `compiler/examples/`, and Python unit tests in `tests/`.
 
 ## 🚀 Two Implementations
 
@@ -327,10 +331,9 @@ GulfOfMexico/
 │   ├── reference/             # Technical reference
 │   └── compiler/              # Compiler documentation
 │
-├── programs/                   # Example programs
+├── programs/                   # Example programs (user-facing)
 │   ├── examples/              # Learning examples
-│   ├── demos/                 # Feature demonstrations
-│   └── tests/                 # Test programs
+│   └── demos/                 # Feature demonstrations
 │
 ├── examples/configs/           # Demo language configurations
 │   ├── demo_gulplisp.json     # Lisp-like language

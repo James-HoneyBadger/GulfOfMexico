@@ -1,4 +1,5 @@
 # Gulf of Mexico - Implementation Quick Reference
+> Archived document: Reflects pre-Nov 2025 repository layout. References to internal GOM test folders are historical; current user-facing programs live in `programs/examples/` and `programs/demos/`.
 
 ## Two Implementations Available
 

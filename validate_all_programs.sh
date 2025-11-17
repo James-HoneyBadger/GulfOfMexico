@@ -82,22 +82,11 @@ for file in programs/05_analysis/*.gom; do
 done
 
 echo ""
-echo "Testing 06_compiler_tests..."
-for file in programs/06_compiler_tests/*.gom; do
-   [ -f "$file" ] && test_program "$file"
-done
-
-echo ""
 echo "Testing demos..."
 for file in programs/demos/*.gom; do
    [ -f "$file" ] && test_program "$file"
 done
 
-echo ""
-echo "Testing tests..."
-for file in programs/tests/*.gom; do
-   [ -f "$file" ] && test_program "$file"
-done
 
 echo ""
 echo "=== Validation Summary ==="

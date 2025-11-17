@@ -1,9 +1,0 @@
-// Even simpler test - no async
-print "Start"!
-function normal_task() => {
-   print "Task running..."!
-   return 42!
-}!
-const result = normal_task()!
-print "Result: ${result}"!
-print "Done"!

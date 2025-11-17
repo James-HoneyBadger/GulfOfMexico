@@ -1,4 +1,5 @@
 # Phase 5 & 6 Completion Report - Map Support & Built-in Functions
+> Archived document: Reflects pre-Nov 2025 state. Directory references may include internal GOM testing folders that have since been removed.
 
 ## Date: December 2024
 

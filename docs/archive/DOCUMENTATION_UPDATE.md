@@ -1,4 +1,5 @@
 # Documentation Update Summary
+> Archived document: Reflects pre-Nov 2025 repository layout (includes `programs/tests/` and `programs/06_compiler_tests/`). For current user-facing programs, see `programs/examples/` and `programs/demos/`.
 
 All major documentation files have been updated to reflect the reorganized program structure.
 

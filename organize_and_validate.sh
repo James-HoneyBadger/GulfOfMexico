@@ -13,7 +13,6 @@ mkdir -p programs/02_features
 mkdir -p programs/03_graphics
 mkdir -p programs/04_satirical
 mkdir -p programs/05_analysis
-mkdir -p programs/06_compiler_tests
 
 # Move files to organized structure
 echo "Moving example files to organized folders..."
@@ -75,8 +74,6 @@ mv programs/examples/42_scientific.gom programs/05_analysis/ 2>/dev/null || true
 # Keep showcase in examples
 mv programs/examples/00_complete_showcase.gom programs/examples/ 2>/dev/null || true
 
-# Compiler examples
-cp compiler/examples/*.gom programs/06_compiler_tests/ 2>/dev/null || true
 
 echo ""
 echo "=== Directory Structure Created ==="
@@ -86,9 +83,7 @@ echo "  02_features/        - Advanced features (async, reactive, etc.)"
 echo "  03_graphics/        - Canvas and graphics programs"
 echo "  04_satirical/       - Comedy/satirical language features"
 echo "  05_analysis/        - Math, stats, finance, science"
-echo "  06_compiler_tests/  - C++ compiler test programs"
 echo "  demos/              - Complete demo applications"
-echo "  tests/              - Unit test programs"
 echo ""
 
 # Validate syntax of key programs
