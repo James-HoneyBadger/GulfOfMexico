@@ -411,7 +411,7 @@ class GOMWebIDEHandler(http.server.SimpleHTTPRequestHandler):
             font-family: 'Consolas', 'Liberation Mono', 'Menlo', 'Courier', monospace;
             tab-size: 3;
         }
-        # output {
+        #output {
             flex: 1;
             padding: 16px;
             background: #1e1e1e;
@@ -422,7 +422,7 @@ class GOMWebIDEHandler(http.server.SimpleHTTPRequestHandler):
             white-space: pre-wrap;
             font-family: 'Consolas', 'Liberation Mono', 'Menlo', 'Courier', monospace;
         }
-        # graphics {
+        #graphics {
             flex: 1;
             padding: 16px;
             background: #1e1e1e;
@@ -431,7 +431,7 @@ class GOMWebIDEHandler(http.server.SimpleHTTPRequestHandler):
             align-items: center;
             justify-content: center;
         }
-        # graphics img {
+        #graphics img {
             max-width: 100%;
             max-height: 100%;
             object-fit: contain;
