@@ -103,6 +103,79 @@ const name "Alice"!
 print("Hello, ${name}!")!
 ```
 
+## 🎭 Satirical Features
+
+Gulf of Mexico includes experimental satirical features that make programming... interesting:
+
+### Emotional Programming 😊😢😠
+Programs can have feelings! Execution changes based on mood:
+
+```
+happy {
+   print "Everything is great!"!
+}
+
+tired {
+   print "Ugh, fine, I'll do it..."!
+}
+```
+
+Moods: `happy` (no errors), `sad` (1-2 errors), `angry` (3+ errors), `excited` (70% random), `tired` (always, with delay)
+
+### Superstitious Programming 🍀
+Let luck decide your code's fate:
+
+```
+lucky {
+   risky_operation()!
+}
+
+cross_fingers {
+   maybe_works()!
+}
+```
+
+Types: `lucky` (optimistic), `unlucky` (pessimistic), `cross_fingers` (50/50), `knock_on_wood` (error suppression)
+
+### Procrastination Keywords ⏰
+Why do now what you can do... eventually?
+
+```
+later {
+   // 50% chance of execution
+}
+
+eventually {
+   // 75% chance  
+}
+
+whenever {
+   // 90% chance
+}
+```
+
+### Corporate Speak 💼
+Synergize your paradigms!
+
+```
+synergize x, y!           // Combine values
+leverage value!           // Multiply by 2
+paradigm_shift value!     // Negate/reverse
+circle_back!              // No-op (naturally)
+touch_base!               // Print corporate wisdom
+```
+
+### Passive-Aggressive Error Handling
+```
+try {
+   risky_code()!
+} whatever {
+   print "Meh, didn't work"!
+}
+```
+
+**See `programs/examples/00_complete_showcase.gom` for all features in action!**
+
 ## Syntax
 
 ### Variables
