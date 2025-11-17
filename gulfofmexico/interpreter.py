@@ -106,6 +106,7 @@ from gulfofmexico.processor.expression_tree import (
 )
 from gulfofmexico.processor.syntax_tree import (
     AfterStatement,
+    AgileStatement,
     AIBuzzwordStatement,
     BlockchainStatement,
     ClassDeclaration,
@@ -114,6 +115,7 @@ from gulfofmexico.processor.syntax_tree import (
     Conditional,
     CorporateSpeakStatement,
     DeleteStatement,
+    DevOpsStatement,
     EmotionalStatement,
     ExportStatement,
     ExpressionStatement,
@@ -124,6 +126,8 @@ from gulfofmexico.processor.syntax_tree import (
     QuantumStatement,
     ReturnStatement,
     ReverseStatement,
+    SecurityTheaterStatement,
+    StartupStatement,
     SuperstitiousStatement,
     TimeTravelStatement,
     TryWhateverStatement,
@@ -2015,6 +2019,15 @@ def determine_statement_type(
             "mine",
         },
         AIBuzzwordStatement: {"deep_learning", "neural_network", "ai_powered"},
+        AgileStatement: {"sprint", "standup", "retro", "burndown"},
+        SecurityTheaterStatement: {
+            "encrypt",
+            "two_factor",
+            "penetration_test",
+            "zero_trust",
+        },
+        DevOpsStatement: {"containerize", "orchestrate", "microservice", "kubernetes"},
+        StartupStatement: {"pivot", "disrupt", "unicorn", "hockey_stick"},
     }
 
     for st in possible_statements:
@@ -3433,6 +3446,283 @@ def interpret_code_statements(
                             exported_names,
                         )
                         print("🤖 [AI_POWERED] AI processing complete!")
+
+            case AgileStatement():
+                # Agile/Scrum methodology satire
+                keyword = statement.keyword.value
+
+                match keyword:
+                    case "sprint":
+                        print("🏃 [SPRINT] Starting 2-week sprint...")
+                        import time
+
+                        time.sleep(0.2)
+                        print("🏃 [SPRINT] Sprint velocity: 42 story points")
+                        interpret_code_statements(
+                            statement.code,
+                            namespaces + [{}],
+                            async_statements,
+                            when_statement_watchers + [{}],
+                            importable_names,
+                            exported_names,
+                        )
+                        print("🏃 [SPRINT] Sprint completed! Retrospective next.")
+
+                    case "standup":
+                        print("🗣️  [STANDUP] Daily standup meeting...")
+                        print("🗣️  [STANDUP] Yesterday: Wrote code")
+                        print("🗣️  [STANDUP] Today: Will write more code")
+                        print("🗣️  [STANDUP] Blockers: None (lying)")
+                        interpret_code_statements(
+                            statement.code,
+                            namespaces + [{}],
+                            async_statements,
+                            when_statement_watchers + [{}],
+                            importable_names,
+                            exported_names,
+                        )
+
+                    case "retro":
+                        print("🔄 [RETRO] Retrospective meeting...")
+                        interpret_code_statements(
+                            statement.code,
+                            namespaces + [{}],
+                            async_statements,
+                            when_statement_watchers + [{}],
+                            importable_names,
+                            exported_names,
+                        )
+                        print("🔄 [RETRO] What went well: Everything!")
+                        print("🔄 [RETRO] What to improve: Nothing!")
+                        print("🔄 [RETRO] Action items: [Empty]")
+
+                    case "burndown":
+                        print("📉 [BURNDOWN] Tracking burndown chart...")
+                        import time
+
+                        for i in range(3, 0, -1):
+                            print(f"📉 [BURNDOWN] Tasks remaining: {i}")
+                            time.sleep(0.15)
+                        interpret_code_statements(
+                            statement.code,
+                            namespaces + [{}],
+                            async_statements,
+                            when_statement_watchers + [{}],
+                            importable_names,
+                            exported_names,
+                        )
+                        print("📉 [BURNDOWN] Sprint complete! (maybe)")
+
+            case SecurityTheaterStatement():
+                # Security theater satire
+                keyword = statement.keyword.value
+
+                match keyword:
+                    case "encrypt":
+                        print("🔐 [ENCRYPT] Applying military-grade encryption...")
+                        print("🔐 [ENCRYPT] Algorithm: ROT13")
+                        import time
+
+                        time.sleep(0.3)
+                        interpret_code_statements(
+                            statement.code,
+                            namespaces + [{}],
+                            async_statements,
+                            when_statement_watchers + [{}],
+                            importable_names,
+                            exported_names,
+                        )
+                        print("🔐 [ENCRYPT] Data secured! (not really)")
+
+                    case "two_factor":
+                        print("🔑 [2FA] Initiating two-factor authentication...")
+                        print("🔑 [2FA] Please confirm: Are you sure?")
+                        print("🔑 [2FA] Please confirm again: Are you REALLY sure?")
+                        interpret_code_statements(
+                            statement.code,
+                            namespaces + [{}],
+                            async_statements,
+                            when_statement_watchers + [{}],
+                            importable_names,
+                            exported_names,
+                        )
+                        print("🔑 [2FA] Authentication successful!")
+
+                    case "penetration_test":
+                        print("🔨 [PENTEST] Running penetration test...")
+                        import time
+
+                        time.sleep(0.2)
+                        print("🔨 [PENTEST] *knock knock*")
+                        time.sleep(0.2)
+                        print("🔨 [PENTEST] Trying to break in...")
+                        interpret_code_statements(
+                            statement.code,
+                            namespaces + [{}],
+                            async_statements,
+                            when_statement_watchers + [{}],
+                            importable_names,
+                            exported_names,
+                        )
+                        print("🔨 [PENTEST] Vulnerabilities found: 0 (we think)")
+
+                    case "zero_trust":
+                        print("🚫 [ZERO_TRUST] Applying zero-trust architecture...")
+                        print("🚫 [ZERO_TRUST] Trust level: 0%")
+                        print("🚫 [ZERO_TRUST] Verifying everything...")
+                        interpret_code_statements(
+                            statement.code,
+                            namespaces + [{}],
+                            async_statements,
+                            when_statement_watchers + [{}],
+                            importable_names,
+                            exported_names,
+                        )
+                        print("🚫 [ZERO_TRUST] Still don't trust anyone.")
+
+            case DevOpsStatement():
+                # DevOps cargo cult satire
+                keyword = statement.keyword.value
+
+                match keyword:
+                    case "containerize":
+                        print("📦 [CONTAINER] Containerizing application...")
+                        print("📦 [CONTAINER] FROM ubuntu:latest")
+                        print("📦 [CONTAINER] RUN apt-get install everything")
+                        import time
+
+                        time.sleep(0.3)
+                        interpret_code_statements(
+                            statement.code,
+                            namespaces + [{}],
+                            async_statements,
+                            when_statement_watchers + [{}],
+                            importable_names,
+                            exported_names,
+                        )
+                        print("📦 [CONTAINER] Image size: 8.5 GB (it's fine)")
+
+                    case "orchestrate":
+                        print("🎼 [ORCHESTRATE] Orchestrating containers...")
+                        print("🎼 [ORCHESTRATE] Starting pod 1/47...")
+                        print("🎼 [ORCHESTRATE] Configuring service mesh...")
+                        import time
+
+                        time.sleep(0.4)
+                        interpret_code_statements(
+                            statement.code,
+                            namespaces + [{}],
+                            async_statements,
+                            when_statement_watchers + [{}],
+                            importable_names,
+                            exported_names,
+                        )
+                        print("🎼 [ORCHESTRATE] Cluster healthy! (probably)")
+
+                    case "microservice":
+                        print("🔬 [MICROSERVICE] Converting to microservice...")
+                        print("🔬 [MICROSERVICE] Latency increased by 300ms")
+                        print("🔬 [MICROSERVICE] Complexity multiplied by 10")
+                        interpret_code_statements(
+                            statement.code,
+                            namespaces + [{}],
+                            async_statements,
+                            when_statement_watchers + [{}],
+                            importable_names,
+                            exported_names,
+                        )
+                        print("🔬 [MICROSERVICE] Now distributed! (and broken)")
+
+                    case "kubernetes":
+                        print("☸️  [K8S] Deploying to Kubernetes...")
+                        print("☸️  [K8S] Writing 47 YAML files...")
+                        import time
+
+                        time.sleep(0.5)
+                        print("☸️  [K8S] kubectl apply -f *.yaml")
+                        interpret_code_statements(
+                            statement.code,
+                            namespaces + [{}],
+                            async_statements,
+                            when_statement_watchers + [{}],
+                            importable_names,
+                            exported_names,
+                        )
+                        print("☸️  [K8S] Error: CrashLoopBackOff (normal)")
+
+            case StartupStatement():
+                # Startup culture satire
+                keyword = statement.keyword.value
+
+                match keyword:
+                    case "pivot":
+                        print("🔄 [PIVOT] Pivoting business model...")
+                        print("🔄 [PIVOT] Old idea: Abandoned")
+                        print("🔄 [PIVOT] New idea: Revolutionary!")
+                        import time
+
+                        time.sleep(0.3)
+                        interpret_code_statements(
+                            statement.code,
+                            namespaces + [{}],
+                            async_statements,
+                            when_statement_watchers + [{}],
+                            importable_names,
+                            exported_names,
+                        )
+                        print("🔄 [PIVOT] We're definitely going to succeed now!")
+
+                    case "disrupt":
+                        print("💥 [DISRUPT] Disrupting the industry...")
+                        print("💥 [DISRUPT] Move fast and break things!")
+                        interpret_code_statements(
+                            statement.code,
+                            namespaces + [{}],
+                            async_statements,
+                            when_statement_watchers + [{}],
+                            importable_names,
+                            exported_names,
+                        )
+                        print("💥 [DISRUPT] Industry: Disrupted ✓")
+                        print("💥 [DISRUPT] Things: Broken ✓")
+
+                    case "unicorn":
+                        print("🦄 [UNICORN] Achieving unicorn status...")
+                        print("🦄 [UNICORN] Valuation: $1 billion (on paper)")
+                        print("🦄 [UNICORN] Revenue: $47")
+                        import time
+
+                        time.sleep(0.4)
+                        interpret_code_statements(
+                            statement.code,
+                            namespaces + [{}],
+                            async_statements,
+                            when_statement_watchers + [{}],
+                            importable_names,
+                            exported_names,
+                        )
+                        print("🦄 [UNICORN] Welcome to the unicorn club! 🎉")
+
+                    case "hockey_stick":
+                        print("🏒 [HOCKEY_STICK] Achieving hockey stick growth...")
+                        import time
+
+                        # Exponential delays
+                        for i in range(4):
+                            delay = 0.1 * (1.5**i)
+                            time.sleep(delay)
+                            print(
+                                f"🏒 [HOCKEY_STICK] Growth month {i+1}: {int(10 * (2**i))}%"
+                            )
+                        interpret_code_statements(
+                            statement.code,
+                            namespaces + [{}],
+                            async_statements,
+                            when_statement_watchers + [{}],
+                            importable_names,
+                            exported_names,
+                        )
+                        print("🏒 [HOCKEY_STICK] Exponential growth achieved! 📈")
 
             case ReverseStatement():
                 # Reverse operation - reverses lists and strings in-place

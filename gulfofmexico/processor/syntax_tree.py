@@ -69,6 +69,10 @@ __all__ = [
     "GaslightingStatement",
     "BlockchainStatement",
     "AIBuzzwordStatement",
+    "AgileStatement",
+    "SecurityTheaterStatement",
+    "DevOpsStatement",
+    "StartupStatement",
 ]
 
 
@@ -431,6 +435,82 @@ class AIBuzzwordStatement(CodeStatement, CodeStatementKeywordable):
     Examples:
         deep_learning { process_data()! }
         ai_powered result = calculate()!
+    """
+
+    keyword: Token
+    code: list[tuple[CodeStatement, ...]]
+
+
+@dataclass
+class AgileStatement(CodeStatement, CodeStatementKeywordable):
+    """Agile/Scrum methodology satire.
+
+    Keywords:
+    - sprint: Execute code in a "sprint" (with velocity tracking)
+    - standup: Daily standup meeting (prints status updates)
+    - retro: Retrospective meeting (reflects on what happened)
+    - burndown: Track burndown chart (counts down unnecessarily)
+
+    Examples:
+        sprint { implement_feature()! }
+        standup { report_status()! }
+    """
+
+    keyword: Token
+    code: list[tuple[CodeStatement, ...]]
+
+
+@dataclass
+class SecurityTheaterStatement(CodeStatement, CodeStatementKeywordable):
+    """Security theater satire.
+
+    Keywords:
+    - encrypt: "Encrypt" data (ROT13)
+    - two_factor: Require two-factor authentication (asks twice)
+    - penetration_test: Run penetration test (knocks on door)
+    - zero_trust: Apply zero-trust architecture (trusts nothing, does nothing)
+
+    Examples:
+        encrypt { store_data()! }
+        two_factor { login()! }
+    """
+
+    keyword: Token
+    code: list[tuple[CodeStatement, ...]]
+
+
+@dataclass
+class DevOpsStatement(CodeStatement, CodeStatementKeywordable):
+    """DevOps cargo cult satire.
+
+    Keywords:
+    - containerize: Put code in a "container"
+    - orchestrate: Orchestrate containers (adds complexity)
+    - microservice: Convert to microservice (adds latency)
+    - kubernetes: Deploy to Kubernetes (YAML hell)
+
+    Examples:
+        containerize { run_app()! }
+        microservice { handle_request()! }
+    """
+
+    keyword: Token
+    code: list[tuple[CodeStatement, ...]]
+
+
+@dataclass
+class StartupStatement(CodeStatement, CodeStatementKeywordable):
+    """Startup culture satire.
+
+    Keywords:
+    - pivot: Pivot the business model (changes direction)
+    - disrupt: Disrupt the industry (breaks things)
+    - unicorn: Become a unicorn (multiplies values by imaginary numbers)
+    - hockey_stick: Achieve hockey stick growth (exponential delays)
+
+    Examples:
+        pivot { change_strategy()! }
+        disrupt { innovate()! }
     """
 
     keyword: Token
@@ -883,6 +963,52 @@ def create_scoped_code_statement(
     ]:
         return (
             AIBuzzwordStatement(
+                keyword=without_whitespace[0],
+                code=statements_inside_scope,
+            ),
+        )
+
+    # Check for Agile/Scrum keywords
+    if without_whitespace[0].value in ["sprint", "standup", "retro", "burndown"]:
+        return (
+            AgileStatement(
+                keyword=without_whitespace[0],
+                code=statements_inside_scope,
+            ),
+        )
+
+    # Check for Security Theater keywords
+    if without_whitespace[0].value in [
+        "encrypt",
+        "two_factor",
+        "penetration_test",
+        "zero_trust",
+    ]:
+        return (
+            SecurityTheaterStatement(
+                keyword=without_whitespace[0],
+                code=statements_inside_scope,
+            ),
+        )
+
+    # Check for DevOps keywords
+    if without_whitespace[0].value in [
+        "containerize",
+        "orchestrate",
+        "microservice",
+        "kubernetes",
+    ]:
+        return (
+            DevOpsStatement(
+                keyword=without_whitespace[0],
+                code=statements_inside_scope,
+            ),
+        )
+
+    # Check for Startup keywords
+    if without_whitespace[0].value in ["pivot", "disrupt", "unicorn", "hockey_stick"]:
+        return (
+            StartupStatement(
                 keyword=without_whitespace[0],
                 code=statements_inside_scope,
             ),

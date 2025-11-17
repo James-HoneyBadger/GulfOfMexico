@@ -32,6 +32,9 @@ private:
     void generateClassDef(const ClassDef* node);
     void generateIfStatement(const IfStatement* node);
     void generateReturnStatement(const ReturnStatement* node);
+    void generateSatiricalStatement(const SatiricalStatement* node);
+    void generateDeleteStatement(const DeleteStatement* node);
+    void generateReverseStatement(const ReverseStatement* node);
     
     void generateBinaryOp(const BinaryOp* node);
     void generateUnaryOp(const UnaryOp* node);

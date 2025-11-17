@@ -33,6 +33,12 @@ private:
     std::unique_ptr<ASTNode> parseIfStatement();
     std::unique_ptr<ASTNode> parseReturnStatement();
     std::unique_ptr<ASTNode> parseExpressionStatement();
+    std::unique_ptr<ASTNode> parseSatiricalStatement();
+    std::unique_ptr<ASTNode> parseDeleteStatement();
+    std::unique_ptr<ASTNode> parseReverseStatement();
+    
+    // Helper to check if token is a satirical keyword
+    bool isSatiricalKeyword(TokenType type) const;
     
     // Expression parsing (precedence climbing)
     std::unique_ptr<ASTNode> parseExpression();

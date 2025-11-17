@@ -78,6 +78,15 @@ std::unique_ptr<ASTNode> Parser::parseStatement() {
     if (check(TokenType::RETURN)) {
         return parseReturnStatement();
     }
+    if (check(TokenType::DELETE)) {
+        return parseDeleteStatement();
+    }
+    if (check(TokenType::REVERSE)) {
+        return parseReverseStatement();
+    }
+    if (isSatiricalKeyword(peek().type)) {
+        return parseSatiricalStatement();
+    }
     
     return parseExpressionStatement();
 }
@@ -342,6 +351,22 @@ std::unique_ptr<ASTNode> Parser::parsePrimary() {
         return std::make_unique<BoolLiteral>(false);
     }
     
+    // Handle built-in functions as identifiers
+    if (match(TokenType::NUMBER_FUNC) || match(TokenType::STRING_FUNC) || 
+        match(TokenType::BOOLEAN_FUNC) || match(TokenType::MAP_FUNC) ||
+        match(TokenType::SIN) || match(TokenType::COS) || match(TokenType::TAN) ||
+        match(TokenType::SQRT) || match(TokenType::ABS) || match(TokenType::FLOOR) ||
+        match(TokenType::CEIL) || match(TokenType::ROUND) || match(TokenType::LOG) ||
+        match(TokenType::LOG10) || match(TokenType::EXP) || match(TokenType::POW) ||
+        match(TokenType::MEAN) || match(TokenType::MEDIAN) || match(TokenType::STDEV) ||
+        match(TokenType::VARIANCE) || match(TokenType::MIN_VAL) || match(TokenType::MAX_VAL) ||
+        match(TokenType::SUM_LIST) || match(TokenType::COMPOUND_INTEREST) ||
+        match(TokenType::SIMPLE_INTEREST) || match(TokenType::PMT) ||
+        match(TokenType::ROI) || match(TokenType::PROFIT_MARGIN) || match(TokenType::CAGR) ||
+        match(TokenType::LINEAR_REGRESSION) || match(TokenType::QUADRATIC_SOLVE)) {
+        return std::make_unique<Identifier>(tokens[current - 1].value);
+    }
+    
     if (match(TokenType::IDENTIFIER)) {
         return std::make_unique<Identifier>(tokens[current - 1].value);
     }
@@ -399,6 +424,62 @@ std::vector<std::unique_ptr<ASTNode>> Parser::parseArgumentList() {
     }
     
     return args;
+}
+
+bool Parser::isSatiricalKeyword(TokenType type) const {
+    return type == TokenType::HAPPY || type == TokenType::SAD || type == TokenType::ANGRY ||
+           type == TokenType::EXCITED || type == TokenType::TIRED ||
+           type == TokenType::LUCKY || type == TokenType::UNLUCKY || 
+           type == TokenType::CROSS_FINGERS || type == TokenType::KNOCK_ON_WOOD ||
+           type == TokenType::LATER || type == TokenType::EVENTUALLY || type == TokenType::WHENEVER ||
+           type == TokenType::TRY || type == TokenType::WHATEVER ||
+           type == TokenType::SYNERGIZE || type == TokenType::LEVERAGE || 
+           type == TokenType::PARADIGM_SHIFT || type == TokenType::CIRCLE_BACK || 
+           type == TokenType::TOUCH_BASE ||
+           type == TokenType::QUANTUM || type == TokenType::TIME_TRAVEL || 
+           type == TokenType::DEFINITELY_NOT ||
+           type == TokenType::BLOCKCHAIN || type == TokenType::SMART_CONTRACT || 
+           type == TokenType::MINE || type == TokenType::IMMUTABLE_LEDGER ||
+           type == TokenType::TOKEN || type == TokenType::NFT || type == TokenType::WEB3 ||
+           type == TokenType::DAO || type == TokenType::DEFI || type == TokenType::HODL ||
+           type == TokenType::AI_POWERED || type == TokenType::DEEP_LEARNING || 
+           type == TokenType::NEURAL_NETWORK || type == TokenType::MACHINE_LEARNING ||
+           type == TokenType::SPRINT || type == TokenType::STANDUP || 
+           type == TokenType::RETRO || type == TokenType::BURNDOWN ||
+           type == TokenType::PENETRATION_TEST || type == TokenType::VULNERABILITY_SCAN || 
+           type == TokenType::SECURITY_AUDIT || type == TokenType::COMPLIANCE_CHECK ||
+           type == TokenType::CONTAINERIZE || type == TokenType::ORCHESTRATE || 
+           type == TokenType::MICROSERVICE || type == TokenType::KUBERNETES ||
+           type == TokenType::PIVOT || type == TokenType::DISRUPT || 
+           type == TokenType::UNICORN || type == TokenType::HOCKEY_STICK;
+}
+
+std::unique_ptr<ASTNode> Parser::parseSatiricalStatement() {
+    Token keyword = advance(); // Consume the satirical keyword
+    
+    consume(TokenType::LBRACE, "Expected '{' after " + keyword.value);
+    auto body = parseBlock();
+    consume(TokenType::RBRACE, "Expected '}' after " + keyword.value + " block");
+    
+    return std::make_unique<SatiricalStatement>(keyword.value, std::move(body));
+}
+
+std::unique_ptr<ASTNode> Parser::parseDeleteStatement() {
+    consume(TokenType::DELETE, "Expected 'delete'");
+    consume(TokenType::IDENTIFIER, "Expected variable name after 'delete'");
+    std::string name = tokens[current - 1].value;
+    match(TokenType::BANG);
+    
+    return std::make_unique<DeleteStatement>(name);
+}
+
+std::unique_ptr<ASTNode> Parser::parseReverseStatement() {
+    consume(TokenType::REVERSE, "Expected 'reverse'");
+    consume(TokenType::IDENTIFIER, "Expected variable name after 'reverse'");
+    std::string name = tokens[current - 1].value;
+    match(TokenType::BANG);
+    
+    return std::make_unique<ReverseStatement>(name);
 }
 
 } // namespace gom

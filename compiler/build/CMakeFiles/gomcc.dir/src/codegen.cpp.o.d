@@ -176,4 +176,6 @@ CMakeFiles/gomcc.dir/src/codegen.cpp.o: \
  /usr/include/c++/15.2.1/bits/hashtable.h \
  /usr/include/c++/15.2.1/bits/hashtable_policy.h \
  /usr/include/c++/15.2.1/bits/node_handle.h \
- /usr/include/c++/15.2.1/bits/erase_if.h /usr/include/c++/15.2.1/iostream
+ /usr/include/c++/15.2.1/bits/erase_if.h /usr/include/c++/15.2.1/iostream \
+ /usr/include/c++/15.2.1/unordered_set \
+ /usr/include/c++/15.2.1/bits/unordered_set.h

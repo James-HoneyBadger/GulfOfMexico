@@ -13,6 +13,7 @@ enum class TokenType {
     BOOL_TRUE,
     BOOL_FALSE,
     UNDEFINED,
+    MAYBE,
     
     // Identifiers and keywords
     IDENTIFIER,
@@ -28,12 +29,126 @@ enum class TokenType {
     AFTER,
     NEW,
     DELETE,
+    REVERSE,
     IMPORT,
     EXPORT,
     FROM,
     AWAIT,
     NEXT,
     PREVIOUS,
+    
+    // Try/Whatever
+    TRY,
+    WHATEVER,
+    
+    // Procrastination
+    LATER,
+    EVENTUALLY,
+    WHENEVER,
+    
+    // Corporate Speak
+    SYNERGIZE,
+    LEVERAGE,
+    PARADIGM_SHIFT,
+    CIRCLE_BACK,
+    TOUCH_BASE,
+    
+    // Emotional
+    HAPPY,
+    SAD,
+    ANGRY,
+    EXCITED,
+    TIRED,
+    
+    // Superstitious
+    LUCKY,
+    UNLUCKY,
+    CROSS_FINGERS,
+    KNOCK_ON_WOOD,
+    
+    // Quantum
+    QUANTUM,
+    
+    // Time Travel
+    TIME_TRAVEL,
+    
+    // Gaslighting
+    DEFINITELY_NOT,
+    
+    // Blockchain
+    BLOCKCHAIN,
+    SMART_CONTRACT,
+    MINE,
+    IMMUTABLE_LEDGER,
+    TOKEN,
+    NFT,
+    WEB3,
+    DAO,
+    DEFI,
+    HODL,
+    
+    // AI Buzzwords
+    AI_POWERED,
+    DEEP_LEARNING,
+    NEURAL_NETWORK,
+    MACHINE_LEARNING,
+    
+    // Agile
+    SPRINT,
+    STANDUP,
+    RETRO,
+    BURNDOWN,
+    
+    // Security Theater
+    PENETRATION_TEST,
+    VULNERABILITY_SCAN,
+    SECURITY_AUDIT,
+    COMPLIANCE_CHECK,
+    
+    // DevOps
+    CONTAINERIZE,
+    ORCHESTRATE,
+    MICROSERVICE,
+    KUBERNETES,
+    
+    // Startup
+    PIVOT,
+    DISRUPT,
+    UNICORN,
+    HOCKEY_STICK,
+    
+    // Built-in functions
+    NUMBER_FUNC,
+    STRING_FUNC,
+    BOOLEAN_FUNC,
+    MAP_FUNC,
+    SIN,
+    COS,
+    TAN,
+    SQRT,
+    ABS,
+    FLOOR,
+    CEIL,
+    ROUND,
+    LOG,
+    LOG10,
+    EXP,
+    POW,
+    MEAN,
+    MEDIAN,
+    STDEV,
+    VARIANCE,
+    MIN_VAL,
+    MAX_VAL,
+    SUM_LIST,
+    COMPOUND_INTEREST,
+    SIMPLE_INTEREST,
+    PMT,
+    ROI,
+    PROFIT_MARGIN,
+    CAGR,
+    LINEAR_REGRESSION,
+    QUADRATIC_SOLVE,
     
     // Operators
     PLUS,
@@ -43,6 +158,8 @@ enum class TokenType {
     PERCENT,
     EQUALS,
     DOUBLE_EQUALS,
+    TRIPLE_EQUALS,
+    QUAD_EQUALS,
     NOT_EQUALS,
     APPROX_EQUALS,
     LESS_THAN,

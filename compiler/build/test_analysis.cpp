@@ -1,267 +1,11 @@
-#include "codegen.h"
 #include <iostream>
-#include <unordered_set>
-
-namespace gom {
-
-CodeGenerator::CodeGenerator() : indentLevel(0) {}
-
-std::string CodeGenerator::generate(const Program& program) {
-    code.str("");
-    code.clear();
-    
-    // Generate includes and runtime
-    emit(generateRuntimeIncludes());
-    emit("\n");
-    emit(generateRuntimeCode());
-    emit("\n");
-    
-    // Generate main function start
-    emitLine("int main() {");
-    indentLevel++;
-    
-    // Generate all statements
-    for (const auto& stmt : program.statements) {
-        generateNode(stmt.get());
-    }
-    
-    // Generate main function end
-    indentLevel--;
-    emitLine("}");
-    
-    return code.str();
-}
-
-void CodeGenerator::indent() {
-    for (int i = 0; i < indentLevel; i++) {
-        code << "    ";
-    }
-}
-
-void CodeGenerator::emit(const std::string& str) {
-    code << str;
-}
-
-void CodeGenerator::emitLine(const std::string& str) {
-    indent();
-    code << str << "\n";
-}
-
-void CodeGenerator::generateNode(const ASTNode* node) {
-    if (auto* varDecl = dynamic_cast<const VarDeclaration*>(node)) {
-        generateVarDeclaration(varDecl);
-    } else if (auto* funcDef = dynamic_cast<const FunctionDef*>(node)) {
-        generateFunctionDef(funcDef);
-    } else if (auto* classDef = dynamic_cast<const ClassDef*>(node)) {
-        generateClassDef(classDef);
-    } else if (auto* ifStmt = dynamic_cast<const IfStatement*>(node)) {
-        generateIfStatement(ifStmt);
-    } else if (auto* retStmt = dynamic_cast<const ReturnStatement*>(node)) {
-        generateReturnStatement(retStmt);
-    } else if (auto* satStmt = dynamic_cast<const SatiricalStatement*>(node)) {
-        generateSatiricalStatement(satStmt);
-    } else if (auto* delStmt = dynamic_cast<const DeleteStatement*>(node)) {
-        generateDeleteStatement(delStmt);
-    } else if (auto* revStmt = dynamic_cast<const ReverseStatement*>(node)) {
-        generateReverseStatement(revStmt);
-    } else {
-        // Expression statement (including function calls like print)
-        indent();
-        generateExpression(node);
-        emit(";\n");
-    }
-}
-
-void CodeGenerator::generateStatement(const ASTNode* node) {
-    generateNode(node);
-}
-
-void CodeGenerator::generateExpression(const ASTNode* node) {
-    if (auto* num = dynamic_cast<const NumberLiteral*>(node)) {
-        emit("GomValue(" + std::to_string(num->value) + ")");
-    } else if (auto* str = dynamic_cast<const StringLiteral*>(node)) {
-        // Properly escape string literals for C++
-        std::string escaped;
-        for (char c : str->value) {
-            if (c == '"') escaped += "\\\"";
-            else if (c == '\\') escaped += "\\\\";
-            else if (c == '\n') escaped += "\\n";
-            else if (c == '\t') escaped += "\\t";
-            else if (c == '\r') escaped += "\\r";
-            else escaped += c;
-        }
-        emit("GomValue(std::string(\"" + escaped + "\"))");
-    } else if (auto* boolLit = dynamic_cast<const BoolLiteral*>(node)) {
-        emit("GomValue(" + std::string(boolLit->value ? "true" : "false") + ")");
-    } else if (auto* ident = dynamic_cast<const Identifier*>(node)) {
-        emit(ident->name);
-    } else if (auto* binOp = dynamic_cast<const BinaryOp*>(node)) {
-        generateBinaryOp(binOp);
-    } else if (auto* unOp = dynamic_cast<const UnaryOp*>(node)) {
-        generateUnaryOp(unOp);
-    } else if (auto* funcCall = dynamic_cast<const FunctionCall*>(node)) {
-        generateFunctionCall(funcCall);
-    } else if (auto* arrLit = dynamic_cast<const ArrayLiteral*>(node)) {
-        generateArrayLiteral(arrLit);
-    } else if (auto* idxAccess = dynamic_cast<const IndexAccess*>(node)) {
-        generateIndexAccess(idxAccess);
-    }
-}
-
-void CodeGenerator::generateVarDeclaration(const VarDeclaration* node) {
-    indent();
-    if (node->isConst) {
-        emit("const ");
-    }
-    emit("GomValue " + node->name);
-    if (node->initializer) {
-        emit(" = ");
-        generateExpression(node->initializer.get());
-    }
-    emit(";\n");
-}
-
-void CodeGenerator::generateAssignment(const Assignment* node) {
-    indent();
-    emit(node->name + " = ");
-    generateExpression(node->value.get());
-    emit(";\n");
-}
-
-void CodeGenerator::generateFunctionDef(const FunctionDef* node) {
-    indent();
-    emit("auto " + node->name + " = [&](");
-    
-    // Parameters
-    for (size_t i = 0; i < node->params.size(); i++) {
-        emit("GomValue " + node->params[i]);
-        if (i < node->params.size() - 1) emit(", ");
-    }
-    
-    emit(") -> GomValue {\n");
-    indentLevel++;
-    
-    // Body
-    for (const auto& stmt : node->body) {
-        generateStatement(stmt.get());
-    }
-    
-    indentLevel--;
-    indent();
-    emit("};\n");
-}
-
-void CodeGenerator::generateClassDef(const ClassDef* node) {
-    emitLine("// Class " + node->name + " - classes not fully implemented yet");
-}
-
-void CodeGenerator::generateIfStatement(const IfStatement* node) {
-    indent();
-    emit("if (gom_to_bool(");
-    generateExpression(node->condition.get());
-    emit(")) {\n");
-    
-    indentLevel++;
-    for (const auto& stmt : node->thenBranch) {
-        generateStatement(stmt.get());
-    }
-    indentLevel--;
-    
-    indent();
-    emit("}\n");
-}
-
-void CodeGenerator::generateReturnStatement(const ReturnStatement* node) {
-    indent();
-    emit("return ");
-    if (node->value) {
-        generateExpression(node->value.get());
-    } else {
-        emit("GomValue()");
-    }
-    emit(";\n");
-}
-
-void CodeGenerator::generateBinaryOp(const BinaryOp* node) {
-    emit("gom_binary_op(");
-    generateExpression(node->left.get());
-    emit(", \"" + node->op + "\", ");
-    generateExpression(node->right.get());
-    emit(")");
-}
-
-void CodeGenerator::generateUnaryOp(const UnaryOp* node) {
-    emit("gom_unary_op(\"" + node->op + "\", ");
-    generateExpression(node->operand.get());
-    emit(")");
-}
-
-void CodeGenerator::generateFunctionCall(const FunctionCall* node) {
-    // Built-in functions that map to gom_* runtime functions
-    static const std::unordered_set<std::string> builtins = {
-        "Number", "String", "Boolean", "Map",
-        "sin", "cos", "tan", "sqrt", "abs", "floor", "ceil", "round",
-        "log", "log10", "exp", "pow",
-        "mean", "median", "stdev", "variance", "min_val", "max_val", "sum_list",
-        "compound_interest", "simple_interest", "pmt",
-        "roi", "profit_margin", "cagr",
-        "linear_regression", "quadratic_solve"
-    };
-    
-    if (node->name == "print") {
-        emit("gom_print(");
-        if (!node->args.empty()) {
-            generateExpression(node->args[0].get());
-        }
-        emit(")");
-    } else if (builtins.count(node->name)) {
-        // Map built-in function calls to gom_* runtime functions
-        emit("gom_" + node->name + "(");
-        for (size_t i = 0; i < node->args.size(); i++) {
-            generateExpression(node->args[i].get());
-            if (i < node->args.size() - 1) emit(", ");
-        }
-        emit(")");
-    } else {
-        // User-defined functions
-        emit(node->name + "(");
-        for (size_t i = 0; i < node->args.size(); i++) {
-            generateExpression(node->args[i].get());
-            if (i < node->args.size() - 1) emit(", ");
-        }
-        emit(")");
-    }
-}
-
-void CodeGenerator::generateArrayLiteral(const ArrayLiteral* node) {
-    emit("GomValue(std::vector<GomValue>{");
-    for (size_t i = 0; i < node->elements.size(); i++) {
-        generateExpression(node->elements[i].get());
-        if (i < node->elements.size() - 1) emit(", ");
-    }
-    emit("})");
-}
-
-void CodeGenerator::generateIndexAccess(const IndexAccess* node) {
-    emit("gom_index_access(");
-    generateExpression(node->object.get());
-    emit(", ");
-    generateExpression(node->index.get());
-    emit(")");
-}
-
-std::string CodeGenerator::generateRuntimeIncludes() {
-    return R"(#include <iostream>
 #include <string>
 #include <vector>
 #include <variant>
 #include <memory>
 #include <cmath>
-)";
-}
 
-std::string CodeGenerator::generateRuntimeCode() {
-    return R"(// Gulf of Mexico Runtime Library
+// Gulf of Mexico Runtime Library
 
 #include <iostream>
 #include <string>
@@ -592,26 +336,47 @@ GomValue gom_quadratic_solve(const GomValue& a, const GomValue& b, const GomValu
     
     return GomValue(std::vector<GomValue>{GomValue(root1), GomValue(root2)});
 }
-)";
-}
 
-void CodeGenerator::generateSatiricalStatement(const SatiricalStatement* node) {
-    emitLine("// Satirical: " + node->keyword);
-    emitLine("{");
-    indentLevel++;
-    for (const auto& stmt : node->body) {
-        generateStatement(stmt.get());
-    }
-    indentLevel--;
-    emitLine("}");
+int main() {
+    gom_print(GomValue(std::string("=== Testing Statistical Functions ===")));
+    const GomValue data = GomValue(std::vector<GomValue>{GomValue(10.000000), GomValue(20.000000), GomValue(30.000000), GomValue(40.000000), GomValue(50.000000)});
+    gom_print(GomValue(std::string("Data: [10, 20, 30, 40, 50]")));
+    gom_print(GomValue(std::string("mean = ")));
+    gom_print(gom_mean(data));
+    gom_print(GomValue(std::string("median = ")));
+    gom_print(gom_median(data));
+    gom_print(GomValue(std::string("stdev = ")));
+    gom_print(gom_stdev(data));
+    gom_print(GomValue(std::string("variance = ")));
+    gom_print(gom_variance(data));
+    gom_print(GomValue(std::string("min_val = ")));
+    gom_print(gom_min_val(data));
+    gom_print(GomValue(std::string("max_val = ")));
+    gom_print(gom_max_val(data));
+    gom_print(GomValue(std::string("sum_list = ")));
+    gom_print(gom_sum_list(data));
+    gom_print(GomValue(std::string("\n=== Testing Financial Functions ===")));
+    gom_print(GomValue(std::string("compound_interest(1000, 0.05, 10, 12) = ")));
+    gom_print(gom_compound_interest(GomValue(1000.000000), GomValue(0.050000), GomValue(10.000000), GomValue(12.000000)));
+    gom_print(GomValue(std::string("simple_interest(1000, 0.05, 10) = ")));
+    gom_print(gom_simple_interest(GomValue(1000.000000), GomValue(0.050000), GomValue(10.000000)));
+    gom_print(GomValue(std::string("pmt(0.05, 12, 1000) = ")));
+    gom_print(gom_pmt(GomValue(0.050000), GomValue(12.000000), GomValue(1000.000000)));
+    gom_print(GomValue(std::string("\n=== Testing Business Functions ===")));
+    gom_print(GomValue(std::string("roi(1500, 1000) = ")));
+    gom_print(gom_roi(GomValue(1500.000000), GomValue(1000.000000)));
+    gom_print(GomValue(std::string("profit_margin(1500, 1000) = ")));
+    gom_print(gom_profit_margin(GomValue(1500.000000), GomValue(1000.000000)));
+    gom_print(GomValue(std::string("cagr(1000, 2000, 5) = ")));
+    gom_print(gom_cagr(GomValue(1000.000000), GomValue(2000.000000), GomValue(5.000000)));
+    gom_print(GomValue(std::string("\n=== Testing Scientific Functions ===")));
+    const GomValue x_data = GomValue(std::vector<GomValue>{GomValue(1.000000), GomValue(2.000000), GomValue(3.000000), GomValue(4.000000), GomValue(5.000000)});
+    const GomValue y_data = GomValue(std::vector<GomValue>{GomValue(2.000000), GomValue(4.000000), GomValue(6.000000), GomValue(8.000000), GomValue(10.000000)});
+    gom_print(GomValue(std::string("linear_regression([1,2,3,4,5], [2,4,6,8,10]) = ")));
+    const GomValue lr_result = gom_linear_regression(x_data, y_data);
+    gom_print(lr_result);
+    gom_print(GomValue(std::string("quadratic_solve(1, -5, 6) = ")));
+    const GomValue qs_result = gom_quadratic_solve(GomValue(1.000000), gom_unary_op("-", GomValue(5.000000)), GomValue(6.000000));
+    gom_print(qs_result);
+    gom_print(GomValue(std::string("\n=== All Analysis Functions Tested! ===")));
 }
-
-void CodeGenerator::generateDeleteStatement(const DeleteStatement* node) {
-    emitLine("// delete " + node->name + " (not implemented in compiled code)");
-}
-
-void CodeGenerator::generateReverseStatement(const ReverseStatement* node) {
-    emitLine("// reverse " + node->name + " (not implemented in compiled code)");
-}
-
-} // namespace gom

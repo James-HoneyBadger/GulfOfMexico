@@ -624,6 +624,22 @@ KEYWORDS = {
         "deep_learning",
         "neural_network",
         "ai_powered",
+        "sprint",
+        "standup",
+        "retro",
+        "burndown",
+        "encrypt",
+        "two_factor",
+        "penetration_test",
+        "zero_trust",
+        "containerize",
+        "orchestrate",
+        "microservice",
+        "kubernetes",
+        "pivot",
+        "disrupt",
+        "unicorn",
+        "hockey_stick",
     ]
     + FUNCTION_KEYWORDS
 }
@@ -1248,6 +1264,684 @@ def db_future(var_name: GulfOfMexicoString) -> GulfOfMexicoValue:
     return prediction
 
 
+# ===== Base/Radix Number System Functions =====
+
+
+def db_to_base(
+    number: GulfOfMexicoValue, base: GulfOfMexicoValue
+) -> GulfOfMexicoString:
+    """Convert a number to a string representation in the specified base (2-36)."""
+    if not isinstance(number, GulfOfMexicoNumber):
+        raise NonFormattedError("to_base requires a number as first argument")
+    if not isinstance(base, GulfOfMexicoNumber):
+        raise NonFormattedError("to_base requires a number as second argument (base)")
+
+    num = int(number.value)
+    radix = int(base.value)
+
+    if radix < 2 or radix > 36:
+        raise NonFormattedError("Base must be between 2 and 36")
+
+    if num == 0:
+        return GulfOfMexicoString("0")
+
+    digits = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"
+    result = []
+    negative = num < 0
+    num = abs(num)
+
+    while num > 0:
+        result.append(digits[num % radix])
+        num //= radix
+
+    if negative:
+        result.append("-")
+
+    return GulfOfMexicoString("".join(reversed(result)))
+
+
+def db_from_base(
+    number_str: GulfOfMexicoValue, base: GulfOfMexicoValue
+) -> GulfOfMexicoNumber:
+    """Convert a string representation in the specified base to a decimal number."""
+    if not isinstance(number_str, GulfOfMexicoString):
+        raise NonFormattedError("from_base requires a string as first argument")
+    if not isinstance(base, GulfOfMexicoNumber):
+        raise NonFormattedError("from_base requires a number as second argument (base)")
+
+    num_str = number_str.value.strip().upper()
+    radix = int(base.value)
+
+    if radix < 2 or radix > 36:
+        raise NonFormattedError("Base must be between 2 and 36")
+
+    try:
+        result = int(num_str, radix)
+        return GulfOfMexicoNumber(result)
+    except ValueError:
+        raise NonFormattedError(f"Invalid number '{num_str}' for base {radix}")
+
+
+def db_base_add(
+    num1: GulfOfMexicoValue,
+    base1: GulfOfMexicoValue,
+    num2: GulfOfMexicoValue,
+    base2: GulfOfMexicoValue,
+    result_base: GulfOfMexicoValue,
+) -> GulfOfMexicoString:
+    """Add two numbers in potentially different bases and return result in specified base."""
+    if not isinstance(num1, (GulfOfMexicoString, GulfOfMexicoNumber)):
+        raise NonFormattedError("base_add requires number or string as first argument")
+    if not isinstance(base1, GulfOfMexicoNumber):
+        raise NonFormattedError("base_add requires base1 (number)")
+    if not isinstance(num2, (GulfOfMexicoString, GulfOfMexicoNumber)):
+        raise NonFormattedError("base_add requires number or string as third argument")
+    if not isinstance(base2, GulfOfMexicoNumber):
+        raise NonFormattedError("base_add requires base2 (number)")
+    if not isinstance(result_base, GulfOfMexicoNumber):
+        raise NonFormattedError("base_add requires result_base (number)")
+
+    # Convert both to decimal
+    if isinstance(num1, GulfOfMexicoString):
+        val1 = db_from_base(num1, base1).value
+    else:
+        val1 = num1.value
+
+    if isinstance(num2, GulfOfMexicoString):
+        val2 = db_from_base(num2, base2).value
+    else:
+        val2 = num2.value
+
+    # Add in decimal
+    result = val1 + val2
+
+    # Convert to result base
+    return db_to_base(GulfOfMexicoNumber(result), result_base)
+
+
+def db_base_sub(
+    num1: GulfOfMexicoValue,
+    base1: GulfOfMexicoValue,
+    num2: GulfOfMexicoValue,
+    base2: GulfOfMexicoValue,
+    result_base: GulfOfMexicoValue,
+) -> GulfOfMexicoString:
+    """Subtract two numbers in potentially different bases and return result in specified base."""
+    if not isinstance(num1, (GulfOfMexicoString, GulfOfMexicoNumber)):
+        raise NonFormattedError("base_sub requires number or string as first argument")
+    if not isinstance(base1, GulfOfMexicoNumber):
+        raise NonFormattedError("base_sub requires base1 (number)")
+    if not isinstance(num2, (GulfOfMexicoString, GulfOfMexicoNumber)):
+        raise NonFormattedError("base_sub requires number or string as third argument")
+    if not isinstance(base2, GulfOfMexicoNumber):
+        raise NonFormattedError("base_sub requires base2 (number)")
+    if not isinstance(result_base, GulfOfMexicoNumber):
+        raise NonFormattedError("base_sub requires result_base (number)")
+
+    # Convert both to decimal
+    if isinstance(num1, GulfOfMexicoString):
+        val1 = db_from_base(num1, base1).value
+    else:
+        val1 = num1.value
+
+    if isinstance(num2, GulfOfMexicoString):
+        val2 = db_from_base(num2, base2).value
+    else:
+        val2 = num2.value
+
+    # Subtract in decimal
+    result = val1 - val2
+
+    # Convert to result base
+    return db_to_base(GulfOfMexicoNumber(result), result_base)
+
+
+def db_base_mul(
+    num1: GulfOfMexicoValue,
+    base1: GulfOfMexicoValue,
+    num2: GulfOfMexicoValue,
+    base2: GulfOfMexicoValue,
+    result_base: GulfOfMexicoValue,
+) -> GulfOfMexicoString:
+    """Multiply two numbers in potentially different bases and return result in specified base."""
+    if not isinstance(num1, (GulfOfMexicoString, GulfOfMexicoNumber)):
+        raise NonFormattedError("base_mul requires number or string as first argument")
+    if not isinstance(base1, GulfOfMexicoNumber):
+        raise NonFormattedError("base_mul requires base1 (number)")
+    if not isinstance(num2, (GulfOfMexicoString, GulfOfMexicoNumber)):
+        raise NonFormattedError("base_mul requires number or string as third argument")
+    if not isinstance(base2, GulfOfMexicoNumber):
+        raise NonFormattedError("base_mul requires base2 (number)")
+    if not isinstance(result_base, GulfOfMexicoNumber):
+        raise NonFormattedError("base_mul requires result_base (number)")
+
+    # Convert both to decimal
+    if isinstance(num1, GulfOfMexicoString):
+        val1 = db_from_base(num1, base1).value
+    else:
+        val1 = num1.value
+
+    if isinstance(num2, GulfOfMexicoString):
+        val2 = db_from_base(num2, base2).value
+    else:
+        val2 = num2.value
+
+    # Multiply in decimal
+    result = val1 * val2
+
+    # Convert to result base
+    return db_to_base(GulfOfMexicoNumber(result), result_base)
+
+
+def db_base_div(
+    num1: GulfOfMexicoValue,
+    base1: GulfOfMexicoValue,
+    num2: GulfOfMexicoValue,
+    base2: GulfOfMexicoValue,
+    result_base: GulfOfMexicoValue,
+) -> GulfOfMexicoString:
+    """Divide two numbers in potentially different bases and return result in specified base."""
+    if not isinstance(num1, (GulfOfMexicoString, GulfOfMexicoNumber)):
+        raise NonFormattedError("base_div requires number or string as first argument")
+    if not isinstance(base1, GulfOfMexicoNumber):
+        raise NonFormattedError("base_div requires base1 (number)")
+    if not isinstance(num2, (GulfOfMexicoString, GulfOfMexicoNumber)):
+        raise NonFormattedError("base_div requires number or string as third argument")
+    if not isinstance(base2, GulfOfMexicoNumber):
+        raise NonFormattedError("base_div requires base2 (number)")
+    if not isinstance(result_base, GulfOfMexicoNumber):
+        raise NonFormattedError("base_div requires result_base (number)")
+
+    # Convert both to decimal
+    if isinstance(num1, GulfOfMexicoString):
+        val1 = db_from_base(num1, base1).value
+    else:
+        val1 = num1.value
+
+    if isinstance(num2, GulfOfMexicoString):
+        val2 = db_from_base(num2, base2).value
+    else:
+        val2 = num2.value
+
+    if val2 == 0:
+        raise NonFormattedError("Division by zero")
+
+    # Integer divide in decimal
+    result = int(val1 // val2)
+
+    # Convert to result base
+    return db_to_base(GulfOfMexicoNumber(result), result_base)
+
+
+# Convenience functions for common bases
+def db_to_binary(number: GulfOfMexicoValue) -> GulfOfMexicoString:
+    """Convert a number to binary (base 2)."""
+    return db_to_base(number, GulfOfMexicoNumber(2))
+
+
+def db_to_octal(number: GulfOfMexicoValue) -> GulfOfMexicoString:
+    """Convert a number to octal (base 8)."""
+    return db_to_base(number, GulfOfMexicoNumber(8))
+
+
+def db_to_hex(number: GulfOfMexicoValue) -> GulfOfMexicoString:
+    """Convert a number to hexadecimal (base 16)."""
+    return db_to_base(number, GulfOfMexicoNumber(16))
+
+
+def db_from_binary(number_str: GulfOfMexicoValue) -> GulfOfMexicoNumber:
+    """Convert a binary string to decimal."""
+    return db_from_base(number_str, GulfOfMexicoNumber(2))
+
+
+def db_from_octal(number_str: GulfOfMexicoValue) -> GulfOfMexicoNumber:
+    """Convert an octal string to decimal."""
+    return db_from_base(number_str, GulfOfMexicoNumber(8))
+
+
+def db_from_hex(number_str: GulfOfMexicoValue) -> GulfOfMexicoNumber:
+    """Convert a hexadecimal string to decimal."""
+    return db_from_base(number_str, GulfOfMexicoNumber(16))
+
+
+# ===== Statistical Functions =====
+
+
+def _get_list_values(lst: GulfOfMexicoValue) -> list[float]:
+    """Extract numeric values from a GulfOfMexico list."""
+    if not isinstance(lst, GulfOfMexicoList):
+        raise NonFormattedError("Function requires a list argument")
+    return [v.value for v in lst.values if isinstance(v, GulfOfMexicoNumber)]
+
+
+def db_mean(lst: GulfOfMexicoValue) -> GulfOfMexicoNumber:
+    """Calculate the arithmetic mean (average) of a list of numbers."""
+    values = _get_list_values(lst)
+    if not values:
+        raise NonFormattedError("Cannot calculate mean of empty list")
+    return GulfOfMexicoNumber(sum(values) / len(values))
+
+
+def db_median(lst: GulfOfMexicoValue) -> GulfOfMexicoNumber:
+    """Calculate the median (middle value) of a list of numbers."""
+    values = _get_list_values(lst)
+    if not values:
+        raise NonFormattedError("Cannot calculate median of empty list")
+    sorted_vals = sorted(values)
+    n = len(sorted_vals)
+    if n % 2 == 0:
+        return GulfOfMexicoNumber((sorted_vals[n // 2 - 1] + sorted_vals[n // 2]) / 2)
+    else:
+        return GulfOfMexicoNumber(sorted_vals[n // 2])
+
+
+def db_mode(lst: GulfOfMexicoValue) -> GulfOfMexicoNumber:
+    """Calculate the mode (most frequent value) of a list of numbers."""
+    values = _get_list_values(lst)
+    if not values:
+        raise NonFormattedError("Cannot calculate mode of empty list")
+    from collections import Counter
+
+    counts = Counter(values)
+    mode_val = counts.most_common(1)[0][0]
+    return GulfOfMexicoNumber(mode_val)
+
+
+def db_variance(lst: GulfOfMexicoValue) -> GulfOfMexicoNumber:
+    """Calculate the variance of a list of numbers."""
+    values = _get_list_values(lst)
+    if not values:
+        raise NonFormattedError("Cannot calculate variance of empty list")
+    mean_val = sum(values) / len(values)
+    variance = sum((x - mean_val) ** 2 for x in values) / len(values)
+    return GulfOfMexicoNumber(variance)
+
+
+def db_stdev(lst: GulfOfMexicoValue) -> GulfOfMexicoNumber:
+    """Calculate the standard deviation of a list of numbers."""
+    variance = db_variance(lst).value
+    return GulfOfMexicoNumber(variance**0.5)
+
+
+def db_min_val(lst: GulfOfMexicoValue) -> GulfOfMexicoNumber:
+    """Find the minimum value in a list of numbers."""
+    values = _get_list_values(lst)
+    if not values:
+        raise NonFormattedError("Cannot find min of empty list")
+    return GulfOfMexicoNumber(min(values))
+
+
+def db_max_val(lst: GulfOfMexicoValue) -> GulfOfMexicoNumber:
+    """Find the maximum value in a list of numbers."""
+    values = _get_list_values(lst)
+    if not values:
+        raise NonFormattedError("Cannot find max of empty list")
+    return GulfOfMexicoNumber(max(values))
+
+
+def db_sum_list(lst: GulfOfMexicoValue) -> GulfOfMexicoNumber:
+    """Calculate the sum of all numbers in a list."""
+    values = _get_list_values(lst)
+    return GulfOfMexicoNumber(sum(values))
+
+
+def db_percentile(lst: GulfOfMexicoValue, p: GulfOfMexicoValue) -> GulfOfMexicoNumber:
+    """Calculate the p-th percentile of a list (p should be 0-100)."""
+    values = _get_list_values(lst)
+    if not isinstance(p, GulfOfMexicoNumber):
+        raise NonFormattedError("Percentile requires a number for p")
+    if not values:
+        raise NonFormattedError("Cannot calculate percentile of empty list")
+
+    percentile = p.value
+    if percentile < 0 or percentile > 100:
+        raise NonFormattedError("Percentile must be between 0 and 100")
+
+    sorted_vals = sorted(values)
+    k = (len(sorted_vals) - 1) * (percentile / 100)
+    f = int(k)
+    c = k - f
+
+    if f + 1 < len(sorted_vals):
+        result = sorted_vals[f] + c * (sorted_vals[f + 1] - sorted_vals[f])
+    else:
+        result = sorted_vals[f]
+
+    return GulfOfMexicoNumber(result)
+
+
+def db_correlation(
+    lst1: GulfOfMexicoValue, lst2: GulfOfMexicoValue
+) -> GulfOfMexicoNumber:
+    """Calculate the Pearson correlation coefficient between two lists."""
+    values1 = _get_list_values(lst1)
+    values2 = _get_list_values(lst2)
+
+    if len(values1) != len(values2):
+        raise NonFormattedError("Lists must have the same length for correlation")
+    if not values1:
+        raise NonFormattedError("Cannot calculate correlation of empty lists")
+
+    n = len(values1)
+    mean1 = sum(values1) / n
+    mean2 = sum(values2) / n
+
+    numerator = sum((values1[i] - mean1) * (values2[i] - mean2) for i in range(n))
+    denominator = (
+        sum((x - mean1) ** 2 for x in values1) * sum((y - mean2) ** 2 for y in values2)
+    ) ** 0.5
+
+    if denominator == 0:
+        return GulfOfMexicoNumber(0)
+
+    return GulfOfMexicoNumber(numerator / denominator)
+
+
+# ===== Financial Functions =====
+
+
+def db_compound_interest(
+    principal: GulfOfMexicoValue,
+    rate: GulfOfMexicoValue,
+    time: GulfOfMexicoValue,
+    n: GulfOfMexicoValue,
+) -> GulfOfMexicoNumber:
+    """Calculate compound interest: A = P(1 + r/n)^(nt)."""
+    if not all(isinstance(x, GulfOfMexicoNumber) for x in [principal, rate, time, n]):
+        raise NonFormattedError("compound_interest requires 4 numbers")
+
+    p = principal.value
+    r = rate.value
+    t = time.value
+    n_val = n.value
+
+    amount = p * ((1 + r / n_val) ** (n_val * t))
+    return GulfOfMexicoNumber(amount)
+
+
+def db_simple_interest(
+    principal: GulfOfMexicoValue,
+    rate: GulfOfMexicoValue,
+    time: GulfOfMexicoValue,
+) -> GulfOfMexicoNumber:
+    """Calculate simple interest: I = P * r * t."""
+    if not all(isinstance(x, GulfOfMexicoNumber) for x in [principal, rate, time]):
+        raise NonFormattedError("simple_interest requires 3 numbers")
+
+    p = principal.value
+    r = rate.value
+    t = time.value
+
+    interest = p * r * t
+    return GulfOfMexicoNumber(interest)
+
+
+def db_pmt(
+    rate: GulfOfMexicoValue,
+    nper: GulfOfMexicoValue,
+    pv: GulfOfMexicoValue,
+) -> GulfOfMexicoNumber:
+    """Calculate periodic payment for a loan: PMT = (PV * r) / (1 - (1 + r)^-n)."""
+    if not all(isinstance(x, GulfOfMexicoNumber) for x in [rate, nper, pv]):
+        raise NonFormattedError("pmt requires 3 numbers: rate, nper, pv")
+
+    r = rate.value
+    n = nper.value
+    pv_val = pv.value
+
+    if r == 0:
+        payment = pv_val / n
+    else:
+        payment = (pv_val * r) / (1 - (1 + r) ** -n)
+
+    return GulfOfMexicoNumber(payment)
+
+
+def db_fv(
+    rate: GulfOfMexicoValue,
+    nper: GulfOfMexicoValue,
+    pmt: GulfOfMexicoValue,
+    pv: GulfOfMexicoValue,
+) -> GulfOfMexicoNumber:
+    """Calculate future value of an investment."""
+    if not all(isinstance(x, GulfOfMexicoNumber) for x in [rate, nper, pmt, pv]):
+        raise NonFormattedError("fv requires 4 numbers")
+
+    r = rate.value
+    n = nper.value
+    pmt_val = pmt.value
+    pv_val = pv.value
+
+    if r == 0:
+        fv_val = -pv_val - pmt_val * n
+    else:
+        fv_val = -pv_val * (1 + r) ** n - pmt_val * (((1 + r) ** n - 1) / r)
+
+    return GulfOfMexicoNumber(fv_val)
+
+
+def db_pv(
+    rate: GulfOfMexicoValue,
+    nper: GulfOfMexicoValue,
+    pmt: GulfOfMexicoValue,
+) -> GulfOfMexicoNumber:
+    """Calculate present value of an investment."""
+    if not all(isinstance(x, GulfOfMexicoNumber) for x in [rate, nper, pmt]):
+        raise NonFormattedError("pv requires 3 numbers")
+
+    r = rate.value
+    n = nper.value
+    pmt_val = pmt.value
+
+    if r == 0:
+        pv_val = -pmt_val * n
+    else:
+        pv_val = -pmt_val * ((1 - (1 + r) ** -n) / r)
+
+    return GulfOfMexicoNumber(pv_val)
+
+
+def db_npv(rate: GulfOfMexicoValue, cashflows: GulfOfMexicoValue) -> GulfOfMexicoNumber:
+    """Calculate Net Present Value of cash flows."""
+    if not isinstance(rate, GulfOfMexicoNumber):
+        raise NonFormattedError("npv requires rate as first argument")
+
+    values = _get_list_values(cashflows)
+    if not values:
+        raise NonFormattedError("npv requires non-empty cashflows list")
+
+    r = rate.value
+    npv_val = sum(cf / (1 + r) ** i for i, cf in enumerate(values))
+
+    return GulfOfMexicoNumber(npv_val)
+
+
+# ===== Business Metrics =====
+
+
+def db_roi(gain: GulfOfMexicoValue, cost: GulfOfMexicoValue) -> GulfOfMexicoNumber:
+    """Calculate Return on Investment: (Gain - Cost) / Cost * 100."""
+    if not all(isinstance(x, GulfOfMexicoNumber) for x in [gain, cost]):
+        raise NonFormattedError("roi requires 2 numbers")
+
+    g = gain.value
+    c = cost.value
+
+    if c == 0:
+        raise NonFormattedError("Cost cannot be zero for ROI calculation")
+
+    roi_val = ((g - c) / c) * 100
+    return GulfOfMexicoNumber(roi_val)
+
+
+def db_profit_margin(
+    revenue: GulfOfMexicoValue, cost: GulfOfMexicoValue
+) -> GulfOfMexicoNumber:
+    """Calculate Profit Margin: (Revenue - Cost) / Revenue * 100."""
+    if not all(isinstance(x, GulfOfMexicoNumber) for x in [revenue, cost]):
+        raise NonFormattedError("profit_margin requires 2 numbers")
+
+    r = revenue.value
+    c = cost.value
+
+    if r == 0:
+        raise NonFormattedError("Revenue cannot be zero for profit margin")
+
+    margin = ((r - c) / r) * 100
+    return GulfOfMexicoNumber(margin)
+
+
+def db_cagr(
+    beginning_value: GulfOfMexicoValue,
+    ending_value: GulfOfMexicoValue,
+    years: GulfOfMexicoValue,
+) -> GulfOfMexicoNumber:
+    """Calculate Compound Annual Growth Rate: (Ending/Beginning)^(1/years) - 1."""
+    if not all(
+        isinstance(x, GulfOfMexicoNumber)
+        for x in [beginning_value, ending_value, years]
+    ):
+        raise NonFormattedError("cagr requires 3 numbers")
+
+    bv = beginning_value.value
+    ev = ending_value.value
+    y = years.value
+
+    if bv <= 0 or y <= 0:
+        raise NonFormattedError("Beginning value and years must be positive")
+
+    cagr_val = ((ev / bv) ** (1 / y) - 1) * 100
+    return GulfOfMexicoNumber(cagr_val)
+
+
+def db_break_even(
+    fixed_costs: GulfOfMexicoValue,
+    price_per_unit: GulfOfMexicoValue,
+    variable_cost_per_unit: GulfOfMexicoValue,
+) -> GulfOfMexicoNumber:
+    """Calculate break-even point in units."""
+    if not all(
+        isinstance(x, GulfOfMexicoNumber)
+        for x in [fixed_costs, price_per_unit, variable_cost_per_unit]
+    ):
+        raise NonFormattedError("break_even requires 3 numbers")
+
+    fc = fixed_costs.value
+    price = price_per_unit.value
+    vc = variable_cost_per_unit.value
+
+    if price <= vc:
+        raise NonFormattedError("Price must be greater than variable cost")
+
+    units = fc / (price - vc)
+    return GulfOfMexicoNumber(units)
+
+
+# ===== Scientific/Mathematical Functions =====
+
+
+def db_linear_regression(
+    x_list: GulfOfMexicoValue, y_list: GulfOfMexicoValue
+) -> GulfOfMexicoList:
+    """Calculate linear regression y = mx + b, returns [slope, intercept]."""
+    x_values = _get_list_values(x_list)
+    y_values = _get_list_values(y_list)
+
+    if len(x_values) != len(y_values):
+        raise NonFormattedError("X and Y lists must have same length")
+    if len(x_values) < 2:
+        raise NonFormattedError("Need at least 2 data points for regression")
+
+    n = len(x_values)
+    x_mean = sum(x_values) / n
+    y_mean = sum(y_values) / n
+
+    numerator = sum((x_values[i] - x_mean) * (y_values[i] - y_mean) for i in range(n))
+    denominator = sum((x - x_mean) ** 2 for x in x_values)
+
+    if denominator == 0:
+        raise NonFormattedError("Cannot calculate regression with constant X values")
+
+    slope = numerator / denominator
+    intercept = y_mean - slope * x_mean
+
+    return GulfOfMexicoList([GulfOfMexicoNumber(slope), GulfOfMexicoNumber(intercept)])
+
+
+def db_predict(
+    x: GulfOfMexicoValue, slope: GulfOfMexicoValue, intercept: GulfOfMexicoValue
+) -> GulfOfMexicoNumber:
+    """Predict y value using linear equation y = mx + b."""
+    if not all(isinstance(v, GulfOfMexicoNumber) for v in [x, slope, intercept]):
+        raise NonFormattedError("predict requires 3 numbers")
+
+    y = slope.value * x.value + intercept.value
+    return GulfOfMexicoNumber(y)
+
+
+def db_derivative(
+    func_values: GulfOfMexicoValue,
+    h: GulfOfMexicoValue,
+) -> GulfOfMexicoList:
+    """Approximate derivative using finite differences."""
+    values = _get_list_values(func_values)
+    if not isinstance(h, GulfOfMexicoNumber):
+        raise NonFormattedError("h (step size) must be a number")
+    if len(values) < 2:
+        raise NonFormattedError("Need at least 2 values for derivative")
+
+    step = h.value
+    derivatives = []
+
+    for i in range(len(values) - 1):
+        deriv = (values[i + 1] - values[i]) / step
+        derivatives.append(GulfOfMexicoNumber(deriv))
+
+    return GulfOfMexicoList(derivatives)
+
+
+def db_integrate(
+    func_values: GulfOfMexicoValue,
+    h: GulfOfMexicoValue,
+) -> GulfOfMexicoNumber:
+    """Approximate definite integral using trapezoidal rule."""
+    values = _get_list_values(func_values)
+    if not isinstance(h, GulfOfMexicoNumber):
+        raise NonFormattedError("h (step size) must be a number")
+    if len(values) < 2:
+        raise NonFormattedError("Need at least 2 values for integration")
+
+    step = h.value
+    integral = step * (values[0] / 2 + sum(values[1:-1]) + values[-1] / 2)
+
+    return GulfOfMexicoNumber(integral)
+
+
+def db_quadratic_solve(
+    a: GulfOfMexicoValue, b: GulfOfMexicoValue, c: GulfOfMexicoValue
+) -> GulfOfMexicoList:
+    """Solve quadratic equation ax^2 + bx + c = 0, returns [root1, root2]."""
+    if not all(isinstance(v, GulfOfMexicoNumber) for v in [a, b, c]):
+        raise NonFormattedError("quadratic_solve requires 3 numbers")
+
+    a_val = a.value
+    b_val = b.value
+    c_val = c.value
+
+    if a_val == 0:
+        raise NonFormattedError("Coefficient 'a' cannot be zero")
+
+    discriminant = b_val**2 - 4 * a_val * c_val
+
+    if discriminant < 0:
+        raise NonFormattedError("No real solutions (negative discriminant)")
+
+    root1 = (-b_val + discriminant**0.5) / (2 * a_val)
+    root2 = (-b_val - discriminant**0.5) / (2 * a_val)
+
+    return GulfOfMexicoList([GulfOfMexicoNumber(root1), GulfOfMexicoNumber(root2)])
+
+
 # get ready, this is boutta be crazy
 MATH_FUNCTION_KEYWORDS = {
     name: Name(
@@ -1314,6 +2008,52 @@ BUILTIN_FUNCTION_KEYWORDS = {
     "observe": Name("observe", BuiltinFunction(1, db_observe)),
     "past": Name("past", BuiltinFunction(2, db_past)),
     "future": Name("future", BuiltinFunction(1, db_future)),
+    # Base/Radix number system functions
+    "to_base": Name("to_base", BuiltinFunction(2, db_to_base)),
+    "from_base": Name("from_base", BuiltinFunction(2, db_from_base)),
+    "base_add": Name("base_add", BuiltinFunction(5, db_base_add)),
+    "base_sub": Name("base_sub", BuiltinFunction(5, db_base_sub)),
+    "base_mul": Name("base_mul", BuiltinFunction(5, db_base_mul)),
+    "base_div": Name("base_div", BuiltinFunction(5, db_base_div)),
+    "to_binary": Name("to_binary", BuiltinFunction(1, db_to_binary)),
+    "to_octal": Name("to_octal", BuiltinFunction(1, db_to_octal)),
+    "to_hex": Name("to_hex", BuiltinFunction(1, db_to_hex)),
+    "from_binary": Name("from_binary", BuiltinFunction(1, db_from_binary)),
+    "from_octal": Name("from_octal", BuiltinFunction(1, db_from_octal)),
+    "from_hex": Name("from_hex", BuiltinFunction(1, db_from_hex)),
+    # Statistical functions
+    "mean": Name("mean", BuiltinFunction(1, db_mean)),
+    "median": Name("median", BuiltinFunction(1, db_median)),
+    "mode": Name("mode", BuiltinFunction(1, db_mode)),
+    "variance": Name("variance", BuiltinFunction(1, db_variance)),
+    "stdev": Name("stdev", BuiltinFunction(1, db_stdev)),
+    "min_val": Name("min_val", BuiltinFunction(1, db_min_val)),
+    "max_val": Name("max_val", BuiltinFunction(1, db_max_val)),
+    "sum_list": Name("sum_list", BuiltinFunction(1, db_sum_list)),
+    "percentile": Name("percentile", BuiltinFunction(2, db_percentile)),
+    "correlation": Name("correlation", BuiltinFunction(2, db_correlation)),
+    # Financial functions
+    "compound_interest": Name(
+        "compound_interest", BuiltinFunction(4, db_compound_interest)
+    ),
+    "simple_interest": Name("simple_interest", BuiltinFunction(3, db_simple_interest)),
+    "pmt": Name("pmt", BuiltinFunction(3, db_pmt)),
+    "fv": Name("fv", BuiltinFunction(4, db_fv)),
+    "pv": Name("pv", BuiltinFunction(3, db_pv)),
+    "npv": Name("npv", BuiltinFunction(2, db_npv)),
+    # Business metrics
+    "roi": Name("roi", BuiltinFunction(2, db_roi)),
+    "profit_margin": Name("profit_margin", BuiltinFunction(2, db_profit_margin)),
+    "cagr": Name("cagr", BuiltinFunction(3, db_cagr)),
+    "break_even": Name("break_even", BuiltinFunction(3, db_break_even)),
+    # Scientific/Mathematical functions
+    "linear_regression": Name(
+        "linear_regression", BuiltinFunction(2, db_linear_regression)
+    ),
+    "predict": Name("predict", BuiltinFunction(3, db_predict)),
+    "derivative": Name("derivative", BuiltinFunction(2, db_derivative)),
+    "integrate": Name("integrate", BuiltinFunction(2, db_integrate)),
+    "quadratic_solve": Name("quadratic_solve", BuiltinFunction(3, db_quadratic_solve)),
 }
 BUILTIN_VALUE_KEYWORDS = {
     "true": Name("true", GulfOfMexicoBoolean(True)),

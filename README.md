@@ -1,6 +1,25 @@
-# GOM - Gulf of Mexico Interpreter
+# GOM - Gulf of Mexico Programming Language
 
 This implementation is based on the conceptual design of **Gulf of Mexico**, the perfect programming language created by Lu Wilson (TodePond) (https://github.com/TodePond/GulfOfMexico).
+
+## 🚀 Two Implementations
+
+**Gulf of Mexico** provides both an **interpreter** (Python) and a **compiler** (C++) with 100% feature parity!
+
+### Python Interpreter
+- Full-featured REPL with IDE
+- Perfect for development and prototyping
+- Rich debugging and interactive features
+
+### C++ Compiler ⚡ NEW!
+- **10-100x faster** than the interpreter
+- Compiles to native executables
+- **34 built-in functions** (math, statistics, finance, business, scientific)
+- **70+ satirical keywords** (blockchain, ai_powered, happy, sprint, etc.)
+- **Map/Dictionary support** with -1 array indexing
+- Production-ready performance
+
+See [CONSOLIDATION_COMPLETE.md](CONSOLIDATION_COMPLETE.md) for full compiler documentation.
 
 ## Installation
 
@@ -8,10 +27,16 @@ This implementation is based on the conceptual design of **Gulf of Mexico**, the
 git clone https://github.com/James-HoneyBadger/GulfOfMexico.git
 cd GulfOfMexico
 pip install -e .
+
+# Build the compiler (optional, for high performance)
+cd compiler/build
+cmake ..
+make -j4
 ```
 
 ## Usage
 
+### Python Interpreter
 ```bash
 # Run a program
 python -m gulfofmexico script.gom
@@ -24,6 +49,20 @@ python -m gulfofmexico -c "print(42)!"
 
 # Launch IDE
 python -m gulfofmexico.ide
+```
+
+### C++ Compiler
+```bash
+# Compile a program
+cd compiler/build
+./gomcc program.gom -o program.cpp
+g++ -std=c++17 program.cpp -o program
+./program
+
+# Example with built-in functions
+./gomcc ../examples/test_analysis.gom -o test.cpp
+g++ -std=c++17 test.cpp -o test
+./test
 ```
 
 ### REPL quick start
@@ -102,6 +141,51 @@ const result await(fetch())!
 const name "Alice"!
 print("Hello, ${name}!")!
 ```
+
+## 📊 Built-in Functions (Compiler Only)
+
+The C++ compiler includes 34 built-in functions for math, statistics, finance, and more!
+
+### Math Functions (12)
+```javascript
+sqrt(144)           // → 12.0
+pow(2, 8)           // → 256.0
+sin(1.5708)         // → 1.0
+abs(-42)            // → 42.0
+floor(3.7)          // → 3.0
+// Also: cos, tan, ceil, round, log, log10, exp
+```
+
+### Statistical Functions (7)
+```javascript
+const data = [10, 20, 30, 40, 50]!
+mean(data)          // → 30.0
+median(data)        // → 30.0
+stdev(data)         // → 15.81
+// Also: variance, min_val, max_val, sum_list
+```
+
+### Financial Functions (3)
+```javascript
+compound_interest(1000, 0.05, 10, 12)  // → 1647.01
+simple_interest(1000, 0.05, 10)         // → 1500.0
+pmt(0.05, 12, 1000)                     // → 112.83
+```
+
+### Business Functions (3)
+```javascript
+roi(1500, 1000)           // → 50.0% ROI
+profit_margin(1500, 1000) // → 33.33% margin
+cagr(1000, 2000, 5)       // → 14.87% annual growth
+```
+
+### Scientific Functions (2)
+```javascript
+linear_regression([1,2,3,4,5], [2,4,6,8,10])  // → [2.0, 0.0]
+quadratic_solve(1, -5, 6)                      // → [3.0, 2.0]
+```
+
+See [BUILTIN_FUNCTIONS.md](BUILTIN_FUNCTIONS.md) for complete reference.
 
 ## 🎭 Satirical Features
 

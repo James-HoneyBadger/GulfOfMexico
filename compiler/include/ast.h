@@ -177,4 +177,31 @@ public:
     std::string toString() const override;
 };
 
+// Satirical statement types
+class SatiricalStatement : public ASTNode {
+public:
+    std::string keyword;
+    std::vector<std::unique_ptr<ASTNode>> body;
+    
+    SatiricalStatement(std::string kw, std::vector<std::unique_ptr<ASTNode>> b)
+        : keyword(std::move(kw)), body(std::move(b)) {}
+    std::string toString() const override;
+};
+
+class DeleteStatement : public ASTNode {
+public:
+    std::string name;
+    
+    explicit DeleteStatement(std::string n) : name(std::move(n)) {}
+    std::string toString() const override;
+};
+
+class ReverseStatement : public ASTNode {
+public:
+    std::string name;
+    
+    explicit ReverseStatement(std::string n) : name(std::move(n)) {}
+    std::string toString() const override;
+};
+
 } // namespace gom

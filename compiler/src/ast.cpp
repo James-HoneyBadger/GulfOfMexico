@@ -94,4 +94,16 @@ std::string Program::toString() const {
     return result;
 }
 
+std::string SatiricalStatement::toString() const {
+    return keyword + " { ... }";
+}
+
+std::string DeleteStatement::toString() const {
+    return "delete " + name;
+}
+
+std::string ReverseStatement::toString() const {
+    return "reverse " + name;
+}
+
 } // namespace gom

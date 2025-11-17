@@ -1,0 +1,65 @@
+// Testing Statistical, Financial, Business, and Scientific Functions
+
+print("=== Testing Statistical Functions ===")!
+
+const data = [10, 20, 30, 40, 50]!
+
+print("Data: [10, 20, 30, 40, 50]")!
+
+print("mean = ")!
+print(mean(data))!
+
+print("median = ")!
+print(median(data))!
+
+print("stdev = ")!
+print(stdev(data))!
+
+print("variance = ")!
+print(variance(data))!
+
+print("min_val = ")!
+print(min_val(data))!
+
+print("max_val = ")!
+print(max_val(data))!
+
+print("sum_list = ")!
+print(sum_list(data))!
+
+print("\n=== Testing Financial Functions ===")!
+
+print("compound_interest(1000, 0.05, 10, 12) = ")!
+print(compound_interest(1000, 0.05, 10, 12))!
+
+print("simple_interest(1000, 0.05, 10) = ")!
+print(simple_interest(1000, 0.05, 10))!
+
+print("pmt(0.05, 12, 1000) = ")!
+print(pmt(0.05, 12, 1000))!
+
+print("\n=== Testing Business Functions ===")!
+
+print("roi(1500, 1000) = ")!
+print(roi(1500, 1000))!
+
+print("profit_margin(1500, 1000) = ")!
+print(profit_margin(1500, 1000))!
+
+print("cagr(1000, 2000, 5) = ")!
+print(cagr(1000, 2000, 5))!
+
+print("\n=== Testing Scientific Functions ===")!
+
+const x_data = [1, 2, 3, 4, 5]!
+const y_data = [2, 4, 6, 8, 10]!
+
+print("linear_regression([1,2,3,4,5], [2,4,6,8,10]) = ")!
+const lr_result = linear_regression(x_data, y_data)!
+print(lr_result)!
+
+print("quadratic_solve(1, -5, 6) = ")!
+const qs_result = quadratic_solve(1, -5, 6)!
+print(qs_result)!
+
+print("\n=== All Analysis Functions Tested! ===")!

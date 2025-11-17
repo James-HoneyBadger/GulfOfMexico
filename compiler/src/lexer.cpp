@@ -6,6 +6,7 @@
 namespace gom {
 
 static std::unordered_map<std::string, TokenType> keywords = {
+    // Core keywords
     {"function", TokenType::FUNCTION},
     {"fn", TokenType::FN},
     {"async", TokenType::ASYNC},
@@ -18,6 +19,7 @@ static std::unordered_map<std::string, TokenType> keywords = {
     {"after", TokenType::AFTER},
     {"new", TokenType::NEW},
     {"delete", TokenType::DELETE},
+    {"reverse", TokenType::REVERSE},
     {"import", TokenType::IMPORT},
     {"export", TokenType::EXPORT},
     {"from", TokenType::FROM},
@@ -27,6 +29,109 @@ static std::unordered_map<std::string, TokenType> keywords = {
     {"true", TokenType::BOOL_TRUE},
     {"false", TokenType::BOOL_FALSE},
     {"undefined", TokenType::UNDEFINED},
+    {"maybe", TokenType::MAYBE},
+    // Try/Whatever
+    {"try", TokenType::TRY},
+    {"whatever", TokenType::WHATEVER},
+    // Procrastination
+    {"later", TokenType::LATER},
+    {"eventually", TokenType::EVENTUALLY},
+    {"whenever", TokenType::WHENEVER},
+    // Corporate Speak
+    {"synergize", TokenType::SYNERGIZE},
+    {"leverage", TokenType::LEVERAGE},
+    {"paradigm_shift", TokenType::PARADIGM_SHIFT},
+    {"circle_back", TokenType::CIRCLE_BACK},
+    {"touch_base", TokenType::TOUCH_BASE},
+    // Emotional
+    {"happy", TokenType::HAPPY},
+    {"sad", TokenType::SAD},
+    {"angry", TokenType::ANGRY},
+    {"excited", TokenType::EXCITED},
+    {"tired", TokenType::TIRED},
+    // Built-in functions
+    {"Number", TokenType::NUMBER_FUNC},
+    {"String", TokenType::STRING_FUNC},
+    {"Boolean", TokenType::BOOLEAN_FUNC},
+    {"Map", TokenType::MAP_FUNC},
+    {"sin", TokenType::SIN},
+    {"cos", TokenType::COS},
+    {"tan", TokenType::TAN},
+    {"sqrt", TokenType::SQRT},
+    {"abs", TokenType::ABS},
+    {"floor", TokenType::FLOOR},
+    {"ceil", TokenType::CEIL},
+    {"round", TokenType::ROUND},
+    {"log", TokenType::LOG},
+    {"log10", TokenType::LOG10},
+    {"exp", TokenType::EXP},
+    {"pow", TokenType::POW},
+    // Statistical functions
+    {"mean", TokenType::MEAN},
+    {"median", TokenType::MEDIAN},
+    {"stdev", TokenType::STDEV},
+    {"variance", TokenType::VARIANCE},
+    {"min_val", TokenType::MIN_VAL},
+    {"max_val", TokenType::MAX_VAL},
+    {"sum_list", TokenType::SUM_LIST},
+    // Financial functions
+    {"compound_interest", TokenType::COMPOUND_INTEREST},
+    {"simple_interest", TokenType::SIMPLE_INTEREST},
+    {"pmt", TokenType::PMT},
+    // Business functions
+    {"roi", TokenType::ROI},
+    {"profit_margin", TokenType::PROFIT_MARGIN},
+    {"cagr", TokenType::CAGR},
+    // Scientific functions
+    {"linear_regression", TokenType::LINEAR_REGRESSION},
+    {"quadratic_solve", TokenType::QUADRATIC_SOLVE},
+    // Superstitious
+    {"lucky", TokenType::LUCKY},
+    {"unlucky", TokenType::UNLUCKY},
+    {"cross_fingers", TokenType::CROSS_FINGERS},
+    {"knock_on_wood", TokenType::KNOCK_ON_WOOD},
+    // Quantum
+    {"quantum", TokenType::QUANTUM},
+    // Time Travel
+    {"time_travel", TokenType::TIME_TRAVEL},
+    // Gaslighting
+    {"definitely_not", TokenType::DEFINITELY_NOT},
+    // Blockchain
+    {"blockchain", TokenType::BLOCKCHAIN},
+    {"smart_contract", TokenType::SMART_CONTRACT},
+    {"mine", TokenType::MINE},
+    {"immutable_ledger", TokenType::IMMUTABLE_LEDGER},
+    {"token", TokenType::TOKEN},
+    {"nft", TokenType::NFT},
+    {"web3", TokenType::WEB3},
+    {"dao", TokenType::DAO},
+    {"defi", TokenType::DEFI},
+    {"hodl", TokenType::HODL},
+    // AI Buzzwords
+    {"ai_powered", TokenType::AI_POWERED},
+    {"deep_learning", TokenType::DEEP_LEARNING},
+    {"neural_network", TokenType::NEURAL_NETWORK},
+    {"machine_learning", TokenType::MACHINE_LEARNING},
+    // Agile
+    {"sprint", TokenType::SPRINT},
+    {"standup", TokenType::STANDUP},
+    {"retro", TokenType::RETRO},
+    {"burndown", TokenType::BURNDOWN},
+    // Security Theater
+    {"penetration_test", TokenType::PENETRATION_TEST},
+    {"vulnerability_scan", TokenType::VULNERABILITY_SCAN},
+    {"security_audit", TokenType::SECURITY_AUDIT},
+    {"compliance_check", TokenType::COMPLIANCE_CHECK},
+    // DevOps
+    {"containerize", TokenType::CONTAINERIZE},
+    {"orchestrate", TokenType::ORCHESTRATE},
+    {"microservice", TokenType::MICROSERVICE},
+    {"kubernetes", TokenType::KUBERNETES},
+    // Startup
+    {"pivot", TokenType::PIVOT},
+    {"disrupt", TokenType::DISRUPT},
+    {"unicorn", TokenType::UNICORN},
+    {"hockey_stick", TokenType::HOCKEY_STICK},
 };
 
 Lexer::Lexer(std::string src)
@@ -209,6 +314,14 @@ Token Lexer::tokenizeOperator() {
         case '=':
             if (peek() == '=') {
                 advance();
+                if (peek() == '=') {
+                    advance();
+                    if (peek() == '=') {
+                        advance();
+                        return Token(TokenType::QUAD_EQUALS, "====", startLine, startCol);
+                    }
+                    return Token(TokenType::TRIPLE_EQUALS, "===", startLine, startCol);
+                }
                 return Token(TokenType::DOUBLE_EQUALS, "==", startLine, startCol);
             }
             if (peek() == '>') {

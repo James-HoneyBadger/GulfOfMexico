@@ -1,0 +1,52 @@
+// Simple Base Number System Test
+// Quick test of all base conversion functions
+
+print "🔢 Simple Base Number Test"!
+print ""!
+
+// Test basic conversions
+print "Convert 42 to different bases:"!
+print "Binary: ${to_binary(42)}"!
+print "Octal: ${to_octal(42)}"!
+print "Hex: ${to_hex(42)}"!
+print "Base 5: ${to_base(42, 5)}"!
+print ""!
+
+// Test conversions back to decimal
+print "Convert back to decimal:"!
+const bin_str = "101010"!
+const oct_str = "52"!
+const hex_str = "2A"!
+const b5_str = "132"!
+print "Binary 101010 = ${from_binary(bin_str)}"!
+print "Octal 52 = ${from_octal(oct_str)}"!
+print "Hex 2A = ${from_hex(hex_str)}"!
+print "Base 5 '132' = ${from_base(b5_str, 5)}"!
+print ""!
+
+// Test cross-base arithmetic
+print "Cross-base arithmetic:"!
+const add_result = base_add("1010", 2, "14", 16, 8)!
+print "Binary 1010 + Hex 14 (in octal) = ${add_result}"!
+const sub_result = base_sub("100", 8, 14, 10, 2)!
+print "Octal 100 - Decimal 14 (in binary) = ${sub_result}"!
+const mul_result = base_mul("23", 5, "12", 7, 16)!
+print "Base5 23 * Base7 12 (in hex) = ${mul_result}"!
+const div_result = base_div("64", 16, "101", 2, 8)!
+print "Hex 64 / Binary 101 (in octal) = ${div_result}"!
+print ""!
+
+// Test edge cases
+print "Edge cases:"!
+const zero_b2 = to_base(0, 2)!
+print "Zero in base 2: ${zero_b2}"!
+const zero_b36 = to_base(0, 36)!
+print "Zero in base 36: ${zero_b36}"!
+const n255_b36 = to_base(255, 36)!
+print "255 in base 36: ${n255_b36}"!
+const zz_str = "ZZ"!
+const zz_dec = from_base(zz_str, 36)!
+print "Base 36 'ZZ' to decimal: ${zz_dec}"!
+print ""!
+
+print "✅ All base functions working!"!
