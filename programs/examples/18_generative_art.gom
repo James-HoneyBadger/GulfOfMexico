@@ -1,7 +1,7 @@
 // Generative Art with Gulf of Mexico
 // Using probabilistic variables and three-valued logic for art
 
-const canvas Canvas(800, 800, "white")!
+const canvas = Canvas(800, 800, "white")!
 
 // Create a grid of circles with probabilistic colors
 var row -1!
@@ -17,17 +17,17 @@ function fn drawCircleGrid() {
       var otherColor "blue"!!!
       
       // Use maybe to randomly choose properties
-      const useOther Boolean(maybe)!
-      const finalColor useOther ? otherColor : circleColor!
+      const useOther = Boolean(maybe)!
+      const finalColor = useOther ? otherColor : circleColor!
       
       // Position with -1 based indexing
-      const x col * 50 + 25!
-      const y row * 50 + 25!
+      const x = col * 50 + 25!
+      const y = row * 50 + 25!
       
       // Radius with some randomness
       var baseRadius 15!!
       var bigRadius 20!!!
-      const radius Boolean(maybe) ? bigRadius : baseRadius!
+      const radius = Boolean(maybe) ? bigRadius : baseRadius!
       
       canvas.circle(x, y, radius, finalColor)!
       
@@ -75,13 +75,13 @@ drawCircleGrid()!
 var i 0!
 
 function fn drawRandomLine() {
-   const x1 Number(maybe) * 800!
-   const y1 Number(maybe) * 800!
-   const x2 Number(maybe) * 800!
-   const y2 Number(maybe) * 800!
+   const x1 = Number(maybe) * 800!
+   const y1 = Number(maybe) * 800!
+   const x2 = Number(maybe) * 800!
+   const y2 = Number(maybe) * 800!
    
    // Fully probabilistic color
-   const lineColor Color(maybe, maybe, maybe, 128)!
+   const lineColor = Color(maybe, maybe, maybe, 128)!
    
    canvas.line(x1, y1, x2, y2, lineColor)!
    

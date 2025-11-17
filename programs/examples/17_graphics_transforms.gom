@@ -1,7 +1,7 @@
 // Advanced Graphics - Transformations
 // Demonstrates transformation stack, rotation, scaling, and translation
 
-const canvas Canvas(600, 600, "black")!
+const canvas = Canvas(600, 600, "black")!
 
 // Save the initial transform
 canvas.saveTransform()!
@@ -56,7 +56,7 @@ var y 50!
 
 function fn drawRandom() {
    // Each call might draw slightly differently due to "maybe"
-   const randomColor Color(maybe, maybe, maybe)!
+   const randomColor = Color(maybe, maybe, maybe)!
    canvas.circle(x, y, 10, randomColor)!
    var x x + 25!
 }
