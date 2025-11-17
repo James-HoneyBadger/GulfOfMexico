@@ -62,6 +62,8 @@ __all__ = [
     "TryWhateverStatement",
     "ProcrastinationStatement",
     "CorporateSpeakStatement",
+    "EmotionalStatement",
+    "SuperstitiousStatement",
 ]
 
 
@@ -292,6 +294,47 @@ class CorporateSpeakStatement(CodeStatement, CodeStatementKeywordable):
 
     keyword: Token
     args: list[ExpressionTreeNode]
+
+
+@dataclass
+class EmotionalStatement(CodeStatement, CodeStatementKeywordable):
+    """Emotional programming: execute code based on program mood.
+
+    Keywords:
+    - happy: executes when program is happy (no recent errors)
+    - sad: executes when program is sad (recent errors)
+    - angry: executes when program is angry (many errors)
+    - excited: executes randomly with high energy
+    - tired: executes slowly (adds delay)
+
+    Examples:
+        happy { print "Everything is great!"! }
+        sad { print "Something went wrong..."! }
+        angry { print "THIS IS UNACCEPTABLE!"! }
+    """
+
+    keyword: Token  # 'happy', 'sad', 'angry', 'excited', 'tired'
+    code: list[tuple[CodeStatement, ...]]
+
+
+@dataclass
+class SuperstitiousStatement(CodeStatement, CodeStatementKeywordable):
+    """Superstitious programming: luck-based execution.
+
+    Keywords:
+    - lucky: higher chance of success (doubles success rate)
+    - unlucky: higher chance of failure (doubles error rate)
+    - cross_fingers: hope for the best (random outcome)
+    - knock_on_wood: prevent bad luck (error suppression)
+
+    Examples:
+        lucky { risky_operation()! }
+        cross_fingers { deploy_to_production()! }
+        knock_on_wood { critical_update()! }
+    """
+
+    keyword: Token
+    code: list[tuple[CodeStatement, ...]]
 
 
 # idea: create a class that evaluates at runtime what a statement is, so then execute it
@@ -694,6 +737,29 @@ def create_scoped_code_statement(
     if without_whitespace[0].value in ["later", "eventually", "whenever"]:
         return (
             ProcrastinationStatement(
+                keyword=without_whitespace[0],
+                code=statements_inside_scope,
+            ),
+        )
+
+    # Check for emotional programming keywords
+    if without_whitespace[0].value in ["happy", "sad", "angry", "excited", "tired"]:
+        return (
+            EmotionalStatement(
+                keyword=without_whitespace[0],
+                code=statements_inside_scope,
+            ),
+        )
+
+    # Check for superstitious programming keywords
+    if without_whitespace[0].value in [
+        "lucky",
+        "unlucky",
+        "cross_fingers",
+        "knock_on_wood",
+    ]:
+        return (
+            SuperstitiousStatement(
                 keyword=without_whitespace[0],
                 code=statements_inside_scope,
             ),

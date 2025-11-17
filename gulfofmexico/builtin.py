@@ -601,6 +601,15 @@ KEYWORDS = {
         "paradigm_shift",
         "circle_back",
         "touch_base",
+        "happy",
+        "sad",
+        "angry",
+        "excited",
+        "tired",
+        "lucky",
+        "unlucky",
+        "cross_fingers",
+        "knock_on_wood",
     ]
     + FUNCTION_KEYWORDS
 }

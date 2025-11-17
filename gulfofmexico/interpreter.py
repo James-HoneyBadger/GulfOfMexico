@@ -112,6 +112,7 @@ from gulfofmexico.processor.syntax_tree import (
     Conditional,
     CorporateSpeakStatement,
     DeleteStatement,
+    EmotionalStatement,
     ExportStatement,
     ExpressionStatement,
     FunctionDefinition,
@@ -119,6 +120,7 @@ from gulfofmexico.processor.syntax_tree import (
     ProcrastinationStatement,
     ReturnStatement,
     ReverseStatement,
+    SuperstitiousStatement,
     TryWhateverStatement,
     VariableAssignment,
     VariableDeclaration,
@@ -1990,7 +1992,15 @@ def determine_statement_type(
         ImportStatement: {"import"},
         TryWhateverStatement: {"try"},
         ProcrastinationStatement: {"later", "eventually", "whenever"},
-        CorporateSpeakStatement: {"synergize", "leverage", "paradigm_shift", "circle_back", "touch_base"},
+        CorporateSpeakStatement: {
+            "synergize",
+            "leverage",
+            "paradigm_shift",
+            "circle_back",
+            "touch_base",
+        },
+        EmotionalStatement: {"happy", "sad", "angry", "excited", "tired"},
+        SuperstitiousStatement: {"lucky", "unlucky", "cross_fingers", "knock_on_wood"},
     }
 
     for st in possible_statements:
@@ -2999,18 +3009,15 @@ def interpret_code_statements(
 
             case ProcrastinationStatement():
                 # Procrastination - maybe execute the code, maybe not
-                print(f"[DEBUG] Procrastination block detected: {statement.keyword.value}")
                 probabilities = {
-                    "later": 0.50,      # 50% chance
-                    "eventually": 0.75, # 75% chance  
-                    "whenever": 0.90,   # 90% chance
+                    "later": 0.50,  # 50% chance
+                    "eventually": 0.75,  # 75% chance
+                    "whenever": 0.90,  # 90% chance
                 }
                 keyword = statement.keyword.value
                 should_execute = random.random() < probabilities.get(keyword, 0.50)
-                print(f"[DEBUG] Should execute: {should_execute}")
-                
+
                 if should_execute:
-                    print(f"[DEBUG] Executing procrastination block")
                     interpret_code_statements(
                         statement.code,
                         namespaces + [{}],
@@ -3024,22 +3031,32 @@ def interpret_code_statements(
                 # Corporate speak with satirical implementations
                 keyword = statement.keyword.value
                 args_values = [
-                    evaluate_expression(arg, namespaces, async_statements, when_statement_watchers)
+                    evaluate_expression(
+                        arg, namespaces, async_statements, when_statement_watchers
+                    )
                     for arg in statement.args
                 ]
-                
+
                 match keyword:
                     case "synergize":
                         # Combine two values (concatenate or add)
                         if len(args_values) >= 2:
                             val1, val2 = args_values[0], args_values[1]
-                            if isinstance(val1, GulfOfMexicoString) or isinstance(val2, GulfOfMexicoString):
-                                result = GulfOfMexicoString(str(val1.value) + str(val2.value))
-                            elif isinstance(val1, GulfOfMexicoNumber) and isinstance(val2, GulfOfMexicoNumber):
+                            if isinstance(val1, GulfOfMexicoString) or isinstance(
+                                val2, GulfOfMexicoString
+                            ):
+                                result = GulfOfMexicoString(
+                                    str(val1.value) + str(val2.value)
+                                )
+                            elif isinstance(val1, GulfOfMexicoNumber) and isinstance(
+                                val2, GulfOfMexicoNumber
+                            ):
                                 result = GulfOfMexicoNumber(val1.value + val2.value)
                             else:
-                                result = GulfOfMexicoString(str(val1.value) + str(val2.value))
-                    
+                                result = GulfOfMexicoString(
+                                    str(val1.value) + str(val2.value)
+                                )
+
                     case "leverage":
                         # Multiply value by 2 (leverage for maximum impact!)
                         if len(args_values) >= 1:
@@ -3050,7 +3067,7 @@ def interpret_code_statements(
                                 result = GulfOfMexicoString(val.value * 2)
                             else:
                                 result = val
-                    
+
                     case "paradigm_shift":
                         # Negate or reverse the value (complete paradigm shift!)
                         if len(args_values) >= 1:
@@ -3058,16 +3075,18 @@ def interpret_code_statements(
                             if isinstance(val, GulfOfMexicoNumber):
                                 result = GulfOfMexicoNumber(-val.value)
                             elif isinstance(val, GulfOfMexicoBoolean):
-                                result = GulfOfMexicoBoolean(not val.value if val.value is not None else None)
+                                result = GulfOfMexicoBoolean(
+                                    not val.value if val.value is not None else None
+                                )
                             elif isinstance(val, GulfOfMexicoString):
                                 result = GulfOfMexicoString(val.value[::-1])
                             else:
                                 result = val
-                    
+
                     case "circle_back":
                         # Defer execution (like 'later') - does nothing
                         pass
-                    
+
                     case "touch_base":
                         # Print a status update (touching base with stakeholders)
                         status_msgs = [
@@ -3080,6 +3099,127 @@ def interpret_code_statements(
                         msg = random.choice(status_msgs)
                         print(f"[TOUCH_BASE] {msg}")
 
+            case EmotionalStatement():
+                # Emotional programming - execute based on program mood
+                # Mood is tracked by error count in current scope
+                keyword = statement.keyword.value
+                error_count = getattr(interpret_code_statements, "_error_count", 0)
+
+                execute = False
+                match keyword:
+                    case "happy":
+                        # Execute if no recent errors (happy mood)
+                        execute = error_count == 0
+                        if execute:
+                            print("😊 [HAPPY MODE]")
+
+                    case "sad":
+                        # Execute if 1-2 recent errors (sad mood)
+                        execute = 1 <= error_count <= 2
+                        if execute:
+                            print("😢 [SAD MODE]")
+
+                    case "angry":
+                        # Execute if 3+ recent errors (angry mood)
+                        execute = error_count >= 3
+                        if execute:
+                            print("😠 [ANGRY MODE]")
+
+                    case "excited":
+                        # Execute randomly with high energy (70% chance)
+                        execute = random.random() < 0.70
+                        if execute:
+                            print("🎉 [EXCITED MODE]")
+
+                    case "tired":
+                        # Always execute but add a delay (0.5s)
+                        execute = True
+                        print("😴 [TIRED MODE] (executing slowly...)")
+                        import time
+
+                        time.sleep(0.5)
+
+                if execute:
+                    interpret_code_statements(
+                        statement.code,
+                        namespaces + [{}],
+                        async_statements,
+                        when_statement_watchers + [{}],
+                        importable_names,
+                        exported_names,
+                    )
+
+            case SuperstitiousStatement():
+                # Superstitious programming - luck-based execution
+                keyword = statement.keyword.value
+
+                match keyword:
+                    case "lucky":
+                        # Lucky block - execute with good fortune
+                        print("🍀 [LUCKY] Fingers crossed!")
+                        try:
+                            interpret_code_statements(
+                                statement.code,
+                                namespaces + [{}],
+                                async_statements,
+                                when_statement_watchers + [{}],
+                                importable_names,
+                                exported_names,
+                            )
+                            print("🍀 [LUCKY] Success! The luck held!")
+                        except Exception as e:
+                            # Even in lucky block, show error but continue
+                            print(
+                                f"🍀 [LUCKY] Uh oh, ran out of luck: {type(e).__name__}"
+                            )
+
+                    case "unlucky":
+                        # Unlucky block - expect things to go wrong
+                        print("💀 [UNLUCKY] This probably won't end well...")
+                        try:
+                            interpret_code_statements(
+                                statement.code,
+                                namespaces + [{}],
+                                async_statements,
+                                when_statement_watchers + [{}],
+                                importable_names,
+                                exported_names,
+                            )
+                            print("💀 [UNLUCKY] Wait, it actually worked? Surprising!")
+                        except Exception as e:
+                            print(f"💀 [UNLUCKY] Yep, knew it. {type(e).__name__}")
+
+                    case "cross_fingers":
+                        # Cross fingers - 50/50 chance
+                        print("🤞 [CROSS_FINGERS] Here goes nothing...")
+                        if random.random() < 0.50:
+                            interpret_code_statements(
+                                statement.code,
+                                namespaces + [{}],
+                                async_statements,
+                                when_statement_watchers + [{}],
+                                importable_names,
+                                exported_names,
+                            )
+                            print("🤞 [CROSS_FINGERS] Phew, that worked out!")
+                        else:
+                            print("🤞 [CROSS_FINGERS] Nope, bad luck this time.")
+
+                    case "knock_on_wood":
+                        # Knock on wood - suppress errors
+                        print("🪵 [KNOCK_ON_WOOD] *knock knock*")
+                        try:
+                            interpret_code_statements(
+                                statement.code,
+                                namespaces + [{}],
+                                async_statements,
+                                when_statement_watchers + [{}],
+                                importable_names,
+                                exported_names,
+                            )
+                        except Exception:
+                            # Silently suppress errors (the wood protected us)
+                            print("🪵 [KNOCK_ON_WOOD] The wood absorbed the bad luck!")
 
             case ReverseStatement():
                 # Reverse operation - reverses lists and strings in-place
