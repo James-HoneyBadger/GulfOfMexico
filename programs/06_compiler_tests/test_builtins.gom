@@ -1,0 +1,37 @@
+// Testing Math Functions
+
+print("=== Testing Math Functions ===")!
+
+const angle = 1.57!
+print("sin(1.57) = ")!
+print(sin(angle))!
+
+print("cos(0) = ")!
+print(cos(0))!
+
+print("sqrt(16) = ")!
+print(sqrt(16))!
+
+print("pow(2, 8) = ")!
+print(pow(2, 8))!
+
+print("abs(-42) = ")!
+const neg = -42!
+print(abs(neg))!
+
+print("floor(3.7) = ")!
+print(floor(3.7))!
+
+print("ceil(3.2) = ")!
+print(ceil(3.2))!
+
+print("round(3.5) = ")!
+print(round(3.5))!
+
+print("log(2.718) = ")!
+print(log(2.718))!
+
+print("exp(1) = ")!
+print(exp(1))!
+
+print("\n=== All Math Functions Tested! ===")!
