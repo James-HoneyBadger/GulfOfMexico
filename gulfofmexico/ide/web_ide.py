@@ -395,18 +395,51 @@ class GOMWebIDEHandler(http.server.SimpleHTTPRequestHandler):
             flex: 1;
             display: flex;
             flex-direction: column;
+            overflow: hidden;
+        }
+        .tabs {
+            display: flex;
+            background: #252526;
+            border-bottom: 1px solid #3e3e42;
+        }
+        .tab {
+            padding: 10px 20px;
+            cursor: pointer;
+            color: #858585;
+            font-size: 13px;
+            border-bottom: 2px solid transparent;
+            transition: all 0.2s;
+        }
+        .tab:hover {
+            color: #cccccc;
+            background: #2d2d30;
+        }
+        .tab.active {
+            color: #ffffff;
+            border-bottom-color: #0e639c;
+            background: #1e1e1e;
+        }
+        .tab-content {
+            display: none;
+            flex: 1;
+            overflow: auto;
+        }
+        .tab-content.active {
+            display: flex;
+            flex-direction: column;
         }
         .output-pane {
             flex: 1;
             display: flex;
             flex-direction: column;
-            border-bottom: 1px solid #3e3e42;
+            overflow: hidden;
         }
         .graphics-pane {
             flex: 1;
             display: flex;
             flex-direction: column;
             background: #1e1e1e;
+            overflow: hidden;
         }
         .pane-header {
             background: #252526;
@@ -438,7 +471,9 @@ class GOMWebIDEHandler(http.server.SimpleHTTPRequestHandler):
             font-size: 14px;
             line-height: 1.6;
             overflow-y: auto;
+            overflow-x: auto;
             white-space: pre-wrap;
+            word-wrap: break-word;
             font-family: 'Consolas', 'Liberation Mono', 'Menlo', 'Courier', monospace;
         }
         #graphics {
@@ -602,13 +637,19 @@ class GOMWebIDEHandler(http.server.SimpleHTTPRequestHandler):
 print(&quot;Hello Gulf of Mexico&quot;)!"></textarea>
         </div>
         <div class="right-panel">
-            <div class="output-pane">
-                <div class="pane-header">Output</div>
-                <div id="output"></div>
+            <div class="tabs">
+                <div class="tab active" onclick="switchTab('output')">Output</div>
+                <div class="tab" onclick="switchTab('graphics')">Graphics</div>
             </div>
-            <div class="graphics-pane">
-                <div class="pane-header">Graphics</div>
-                <div id="graphics"><div class="no-graphics">No graphics generated yet</div></div>
+            <div id="outputTab" class="tab-content active">
+                <div class="output-pane">
+                    <div id="output"></div>
+                </div>
+            </div>
+            <div id="graphicsTab" class="tab-content">
+                <div class="graphics-pane">
+                    <div id="graphics"><div class="no-graphics">No graphics generated yet</div></div>
+                </div>
             </div>
         </div>
     </div>
@@ -734,6 +775,22 @@ print "Current:", current x!
 print "Previous:", previous x!`
         };
 
+        function switchTab(tabName) {
+            // Update tab buttons
+            const tabs = document.querySelectorAll('.tab');
+            tabs.forEach(tab => {
+                tab.classList.remove('active');
+                if (tab.textContent.toLowerCase() === tabName.toLowerCase()) {
+                    tab.classList.add('active');
+                }
+            });
+            
+            // Update tab content
+            const contents = document.querySelectorAll('.tab-content');
+            contents.forEach(content => content.classList.remove('active'));
+            document.getElementById(tabName + 'Tab').classList.add('active');
+        }
+
         function loadExample(key) {
             if (key && examples[key]) {
                 document.getElementById('editor').value = examples[key];
@@ -790,6 +847,8 @@ print "Previous:", previous x!`
                     const imageUrl = '/image/' + result.images[0] + '?t=' + Date.now();
                     console.log('Setting image URL:', imageUrl);
                     graphics.innerHTML = '<img src="' + imageUrl + '" alt="Generated graphics" />';
+                    // Auto-switch to Graphics tab when graphics are generated
+                    switchTab('graphics');
                 } else {
                     console.log('No images found, showing placeholder');
                     graphics.innerHTML = '<div class="no-graphics">No graphics generated</div>';
