@@ -34,7 +34,7 @@ print(squared)!
 const a = 5!
 const b = 10!
 if a < b {
-    print(999)!
+   print(999)!
 }
 
 // Complex expression

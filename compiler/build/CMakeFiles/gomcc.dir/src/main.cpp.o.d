@@ -1,6 +1,8 @@
 CMakeFiles/gomcc.dir/src/main.cpp.o: \
- /home/james/GOM/compiler/src/main.cpp /usr/include/stdc-predef.h \
- /home/james/GOM/compiler/include/lexer.h /usr/include/c++/15.2.1/string \
+ /home/james/GulfOfMexico/compiler/src/main.cpp \
+ /usr/include/stdc-predef.h \
+ /home/james/GulfOfMexico/compiler/include/lexer.h \
+ /usr/include/c++/15.2.1/string \
  /usr/include/c++/15.2.1/bits/requires_hosted.h \
  /usr/include/c++/15.2.1/x86_64-pc-linux-gnu/bits/c++config.h \
  /usr/include/c++/15.2.1/x86_64-pc-linux-gnu/bits/os_defines.h \
@@ -113,8 +115,9 @@ CMakeFiles/gomcc.dir/src/main.cpp.o: \
  /usr/include/c++/15.2.1/typeinfo \
  /usr/include/c++/15.2.1/bits/nested_exception.h \
  /usr/include/c++/15.2.1/bits/enable_special_members.h \
- /home/james/GOM/compiler/include/parser.h \
- /home/james/GOM/compiler/include/ast.h /usr/include/c++/15.2.1/memory \
+ /home/james/GulfOfMexico/compiler/include/parser.h \
+ /home/james/GulfOfMexico/compiler/include/ast.h \
+ /usr/include/c++/15.2.1/memory \
  /usr/include/c++/15.2.1/bits/stl_tempbuf.h \
  /usr/include/c++/15.2.1/bits/stl_raw_storage_iter.h \
  /usr/include/c++/15.2.1/bits/align.h \
@@ -150,7 +153,7 @@ CMakeFiles/gomcc.dir/src/main.cpp.o: \
  /usr/include/c++/15.2.1/pstl/execution_defs.h \
  /usr/include/c++/15.2.1/variant /usr/include/c++/15.2.1/bits/monostate.h \
  /usr/include/c++/15.2.1/bits/parse_numbers.h \
- /home/james/GOM/compiler/include/codegen.h \
+ /home/james/GulfOfMexico/compiler/include/codegen.h \
  /usr/include/c++/15.2.1/sstream /usr/include/c++/15.2.1/istream \
  /usr/include/c++/15.2.1/ios /usr/include/c++/15.2.1/bits/ios_base.h \
  /usr/include/c++/15.2.1/bits/locale_classes.h \

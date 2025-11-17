@@ -1,0 +1,39 @@
+// Simple Mandelbrot Test
+print "Starting Mandelbrot test..."!
+
+const canvas = Canvas(400, 300, "black")!
+print "Canvas created"!
+
+// Simple gradient test first
+var y = -1!
+function drawRow() => {
+   if y < 299 {
+      var x = -1!
+      function drawPixel() => {
+         if x < 399 {
+            // Create gradient color
+            const red = (x + 1) * 255 / 400!
+            const blue = (y + 1) * 255 / 300!
+            const color = Color(red, 0, blue)!
+            canvas.pixel(x, y, color)!
+            var x = x + 1!
+            drawPixel()!
+         }
+      }!
+      drawPixel()!
+      var y = y + 1!
+      
+      const mod30 = (y + 1) - (((y + 1) / 30) * 30)!
+      if mod30 == 0 {
+         print "Row ${y + 1} complete"!
+      }
+      drawRow()!
+   }
+}!
+
+print "Drawing gradient..."!
+drawRow()!
+
+canvas.save("gradient_test.png")!
+print "Saved to gradient_test.png"!
+exit()!

@@ -4,7 +4,7 @@
 # compile CXX with /usr/bin/c++
 CXX_DEFINES = 
 
-CXX_INCLUDES = -I/home/james/GOM/compiler/include
+CXX_INCLUDES = -I/home/james/GulfOfMexico/compiler/include
 
 CXX_FLAGS = -std=c++17 -Wall -Wextra -pedantic
 

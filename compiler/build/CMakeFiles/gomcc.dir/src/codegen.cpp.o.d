@@ -1,8 +1,9 @@
 CMakeFiles/gomcc.dir/src/codegen.cpp.o: \
- /home/james/GOM/compiler/src/codegen.cpp /usr/include/stdc-predef.h \
- /home/james/GOM/compiler/include/codegen.h \
- /home/james/GOM/compiler/include/ast.h /usr/include/c++/15.2.1/memory \
- /usr/include/c++/15.2.1/bits/memoryfwd.h \
+ /home/james/GulfOfMexico/compiler/src/codegen.cpp \
+ /usr/include/stdc-predef.h \
+ /home/james/GulfOfMexico/compiler/include/codegen.h \
+ /home/james/GulfOfMexico/compiler/include/ast.h \
+ /usr/include/c++/15.2.1/memory /usr/include/c++/15.2.1/bits/memoryfwd.h \
  /usr/include/c++/15.2.1/x86_64-pc-linux-gnu/bits/c++config.h \
  /usr/include/c++/15.2.1/x86_64-pc-linux-gnu/bits/os_defines.h \
  /usr/include/features.h /usr/include/features-time64.h \

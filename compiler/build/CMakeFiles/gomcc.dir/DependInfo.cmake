@@ -8,12 +8,12 @@ set(CMAKE_DEPENDS_LANGUAGES
 
 # The set of dependency files which are needed:
 set(CMAKE_DEPENDS_DEPENDENCY_FILES
-  "/home/james/GOM/compiler/src/ast.cpp" "CMakeFiles/gomcc.dir/src/ast.cpp.o" "gcc" "CMakeFiles/gomcc.dir/src/ast.cpp.o.d"
-  "/home/james/GOM/compiler/src/codegen.cpp" "CMakeFiles/gomcc.dir/src/codegen.cpp.o" "gcc" "CMakeFiles/gomcc.dir/src/codegen.cpp.o.d"
-  "/home/james/GOM/compiler/src/lexer.cpp" "CMakeFiles/gomcc.dir/src/lexer.cpp.o" "gcc" "CMakeFiles/gomcc.dir/src/lexer.cpp.o.d"
-  "/home/james/GOM/compiler/src/main.cpp" "CMakeFiles/gomcc.dir/src/main.cpp.o" "gcc" "CMakeFiles/gomcc.dir/src/main.cpp.o.d"
-  "/home/james/GOM/compiler/src/parser.cpp" "CMakeFiles/gomcc.dir/src/parser.cpp.o" "gcc" "CMakeFiles/gomcc.dir/src/parser.cpp.o.d"
-  "/home/james/GOM/compiler/src/runtime.cpp" "CMakeFiles/gomcc.dir/src/runtime.cpp.o" "gcc" "CMakeFiles/gomcc.dir/src/runtime.cpp.o.d"
+  "/home/james/GulfOfMexico/compiler/src/ast.cpp" "CMakeFiles/gomcc.dir/src/ast.cpp.o" "gcc" "CMakeFiles/gomcc.dir/src/ast.cpp.o.d"
+  "/home/james/GulfOfMexico/compiler/src/codegen.cpp" "CMakeFiles/gomcc.dir/src/codegen.cpp.o" "gcc" "CMakeFiles/gomcc.dir/src/codegen.cpp.o.d"
+  "/home/james/GulfOfMexico/compiler/src/lexer.cpp" "CMakeFiles/gomcc.dir/src/lexer.cpp.o" "gcc" "CMakeFiles/gomcc.dir/src/lexer.cpp.o.d"
+  "/home/james/GulfOfMexico/compiler/src/main.cpp" "CMakeFiles/gomcc.dir/src/main.cpp.o" "gcc" "CMakeFiles/gomcc.dir/src/main.cpp.o.d"
+  "/home/james/GulfOfMexico/compiler/src/parser.cpp" "CMakeFiles/gomcc.dir/src/parser.cpp.o" "gcc" "CMakeFiles/gomcc.dir/src/parser.cpp.o.d"
+  "/home/james/GulfOfMexico/compiler/src/runtime.cpp" "CMakeFiles/gomcc.dir/src/runtime.cpp.o" "gcc" "CMakeFiles/gomcc.dir/src/runtime.cpp.o.d"
   "" "gomcc" "gcc" "CMakeFiles/gomcc.dir/link.d"
   )
 

@@ -1,0 +1,16 @@
+// Test drawing methods
+print "Testing canvas drawing..."!
+
+const canvas = Canvas(200, 200, "white")!
+
+print "Drawing rectangle..."!
+
+// Try to draw a simple red rectangle
+const red = Color(255, 0, 0)!
+canvas.rect(-1, -1, 50, 50, red)!
+
+print "Saving..."!
+
+canvas.save("drawing_test.png")!
+
+print "Done!"!

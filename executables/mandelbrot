@@ -9,29 +9,38 @@ import os
 from pathlib import Path
 from PIL import Image, ImageDraw
 
+
 def create_mandelbrot_art(width=600, height=400, filename="mandelbrot.png"):
     """Create a colorful fractal-like pattern"""
     print("Generating Mandelbrot-style fractal art...")
-    
+
     # Create image
-    img = Image.new('RGB', (width, height), color='#000033')
+    img = Image.new("RGB", (width, height), color="#000033")
     draw = ImageDraw.Draw(img)
-    
+
     print("Canvas initialized - drawing fractal pattern...")
-    
+
     # Create color palette (dark blue to white)
     colors = [
-        '#000033', '#000066', '#000099', '#0000CC', '#0000FF',
-        '#3333FF', '#6666FF', '#9999FF', '#CCCCFF', '#FFFFFF'
+        "#000033",
+        "#000066",
+        "#000099",
+        "#0000CC",
+        "#0000FF",
+        "#3333FF",
+        "#6666FF",
+        "#9999FF",
+        "#CCCCFF",
+        "#FFFFFF",
     ]
-    
+
     # Draw horizontal gradient bands
     print("Drawing gradient background...")
     band_height = height // len(colors)
     for i, color in enumerate(colors):
         y = i * band_height
         draw.rectangle([0, y, width, y + band_height], fill=color)
-    
+
     # Draw concentric circles to simulate Mandelbrot bulb
     print("Drawing central fractal bulb...")
     center_x, center_y = width // 2, height // 2
@@ -40,32 +49,36 @@ def create_mandelbrot_art(width=600, height=400, filename="mandelbrot.png"):
         color_idx = min(9 - i, len(colors) - 1)
         color = colors[color_idx]
         draw.ellipse(
-            [center_x - radius, center_y - radius, 
-             center_x + radius, center_y + radius],
-            fill=color
+            [
+                center_x - radius,
+                center_y - radius,
+                center_x + radius,
+                center_y + radius,
+            ],
+            fill=color,
         )
-    
+
     # Add smaller satellite circles
     print("Adding fractal details...")
     satellites = [
         (width // 3, height // 2, 40),
         (2 * width // 3, height // 2, 40),
         (width // 2, height // 4, 30),
-        (width // 2, 3 * height // 4, 30)
+        (width // 2, 3 * height // 4, 30),
     ]
-    
+
     for sx, sy, sradius in satellites:
         for i in range(3, 0, -1):
             r = sradius * i // 3
             color_idx = min(6 + i, len(colors) - 1)
             color = colors[color_idx]
             draw.ellipse([sx - r, sy - r, sx + r, sy + r], fill=color)
-    
+
     print("Finalizing fractal image...")
-    
+
     # Save
     img.save(filename)
-    
+
     print("")
     print("====================================")
     print("Mandelbrot Art Generation Complete!")
@@ -80,6 +93,7 @@ def create_mandelbrot_art(width=600, height=400, filename="mandelbrot.png"):
     print("The pattern uses colors from dark blue to white.")
     print("")
 
+
 def main():
     try:
         create_mandelbrot_art()
@@ -87,6 +101,7 @@ def main():
     except Exception as e:
         print(f"Error creating Mandelbrot art: {e}", file=sys.stderr)
         return 1
+
 
 if __name__ == "__main__":
     sys.exit(main())

@@ -1,6 +1,8 @@
 CMakeFiles/gomcc.dir/src/lexer.cpp.o: \
- /home/james/GOM/compiler/src/lexer.cpp /usr/include/stdc-predef.h \
- /home/james/GOM/compiler/include/lexer.h /usr/include/c++/15.2.1/string \
+ /home/james/GulfOfMexico/compiler/src/lexer.cpp \
+ /usr/include/stdc-predef.h \
+ /home/james/GulfOfMexico/compiler/include/lexer.h \
+ /usr/include/c++/15.2.1/string \
  /usr/include/c++/15.2.1/bits/requires_hosted.h \
  /usr/include/c++/15.2.1/x86_64-pc-linux-gnu/bits/c++config.h \
  /usr/include/c++/15.2.1/x86_64-pc-linux-gnu/bits/os_defines.h \

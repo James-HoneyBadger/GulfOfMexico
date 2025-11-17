@@ -53,10 +53,10 @@ RM = /usr/bin/cmake -E rm -f
 EQUALS = =
 
 # The top-level source directory on which CMake was run.
-CMAKE_SOURCE_DIR = /home/james/GOM/compiler
+CMAKE_SOURCE_DIR = /home/james/GulfOfMexico/compiler
 
 # The top-level build directory on which CMake was run.
-CMAKE_BINARY_DIR = /home/james/GOM/compiler/build
+CMAKE_BINARY_DIR = /home/james/GulfOfMexico/compiler/build
 
 # Include any dependencies generated for this target.
 include CMakeFiles/gomcc.dir/depend.make
@@ -73,88 +73,88 @@ CMakeFiles/gomcc.dir/codegen:
 .PHONY : CMakeFiles/gomcc.dir/codegen
 
 CMakeFiles/gomcc.dir/src/main.cpp.o: CMakeFiles/gomcc.dir/flags.make
-CMakeFiles/gomcc.dir/src/main.cpp.o: /home/james/GOM/compiler/src/main.cpp
+CMakeFiles/gomcc.dir/src/main.cpp.o: /home/james/GulfOfMexico/compiler/src/main.cpp
 CMakeFiles/gomcc.dir/src/main.cpp.o: CMakeFiles/gomcc.dir/compiler_depend.ts
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/home/james/GOM/compiler/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_1) "Building CXX object CMakeFiles/gomcc.dir/src/main.cpp.o"
-	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/gomcc.dir/src/main.cpp.o -MF CMakeFiles/gomcc.dir/src/main.cpp.o.d -o CMakeFiles/gomcc.dir/src/main.cpp.o -c /home/james/GOM/compiler/src/main.cpp
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/home/james/GulfOfMexico/compiler/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_1) "Building CXX object CMakeFiles/gomcc.dir/src/main.cpp.o"
+	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/gomcc.dir/src/main.cpp.o -MF CMakeFiles/gomcc.dir/src/main.cpp.o.d -o CMakeFiles/gomcc.dir/src/main.cpp.o -c /home/james/GulfOfMexico/compiler/src/main.cpp
 
 CMakeFiles/gomcc.dir/src/main.cpp.i: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Preprocessing CXX source to CMakeFiles/gomcc.dir/src/main.cpp.i"
-	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /home/james/GOM/compiler/src/main.cpp > CMakeFiles/gomcc.dir/src/main.cpp.i
+	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /home/james/GulfOfMexico/compiler/src/main.cpp > CMakeFiles/gomcc.dir/src/main.cpp.i
 
 CMakeFiles/gomcc.dir/src/main.cpp.s: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Compiling CXX source to assembly CMakeFiles/gomcc.dir/src/main.cpp.s"
-	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /home/james/GOM/compiler/src/main.cpp -o CMakeFiles/gomcc.dir/src/main.cpp.s
+	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /home/james/GulfOfMexico/compiler/src/main.cpp -o CMakeFiles/gomcc.dir/src/main.cpp.s
 
 CMakeFiles/gomcc.dir/src/lexer.cpp.o: CMakeFiles/gomcc.dir/flags.make
-CMakeFiles/gomcc.dir/src/lexer.cpp.o: /home/james/GOM/compiler/src/lexer.cpp
+CMakeFiles/gomcc.dir/src/lexer.cpp.o: /home/james/GulfOfMexico/compiler/src/lexer.cpp
 CMakeFiles/gomcc.dir/src/lexer.cpp.o: CMakeFiles/gomcc.dir/compiler_depend.ts
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/home/james/GOM/compiler/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_2) "Building CXX object CMakeFiles/gomcc.dir/src/lexer.cpp.o"
-	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/gomcc.dir/src/lexer.cpp.o -MF CMakeFiles/gomcc.dir/src/lexer.cpp.o.d -o CMakeFiles/gomcc.dir/src/lexer.cpp.o -c /home/james/GOM/compiler/src/lexer.cpp
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/home/james/GulfOfMexico/compiler/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_2) "Building CXX object CMakeFiles/gomcc.dir/src/lexer.cpp.o"
+	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/gomcc.dir/src/lexer.cpp.o -MF CMakeFiles/gomcc.dir/src/lexer.cpp.o.d -o CMakeFiles/gomcc.dir/src/lexer.cpp.o -c /home/james/GulfOfMexico/compiler/src/lexer.cpp
 
 CMakeFiles/gomcc.dir/src/lexer.cpp.i: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Preprocessing CXX source to CMakeFiles/gomcc.dir/src/lexer.cpp.i"
-	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /home/james/GOM/compiler/src/lexer.cpp > CMakeFiles/gomcc.dir/src/lexer.cpp.i
+	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /home/james/GulfOfMexico/compiler/src/lexer.cpp > CMakeFiles/gomcc.dir/src/lexer.cpp.i
 
 CMakeFiles/gomcc.dir/src/lexer.cpp.s: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Compiling CXX source to assembly CMakeFiles/gomcc.dir/src/lexer.cpp.s"
-	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /home/james/GOM/compiler/src/lexer.cpp -o CMakeFiles/gomcc.dir/src/lexer.cpp.s
+	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /home/james/GulfOfMexico/compiler/src/lexer.cpp -o CMakeFiles/gomcc.dir/src/lexer.cpp.s
 
 CMakeFiles/gomcc.dir/src/parser.cpp.o: CMakeFiles/gomcc.dir/flags.make
-CMakeFiles/gomcc.dir/src/parser.cpp.o: /home/james/GOM/compiler/src/parser.cpp
+CMakeFiles/gomcc.dir/src/parser.cpp.o: /home/james/GulfOfMexico/compiler/src/parser.cpp
 CMakeFiles/gomcc.dir/src/parser.cpp.o: CMakeFiles/gomcc.dir/compiler_depend.ts
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/home/james/GOM/compiler/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_3) "Building CXX object CMakeFiles/gomcc.dir/src/parser.cpp.o"
-	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/gomcc.dir/src/parser.cpp.o -MF CMakeFiles/gomcc.dir/src/parser.cpp.o.d -o CMakeFiles/gomcc.dir/src/parser.cpp.o -c /home/james/GOM/compiler/src/parser.cpp
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/home/james/GulfOfMexico/compiler/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_3) "Building CXX object CMakeFiles/gomcc.dir/src/parser.cpp.o"
+	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/gomcc.dir/src/parser.cpp.o -MF CMakeFiles/gomcc.dir/src/parser.cpp.o.d -o CMakeFiles/gomcc.dir/src/parser.cpp.o -c /home/james/GulfOfMexico/compiler/src/parser.cpp
 
 CMakeFiles/gomcc.dir/src/parser.cpp.i: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Preprocessing CXX source to CMakeFiles/gomcc.dir/src/parser.cpp.i"
-	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /home/james/GOM/compiler/src/parser.cpp > CMakeFiles/gomcc.dir/src/parser.cpp.i
+	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /home/james/GulfOfMexico/compiler/src/parser.cpp > CMakeFiles/gomcc.dir/src/parser.cpp.i
 
 CMakeFiles/gomcc.dir/src/parser.cpp.s: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Compiling CXX source to assembly CMakeFiles/gomcc.dir/src/parser.cpp.s"
-	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /home/james/GOM/compiler/src/parser.cpp -o CMakeFiles/gomcc.dir/src/parser.cpp.s
+	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /home/james/GulfOfMexico/compiler/src/parser.cpp -o CMakeFiles/gomcc.dir/src/parser.cpp.s
 
 CMakeFiles/gomcc.dir/src/ast.cpp.o: CMakeFiles/gomcc.dir/flags.make
-CMakeFiles/gomcc.dir/src/ast.cpp.o: /home/james/GOM/compiler/src/ast.cpp
+CMakeFiles/gomcc.dir/src/ast.cpp.o: /home/james/GulfOfMexico/compiler/src/ast.cpp
 CMakeFiles/gomcc.dir/src/ast.cpp.o: CMakeFiles/gomcc.dir/compiler_depend.ts
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/home/james/GOM/compiler/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_4) "Building CXX object CMakeFiles/gomcc.dir/src/ast.cpp.o"
-	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/gomcc.dir/src/ast.cpp.o -MF CMakeFiles/gomcc.dir/src/ast.cpp.o.d -o CMakeFiles/gomcc.dir/src/ast.cpp.o -c /home/james/GOM/compiler/src/ast.cpp
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/home/james/GulfOfMexico/compiler/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_4) "Building CXX object CMakeFiles/gomcc.dir/src/ast.cpp.o"
+	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/gomcc.dir/src/ast.cpp.o -MF CMakeFiles/gomcc.dir/src/ast.cpp.o.d -o CMakeFiles/gomcc.dir/src/ast.cpp.o -c /home/james/GulfOfMexico/compiler/src/ast.cpp
 
 CMakeFiles/gomcc.dir/src/ast.cpp.i: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Preprocessing CXX source to CMakeFiles/gomcc.dir/src/ast.cpp.i"
-	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /home/james/GOM/compiler/src/ast.cpp > CMakeFiles/gomcc.dir/src/ast.cpp.i
+	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /home/james/GulfOfMexico/compiler/src/ast.cpp > CMakeFiles/gomcc.dir/src/ast.cpp.i
 
 CMakeFiles/gomcc.dir/src/ast.cpp.s: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Compiling CXX source to assembly CMakeFiles/gomcc.dir/src/ast.cpp.s"
-	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /home/james/GOM/compiler/src/ast.cpp -o CMakeFiles/gomcc.dir/src/ast.cpp.s
+	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /home/james/GulfOfMexico/compiler/src/ast.cpp -o CMakeFiles/gomcc.dir/src/ast.cpp.s
 
 CMakeFiles/gomcc.dir/src/codegen.cpp.o: CMakeFiles/gomcc.dir/flags.make
-CMakeFiles/gomcc.dir/src/codegen.cpp.o: /home/james/GOM/compiler/src/codegen.cpp
+CMakeFiles/gomcc.dir/src/codegen.cpp.o: /home/james/GulfOfMexico/compiler/src/codegen.cpp
 CMakeFiles/gomcc.dir/src/codegen.cpp.o: CMakeFiles/gomcc.dir/compiler_depend.ts
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/home/james/GOM/compiler/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_5) "Building CXX object CMakeFiles/gomcc.dir/src/codegen.cpp.o"
-	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/gomcc.dir/src/codegen.cpp.o -MF CMakeFiles/gomcc.dir/src/codegen.cpp.o.d -o CMakeFiles/gomcc.dir/src/codegen.cpp.o -c /home/james/GOM/compiler/src/codegen.cpp
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/home/james/GulfOfMexico/compiler/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_5) "Building CXX object CMakeFiles/gomcc.dir/src/codegen.cpp.o"
+	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/gomcc.dir/src/codegen.cpp.o -MF CMakeFiles/gomcc.dir/src/codegen.cpp.o.d -o CMakeFiles/gomcc.dir/src/codegen.cpp.o -c /home/james/GulfOfMexico/compiler/src/codegen.cpp
 
 CMakeFiles/gomcc.dir/src/codegen.cpp.i: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Preprocessing CXX source to CMakeFiles/gomcc.dir/src/codegen.cpp.i"
-	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /home/james/GOM/compiler/src/codegen.cpp > CMakeFiles/gomcc.dir/src/codegen.cpp.i
+	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /home/james/GulfOfMexico/compiler/src/codegen.cpp > CMakeFiles/gomcc.dir/src/codegen.cpp.i
 
 CMakeFiles/gomcc.dir/src/codegen.cpp.s: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Compiling CXX source to assembly CMakeFiles/gomcc.dir/src/codegen.cpp.s"
-	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /home/james/GOM/compiler/src/codegen.cpp -o CMakeFiles/gomcc.dir/src/codegen.cpp.s
+	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /home/james/GulfOfMexico/compiler/src/codegen.cpp -o CMakeFiles/gomcc.dir/src/codegen.cpp.s
 
 CMakeFiles/gomcc.dir/src/runtime.cpp.o: CMakeFiles/gomcc.dir/flags.make
-CMakeFiles/gomcc.dir/src/runtime.cpp.o: /home/james/GOM/compiler/src/runtime.cpp
+CMakeFiles/gomcc.dir/src/runtime.cpp.o: /home/james/GulfOfMexico/compiler/src/runtime.cpp
 CMakeFiles/gomcc.dir/src/runtime.cpp.o: CMakeFiles/gomcc.dir/compiler_depend.ts
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/home/james/GOM/compiler/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_6) "Building CXX object CMakeFiles/gomcc.dir/src/runtime.cpp.o"
-	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/gomcc.dir/src/runtime.cpp.o -MF CMakeFiles/gomcc.dir/src/runtime.cpp.o.d -o CMakeFiles/gomcc.dir/src/runtime.cpp.o -c /home/james/GOM/compiler/src/runtime.cpp
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/home/james/GulfOfMexico/compiler/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_6) "Building CXX object CMakeFiles/gomcc.dir/src/runtime.cpp.o"
+	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/gomcc.dir/src/runtime.cpp.o -MF CMakeFiles/gomcc.dir/src/runtime.cpp.o.d -o CMakeFiles/gomcc.dir/src/runtime.cpp.o -c /home/james/GulfOfMexico/compiler/src/runtime.cpp
 
 CMakeFiles/gomcc.dir/src/runtime.cpp.i: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Preprocessing CXX source to CMakeFiles/gomcc.dir/src/runtime.cpp.i"
-	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /home/james/GOM/compiler/src/runtime.cpp > CMakeFiles/gomcc.dir/src/runtime.cpp.i
+	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /home/james/GulfOfMexico/compiler/src/runtime.cpp > CMakeFiles/gomcc.dir/src/runtime.cpp.i
 
 CMakeFiles/gomcc.dir/src/runtime.cpp.s: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Compiling CXX source to assembly CMakeFiles/gomcc.dir/src/runtime.cpp.s"
-	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /home/james/GOM/compiler/src/runtime.cpp -o CMakeFiles/gomcc.dir/src/runtime.cpp.s
+	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /home/james/GulfOfMexico/compiler/src/runtime.cpp -o CMakeFiles/gomcc.dir/src/runtime.cpp.s
 
 # Object files for target gomcc
 gomcc_OBJECTS = \
@@ -177,7 +177,7 @@ gomcc: CMakeFiles/gomcc.dir/src/runtime.cpp.o
 gomcc: CMakeFiles/gomcc.dir/build.make
 gomcc: CMakeFiles/gomcc.dir/compiler_depend.ts
 gomcc: CMakeFiles/gomcc.dir/link.txt
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --bold --progress-dir=/home/james/GOM/compiler/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_7) "Linking CXX executable gomcc"
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --bold --progress-dir=/home/james/GulfOfMexico/compiler/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_7) "Linking CXX executable gomcc"
 	$(CMAKE_COMMAND) -E cmake_link_script CMakeFiles/gomcc.dir/link.txt --verbose=$(VERBOSE)
 
 # Rule to build all files generated by this target.
@@ -189,6 +189,6 @@ CMakeFiles/gomcc.dir/clean:
 .PHONY : CMakeFiles/gomcc.dir/clean
 
 CMakeFiles/gomcc.dir/depend:
-	cd /home/james/GOM/compiler/build && $(CMAKE_COMMAND) -E cmake_depends "Unix Makefiles" /home/james/GOM/compiler /home/james/GOM/compiler /home/james/GOM/compiler/build /home/james/GOM/compiler/build /home/james/GOM/compiler/build/CMakeFiles/gomcc.dir/DependInfo.cmake "--color=$(COLOR)"
+	cd /home/james/GulfOfMexico/compiler/build && $(CMAKE_COMMAND) -E cmake_depends "Unix Makefiles" /home/james/GulfOfMexico/compiler /home/james/GulfOfMexico/compiler /home/james/GulfOfMexico/compiler/build /home/james/GulfOfMexico/compiler/build /home/james/GulfOfMexico/compiler/build/CMakeFiles/gomcc.dir/DependInfo.cmake "--color=$(COLOR)"
 .PHONY : CMakeFiles/gomcc.dir/depend
 

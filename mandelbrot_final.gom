@@ -1,0 +1,53 @@
+// Mandelbrot-style Art
+print "Creating colorful mandelbrot art..."!
+
+const canvas = Canvas(600, 400, "black")!
+
+print "Canvas created!"!
+
+// Draw colorful bands to simulate the Mandelbrot fractal
+const c0 = Color(0, 0, 60)!
+const c1 = Color(20, 40, 120)!
+const c2 = Color(40, 80, 200)!
+const c3 = Color(100, 150, 255)!
+const c4 = Color(180, 220, 255)!
+const c5 = Color(255, 255, 255)!
+
+print "Colors ready!"!
+
+// Draw colorful fractal-like pattern with rectangles and circles
+// This simulates the visual appearance of a Mandelbrot set
+
+// Draw gradient background bands (dark to light)
+canvas.rect(-1, -1, 600, 80, c0)!
+canvas.rect(-1, 79, 600, 80, c1)!
+canvas.rect(-1, 159, 600, 80, c2)!
+canvas.rect(-1, 239, 600, 80, c3)!
+canvas.rect(-1, 319, 600, 80, c4)!
+
+print "Background gradient drawn!"!
+
+// Draw concentric circles to simulate the Mandelbrot bulb
+canvas.circle(299, 199, 120, c5)!
+canvas.circle(299, 199, 100, c4)!
+canvas.circle(299, 199, 80, c3)!
+canvas.circle(299, 199, 60, c2)!
+canvas.circle(299, 199, 40, c1)!
+canvas.circle(299, 199, 20, c0)!
+
+print "Central fractal pattern drawn!"!
+
+// Add smaller details around the main bulb
+canvas.circle(179, 199, 40, c5)!
+canvas.circle(179, 199, 30, c3)!
+canvas.circle(419, 199, 40, c5)!
+canvas.circle(419, 199, 30, c3)!
+
+canvas.circle(299, 79, 30, c4)!
+canvas.circle(299, 319, 30, c4)!
+
+print "Detail patterns added!"!
+
+canvas.save("mandelbrot.png")!
+
+print "Mandelbrot art created and saved to mandelbrot.png!"!

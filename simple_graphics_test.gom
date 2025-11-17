@@ -1,0 +1,10 @@
+// Simplest graphics test
+print "Starting test"!
+
+const canvas = Canvas(100, 100, "white")!
+
+print "Canvas created"!
+
+canvas.save("test.png")!
+
+print "Done"!

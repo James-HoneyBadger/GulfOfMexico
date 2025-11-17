@@ -85,9 +85,34 @@ GomValue gom_index_access(const GomValue& obj, const GomValue& index) {
 }
 
 int main() {
-    auto add = [&](GomValue a, GomValue b) -> GomValue {
-        return gom_binary_op(a, "+", b);
-    };
-    const GomValue result = add(GomValue(5.000000), GomValue(7.000000));
-    gom_print(result);
+    print;
+    GomValue(std::string("Generating Mandelbrot-style fractal art..."));
+    const GomValue canvas = Canvas(GomValue(600.000000), GomValue(400.000000), GomValue(std::string("#000033")));
+    print;
+    GomValue(std::string("Canvas initialized..."));
+    gom_index_access(canvas, GomValue(std::string("save")));
+    print;
+    GomValue(std::string(""));
+    print;
+    GomValue(std::string("===================================="));
+    print;
+    GomValue(std::string("Mandelbrot Art Generation Complete!"));
+    print;
+    GomValue(std::string("===================================="));
+    print;
+    GomValue(std::string(""));
+    print;
+    GomValue(std::string("Output: mandelbrot.png"));
+    print;
+    GomValue(std::string("Size: 600 x 400 pixels"));
+    print;
+    GomValue(std::string(""));
+    print;
+    GomValue(std::string("This colorful visualization represents"));
+    print;
+    GomValue(std::string("the beauty of the Mandelbrot set fractal"));
+    print;
+    GomValue(std::string("using Gulf of Mexico's graphics system."));
+    print;
+    GomValue(std::string(""));
 }
