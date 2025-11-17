@@ -159,3 +159,8 @@ def _main(argv: Optional[list[str]] = None) -> int:
 
 if __name__ == "__main__":  # pragma: no cover
     raise SystemExit(_main())
+
+
+def main():
+    """Entry point for console scripts."""
+    raise SystemExit(_main())

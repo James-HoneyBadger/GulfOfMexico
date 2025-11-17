@@ -1,0 +1,32 @@
+# Include additional files in the distribution
+include README.md
+include LICENSE
+include CHANGELOG.md
+include DOCUMENTATION.md
+include CODE_OF_CONDUCT.md
+
+# Include documentation
+recursive-include docs *.md
+
+# Include language configuration presets
+recursive-include configs *.json *.yaml *.yml
+
+# Include example programs
+recursive-include programs *.gom
+recursive-include examples *.gom *.json
+
+# Exclude test files and build artifacts
+exclude .gitignore
+exclude .flake8
+exclude .markdownlint.json
+exclude pytest.ini
+exclude tox.ini
+recursive-exclude tests *
+recursive-exclude .git *
+recursive-exclude __pycache__ *
+recursive-exclude *.egg-info *
+recursive-exclude build *
+recursive-exclude dist *
+global-exclude *.pyc
+global-exclude *.pyo
+global-exclude .DS_Store
