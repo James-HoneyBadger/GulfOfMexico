@@ -200,7 +200,7 @@ run_file("myprogram.gom")
    - Feature flag management
    - Namespace integration
 
-3. **CLI Layer** (`gomconfig.py`)
+3. **CLI Layer** (`tools/gomconfig.py`)
    - User-friendly configuration management
    - Validation and comparison tools
    - Documentation generation
@@ -219,7 +219,7 @@ Easy to add:
 - New presets (just create a YAML/JSON file)
 - Custom functions (via implementation references)
 - New syntax options (extend `SyntaxOptions` dataclass)
-- Additional CLI commands (add to `gomconfig.py`)
+- Additional CLI commands (add to `tools/gomconfig.py`)
 
 ## Benefits
 
