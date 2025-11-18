@@ -28,7 +28,7 @@ The **Language Construction Set** is a comprehensive system that allows you to c
    - Integration with interpreter namespaces
    - Auto-loading from environment
 
-3. **gomconfig.py** (490 lines)
+3. **tools/gomconfig.py** (490 lines)
    - Complete CLI tool for configuration management
    - Commands: create, edit, validate, info, export, list-presets, convert, diff
    - Interactive configuration builder
@@ -65,7 +65,7 @@ The **Language Construction Set** is a comprehensive system that allows you to c
    - Usage instructions
 
 ### Demos & Examples
-10. **demo_language_construction_set.py** (370 lines)
+10. **tools/demos/demo_language_construction_set.py** (370 lines)
     - 8 interactive demonstrations
     - Shows all major features
     - Generates example configurations
@@ -120,17 +120,17 @@ Six built-in presets for common use cases:
 ### 5. CLI Tool
 
 ```bash
-# Create
-python gomconfig.py create --preset python_like
+```bash
+python tools/gomconfig.py create --preset python_like
 
-# Validate
-python gomconfig.py validate my_config.yaml
+# Validate a configuration file
+python tools/gomconfig.py validate my_config.yaml
 
-# Info
-python gomconfig.py info my_config.yaml
+# View configuration info
+python tools/gomconfig.py info my_config.yaml
 
-# Compare
-python gomconfig.py diff config1.yaml config2.yaml
+# Compare two configurations
+python tools/gomconfig.py diff config1.yaml config2.yaml
 ```
 
 ### 6. Runtime Integration

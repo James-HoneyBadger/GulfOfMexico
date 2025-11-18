@@ -140,7 +140,7 @@ This directory contains example programs demonstrating all features of the Gulf 
 python -m gulfofmexico programs/examples/00_complete_showcase.gom
 
 # Using run script
-python run_gom.py programs/examples/20_procrastination.gom
+python tools/run_gom.py programs/examples/20_procrastination.gom
 
 # Using the interpreter directly
 from gulfofmexico import run_file

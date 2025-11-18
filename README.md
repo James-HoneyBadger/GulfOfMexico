@@ -132,28 +132,28 @@ python demo_create_new_languages.py
 
 ```bash
 # Create from preset
-python gomconfig.py create --preset python_like --output my_lang.json
+python tools/gomconfig.py create --preset python_like --output my_lang.json
 
 # Interactive creation
-python gomconfig.py create --interactive
+python tools/gomconfig.py create --interactive
 
 # Update configuration
-python gomconfig.py update my_lang.json --set metadata.author "Your Name"
+python tools/gomconfig.py update my_lang.json --set metadata.author "Your Name"
 
 # Delete elements
-python gomconfig.py delete my_lang.json --keyword synergize --function blockchain
+python tools/gomconfig.py delete my_lang.json --keyword synergize --function blockchain
 
 # Merge configurations
-python gomconfig.py update config1.json --merge config2.json
+python tools/gomconfig.py update config1.json --merge config2.json
 
 # Compare configurations
-python gomconfig.py diff config1.json config2.json
+python tools/gomconfig.py diff config1.json config2.json
 
 # Validate
-python gomconfig.py validate my_lang.json
+python tools/gomconfig.py validate my_lang.json
 
 # Show info
-python gomconfig.py info my_lang.json
+python tools/gomconfig.py info my_lang.json
 ```
 
 ### Available Presets
@@ -346,9 +346,15 @@ GulfOfMexico/
 │   ├── minimal.json           # Teaching mode
 │   └── README.md
 │
-├── gomconfig.py               # CLI configuration tool
-├── demo_create_new_languages.py  # Advanced demos
-└── README.md                  # This file
+├── tools/                      # Development tools
+│   ├── gomconfig.py           # CLI configuration tool
+│   ├── demos/                 # Demo scripts
+│   │   └── demo_create_new_languages.py
+│   └── maintenance/           # Code maintenance scripts
+│
+├── scripts/                    # Shell scripts for validation
+│
+├── configs/                    # Language presets
 ```
 
 ## 🎓 Examples
@@ -448,7 +454,7 @@ config.save("teaching.json")
 
 Run the comprehensive demo:
 ```bash
-python demo_create_new_languages.py
+python tools/demos/demo_create_new_languages.py
 ```
 
 This creates 5 complete language variants:

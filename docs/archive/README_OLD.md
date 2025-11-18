@@ -146,23 +146,22 @@ config.save("my_language.yaml")
 ### CLI Configuration Tool
 
 ```bash
-# Create new configuration
-python gomconfig.py create --preset python_like
+python tools/gomconfig.py create --preset python_like
 
-# Interactive creation
-python gomconfig.py create --interactive
+# Interactive creation with guided prompts
+python tools/gomconfig.py create --interactive
 
-# Validate configuration
-python gomconfig.py validate my_config.yaml
+# Validate a configuration
+python tools/gomconfig.py validate my_config.yaml
 
-# Show detailed info
-python gomconfig.py info my_config.yaml
+# View configuration details
+python tools/gomconfig.py info my_config.yaml
 
-# List available presets
-python gomconfig.py list-presets
+# List all available presets
+python tools/gomconfig.py list-presets
 
-# Export documentation
-python gomconfig.py export my_config.yaml --format markdown
+# Export configuration documentation
+python tools/gomconfig.py export my_config.yaml --format markdown
 ```
 
 ### Available Presets
@@ -191,8 +190,12 @@ python gomconfig.py export my_config.yaml --format markdown
 - **[demo_language_construction_set.py](demo_language_construction_set.py)** - Interactive demo
 
 ```bash
-# Run the demo to see all features
-python demo_language_construction_set.py
+- **[demo_language_construction_set.py](../tools/demos/demo_language_construction_set.py)** - Interactive demo
+
+Run this script to see the construction set in action:
+
+```bash
+python tools/demos/demo_language_construction_set.py
 ```
 
 ---
@@ -545,7 +548,7 @@ print(helper())!
 ```bash
 python -m gulfofmexico.ide       # Qt GUI with web fallback
 python -m gulfofmexico.ide --web # Force web interface
-./run_web_ide.sh                 # Convenience script for web IDE
+./scripts/run_web_ide.sh         # Convenience script for web IDE
 ```
 
 Web IDE: `http://localhost:8080/ide`

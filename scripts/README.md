@@ -68,4 +68,4 @@ python3 scripts/benchmarks.py
 
 - All scripts assume they're run from the repository root
 - The batch runner has a 6-second timeout per file (normal for reactive programs)
-- Scripts in this directory are for development; end users should use `run_gom.py` directly
+- Scripts in this directory are for development; end users should use `tools/run_gom.py` directly

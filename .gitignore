@@ -1,7 +1,50 @@
+# Python
 *.pyc
-build/*
-dist/*
-*.egg*/*
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+
+# Distribution / packaging
+build/
+dist/
+*.egg-info/
+*.egg
+.eggs/
+*.whl
+
+# Virtual environments
+.venv/
+venv/
+ENV/
+env/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# Build artifacts and generated files
+artifacts/
+*.png
+*.jpg
+*.gif
+validation_results.txt
+validate_run_output.txt
+
+# Poetry
+poetry.lock
+
+# Secrets
 secrets.txt
+*.key
+*.pem
+
+# OS
+.DS_Store
+Thumbs.db
 
 
