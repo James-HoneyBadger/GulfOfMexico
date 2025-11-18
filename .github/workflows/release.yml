@@ -72,7 +72,7 @@ jobs:
             dist/*
 
       - name: Publish to PyPI (optional)
-        if: ${{ secrets.PYPI_API_TOKEN != '' }}
+        if: ${{ secrets.PYPI_API_TOKEN }}
         uses: pypa/gh-action-pypi-publish@release/v1
         with:
           password: ${{ secrets.PYPI_API_TOKEN }}
