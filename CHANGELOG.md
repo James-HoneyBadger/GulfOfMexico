@@ -4,6 +4,13 @@ All notable changes to this project will be documented in this file.
 
 The format is simple date-based entries. Dates use ISO-8601 (YYYY-MM-DD).
 
+## 2025-11-17 (v0.1.3)
+
+### PyPI Publication
+- First official release to PyPI (https://pypi.org/project/gulfofmexico/)
+- Automated GitHub Release + PyPI publish via GitHub Actions
+- Package installable via `pip install gulfofmexico`
+
 ## 2025-11-17 (v0.1.2)
 
 ### First GitHub Release automation
