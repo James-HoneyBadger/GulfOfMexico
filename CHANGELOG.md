@@ -4,8 +4,13 @@ All notable changes to this project will be documented in this file.
 
 The format is simple date-based entries. Dates use ISO-8601 (YYYY-MM-DD).
 
-## 2025-11-17
+## 2025-11-17 (v0.1.2)
 
+### First GitHub Release automation
+- Added GitHub Actions workflow to build wheels/sdist on version tags and create a GitHub Release with attached artifacts
+- Release body sourced from `CHANGELOG.md`
+- Optional PyPI publish via `pypa/gh-action-pypi-publish` using `PYPI_API_TOKEN` secret
+- Console scripts wired: `gulfofmexico`, `gom`, `gom-ide`, `gomconfig`
 ### Repository cleanup and docs alignment
 - Removed internal GOM test programs used for designing/debugging the language:
   - Deleted `programs/tests/` and `programs/06_compiler_tests/`
