@@ -15,8 +15,6 @@
 - **[Programming Guide](docs/guides/PROGRAMMING_GUIDE.md)** - Language features
 - **[Language Construction Set](docs/language/LANGUAGE_CONSTRUCTION_QUICKSTART.md)** - Create custom language variants
 
-> Note (Nov 2025): Internal GOM test programs used for designing/debugging the language were removed. Use user-facing examples in `programs/examples/`, demos in `programs/demos/`, compiler examples in `compiler/examples/`, and Python unit tests in `tests/`.
-
 ## 🚀 Two Implementations
 
 ### Python Interpreter ⭐ (Recommended)
