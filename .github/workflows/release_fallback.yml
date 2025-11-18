@@ -92,7 +92,7 @@ jobs:
           fi
 
       - name: Publish to PyPI (optional)
-        if: ${{ secrets.PYPI_API_TOKEN != '' }}
+        if: ${{ secrets.PYPI_API_TOKEN }}
         shell: bash
         working-directory: repo
         env:
