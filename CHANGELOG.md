@@ -4,6 +4,27 @@ All notable changes to this project will be documented in this file.
 
 The format is simple date-based entries. Dates use ISO-8601 (YYYY-MM-DD).
 
+## 2025-11-18 (v0.1.5)
+
+### Documentation standardization
+- Unified look and feel across all documentation files
+- Standardized titles to "Gulf of Mexico — <Topic>" format
+- Added concise one-line introductions to all docs
+- Created comprehensive docs style guide in DOCUMENTATION.md
+- Added table of contents to DOCUMENTATION.md for easier navigation
+- Normalized headings, links, and formatting across 20+ documentation files
+- Updated LICENSE to MIT License with Honey Badger Universe copyright
+- Reformatted CODE_OF_CONDUCT.md with clear headings and professional tone
+- Added "Community & Policies" section to README and DOCUMENTATION
+- Created docs/guides/README.md index for user guides
+- Fixed example paths to use programs/examples/ and programs/demos/
+- Updated .markdownlint.json to align with new documentation style
+- Comprehensive updates to:
+  - All reference docs (TECHNICAL_REFERENCE, FEATURE_PARITY, BUILTIN_FUNCTIONS, etc.)
+  - All guide docs (INSTALL_GUIDE, USER_GUIDE, PROGRAMMING_GUIDE)
+  - All compiler docs (README, EXPERIMENTAL_STATUS, CONSOLIDATION_*)
+  - Central docs (README, DOCUMENTATION, CODE_OF_CONDUCT, configs/README)
+
 ## 2025-11-17 (v0.1.4)
 
 ### Release pipeline hardening
