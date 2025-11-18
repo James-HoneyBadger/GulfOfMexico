@@ -1,10 +1,8 @@
-# Gulf of Mexico C++ Compiler - Experimental Status
+# Gulf of Mexico — C++ Compiler Experimental Status
 
 ⚠️ **EXPERIMENTAL - NOT FOR PRODUCTION USE** ⚠️
 
-## Overview
-
-The Gulf of Mexico C++ compiler (`gomcc`) is an **experimental** code translation system that converts Gulf of Mexico source code to C++ executables. It is **separate and independent** from the main Python-based interpreter.
+The C++ compiler is a research project separate from the stable Python interpreter. Language Construction Set customization is not supported.
 
 ## Important Distinctions
 

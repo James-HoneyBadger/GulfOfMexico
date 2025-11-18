@@ -487,6 +487,12 @@ Contributions are welcome! Please:
 3. Submit pull requests with tests
 4. Follow the existing code style
 
+## 🧭 Community & Policies
+
+- Code of Conduct: [CODE_OF_CONDUCT.md](CODE_OF_CONDUCT.md)
+- License: [LICENSE](LICENSE) (MIT)
+- Security/abuse reports: email <james@honey-badger.org>
+
 ## 📊 Statistics
 
 - **Programming Language**: Gulf of Mexico
@@ -529,3 +535,8 @@ MIT License - See [LICENSE](LICENSE) for details
 **Customize**: [`python demo_create_new_languages.py`](docs/language/LANGUAGE_CONSTRUCTION_QUICKSTART.md)
 
 **Learn More**: [DOCUMENTATION.md](DOCUMENTATION.md)
+
+---
+
+Need writing guidance? See the Docs style guide in
+[DOCUMENTATION.md](DOCUMENTATION.md#-docs-style-guide).

@@ -1,8 +1,6 @@
-# Consolidation Summary
+# Gulf of Mexico — Consolidation Summary
 
-## What Was Done
-
-I've analyzed both the Python interpreter and C++ compiler implementations of GulfOfMexico and started the consolidation process to ensure both can handle the same programs.
+Quick overview of compiler-interpreter consolidation: feature analysis, lexer updates, and current state.
 
 ### Completed Work
 

@@ -1,4 +1,6 @@
-# Gulf of Mexico Built-in Functions - Quick Reference
+# Gulf of Mexico — Built-in Functions Reference
+
+Quick reference for all built-in functions: type conversions, math, statistics, financial, business, and scientific functions.
 
 ## Type Conversions
 ```javascript

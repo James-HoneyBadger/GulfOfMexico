@@ -1,6 +1,6 @@
-# Gulf of Mexico Programming Guide
+# Gulf of Mexico — Programming Guide
 
-Best practices, patterns, and practical wisdom for writing *perfect* code in the *perfect* language.
+Best practices, patterns, and practical guidance for writing effective code.
 
 > Note (Nov 2025): Internal GOM test programs used for designing/debugging the language were removed. Use user-facing examples in `programs/examples/`, demos in `programs/demos/`, and Python unit tests in `tests/`.
 
@@ -844,6 +844,6 @@ Explore the organized example programs:
 - **Practical**: `programs/05_analysis/` - Statistics, finance, business analysis
 - **Complete showcase**: `programs/demos/grand_deluxe_demo.gom`
 
-See [programs/README.md](programs/README.md) for the complete catalog and syntax guidelines.
+See [programs/README.md](../../programs/README.md) for the complete catalog and syntax guidelines.
 
 Happy coding! 🌊

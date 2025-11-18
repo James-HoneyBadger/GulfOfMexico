@@ -1,6 +1,6 @@
-# Gulf of Mexico C++ Compiler (gomcc)
+# Gulf of Mexico — C++ Compiler (gomcc)
 
-A compiler that translates Gulf of Mexico (GOM) source code into C++.
+Experimental C++ compiler for Gulf of Mexico: transpiles GOM source to C++17. ⚠️ See [EXPERIMENTAL_STATUS.md](EXPERIMENTAL_STATUS.md) for important limitations.
 
 ## Features
 

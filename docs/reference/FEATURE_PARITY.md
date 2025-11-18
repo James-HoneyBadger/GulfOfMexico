@@ -1,6 +1,6 @@
-# Gulf of Mexico Feature Parity Analysis
+# Gulf of Mexico — Feature Parity Analysis
 
-This document tracks feature parity between the Python interpreter and C++ compiler.
+Feature comparison between the Python interpreter and C++ compiler implementations.
 
 ## Current Status (Pre-Consolidation)
 

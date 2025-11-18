@@ -1,6 +1,6 @@
-# Gulf of Mexico Installation Guide
+# Gulf of Mexico — Installation Guide
 
-Getting the *perfect* programming language onto your imperfect computer.
+Install the interpreter, verify it runs, and get to your first program quickly.
 
 ## Table of Contents
 
@@ -13,13 +13,13 @@ Getting the *perfect* programming language onto your imperfect computer.
 
 ## Quick Start
 
-For the impatient among us (we get it):
+Quick path to a working setup:
 
 ```bash
 git clone https://github.com/James-HoneyBadger/GulfOfMexico.git
 cd GulfOfMexico
 pip install -e .
-python -m gulfofmexico programs/01_basics/01_hello_world.gom
+python -m gulfofmexico programs/examples/01_hello_world.gom
 ```
 
 If that worked, congratulations! You're done. If not, keep reading.
@@ -28,9 +28,9 @@ If that worked, congratulations! You're done. If not, keep reading.
 
 ### Requirements
 
-- **Python 3.10 or higher** - Because we live in the future
-- **pip** - For installing things
-- **Git** - For cloning things
+- Python 3.10 or higher
+- pip
+- Git
 
 Check your Python version:
 
@@ -40,7 +40,7 @@ python --version
 python3 --version
 ```
 
-If you see something like `Python 3.10.x` or higher, you're golden.
+If you see `Python 3.10.x` or higher, you're good to proceed.
 
 ### Step 1: Clone the Repository
 
@@ -49,11 +49,11 @@ git clone https://github.com/James-HoneyBadger/GulfOfMexico.git
 cd GulfOfMexico
 ```
 
-This downloads the entire Gulf of Mexico experience to your local machine. Exciting!
+This downloads the repository to your local machine.
 
 ### Step 2: Install the Package
 
-We recommend installing in **editable mode** so you can tinker with the internals (you know you want to):
+We recommend installing in editable mode so changes update immediately:
 
 ```bash
 pip install -e .
@@ -81,11 +81,11 @@ Or jump straight into the REPL:
 python -m gulfofmexico
 ```
 
-You should see a prompt. Type `print("It works!")!` and press Enter.
+You should see a prompt. Try: `print("It works!")!` and press Enter.
 
 ## Optional Dependencies
 
-Gulf of Mexico has some optional features that require extra packages. They're like DLC, but free.
+Gulf of Mexico has optional features that require extra packages.
 
 ### Input Handling (pynput)
 
@@ -95,17 +95,17 @@ For fancy keyboard input in programs:
 pip install pynput
 ```
 
-Already included if you did `pip install -e .` (we gotchu).
+Included if you installed extras via Poetry or requirements; otherwise install manually.
 
 ### GitHub Globals (pygithub)
 
-For mysterious GitHub integration features:
+For GitHub integration features:
 
 ```bash
 pip install pygithub
 ```
 
-Also already included. We're thorough like that.
+Included if installed with the appropriate extras.
 
 ### Qt IDE (PySide6 or PyQt5)
 
@@ -121,7 +121,7 @@ Or if you prefer PyQt5:
 pip install PyQt5
 ```
 
-**Note:** The Qt IDE doesn't work on all systems (looking at you, CPU instruction limitations). If it fails, the IDE automatically falls back to a web-based interface. Crisis averted!
+Note: If Qt isn't available on your system, the IDE can fall back to a web-based interface.
 
 ## IDE Setup
 
@@ -154,7 +154,7 @@ The web IDE runs at `http://localhost:8080/ide` and opens automatically in your 
 
 ### Linux
 
-Should work out of the box. You're probably fine.
+Should work out of the box.
 
 If you get permission errors:
 
@@ -164,7 +164,7 @@ pip install --user -e .
 
 ### macOS
 
-Same as Linux, but more expensive.
+Similar to Linux; if using Homebrew Python, ensure the correct version is installed.
 
 If you're using Homebrew Python:
 
@@ -174,8 +174,6 @@ pip3 install -e .
 ```
 
 ### Windows
-
-Python on Windows can be... *special*.
 
 Make sure Python is in your PATH:
 
@@ -203,7 +201,7 @@ py -m gulfofmexico
 
 ### Virtual Environments (Recommended)
 
-If you're fancy and like isolation:
+Recommended for isolation:
 
 ```bash
 python -m venv gom-env
@@ -237,11 +235,11 @@ Type away! Exit with `Ctrl+D` (Linux/Mac) or `Ctrl+Z` then Enter (Windows).
 
 ### Example Programs
 
-We've included 80+ organized examples:
+Explore the organized examples:
 
 ```bash
 # Hello World
-python -m gulfofmexico programs/01_basics/01_hello_world.gom
+python -m gulfofmexico programs/examples/01_hello_world.gom
 
 # Feature showcase
 python -m gulfofmexico programs/demos/feature_showcase.gom
@@ -256,7 +254,7 @@ python -m gulfofmexico programs/demos/calculator.gom
 python -m gulfofmexico programs/03_graphics/19_mandelbrot.gom
 ```
 
-Browse the `programs/` directory for more. See [programs/README.md](programs/README.md) for the complete catalog.
+Browse the `programs/` directory for more. See [programs/README.md](../../programs/README.md) for the complete catalog.
 
 ## Troubleshooting
 
@@ -285,7 +283,7 @@ This happens. Use the web IDE:
 python -m gulfofmexico.ide --web
 ```
 
-Or it should automatically fall back. If it doesn't, well, you tried.
+It should automatically fall back when Qt is unavailable.
 
 ### "SyntaxError" When Running Programs
 
@@ -337,20 +335,20 @@ cd ..
 rm -rf GOM
 ```
 
-Or keep it around. You might come back. They always come back.
+Or keep it around for later.
 
 ## Getting Help
 
-- **User Guide**: [USER_GUIDE.md](USER_GUIDE.md)
-- **Technical Reference**: [TECHNICAL_REFERENCE.md](TECHNICAL_REFERENCE.md)
-- **Programming Guide**: [PROGRAMMING_GUIDE.md](PROGRAMMING_GUIDE.md)
-- **Example Programs**: [programs/README.md](programs/README.md) - Complete catalog of 80+ examples
-- **Validation Report**: [VALIDATION_REPORT.md](VALIDATION_REPORT.md) - Test results and status
+- **User Guide**: [USER_GUIDE.md](./USER_GUIDE.md)
+- **Technical Reference**: [TECHNICAL_REFERENCE.md](../reference/TECHNICAL_REFERENCE.md)
+- **Programming Guide**: [PROGRAMMING_GUIDE.md](./PROGRAMMING_GUIDE.md)
+- **Example Programs**: [programs/README.md](../../programs/README.md) - Complete catalog
+- **Validation Report**: [VALIDATION_REPORT.md](../reference/VALIDATION_REPORT.md) - Test results and status
 - **GitHub Issues**: [Report problems](https://github.com/James-HoneyBadger/GulfOfMexico/issues)
 
 ## Success!
 
-If you've made it this far, you should have a working Gulf of Mexico installation. Fire up a program and experience the *perfection*.
+You should now have a working Gulf of Mexico installation. Fire up a program and get started.
 
 ```bash
 python -m gulfofmexico programs/01_basics/01_hello_world.gom

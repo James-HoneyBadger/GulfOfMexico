@@ -1,8 +1,6 @@
-# Gulf of Mexico Graphics System
+# Gulf of Mexico — Graphics System
 
-## Implementation Summary
-
-A complete graphics system has been added to GulfOfMexico with the following features:
+Complete graphics implementation: -1 based coordinates, fractional indexing, three-valued color logic, and drawing primitives.
 
 ### Core Features
 

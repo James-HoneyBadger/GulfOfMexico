@@ -1,8 +1,8 @@
-# Gulf of Mexico Language Configurations
+# Gulf of Mexico — Language Presets
 
-This directory contains preset language configurations for Gulf of Mexico.
+Curated, ready-to-use configurations for Gulf of Mexico. Use a preset as-is or as a starting point for your own variant.
 
-## Available Configurations
+## 📦 Available Presets
 
 ### `python_like.yaml`
 Python-style syntax variant:
@@ -11,7 +11,7 @@ Python-style syntax variant:
 - `#` for comments
 - No satirical features
 
-**Use when:** You want familiar Python-like syntax
+**When to use:** You want familiar Python-like syntax.
 
 **Example:**
 ```bash
@@ -25,7 +25,7 @@ Professional mode with Spanish keywords:
 - No satirical features
 - Gulf of Mexico's unique features intact
 
-**Use when:** You want a serious, professional Spanish variant
+**When to use:** You want a serious, professional Spanish variant.
 
 **Example:**
 ```bash
@@ -40,16 +40,16 @@ Minimal feature set for teaching:
 - 0-based indexing
 - Strict mode enabled
 
-**Use when:** Teaching programming basics without distractions
+**When to use:** Teaching programming basics without distractions.
 
 **Example:**
 ```bash
 python -m gulfofmexico --config configs/minimal.json lesson1.gom
 ```
 
-## Creating Your Own Configuration
+## 🛠️ Creating Your Own Configuration
 
-### Method 1: Start from Preset
+### Method 1: Start from a Preset
 
 ```bash
 # Copy a preset and modify it
@@ -79,7 +79,7 @@ config.add_function("log", arity=-1, description="Logging")
 config.save("configs/my_variant.yaml")
 ```
 
-## Using Configurations
+## ▶️ Using Configurations
 
 ### Command Line
 
@@ -117,7 +117,7 @@ keywords:
   # ... more customizations
 ```
 
-## Validating Configurations
+## ✅ Validating Configurations
 
 ```bash
 # Validate a config file
@@ -127,14 +127,14 @@ python gomconfig.py validate configs/python_like.yaml
 python gomconfig.py info configs/spanish_professional.yaml
 ```
 
-## Comparing Configurations
+## 🔍 Comparing Configurations
 
 ```bash
 # See differences between two configs
 python gomconfig.py diff configs/python_like.yaml configs/minimal.json
 ```
 
-## Exporting Documentation
+## 📤 Exporting Documentation
 
 ```bash
 # Export mapping table as markdown
@@ -144,7 +144,7 @@ python gomconfig.py export configs/python_like.yaml --format markdown
 python gomconfig.py convert configs/python_like.yaml --to json
 ```
 
-## Configuration File Format
+## 📄 Configuration File Format
 
 Both YAML and JSON are supported. YAML is recommended for readability.
 
@@ -190,9 +190,9 @@ runtime:
   compatibility_mode: "standard"
 ```
 
-See [docs/language/LANGUAGE_CONSTRUCTION_SET.md](../docs/language/LANGUAGE_CONSTRUCTION_SET.md) for complete documentation.
+See [Language Construction Set](../docs/language/LANGUAGE_CONSTRUCTION_SET.md) for complete documentation.
 
-## Contributing
+## 🤝 Contributing
 
 Want to add a preset configuration?
 
@@ -207,6 +207,6 @@ Want to add a preset configuration?
 - `{language}_{mode}.yaml` - Internationalization (spanish_professional, french_casual)
 - `{purpose}.yaml` - Purpose-specific (teaching, minimal, datascience)
 
-## License
+## 📄 License
 
-Same as Gulf of Mexico - see LICENSE file.
+Same as Gulf of Mexico — see [LICENSE](../LICENSE).

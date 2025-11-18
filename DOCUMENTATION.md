@@ -1,6 +1,37 @@
-# Gulf of Mexico - Complete Documentation Index
+# Gulf of Mexico — Complete Documentation Index
 
-Welcome to the comprehensive documentation for the Gulf of Mexico programming language!
+Your hub for all Gulf of Mexico docs: quick starts, language customization, technical reference, and compiler notes.
+
+## Contents
+
+- [Docs style guide](#️-docs-style-guide)
+- [Quick Navigation](#-quick-navigation)
+- [Documentation by Use Case](#-documentation-by-use-case)
+- [File Structure](#-file-structure)
+- [Learning Paths](#-learning-paths)
+- [Tools & Utilities](#-tools--utilities)
+- [Key Documentation by Topic](#-key-documentation-by-topic)
+- [Important Notes](#️-important-notes)
+- [Getting Help](#-getting-help)
+- [Community & Policies](#-community--policies)
+- [Contributing](#-contributing)
+- [Quick Stats](#-quick-stats)
+- [Roadmap](#-roadmap)
+- [Changelog](#-changelog)
+
+## ✍️ Docs style guide
+
+Keep docs scannable and consistent:
+
+- Headings: Use H1 for the page title, H2 for major sections, H3 for subsections.
+- Intros: Start each page with a one‑line summary of what the page covers.
+- Lists: Prefer short bullet lists over long paragraphs when enumerating items.
+- Code: Use fenced code blocks with a language hint (bash, python, gom, text).
+- Callouts: Use short emoji callouts (e.g., ⚠️, ✅, 📦) sparingly for emphasis.
+- Links: Prefer relative links within the repo; use descriptive link text.
+- Tone: Direct, friendly, and concise. Avoid jokes in policy/reference docs.
+- Sections to include when relevant: Overview, Prerequisites, Steps/Examples,
+  Next steps/Related links.
 
 ## 📚 Quick Navigation
 
@@ -247,6 +278,12 @@ It does NOT affect the C++ compiler.
 4. Check example programs in `programs/`
 5. Review [Technical Reference](docs/reference/TECHNICAL_REFERENCE.md)
 
+## 🤝 Community & Policies
+
+- Code of Conduct: [CODE_OF_CONDUCT.md](CODE_OF_CONDUCT.md)
+- License: [LICENSE](LICENSE) (MIT)
+- Security/abuse reports: email <james@honey-badger.org>
+
 ## 🤝 Contributing
 
 1. Read [CODE_OF_CONDUCT.md](CODE_OF_CONDUCT.md)
@@ -281,6 +318,6 @@ Upcoming documentation:
 
 ---
 
-**Last Updated**: November 17, 2025
+**Last Updated**: November 18, 2025
 
 **Need help?** Start with the [README.md](README.md) or jump to the [User Guide](docs/guides/USER_GUIDE.md)!

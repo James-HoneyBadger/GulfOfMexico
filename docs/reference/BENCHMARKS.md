@@ -1,4 +1,6 @@
-# Performance Benchmarks - C++ Compiler vs Python Interpreter
+# Gulf of Mexico — Performance Benchmarks
+
+Performance comparison: C++ compiler vs Python interpreter across statistical, mathematical, and financial workloads.
 
 ## Test Setup
 

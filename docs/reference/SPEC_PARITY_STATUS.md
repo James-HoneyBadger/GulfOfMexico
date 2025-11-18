@@ -1,6 +1,6 @@
-# Specification Parity Status
+# Gulf of Mexico — Specification Parity Status
 
-Current implementation status vs. design specifications for the Gulf of Mexico interpreter.
+Implementation status vs design specifications: fully implemented features, partial features, and gaps.
 
 **Last Updated**: November 16, 2025  
 **Test Suite Status**: 49 programs, 0 failures ✅

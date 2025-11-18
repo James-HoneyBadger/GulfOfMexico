@@ -1,4 +1,6 @@
-# Async Scheduler Implementation - Status Summary
+# Gulf of Mexico — Async Scheduler Status
+
+Status and implementation notes for the async scheduler: what works, what's blocked, and integration recommendations.
 
 ## What Was Created
 

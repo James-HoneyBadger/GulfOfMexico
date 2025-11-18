@@ -1,6 +1,6 @@
-# Gulf of Mexico User Guide
+# Gulf of Mexico — User Guide
 
-Welcome to the Gulf of Mexico, the *perfect* programming language! If you've ever thought "arrays should start at -1" or "I wish my variables could argue about their values," then congratulations—you've found your spiritual home.
+Learn the core concepts, run programs, and use the REPL effectively.
 
 ## Table of Contents
 
@@ -57,7 +57,7 @@ The REPL lets you experiment interactively and run files with import/export sect
 - Start the REPL:
 
 ```bash
-python3 -m gulfofmexico.repl
+python -m gulfofmexico
 ```
 
 - Try a few statements:
@@ -78,7 +78,7 @@ print "sum =", r!
 - Load and run a file (also supports multi-file sections using `===== section =====`):
 
 ```text
-:load programs/01_basics/01_hello_world.gom
+:load programs/examples/01_hello_world.gom
 :load programs/demos/banking_system.gom
 ```
 
@@ -99,14 +99,14 @@ The interpreter now buffers internal debug messages (the `[DB_PRINT]` lines) and
 only prints them when a program errors out. This keeps normal execution output
 clean. To force immediate debug output during active troubleshooting:
 
-**Method 1: Use CLI flags (recommended)**
+Method 1: Use CLI flags (recommended)
 ```bash
 python -m gulfofmexico --debug your_program.gom
 python -m gulfofmexico --verbose your_program.gom
 python -m gulfofmexico.ide --debug
 ```
 
-**Method 2: Use environment variables**
+Method 2: Use environment variables
 ```bash
 GULFOFMEXICO_DEBUG=1 python -m gulfofmexico your_program.gom
 GULFOFMEXICO_VERBOSE=1 python -m gulfofmexico your_program.gom

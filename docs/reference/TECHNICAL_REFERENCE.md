@@ -1,6 +1,6 @@
-# Gulf of Mexico Technical Reference
+# Gulf of Mexico — Technical Reference
 
-The definitive (and slightly ridiculous) technical specification for the *perfect* programming language.
+The complete technical specification: lexical structure, data types, operators, control flow, and special features.
 
 ## Table of Contents
 

@@ -1,8 +1,6 @@
-# Mandelbrot Fractal Visualization
+# Gulf of Mexico — Mandelbrot Fractal Visualization
 
-## Overview
-
-This document describes the Mandelbrot fractal visualization program created for the GulfOfMexico programming language.
+Documentation for the Mandelbrot fractal program: graphics features, usage, implementation notes, and output.
 
 ## Program Details
 
