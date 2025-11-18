@@ -1,0 +1,93 @@
+name: Release (Fallback - no external actions)
+
+on:
+  push:
+    tags:
+      - 'v*'
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: 'Tag to release (e.g., v0.1.4)'
+        required: true
+        type: string
+
+permissions:
+  contents: write
+
+jobs:
+  build-and-release:
+    name: Build and Release (Fallback)
+    runs-on: ubuntu-latest
+    steps:
+      - name: Resolve tag name
+        id: resolve_tag
+        shell: bash
+        run: |
+          set -euo pipefail
+          if [[ "${{ github.event_name }}" == "workflow_dispatch" ]]; then
+            echo "TAG_NAME=${{ github.event.inputs.tag }}" >> $GITHUB_ENV
+          else
+            echo "TAG_NAME=${{ github.ref_name }}" >> $GITHUB_ENV
+          fi
+          echo "Resolved TAG_NAME=$TAG_NAME"
+
+      - name: Clone repository at tag (manual git)
+        shell: bash
+        env:
+          REPO: ${{ github.repository }}
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          REPO_URL="https://x-access-token:${GH_TOKEN}@github.com/${REPO}.git"
+          echo "Cloning ${REPO}"
+          git clone --no-checkout "$REPO_URL" repo
+          cd repo
+          git fetch --tags --force
+          git checkout "refs/tags/${TAG_NAME}"
+          git rev-parse --short HEAD
+
+      - name: Ensure Python and build tools are available
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 --version || true
+          python3 -m pip install --upgrade pip
+          python3 -m pip install build twine
+
+      - name: Build package
+        shell: bash
+        working-directory: repo
+        run: |
+          set -euo pipefail
+          python3 -m build
+          ls -l dist
+
+      - name: Create GitHub Release via gh
+        env:
+          GH_TOKEN: ${{ github.token }}
+        shell: bash
+        working-directory: repo
+        run: |
+          set -euo pipefail
+          gh --version
+          # Create release if it doesn't exist, else upload assets
+          if gh release view "${TAG_NAME}" >/dev/null 2>&1; then
+            echo "Release ${TAG_NAME} exists; uploading assets"
+            gh release upload "${TAG_NAME}" dist/* --clobber
+          else
+            echo "Creating release ${TAG_NAME}"
+            gh release create "${TAG_NAME}" dist/* \
+              --title "GulfOfMexico ${TAG_NAME}" \
+              --notes-file CHANGELOG.md
+          fi
+
+      - name: Publish to PyPI (optional)
+        if: ${{ secrets.PYPI_API_TOKEN != '' }}
+        shell: bash
+        working-directory: repo
+        env:
+          PYPI_API_TOKEN: ${{ secrets.PYPI_API_TOKEN }}
+        run: |
+          set -euo pipefail
+          # Use token auth; __token__ username is required for API tokens
+          python3 -m twine upload -u __token__ -p "$PYPI_API_TOKEN" dist/*
