@@ -4,6 +4,13 @@ All notable changes to this project will be documented in this file.
 
 The format is simple date-based entries. Dates use ISO-8601 (YYYY-MM-DD).
 
+## 2025-11-17 (v0.1.4)
+
+### Release pipeline hardening
+- Workflow now checks out the exact tag and supports manual dispatch (workflow_dispatch)
+- Re-run friendly: you can manually run release for a given tag in Actions
+- Improves reliability for GitHub Release creation and PyPI publish
+
 ## 2025-11-17 (v0.1.3)
 
 ### PyPI Publication
