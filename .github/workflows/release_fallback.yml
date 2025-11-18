@@ -54,6 +54,17 @@ jobs:
           python3 -m pip install --upgrade pip
           python3 -m pip install build twine
 
+      - name: Ensure GitHub CLI (gh) is available
+        shell: bash
+        run: |
+          set -euo pipefail
+          if ! command -v gh >/dev/null 2>&1; then
+            echo "gh not found; installing via apt"
+            sudo apt-get update -y
+            sudo apt-get install -y gh
+          fi
+          gh --version
+
       - name: Build package
         shell: bash
         working-directory: repo
@@ -69,7 +80,6 @@ jobs:
         working-directory: repo
         run: |
           set -euo pipefail
-          gh --version
           # Create release if it doesn't exist, else upload assets
           if gh release view "${TAG_NAME}" >/dev/null 2>&1; then
             echo "Release ${TAG_NAME} exists; uploading assets"
