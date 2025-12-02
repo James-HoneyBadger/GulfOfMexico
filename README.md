@@ -71,6 +71,44 @@ python -m gulfofmexico
 
 # Or use the graphical IDE
 python -m gulfofmexico.ide
+
+### Inline code and flags
+
+```bash
+# Inline execution
+python -m gulfofmexico -c "print(\"Hello\")!"
+
+# Debug: show internal messages
+python -m gulfofmexico --debug script.gom
+
+# Verbose: keep process waiting for reactive statements
+python -m gulfofmexico --verbose script.gom
+```
+
+Note: By default executions complete without waiting. Use `--verbose` (or `GULFOFMEXICO_VERBOSE=1`) to keep the process alive for `when`/`after` statements.
+
+## 🔨 Build Compiler (C++)
+
+```bash
+mkdir -p compiler/build
+cmake -S compiler -B compiler/build
+cmake --build compiler/build -- -j"$(nproc)"
+```
+
+## ✅ Run Tests
+
+```bash
+python -m venv .venv
+source .venv/bin/activate
+pip install -U pip
+pip install -e .
+pip install pytest
+pytest -q tests
+```
+
+## 🛠️ CI
+
+GitHub Actions runs Python tests and builds the C++ compiler on push/PR (`.github/workflows/ci.yml`).
 ```
 
 ### Try Examples

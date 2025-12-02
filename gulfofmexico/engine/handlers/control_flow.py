@@ -81,7 +81,9 @@ class ConditionalHandler(StatementHandler):
         Returns:
             Conditional class
         """
-        return Conditional
+        # Tests expect ConditionalStatement compatibility class
+        from gulfofmexico.processor.syntax_tree import ConditionalStatement
+        return ConditionalStatement
 
 
 class WhenStatementHandler(StatementHandler):

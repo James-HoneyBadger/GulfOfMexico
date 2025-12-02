@@ -29,6 +29,8 @@ Reality:
 """
 
 from abc import ABC, abstractmethod
+from typing import Optional, Callable
+from gulfofmexico.builtin import GulfOfMexicoValue
 from gulfofmexico.handlers import StatementHandler
 
 

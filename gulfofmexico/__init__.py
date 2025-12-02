@@ -123,8 +123,8 @@ def run_file(main_filename: str) -> None:
                 importable_names[target_filename] = {}
             importable_names[target_filename][name] = value
 
-    # Only show completion message if there are async/when statements that might be pending
-    # Check if we have any when-statements or after-statements to wait for
+    # Optional wait loop for interactive scenarios; disabled by default
+    # to allow non-interactive executions (tests, scripts) to complete.
     import os
 
     if os.environ.get("GULFOFMEXICO_VERBOSE"):
@@ -134,8 +134,8 @@ def run_file(main_filename: str) -> None:
             "after-statements.\033[039m",
             flush=True,
         )
-    try:
-        while True:
-            sleep(1)  # just waiting for any clicks, when statements, etc
-    except KeyboardInterrupt:
-        exit()  # quit silently
+        try:
+            while True:
+                sleep(1)  # just waiting for any clicks, when statements, etc
+        except KeyboardInterrupt:
+            exit()  # quit silently

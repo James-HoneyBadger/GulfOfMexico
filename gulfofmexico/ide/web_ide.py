@@ -223,7 +223,7 @@ class GOMWebIDEHandler(http.server.SimpleHTTPRequestHandler):
         import sys
         from contextlib import redirect_stdout, redirect_stderr
 
-    _webide_debug(f"[WEB IDE] Received code: {repr(code[:50])}\n")
+        _webide_debug(f"[WEB IDE] Received code: {repr(code[:50])}\n")
 
         stdout_capture = io.StringIO()
         stderr_capture = io.StringIO()

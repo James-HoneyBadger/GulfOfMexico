@@ -1,0 +1,7 @@
+{
+	"InstallScripts" : 
+	[
+		"/home/james/GulfOfMexico/compiler/build_ci/cmake_install.cmake"
+	],
+	"Parallel" : false
+}
