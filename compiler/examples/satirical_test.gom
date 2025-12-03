@@ -1,41 +1,41 @@
 // Test satirical features with proper syntax
 
-print("Testing Satirical Features")!
+print "Testing Satirical Features"!
 
 // Emotional programming
 happy {
-   print("Happy code block!")!
+   print "Happy code block!"!
 }
 
 // Superstitious programming
 lucky {
    const x 42!
-   print("Lucky number")!
-   print(x)!
+   print "Lucky number"!
+   print x!
 }
 
 // Blockchain buzzwords
 blockchain {
-   print("Decentralized!")!
+   print "Decentralized!"!
 }
 
 // AI buzzwords
 ai_powered {
    const prediction 99!
-   print("AI Prediction")!
-   print(prediction)!
+   print "AI Prediction"!
+   print prediction!
 }
 
 // Agile keywords
 sprint {
-   print("Sprint velocity: Maximum!")!
+   print "Sprint velocity: Maximum!"!
 }
 
 // Corporate speak
 synergize {
    const synergy 100!
-   print("Synergy level")!
-   print(synergy)!
+   print "Synergy level"!
+   print synergy!
 }
 
-print("All satirical features tested!")!
+print "All satirical features tested!"!

@@ -26,82 +26,82 @@ print "      :"!
 print "             ["!
 print "                  )"!
 print "                    R"!
-print("                  9")!
-print("             q")!
-print("      <")!
-print("   ;")!
-print("~")!
-print("   M")!
-print("      }")!
-print("             0")!
-print("                  B")!
-print("                    +")!
-print("                  @")!
-print("             ?")!
-print("      ")!
-print("   -")!
-print("^")!
-print("   8")!
-print("      ")!
-print("             Y")!
-print("                  k")!
-print("                    )")!
-print("                  D")!
-print("             5")!
-print("      s")!
-print("   ")!
-print(",")!
-print("   T")!
-print("      ")!
-print("             >")!
-print("                  n")!
-print("                    *")!
-print("                  F")!
-print("             3")!
-print("      u")!
-print("   ")!
-print(".")!
-print("   H")!
-print("      ")!
-print("             }")!
-print("                  v")!
-print("                    %")!
-print("                  L")!
-print("             2")!
-print("      t")!
-print("   ")!
-print("/")!
-print("   C")!
-print("      ")!
-print("             {")!
-print("                  r")!
-print("                    &")!
-print("                  J")!
-print("             6")!
-print("      w")!
-print("   ")!
-print("|")!
-print("   N")!
-print("      ")!
-print("             )")!
-print("                  e")!
-print("                    ^")!
-print("                  4")!
-print("             b")!
-print("      :")!
-print("   ")!
-print("=")!
-print("   Q")!
-print("      ")!
-print("             !")!
-print("                  x")!
-print("                    $")!
-print("                  1")!
-print("             j")!
-print("      >")!
-print("   ")!
-print("+")!
-print("   U")!
-print("      ")!
-print("             ~")!
-print("                  o")!
+print "                  9"!
+print "             q"!
+print "      <"!
+print "   ;"!
+print "~"!
+print "   M"!
+print "      }"!
+print "             0"!
+print "                  B"!
+print "                    +"!
+print "                  @"!
+print "             ?"!
+print "      "!
+print "   -"!
+print "^"!
+print "   8"!
+print "      "!
+print "             Y"!
+print "                  k"!
+print "                    )"!
+print "                  D"!
+print "             5"!
+print "      s"!
+print "   "!
+print ","!
+print "   T"!
+print "      "!
+print "             >"!
+print "                  n"!
+print "                    *"!
+print "                  F"!
+print "             3"!
+print "      u"!
+print "   "!
+print "."!
+print "   H"!
+print "      "!
+print "             }"!
+print "                  v"!
+print "                    %"!
+print "                  L"!
+print "             2"!
+print "      t"!
+print "   "!
+print "/"!
+print "   C"!
+print "      "!
+print "             {"!
+print "                  r"!
+print "                    &"!
+print "                  J"!
+print "             6"!
+print "      w"!
+print "   "!
+print "|"!
+print "   N"!
+print "      "!
+print "             )"!
+print "                  e"!
+print "                    ^"!
+print "                  4"!
+print "             b"!
+print "      :"!
+print "   "!
+print "="!
+print "   Q"!
+print "      "!
+print "             !"!
+print "                  x"!
+print "                    $"!
+print "                  1"!
+print "             j"!
+print "      >"!
+print "   "!
+print "+"!
+print "   U"!
+print "      "!
+print "             ~"!
+print "                  o"!

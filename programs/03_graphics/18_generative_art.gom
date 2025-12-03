@@ -1,7 +1,7 @@
 // Generative Art with Gulf of Mexico
 // Using probabilistic variables and three-valued logic for art
 
-const canvas = Canvas(800, 800, "white")!
+const canvas = Canvas 800, 800, "white"!
 
 // Create a grid of circles with probabilistic colors
 var row -1!
@@ -35,7 +35,7 @@ function fn drawCircleGrid() {
    }
 
    // Draw 15 circles in this row
-   drawRow()!
+   drawRow!
    drawRow()!
    drawRow()!
    drawRow()!
@@ -55,21 +55,21 @@ function fn drawCircleGrid() {
 }
 
 // Draw 15 rows
-drawCircleGrid()!
-drawCircleGrid()!
-drawCircleGrid()!
-drawCircleGrid()!
-drawCircleGrid()!
-drawCircleGrid()!
-drawCircleGrid()!
-drawCircleGrid()!
-drawCircleGrid()!
-drawCircleGrid()!
-drawCircleGrid()!
-drawCircleGrid()!
-drawCircleGrid()!
-drawCircleGrid()!
-drawCircleGrid()!
+drawCircleGrid!
+drawCircleGrid!
+drawCircleGrid!
+drawCircleGrid!
+drawCircleGrid!
+drawCircleGrid!
+drawCircleGrid!
+drawCircleGrid!
+drawCircleGrid!
+drawCircleGrid!
+drawCircleGrid!
+drawCircleGrid!
+drawCircleGrid!
+drawCircleGrid!
+drawCircleGrid!
 
 // Add some random lines with maybe colors
 var i 0!
@@ -81,35 +81,35 @@ function fn drawRandomLine() {
    const y2 = Number(maybe) * 800!
 
    // Fully probabilistic color
-   const lineColor = Color(maybe, maybe, maybe, 128)!
+   const lineColor = Color maybe, maybe, maybe, 128!
 
-   canvas.line(x1, y1, x2, y2, lineColor)!
+   canvas.line x1, y1, x2, y2, lineColor!
 
    var i i + 1!
 }
 
 // Draw 20 random lines
-drawRandomLine()!
-drawRandomLine()!
-drawRandomLine()!
-drawRandomLine()!
-drawRandomLine()!
-drawRandomLine()!
-drawRandomLine()!
-drawRandomLine()!
-drawRandomLine()!
-drawRandomLine()!
-drawRandomLine()!
-drawRandomLine()!
-drawRandomLine()!
-drawRandomLine()!
-drawRandomLine()!
-drawRandomLine()!
-drawRandomLine()!
-drawRandomLine()!
-drawRandomLine()!
-drawRandomLine()!
+drawRandomLine!
+drawRandomLine!
+drawRandomLine!
+drawRandomLine!
+drawRandomLine!
+drawRandomLine!
+drawRandomLine!
+drawRandomLine!
+drawRandomLine!
+drawRandomLine!
+drawRandomLine!
+drawRandomLine!
+drawRandomLine!
+drawRandomLine!
+drawRandomLine!
+drawRandomLine!
+drawRandomLine!
+drawRandomLine!
+drawRandomLine!
+drawRandomLine!
 
-canvas.save("generative_art.png")!
-print("Generative art created!")!
-print("Each run creates a different image due to probabilistic variables!")!
+canvas.save "generative_art.png"!
+print "Generative art created!"!
+print "Each run creates a different image due to probabilistic variables!"!
