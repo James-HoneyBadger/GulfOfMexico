@@ -17,6 +17,8 @@ try:
         QFileDialog,
         QGuiApplication,
         QHBoxLayout,
+        QInputDialog,
+        QLabel,
         QMainWindow,
         QMenu,
         QMessageBox,
@@ -139,6 +141,9 @@ if PYSIDE_AVAILABLE:
 
             # Status bar and recent files
             self.statusBar().showMessage("Ready")
+            # Web IDE status label (permanent in status bar)
+            self.web_ide_label = QLabel("Web IDE: stopped")
+            self.statusBar().addPermanentWidget(self.web_ide_label)
             self.recent_files: list[str] = []
             self._open_recent_menu = None
             self._recent_path = Path.home() / ".config" / "gom-ide" / "recent.json"
@@ -376,7 +381,7 @@ if PYSIDE_AVAILABLE:
             tools_menu = mb.addMenu("Tools")
             act_open_webide = QAction("Open Web IDE", self)
             act_open_webide.setShortcut("Ctrl+Shift+W")
-            act_open_webide.triggered.connect(self._open_web_ide)
+            act_open_webide.triggered.connect(self._ask_and_open_web_ide)
             tools_menu.addAction(act_open_webide)
 
         def _maybe_save_editor(self, ed: "CodeEditor") -> bool:
@@ -434,6 +439,7 @@ if PYSIDE_AVAILABLE:
                 url = f"http://localhost:{preferred}/ide"
                 webbrowser.open(url)
                 self.statusBar().showMessage(f"Opened existing Web IDE at {url}")
+                self.web_ide_label.setText(f"Web IDE: open ({preferred})")
                 return
 
             # Try to start the web IDE server in a background thread
@@ -446,6 +452,18 @@ if PYSIDE_AVAILABLE:
 
             threading.Thread(target=_start_server, daemon=True).start()
             self.statusBar().showMessage(f"Starting Web IDE on port {preferred} — opening browser")
+            self.web_ide_label.setText(f"Web IDE: starting ({preferred})")
+
+        def _ask_and_open_web_ide(self) -> None:
+            """Prompt the user for a port then open/start the Web IDE.
+
+            Uses a simple QInputDialog to pick a port (default 8080). If the user
+            cancels, no action is performed.
+            """
+            port, ok = QInputDialog.getInt(self, "Open Web IDE", "Port:", 8080, 1, 65535)
+            if not ok:
+                return
+            self._open_web_ide(port)
 
         def _show_console_menu(self, pos) -> None:
             menu = QMenu(self)

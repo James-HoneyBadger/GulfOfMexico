@@ -117,3 +117,28 @@ def test_open_web_ide_starts_server(monkeypatch):
     app.MainWindow._open_web_ide(dummy, port=8080)
     # After patched Thread runs, our fake_run should have been called
     assert called.get("started") == 8080
+
+
+@pytest.mark.skipif(not hasattr(app, "MainWindow"), reason="Qt not available")
+def test_mainwindow_has_status_label(monkeypatch):
+    # Create a dummy MainWindow to ensure the web_ide_label was created
+    w = app.MainWindow()
+    assert hasattr(w, "web_ide_label")
+    assert "Web IDE" in w.web_ide_label.text()
+
+
+@pytest.mark.skipif(not hasattr(app, "MainWindow"), reason="Qt not available")
+def test_ask_and_open_web_ide_prompts(monkeypatch):
+    # Patch QInputDialog.getInt to return a chosen port and ok=True
+    monkeypatch.setattr(app.QInputDialog, "getInt", lambda *a, **k: (9000, True))
+
+    called = {}
+
+    def fake_open(self, port=None):
+        called["port"] = port
+
+    monkeypatch.setattr(app.MainWindow, "_open_web_ide", fake_open)
+
+    w = app.MainWindow()
+    w._ask_and_open_web_ide()
+    assert called.get("port") == 9000
