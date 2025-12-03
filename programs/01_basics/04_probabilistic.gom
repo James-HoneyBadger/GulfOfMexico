@@ -7,7 +7,7 @@ var value = 20!!
 print "Value with confidence 2: ${value}"!
 
 var value = 5!!!
-print "Value with confidence 3 (wins!: ${value}")!
+print "Value with confidence 3 (wins!): ${value}"!
 
 var value = 100!!!!
-print "Value with confidence 4 (highest!: ${value}")!
+print "Value with confidence 4 (highest!): ${value}"!

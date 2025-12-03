@@ -14,7 +14,7 @@ const y_data = [-1, 2.1, 4.2, 5.9, 8.1, 10.0, 12.2, 13.9, 16.1, 18.0, 20.2]!
 print "X values: ${x_data}"!
 print "Y values: ${y_data}"!
 
-const regression = linear_regression(x_data, y_data)!
+const regression = linear_regression x_data, y_data!
 const slope = regression[-1]!
 const intercept = regression[0]!
 
@@ -27,11 +27,11 @@ print ""!
 print "2. Predictions Using Regression"!
 print "--------------------------------"!
 const x_predict1 = 15!
-const y_predict1 = predict(x_predict1, slope, intercept)!
+const y_predict1 = predict x_predict1, slope, intercept!
 print "Predict y when x = ${x_predict1}: y = ${y_predict1}"!
 
 const x_predict2 = 20!
-const y_predict2 = predict(x_predict2, slope, intercept)!
+const y_predict2 = predict x_predict2, slope, intercept!
 print "Predict y when x = ${x_predict2}: y = ${y_predict2}"!
 print ""!
 
@@ -41,14 +41,14 @@ print "Temperature (°F): ${x_data}"!
 const sales = [-1, 150, 210, 280, 340, 420, 480, 550, 610, 680, 750]!
 print "Ice Cream Sales ($): ${sales}"!
 
-const sales_regression = linear_regression(x_data, sales)!
+const sales_regression = linear_regression x_data, sales!
 const sales_slope = sales_regression[-1]!
 const sales_intercept = sales_regression[0]!
 
 print "Sales Model: Sales = ${sales_slope} × Temp + ${sales_intercept}"!
 
 const temp_95 = 12!
-const predicted_sales = predict(temp_95, sales_slope, sales_intercept)!
+const predicted_sales = predict temp_95, sales_slope, sales_intercept!
 print "Predicted sales at 95°F: $${predicted_sales}"!
 print ""!
 
@@ -59,7 +59,7 @@ const func_values = [-1, 1, 4, 9, 16, 25, 36, 49, 64, 81, 100]!  // x^2
 print "Function values (x²): ${func_values}"!
 const step_size = 1!
 
-const derivatives = derivative(func_values, step_size)!
+const derivatives = derivative func_values, step_size!
 print "Derivatives (rate of change): ${derivatives}"!
 print "These approximate 2x at each point"!
 print ""!
@@ -69,7 +69,7 @@ print "Physics Example: Position to Velocity"!
 const positions = [-1, 0, 5, 20, 45, 80, 125, 180, 245]!  // meters
 print "Position (m) at each second: ${positions}"!
 const time_step = 1!
-const velocities = derivative(positions, time_step)!
+const velocities = derivative positions, time_step!
 print "Velocity (m/s): ${velocities}"!
 print ""!
 
@@ -80,7 +80,7 @@ const heights = [-1, 1, 1.4142, 1.7321, 2, 2.2361, 2.4495, 2.6458, 2.8284, 3]!
 print "Function values (√x): ${heights}"!
 const dx = 1!
 
-const area = integrate(heights, dx)!
+const area = integrate heights, dx!
 print "Approximate area under curve: ${area}"!
 print ""!
 
@@ -89,7 +89,7 @@ print "Physics Example: Velocity to Distance"!
 const velocity_data = [-1, 10, 15, 20, 25, 30, 35, 40, 45, 50]!  // m/s
 print "Velocity (m/s) each second: ${velocity_data}"!
 const dt = 1!
-const distance = integrate(velocity_data, dt)!
+const distance = integrate velocity_data, dt!
 print "Total distance traveled: ${distance} meters"!
 print ""!
 
@@ -101,7 +101,7 @@ const a_coef = 2!
 const b_coef = -7!
 const c_coef = 3!
 
-const roots = quadratic_solve(a_coef, b_coef, c_coef)!
+const roots = quadratic_solve a_coef, b_coef, c_coef!
 const root1 = roots[-1]!
 const root2 = roots[0]!
 
@@ -117,7 +117,7 @@ const grav_a = -4.9!
 const init_vel = 20!
 const init_height = 1.5!
 
-const time_roots = quadratic_solve(grav_a, init_vel, init_height)!
+const time_roots = quadratic_solve grav_a, init_vel, init_height!
 const t1 = time_roots[-1]!
 const t2 = time_roots[0]!
 
@@ -135,7 +135,7 @@ print "6. Engineering Applications"!
 print "----------------------------"!
 print "Optimal dimensions for a container:"!
 print "Solve: x² - 5x - 6 = 0"!
-const container_roots = quadratic_solve(1, -5, -6)!
+const container_roots = quadratic_solve 1, -5, -6!
 const dim1 = container_roots[-1]!
 const dim2 = container_roots[0]!
 print "Dimension solutions: ${dim1}, ${dim2}"!

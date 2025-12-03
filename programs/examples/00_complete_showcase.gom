@@ -21,7 +21,7 @@ print "Because programming is 10% skill, 90% luck!"!
 
 lucky {
    print "  ✓ Lucky block: Feeling fortunate today!"!
-   const luckyNumber = Number(7)!
+   const luckyNumber = Number 7!
    print "    Lucky number:", luckyNumber!
 }
 
@@ -51,12 +51,12 @@ whenever {
 print "\n💼 FEATURE #4: CORPORATE SPEAK"!
 print "Let's synergize our paradigms!"!
 
-const innovation = String("Innovation")!
-const synergy = String("Synergy")!
+const innovation = String "Innovation"!
+const synergy = String "Synergy"!
 synergize innovation, synergy!
 print "  ✓ Synergized:", innovation, "with", synergy!
 
-const impact = Number(100)!
+const impact = Number 100!
 leverage impact!
 print "  ✓ Leveraged impact for 2x results!"!
 
@@ -75,7 +75,7 @@ print "When you know it won't work but try anyway!"!
 
 unlucky {
    print "  ✓ This probably won't work..."!
-   const doom = Number(13)!
+   const doom = Number 13!
    print "    Doom number:", doom, "(it worked anyway!)"!
 }
 
@@ -87,7 +87,7 @@ happy {
          print "  🎉 Triple combo: Happy + Lucky + Eventually!"!
          print "  🎉 What are the odds?!"!
 
-         const magic = String("MAGIC")!
+         const magic = String "MAGIC"!
          leverage magic!
          print "  🎉 Leveraged magic:", magic!
       }

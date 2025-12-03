@@ -5,7 +5,7 @@ print "=== GULF OF MEXICO COMPILER - COMPREHENSIVE TEST ==="!
 
 // Test 1: Map Support
 print "\n1. Map/Dictionary Support"!
-const config = Map()!
+const config = Map !
 print "  Created empty map: OK"!
 
 // Test 2: Arrays with -1 indexing

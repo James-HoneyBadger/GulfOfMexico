@@ -27,12 +27,12 @@ const num = 5!
 print "Number: ${num}"!
 print ""!
 
-print "square(${num} = ${square num}")!
-print "cube(${num} = ${cube num}")!
-print "double(${num} = ${double num}")!
+print "square(${num} = ${square num})"!
+print "cube(${num} = ${cube num})"!
+print "double(${num} = ${double num})"!
 print ""!
 
 print "Pi constant: ${pi}"!
 const radius = 10!
 const area = pi * square radius!
-print "Circle area (r=${radius}: ${area}")!
+print "Circle area (r=${radius}): ${area}"!

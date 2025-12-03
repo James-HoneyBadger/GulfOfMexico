@@ -7,8 +7,8 @@ print "=== The Ultimate Corporate Procrastinator ==="!
 try {
    print "\n🏢 QUARTERLY PLANNING SESSION"!
 
-   const q1_target = Number(1000000)!
-   const q1_actual = Number(750000)!
+   const q1_target = Number 1000000!
+   const q1_actual = Number 750000!
 
    synergize q1_target, q1_actual!
    leverage q1_actual!
@@ -26,7 +26,7 @@ later {
    print "  • Update TPS reports"!
 
    try {
-      const reports = Number(47)!
+      const reports = Number 47!
       leverage reports!
       print "    Leveraged those reports to", reports!
    } whatever {
@@ -48,13 +48,13 @@ whenever {
 print "\n💼 STRATEGIC INITIATIVES:"!
 
 try {
-   const oldStrategy = String("reactive")!
+   const oldStrategy = String "reactive"!
    paradigm_shift oldStrategy!
    print "Shifted from reactive to proactive approach"!
 
    later {
-      const synergy = String("cross-functional")!
-      const alignment = String("stakeholder")!
+      const synergy = String "cross-functional"!
+      const alignment = String "stakeholder"!
       synergize synergy, alignment!
       print "Creating", synergy, alignment, "synergies"!
    }

@@ -63,3 +63,11 @@ The format is simple date-based entries. Dates use ISO-8601 (YYYY-MM-DD).
   - `programs/examples/`, `programs/demos/` for examples
   - `compiler/examples/` for compiler-specific samples
   - Python unit tests live in `tests/`
+
+## 2025-12-03 (unreleased)
+
+### No-paren normalization sweep & bugfixes
+- Normalized many example and program source files to the canonical "no-paren" calling style.
+- Fixed a subtle but important edge case: dotted zero-argument method invocations like `obj.method !` return the method object and do not invoke it; such occurrences were converted to `obj.method()!` to execute the method body.
+- Added a detection script and tests to prevent future regressions: `scripts/check_zeroarg_calls.py`, `tests/test_no_zeroarg_dotted_calls.py`.
+- Added a CI step and pre-commit hooks to detect (and optionally fix) zero-argument dotted method occurrences.

@@ -2,7 +2,7 @@
 
 print "=== Testing Map/Dictionary Support ==="!
 
-const person = Map()!
+const person = Map !
 print "Created empty Map"!
 
 print "\n=== Testing Array Operations ==="!

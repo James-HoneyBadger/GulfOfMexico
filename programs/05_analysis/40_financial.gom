@@ -13,7 +13,7 @@ const annual_rate = 0.05!  // 5%
 const years = 10!
 const compounds_per_year = 12!  // Monthly compounding
 
-const final_amount = compound_interest(principal, annual_rate, years, compounds_per_year)!
+const final_amount = compound_interest principal, annual_rate, years, compounds_per_year!
 print "Principal: $${principal}"!
 print "Annual Rate: ${annual_rate * 100}%"!
 print "Time: ${years} years"!
@@ -30,7 +30,7 @@ const simple_principal = 5000!
 const simple_rate = 0.04!  // 4%
 const simple_time = 3!
 
-const simple_int = simple_interest(simple_principal, simple_rate, simple_time)!
+const simple_int = simple_interest simple_principal, simple_rate, simple_time!
 print "Principal: $${simple_principal}"!
 print "Rate: ${simple_rate * 100}%"!
 print "Time: ${simple_time} years"!
@@ -46,7 +46,7 @@ const loan_amount = 250000!  // $250k mortgage
 const monthly_rate = 0.045 / 12!  // 4.5% annual / 12 months
 const num_payments = 30 * 12!  // 30 years * 12 months
 
-const monthly_payment = pmt(monthly_rate, num_payments, loan_amount)!
+const monthly_payment = pmt monthly_rate, num_payments, loan_amount!
 print "Loan Amount: $${loan_amount}"!
 print "Annual Rate: 4.5%"!
 print "Loan Term: 30 years"!
@@ -64,7 +64,7 @@ const monthly_investment = 500!
 const inv_rate = 0.07 / 12!  // 7% annual
 const inv_months = 20 * 12!  // 20 years
 
-const future_value = fv(inv_rate, inv_months, -monthly_investment, 0)!
+const future_value = fv inv_rate, inv_months, -monthly_investment, 0!
 print "Monthly Investment: $${monthly_investment}"!
 print "Annual Return: 7%"!
 print "Time Period: 20 years"!
@@ -78,7 +78,7 @@ const future_needed = 100000!
 const pv_rate = 0.06 / 12!
 const pv_months = 10 * 12!
 
-const monthly_needed = pv(pv_rate, pv_months, -future_needed / pv_months)!
+const monthly_needed = pv pv_rate, pv_months, -future_needed / pv_months!
 print "Future Value Needed: $${future_needed}"!
 print "Annual Rate: 6%"!
 print "Time: 10 years"!
@@ -94,7 +94,7 @@ print "Initial Investment: $50,000"!
 print "Annual Cash Flows: $15k, $18k, $20k, $22k, $25k"!
 print "Discount Rate: ${discount_rate * 100}%"!
 
-const npv_result = npv(discount_rate, cash_flows)!
+const npv_result = npv discount_rate, cash_flows!
 print "Net Present Value: $${npv_result}"!
 
 if npv_result > 0 {
@@ -115,7 +115,7 @@ const monthly_contribution = 1000!
 const expected_return = 0.08 / 12!
 
 const retirement_months = retirement_years * 12!
-const retirement_fund = fv(expected_return, retirement_months, -monthly_contribution, 0)!
+const retirement_fund = fv expected_return, retirement_months, -monthly_contribution, 0!
 print "Current Age: ${current_age}"!
 print "Retirement Age: ${retirement_age}"!
 print "Monthly Contribution: $${monthly_contribution}"!

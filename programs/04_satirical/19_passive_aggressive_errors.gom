@@ -5,7 +5,7 @@ print "=== Passive-Aggressive Error Handling ==="!
 
 // Example 1: Division by zero (whatever!)
 try {
-   const result = Number(10) / Number(0)!
+   const result = Number(10) / Number 0!
    print "Result:", result!
 } whatever {
    print "Math is hard, let's go shopping"!
@@ -20,7 +20,7 @@ try {
 
 // Example 3: Invalid operation (whatever!)
 try {
-   const broken = String("hello") - Number(5)!
+   const broken = String("hello") - Number 5!
    print broken!
 } whatever {
    print "Whatever, I didn't want to do that anyway"!
@@ -28,7 +28,7 @@ try {
 
 // Example 4: Actually successful code
 try {
-   const x = Number(42)!
+   const x = Number 42!
    print "Success! x =", x!
 } whatever {
    print "This shouldn't print"!

@@ -44,8 +44,8 @@ print n[-1]!
 var s = "GOM"!
 print "String before push/pop:"!
 print s!
-s.push("! ")!
-s.push("Rocks")!
+s.push "! "!
+s.push "Rocks"!
 print "String after pushes:"!
 print s!
 print "Popped char:"!
@@ -54,7 +54,7 @@ print "String now:"!
 print s!
 
 // 4) Maps (dictionaries)
-const person = Map()!
+const person = Map!
 person["name"] = "Ada"!
 person["age"] = 36!
 person["skills"] = ["math", "logic", "computing"]!
@@ -86,7 +86,7 @@ count = 3!   // triggers
 
 // 7) Async / Await
 async function greet_async() => {
-   sleep(0.1)!
+   sleep 0.1!
    return "Async greeting complete!"!
 }!
 print "Starting async demo..."!
@@ -152,7 +152,7 @@ synergize {
 
 // 11) Tiny object pattern via Map
 function make_point(x, y) => {
-   const p = Map()!
+   const p = Map!
    p["x"] = x!
    p["y"] = y!
    return p!

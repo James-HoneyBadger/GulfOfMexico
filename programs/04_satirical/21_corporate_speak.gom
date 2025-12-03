@@ -5,37 +5,37 @@ print "=== Corporate Synergy Meeting ==="!
 
 // synergize: Combine two values
 print "\n1. SYNERGIZE (combining values):"!
-const name1 = String("Innovative")!
-const name2 = String("Solutions")!
+const name1 = String "Innovative"!
+const name2 = String "Solutions"!
 synergize name1, name2!
 print "  Company name:", name1, "+", name2!
 
-const revenue = Number(100000)!
-const profit = Number(50000)!
+const revenue = Number 100000!
+const profit = Number 50000!
 synergize revenue, profit!
 print "  Total:", revenue, "+", profit!
 
 // leverage: Multiply by 2 (for maximum impact!)
 print "\n2. LEVERAGE (doubling for impact):"!
-const sales = Number(1000)!
+const sales = Number 1000!
 leverage sales!
 print "  Leveraged sales: 1000 * 2"!
 
-const buzz = String("Synergy")!
+const buzz = String "Synergy"!
 leverage buzz!
 print "  Leveraged buzzword: Synergy * 2"!
 
 // paradigm_shift: Negate or reverse
 print "\n3. PARADIGM SHIFT (complete reversal):"!
-const oldThinking = Number(100)!
+const oldThinking = Number 100!
 paradigm_shift oldThinking!
 print "  Old thinking: 100 -> -100"!
 
-const direction = String("forward")!
+const direction = String "forward"!
 paradigm_shift direction!
 print "  Direction: forward -> backward"!
 
-const mindset = Boolean(true)!
+const mindset = Boolean true!
 paradigm_shift mindset!
 print "  Mindset: true -> false"!
 

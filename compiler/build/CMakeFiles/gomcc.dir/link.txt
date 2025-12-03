@@ -1,1 +1,0 @@
-/usr/bin/c++ -Wl,--dependency-file=CMakeFiles/gomcc.dir/link.d CMakeFiles/gomcc.dir/src/main.cpp.o CMakeFiles/gomcc.dir/src/lexer.cpp.o CMakeFiles/gomcc.dir/src/parser.cpp.o CMakeFiles/gomcc.dir/src/ast.cpp.o CMakeFiles/gomcc.dir/src/codegen.cpp.o CMakeFiles/gomcc.dir/src/runtime.cpp.o -o gomcc
