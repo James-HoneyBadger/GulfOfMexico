@@ -99,14 +99,14 @@ class Plugin(ABC):
 
         Use this to perform initialization, register resources, etc.
         """
-        pass
+        return None
 
     def on_unload(self) -> None:
         """Called when the plugin is unloaded.
 
         Use this to perform cleanup, release resources, etc.
         """
-        pass
+        return None
 
 
 class PluginManager:
@@ -255,7 +255,9 @@ class ExamplePlugin(Plugin):
 
         def hello(name: GulfOfMexicoValue) -> GulfOfMexicoString:
             """Custom hello function."""
-            from gulfofmexico.builtin import db_to_string  # pylint: disable=import-outside-toplevel
+            from gulfofmexico.builtin import (
+                db_to_string,
+            )  # pylint: disable=import-outside-toplevel
 
             name_str = db_to_string(name).value
             return GulfOfMexicoString(f"Hello from plugin, {name_str}!")
