@@ -4,7 +4,7 @@
 const canvas = Canvas 600, 600, "black"!
 
 // Save the initial transform
-canvas.saveTransform!
+canvas.saveTransform()!
 
 // Draw a square in the center
 canvas.translate 250, 250!
@@ -15,40 +15,40 @@ canvas.rotate 45!
 canvas.rect -25, -25, 50, 50, "blue"!
 
 // Restore original transform
-canvas.restoreTransform!
+canvas.restoreTransform()!
 
 // Scaling example
-canvas.saveTransform!
+canvas.saveTransform()!
 canvas.translate 450, 150!
 canvas.scale 2.0!
 canvas.circle 0, 0, 25, "green"!
-canvas.restoreTransform!
+canvas.restoreTransform()!
 
 // Draw a spiral using rotation
 var angle 0!
 var radius 10!
 
 function fn drawSpiral() {
-   canvas.saveTransform!
+   canvas.saveTransform()!
    canvas.translate 300, 450!
    canvas.rotate angle!
    canvas.translate radius, 0!
    canvas.circle 0, 0, 5, "cyan"!
-   canvas.restoreTransform!
+   canvas.restoreTransform()!
 
    var angle angle + 30!
    var radius radius + 5!
 }
 
 // Draw multiple rotated elements
-drawSpiral!
-drawSpiral!
-drawSpiral!
-drawSpiral!
-drawSpiral!
-drawSpiral!
-drawSpiral!
-drawSpiral!
+drawSpiral()!
+drawSpiral()!
+drawSpiral()!
+drawSpiral()!
+drawSpiral()!
+drawSpiral()!
+drawSpiral()!
+drawSpiral()!
 
 // Draw with probabilistic colors and positions
 var x 50!
@@ -61,11 +61,11 @@ function fn drawRandom() {
    var x x + 25!
 }
 
-drawRandom!
-drawRandom!
-drawRandom!
-drawRandom!
-drawRandom!
+drawRandom()!
+drawRandom()!
+drawRandom()!
+drawRandom()!
+drawRandom()!
 
 canvas.save "transforms_demo.png"!
 print "Transformation demo saved!"!

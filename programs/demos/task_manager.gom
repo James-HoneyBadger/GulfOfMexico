@@ -32,17 +32,17 @@ task3.name = "Add tests"!
 task3.priority = 4!
 
 print "Current tasks:"!
-task1.info!
-task2.info!
-task3.info!
+task1.info()!
+task2.info()!
+task3.info()!
 
 print ""!
 print "Completing tasks..."!
-task2.complete!
-task1.complete!
+task2.complete()!
+task1.complete()!
 
 print ""!
 print "Updated tasks:"!
-task1.info!
-task2.info!
-task3.info!
+task1.info()!
+task2.info()!
+task3.info()!

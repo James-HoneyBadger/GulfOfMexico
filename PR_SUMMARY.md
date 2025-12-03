@@ -2,6 +2,8 @@
 
 This branch normalizes Gulf of Mexico (GOM) example/program files to the canonical no-paren call style (e.g. fn(a, b)! -> fn a, b!). Includes interpolation & string fixes where needed.
 
+NOTE: While converting calls to the canonical "no-paren" calling style, zero-argument method *invocations* such as `obj.method !` were accidentally converted in some places — but under the interpreter `obj.method !` returns the method value instead of executing it. To actually invoke a zero-argument method you must use parentheses: `obj.method()!`. The branch includes fixes for those cases and adds a guard test to prevent future regressions.
+
 ## Files changed (HEAD)
 "
 "

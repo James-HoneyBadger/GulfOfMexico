@@ -31,6 +31,11 @@ jobs:
           source .venv/bin/activate
           pytest -q tests
 
+      - name: Run zero-arg dotted-call checker
+        run: |
+          source .venv/bin/activate
+          python scripts/check_zeroarg_calls.py
+
   code-quality:
     runs-on: ubuntu-latest
     steps:

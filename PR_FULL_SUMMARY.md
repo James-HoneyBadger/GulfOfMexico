@@ -2,6 +2,8 @@
 
 This PR normalizes Gulf of Mexico .gom files to use the canonical no-paren calling style (e.g., fn(a, b)! -> fn a, b!) across examples and programs, fixes interpolation and parenthesis issues, and also adds Qt IDE improvements (Open Web IDE menu + sanitized console error styling).
 
+**Note on zero-arg method invocations:** When converting to the no-paren style we discovered an important edge case — a dotted expression like `obj.method !` does not invoke the method, it returns the function object. To actually call a zero-argument method you must use parentheses: `obj.method()!`. This PR includes fixes for those cases and adds a regression test and CI check to prevent reintroducing them.
+
 ## Files modified (branch vs main)
 - PR_SUMMARY.md
 - compiler/examples/comprehensive_test.gom
