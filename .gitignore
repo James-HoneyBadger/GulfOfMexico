@@ -35,6 +35,8 @@ artifacts/
 validation_results.txt
 validate_run_output.txt
 
+# Local CMake build artifacts
+compiler/build/
 # Poetry
 poetry.lock
 
