@@ -8,8 +8,8 @@ happy {
    print "\n😊 Beginning with positive vibes!"!
 
    // Corporate speak in happy mode
-   const team = String("A-Team")!
-   const project = String("MVP")!
+   const team = String "A-Team"!
+   const project = String "MVP"!
    synergize team, project!
    print "Synergized:", team, "with", project!
 }
@@ -17,7 +17,7 @@ happy {
 // Excited about the possibilities
 excited {
    print "\n🎉 Super excited to leverage our synergies!"!
-   leverage String("HYPE")!
+   leverage String "HYPE"!
 }
 
 // Procrastinate on important stuff
@@ -39,7 +39,7 @@ lucky {
       knock_on_wood {
          print "Triple protection: Lucky + Crossed Fingers + Knocked Wood!"!
          print "Deploying..."!
-         const deploy = String("SUCCESS")!
+         const deploy = String "SUCCESS"!
          print "Status:", deploy!
       }
    }
@@ -52,7 +52,7 @@ tired {
 }
 
 // Paradigm shift the thinking
-const oldWay = String("waterfall")!
+const oldWay = String "waterfall"!
 print "\nOld methodology:", oldWay!
 paradigm_shift oldWay!
 print "New methodology: paradigm shifted!"!

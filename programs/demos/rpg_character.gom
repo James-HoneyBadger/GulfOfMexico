@@ -45,7 +45,7 @@ print ""!
 hero.takeDamage 30!
 hero.castSpell 15!
 hero.heal 20!
-hero.levelUp()!
+hero.levelUp!
 
 print ""!
 print "Final stats:"!

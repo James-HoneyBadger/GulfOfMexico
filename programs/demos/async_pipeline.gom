@@ -22,15 +22,15 @@ print "=== Async Data Pipeline Demo ==="!
 print ""!
 
 const source = "API endpoint"!
-const rawData = await fetchData(source)!
+const rawData = await fetchData source!
 print "Raw data: ${rawData}"!
 print ""!
 
-const processed = await processData(rawData)!
+const processed = await processData rawData!
 print "Processed data: ${processed}"!
 print ""!
 
-const isValid = await validateData(processed)!
+const isValid = await validateData processed!
 print "Validation result: ${isValid}"!
 print ""!
 

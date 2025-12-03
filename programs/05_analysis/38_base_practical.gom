@@ -13,10 +13,10 @@ const ip_oct2 = 168!
 const ip_oct3 = 1!
 const ip_oct4 = 254!
 
-const bin1 = to_binary(ip_oct1)!
-const bin2 = to_binary(ip_oct2)!
-const bin3 = to_binary(ip_oct3)!
-const bin4 = to_binary(ip_oct4)!
+const bin1 = to_binary ip_oct1!
+const bin2 = to_binary ip_oct2!
+const bin3 = to_binary ip_oct3!
+const bin4 = to_binary ip_oct4!
 
 print "IP Address: ${ip_oct1}.${ip_oct2}.${ip_oct3}.${ip_oct4}"!
 print "Binary: ${bin1}.${bin2}.${bin3}.${bin4}"!
@@ -29,9 +29,9 @@ const red = 255!
 const green = 99!
 const blue = 71!
 
-const hex_r = to_hex(red)!
-const hex_g = to_hex(green)!
-const hex_b = to_hex(blue)!
+const hex_r = to_hex red!
+const hex_g = to_hex green!
+const hex_b = to_hex blue!
 
 print "RGB: (${red}, ${green}, ${blue})"!
 print "Hex color: #${hex_r}${hex_g}${hex_b}"!
@@ -44,8 +44,8 @@ const owner_rwx = 7!  // read=4, write=2, execute=1
 const group_rx = 5!   // read=4, execute=1
 const other_r = 4!    // read=4
 
-const perm_oct = to_octal(owner_rwx * 64 + group_rx * 8 + other_r)!
-const perm_bin = to_binary(owner_rwx * 64 + group_rx * 8 + other_r)!
+const perm_oct = to_octal owner_rwx * 64 + group_rx * 8 + other_r!
+const perm_bin = to_binary owner_rwx * 64 + group_rx * 8 + other_r!
 
 print "Permissions: ${owner_rwx}${group_rx}${other_r} (octal)"!
 print "Full octal: ${perm_oct}"!
@@ -57,8 +57,8 @@ print ""!
 print "4. Memory Address Conversion"!
 print "-----------------------------"!
 const mem_addr = 65535!
-const mem_hex = to_hex(mem_addr)!
-const mem_bin = to_binary(mem_addr)!
+const mem_hex = to_hex mem_addr!
+const mem_bin = to_binary mem_addr!
 
 print "Decimal address: ${mem_addr}"!
 print "Hex: 0x${mem_hex}"!
@@ -69,10 +69,10 @@ print ""!
 print "5. Custom Base Encoding"!
 print "-----------------------"!
 const data = 12345!
-const base32 = to_base(data, 32)!
+const base32 = to_base data, 32!
 print "Data: ${data}"!
 print "Base-32 encoded: ${base32}"!
-const decoded = from_base(base32, 32)!
+const decoded = from_base base32, 32!
 print "Decoded back: ${decoded}"!
 print ""!
 
@@ -82,9 +82,9 @@ print "--------------"!
 const bin_a = "1111"!  // 15 in decimal
 const bin_b = "1010"!  // 10 in decimal
 
-const sum_bin = base_add(bin_a, 2, bin_b, 2, 2)!
-const diff_bin = base_sub(bin_a, 2, bin_b, 2, 2)!
-const prod_bin = base_mul(bin_a, 2, bin_b, 2, 2)!
+const sum_bin = base_add bin_a, 2, bin_b, 2, 2!
+const diff_bin = base_sub bin_a, 2, bin_b, 2, 2!
+const prod_bin = base_mul bin_a, 2, bin_b, 2, 2!
 
 print "Binary ${bin_a} + ${bin_b} = ${sum_bin}"!
 print "Binary ${bin_a} - ${bin_b} = ${diff_bin}"!
@@ -96,8 +96,8 @@ print "7. Check Powers of 2"!
 print "--------------------"!
 const num16 = 16!
 const num20 = 20!
-const bin16 = to_binary(num16)!
-const bin20 = to_binary(num20)!
+const bin16 = to_binary num16!
+const bin20 = to_binary num20!
 
 print "${num16} in binary: ${bin16} (power of 2!)"!
 print "${num20} in binary: ${bin20} (not power of 2)"!

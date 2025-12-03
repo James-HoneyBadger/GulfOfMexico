@@ -7,8 +7,8 @@ print ""!
 print "1. Arrays start at -1"!
 const arr = [10, 20, 30]!
 print "   arr = ${arr}"!
-print "   arr[-1] = ${arr[-1]} (first element")!
-print "   arr[0] = ${arr[0]} (second element")!
+print "   arr[-1] = ${arr[-1]} (first element)"!
+print "   arr[0] = ${arr[0]} (second element)"!
 print ""!
 
 // 2. Fractional indexing
@@ -38,15 +38,15 @@ print ""!
 print "5. Multiple Equality Operators"!
 const a = 42!
 const b = 42.0!
-print "   42 = 42.0: ${a = b} (approximate")!
-print "   42 == 42.0: ${a == b} (standard")!
-print "   42 === 42.0: ${a === b} (strict")!
+print "   42 = 42.0: ${a = b} (approximate)"!
+print "   42 == 42.0: ${a == b} (standard)"!
+print "   42 === 42.0: ${a === b} (strict)"!
 print ""!
 
 // 6. Functions
 print "6. Functions"!
 fn add(x, y) => x + y!
-print "   add(5, 3 = ${add 5, 3}")!
+print "   add(5, 3) = ${add 5, 3}"!
 print ""!
 
 // 7. Classes

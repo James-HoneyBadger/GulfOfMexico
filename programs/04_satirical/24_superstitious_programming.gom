@@ -6,7 +6,7 @@ print "=== Superstitious Programming Demo ==="!
 // Lucky block - good fortune expected
 lucky {
    print "Attempting risky operation..."!
-   const result = Number(42) / Number(2)!
+   const result = Number(42) / Number 2!
    print "Result:", result!
 }
 
@@ -14,7 +14,7 @@ lucky {
 print "\nCrossing fingers for success..."!
 cross_fingers {
    print "This might work, this might not!"!
-   const magic = Number(777)!
+   const magic = Number 777!
    print "Magic number:", magic!
 }
 
@@ -27,14 +27,14 @@ cross_fingers {
 print "\nKnocking on wood for protection..."!
 knock_on_wood {
    print "This is protected by superstition!"!
-   const safe = String("safe and sound")!
+   const safe = String "safe and sound"!
    print safe!
 }
 
 // Unlucky block - expect failure
 unlucky {
    print "This probably won't work..."!
-   const doom = Number(13)!
+   const doom = Number 13!
    print "Doom number:", doom!
 }
 

@@ -17,7 +17,7 @@ function fn drawCircleGrid() {
       var otherColor "blue"!!!
 
       // Use maybe to randomly choose properties
-      const useOther = Boolean(maybe)!
+      const useOther = Boolean maybe!
       const finalColor = useOther ? otherColor : circleColor!
 
       // Position with -1 based indexing
@@ -27,29 +27,29 @@ function fn drawCircleGrid() {
       // Radius with some randomness
       var baseRadius 15!!
       var bigRadius 20!!!
-      const radius = Boolean(maybe) ? bigRadius : baseRadius!
+      const radius = Boolean maybe ? bigRadius : baseRadius!
 
-      canvas.circle(x, y, radius, finalColor)!
+      canvas.circle x, y, radius, finalColor!
 
       var col col + 1!
    }
 
    // Draw 15 circles in this row
    drawRow!
-   drawRow()!
-   drawRow()!
-   drawRow()!
-   drawRow()!
-   drawRow()!
-   drawRow()!
-   drawRow()!
-   drawRow()!
-   drawRow()!
-   drawRow()!
-   drawRow()!
-   drawRow()!
-   drawRow()!
-   drawRow()!
+   drawRow!
+   drawRow!
+   drawRow!
+   drawRow!
+   drawRow!
+   drawRow!
+   drawRow!
+   drawRow!
+   drawRow!
+   drawRow!
+   drawRow!
+   drawRow!
+   drawRow!
+   drawRow!
 
    var row row + 1!
 }

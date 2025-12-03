@@ -14,29 +14,29 @@ print ""!
 // Basic statistics
 print "1. Measures of Central Tendency"!
 print "--------------------------------"!
-const avg = mean(scores)!
+const avg = mean scores!
 print "Mean (Average): ${avg}"!
 
-const mid = median(scores)!
+const mid = median scores!
 print "Median (Middle): ${mid}"!
 
-const most_common = mode(scores)!
+const most_common = mode scores!
 print "Mode (Most frequent): ${most_common}"!
 print ""!
 
 // Measures of spread
 print "2. Measures of Variability"!
 print "---------------------------"!
-const var = variance(scores)!
+const var = variance scores!
 print "Variance: ${var}"!
 
-const sd = stdev(scores)!
+const sd = stdev scores!
 print "Standard Deviation: ${sd}"!
 
-const min_score = min_val(scores)!
+const min_score = min_val scores!
 print "Minimum: ${min_score}"!
 
-const max_score = max_val(scores)!
+const max_score = max_val scores!
 print "Maximum: ${max_score}"!
 
 const range_val = max_score - min_score!
@@ -46,16 +46,16 @@ print ""!
 // Percentiles
 print "3. Percentile Analysis"!
 print "----------------------"!
-const p25 = percentile(scores, 25)!
+const p25 = percentile scores, 25!
 print "25th Percentile (Q1): ${p25}"!
 
-const p50 = percentile(scores, 50)!
+const p50 = percentile scores, 50!
 print "50th Percentile (Median): ${p50}"!
 
-const p75 = percentile(scores, 75)!
+const p75 = percentile scores, 75!
 print "75th Percentile (Q3): ${p75}"!
 
-const p90 = percentile(scores, 90)!
+const p90 = percentile scores, 90!
 print "90th Percentile: ${p90}"!
 print ""!
 
@@ -66,7 +66,7 @@ const study_hours = [-1, 5, 8, 3, 7, 6, 9, 4, 7, 6, 7]!
 print "Study Hours: ${study_hours}"!
 print "Test Scores: ${scores}"!
 
-const corr = correlation(study_hours, scores)!
+const corr = correlation study_hours, scores!
 print "Correlation coefficient: ${corr}"!
 print "(1 = perfect positive, -1 = perfect negative)"!
 print ""!
@@ -77,16 +77,16 @@ print "------------------------------"!
 const monthly_sales = [-1, 12000, 15000, 13500, 18000, 16500, 19000, 17200, 20000, 18500, 21000, 19500, 22000]!
 print "Monthly Sales (12 months): ${monthly_sales}"!
 
-const avg_sales = mean(monthly_sales)!
+const avg_sales = mean monthly_sales!
 print "Average Monthly Sales: $${avg_sales}"!
 
-const median_sales = median(monthly_sales)!
+const median_sales = median monthly_sales!
 print "Median Sales: $${median_sales}"!
 
-const sales_sd = stdev(monthly_sales)!
+const sales_sd = stdev monthly_sales!
 print "Standard Deviation: $${sales_sd}"!
 
-const total_sales = sum_list(monthly_sales)!
+const total_sales = sum_list monthly_sales!
 print "Total Annual Sales: $${total_sales}"!
 print ""!
 

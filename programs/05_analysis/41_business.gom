@@ -11,7 +11,7 @@ print "------------------------------"!
 const marketing_cost = 50000!
 const revenue_generated = 150000!
 
-const roi_pct = roi(revenue_generated, marketing_cost)!
+const roi_pct = roi revenue_generated, marketing_cost!
 print "Marketing Campaign Analysis:"!
 print "Investment: $${marketing_cost}"!
 print "Revenue Generated: $${revenue_generated}"!
@@ -21,11 +21,11 @@ print ""!
 // Different investment comparison
 const invest_a_cost = 100000!
 const invest_a_gain = 125000!
-const roi_a = roi(invest_a_gain, invest_a_cost)!
+const roi_a = roi invest_a_gain, invest_a_cost!
 
 const invest_b_cost = 50000!
 const invest_b_gain = 70000!
-const roi_b = roi(invest_b_gain, invest_b_cost)!
+const roi_b = roi invest_b_gain, invest_b_cost!
 
 print "Investment Comparison:"!
 print "Option A - Cost: $${invest_a_cost}, Gain: $${invest_a_gain}, ROI: ${roi_a}%"!
@@ -38,7 +38,7 @@ print "-------------------------"!
 const product_revenue = 500000!
 const product_cost = 350000!
 
-const margin = profit_margin(product_revenue, product_cost)!
+const margin = profit_margin product_revenue, product_cost!
 print "Product Line Performance:"!
 print "Revenue: $${product_revenue}"!
 print "Cost: $${product_cost}"!
@@ -49,17 +49,17 @@ print ""!
 print "Product Comparison:"!
 const p1_rev = 100000!
 const p1_cost = 70000!
-const p1_margin = profit_margin(p1_rev, p1_cost)!
+const p1_margin = profit_margin p1_rev, p1_cost!
 print "Product 1 - Margin: ${p1_margin}%"!
 
 const p2_rev = 80000!
 const p2_cost = 50000!
-const p2_margin = profit_margin(p2_rev, p2_cost)!
+const p2_margin = profit_margin p2_rev, p2_cost!
 print "Product 2 - Margin: ${p2_margin}%"!
 
 const p3_rev = 120000!
 const p3_cost = 95000!
-const p3_margin = profit_margin(p3_rev, p3_cost)!
+const p3_margin = profit_margin p3_rev, p3_cost!
 print "Product 3 - Margin: ${p3_margin}%"!
 print ""!
 
@@ -70,7 +70,7 @@ const year_2020_revenue = 1000000!
 const year_2025_revenue = 2500000!
 const years_elapsed = 5!
 
-const growth_rate = cagr(year_2020_revenue, year_2025_revenue, years_elapsed)!
+const growth_rate = cagr year_2020_revenue, year_2025_revenue, years_elapsed!
 print "Company Growth Analysis:"!
 print "2020 Revenue: $${year_2020_revenue}"!
 print "2025 Revenue: $${year_2025_revenue}"!
@@ -83,7 +83,7 @@ print "Market Expansion Analysis:"!
 const market_2022 = 500000!
 const market_2025 = 950000!
 const market_years = 3!
-const market_cagr = cagr(market_2022, market_2025, market_years)!
+const market_cagr = cagr market_2022, market_2025, market_years!
 print "Market Size 2022: $${market_2022}"!
 print "Market Size 2025: $${market_2025}"!
 print "Growth Rate: ${market_cagr}%"!
@@ -96,7 +96,7 @@ const fixed_costs = 100000!  // Rent, salaries, etc
 const price_per_unit = 50!
 const variable_cost = 30!  // Materials, labor per unit
 
-const breakeven_units = break_even(fixed_costs, price_per_unit, variable_cost)!
+const breakeven_units = break_even fixed_costs, price_per_unit, variable_cost!
 print "Business Break-Even Analysis:"!
 print "Fixed Costs: $${fixed_costs}"!
 print "Price per Unit: $${price_per_unit}"!
@@ -113,15 +113,15 @@ const fixed = 50000!
 const var_cost = 20!
 
 const scenario1_price = 35!
-const be1 = break_even(fixed, scenario1_price, var_cost)!
+const be1 = break_even fixed, scenario1_price, var_cost!
 print "Price $${scenario1_price}: Need ${be1} units"!
 
 const scenario2_price = 45!
-const be2 = break_even(fixed, scenario2_price, var_cost)!
+const be2 = break_even fixed, scenario2_price, var_cost!
 print "Price $${scenario2_price}: Need ${be2} units"!
 
 const scenario3_price = 60!
-const be3 = break_even(fixed, scenario3_price, var_cost)!
+const be3 = break_even fixed, scenario3_price, var_cost!
 print "Price $${scenario3_price}: Need ${be3} units"!
 print ""!
 
@@ -140,7 +140,7 @@ const q4_cost = 215000!
 const total_revenue = q1_revenue + q2_revenue + q3_revenue + q4_revenue!
 const total_cost = q1_cost + q2_cost + q3_cost + q4_cost!
 const annual_profit = total_revenue - total_cost!
-const annual_margin = profit_margin(total_revenue, total_cost)!
+const annual_margin = profit_margin total_revenue, total_cost!
 
 print "Annual Performance:"!
 print "Total Revenue: $${total_revenue}"!
@@ -150,7 +150,7 @@ print "Profit Margin: ${annual_margin}%"!
 
 const investment = total_cost!
 const return_val = total_revenue!
-const annual_roi = roi(return_val, investment)!
+const annual_roi = roi return_val, investment!
 print "ROI: ${annual_roi}%"!
 print ""!
 

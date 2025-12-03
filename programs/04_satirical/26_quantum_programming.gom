@@ -15,7 +15,7 @@ print "   Until we observe it, it's both 1 AND 2 AND 3 AND 4 AND 5!"!
 
 print ""!
 print "3. Observing quantum variable (collapses wavefunction)..."!
-const result = observe("x")!
+const result = observe "x"!
 print "   Result: ${result}"!
 
 print ""!
@@ -31,9 +31,9 @@ quantum c ["cat", "dog", "bird"]!
 
 print ""!
 print "6. Observing all quantum states..."!
-const val_a = observe("a")!
-const val_b = observe("b")!
-const val_c = observe("c")!
+const val_a = observe "a"!
+const val_b = observe "b"!
+const val_c = observe "c"!
 
 print "   a collapsed to: ${val_a}"!
 print "   b collapsed to: ${val_b}"!

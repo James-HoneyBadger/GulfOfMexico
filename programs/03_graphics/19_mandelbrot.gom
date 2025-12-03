@@ -3,7 +3,7 @@ print "Starting Mandelbrot generation..."!
 
 const width = 100!
 const height = 100!
-const canvas = Canvas(width, height, "black")!
+const canvas = Canvas width, height, "black"!
 
 print "Canvas created"!
 
@@ -23,7 +23,7 @@ var col = -1!
 // Draw a simple gradient as a test
 function drawPixel(x, y, iter) => {
    const color = iter == 0 ? c0 : (iter == 1 ? c1 : (iter == 2 ? c2 : c3))!
-   canvas.pixel(x, y, color)!
+   canvas.pixel x, y, color!
 }!
 
 // Process one pixel
@@ -35,7 +35,7 @@ function processPixel() => {
    // Simple iteration count (just based on position for now)
    const iter = ((col + row) % 4)!
 
-   drawPixel(col, row, iter)!
+   drawPixel col, row, iter!
 
    col = col + 1!
 }!
@@ -44,35 +44,35 @@ function processPixel() => {
 function processRow() => {
    col = -1!
 
-   processPixel()!
-   processPixel()!
-   processPixel()!
-   processPixel()!
-   processPixel()!
-   processPixel()!
-   processPixel()!
-   processPixel()!
-   processPixel()!
-   processPixel()!
+   processPixel!
+   processPixel!
+   processPixel!
+   processPixel!
+   processPixel!
+   processPixel!
+   processPixel!
+   processPixel!
+   processPixel!
+   processPixel!
 
    row = row + 1!
 }!
 
 print "Starting to draw..."!
 
-processRow()!
-processRow()!
-processRow()!
-processRow()!
-processRow()!
-processRow()!
-processRow()!
-processRow()!
-processRow()!
-processRow()!
+processRow!
+processRow!
+processRow!
+processRow!
+processRow!
+processRow!
+processRow!
+processRow!
+processRow!
+processRow!
 
 print "Drawing complete!"!
 
-canvas.save("mandelbrot.png")!
+canvas.save "mandelbrot.png"!
 
 print "Mandelbrot set saved to mandelbrot.png"!

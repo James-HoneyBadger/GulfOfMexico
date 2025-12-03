@@ -11,8 +11,8 @@ async function processData(value) => {
 }!
 
 // Call async functions
-const result = await fetchData()!
+const result = await fetchData!
 print "Fetched result: ${result}"!
 
-const processed = await processData(result)!
+const processed = await processData result!
 print "Processed result: ${processed}"!

@@ -18,10 +18,10 @@ class Person {
 const alice = new Person!
 alice.name = "Alice"!
 alice.age = 25!
-alice.introduce()!
+alice.introduce !
 
 const bob = new Person!
 bob.name = "Bob"!
 bob.age = 30!
-bob.introduce()!
-bob.birthday()!
+bob.introduce !
+bob.birthday !

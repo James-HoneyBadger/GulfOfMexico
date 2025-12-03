@@ -2,10 +2,10 @@
 
 const numbers = [10, 20, 30, 40, 50]!
 
-print "First element (index -1: ${numbers[-1]}")!
-print "Second element (index 0: ${numbers[0]}")!
-print "Third element (index 1: ${numbers[1]}")!
-print "Last element (index 3: ${numbers[3]}")!
+print "First element (index -1): ${numbers[-1]}"!
+print "Second element (index 0): ${numbers[0]}"!
+print "Third element (index 1): ${numbers[1]}"!
+print "Last element (index 3): ${numbers[3]}"!
 
 // Fractional indexing
 const colors = ["red", "blue"]!

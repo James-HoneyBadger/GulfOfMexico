@@ -3,15 +3,15 @@
 
 print "Creating fractal art..."!
 
-const canvas = Canvas(400, 300, "black")!
+const canvas = Canvas 400, 300, "black"!
 
 // Color palette - blues to whites
-const c0 = Color(0, 0, 51)!     // Dark blue
-const c1 = Color(0, 0, 102)!    // Medium blue
-const c2 = Color(51, 102, 204)! // Bright blue
-const c3 = Color(102, 153, 255)! // Light blue
-const c4 = Color(204, 229, 255)! // Very light blue
-const c5 = Color(255, 255, 255)! // White
+const c0 = Color 0, 0, 51!     // Dark blue
+const c1 = Color 0, 0, 102!    // Medium blue
+const c2 = Color 51, 102, 204! // Bright blue
+const c3 = Color 102, 153, 255! // Light blue
+const c4 = Color 204, 229, 255! // Very light blue
+const c5 = Color 255, 255, 255! // White
 
 print "Colors created"!
 
