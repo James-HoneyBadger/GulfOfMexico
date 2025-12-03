@@ -212,24 +212,24 @@ syntax_options:
 
 ## Validation Checklist
 
-✓ No duplicate custom keyword names  
-✓ Function arities >= -1  
-✓ Operator precedences >= 0  
-✓ Valid associativity (left/right/none)  
-✓ Required metadata fields present  
+✓ No duplicate custom keyword names
+✓ Function arities >= -1
+✓ Operator precedences >= 0
+✓ Valid associativity (left/right/none)
+✓ Required metadata fields present
 
 ## Troubleshooting
 
-**Problem:** Config not loading  
+**Problem:** Config not loading
 **Solution:** Check file format (YAML requires pyyaml: `pip install pyyaml`)
 
-**Problem:** Validation errors  
+**Problem:** Validation errors
 **Solution:** Run `python gomconfig.py validate config.yaml` for details
 
-**Problem:** Features not working  
+**Problem:** Features not working
 **Solution:** Check runtime is loaded: `LanguageRuntime.get_info()`
 
-**Problem:** YAML not available  
+**Problem:** YAML not available
 **Solution:** Install pyyaml OR use JSON format instead
 
 ## Links

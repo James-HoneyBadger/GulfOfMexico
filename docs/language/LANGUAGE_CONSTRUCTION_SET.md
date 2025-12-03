@@ -368,12 +368,12 @@ Create `.gomconfig` in your project directory (YAML or JSON):
 # .gomconfig
 metadata:
   name: "Project Language Config"
-  
+
 keywords:
   if:
     original: "if"
     custom: "when"
-    
+
 # ... rest of config
 ```
 

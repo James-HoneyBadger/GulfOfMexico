@@ -43,7 +43,7 @@ zero_trust {
    print "Verifying network..."!
    print "Verifying intentions..."!
    print "Verifying verification..."!
-   
+
    const trust_level = 0!
    print "Trust level: ${trust_level}%"!
    print "Access: Denied by default!"!

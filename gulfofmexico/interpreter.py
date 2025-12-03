@@ -29,16 +29,18 @@ that is NOT used in production. All code execution uses this file's pattern matc
 """
 
 from __future__ import annotations
-import os
-import re
+
 import json
-import random
+import os
 import pickle
-import requests
-from pathlib import Path
+import random
+import re
 from copy import deepcopy
 from difflib import SequenceMatcher
+from pathlib import Path
 from typing import Literal, Optional, TypeAlias, Union
+
+import requests
 
 KEY_MOUSE_IMPORTED = True
 try:
@@ -54,7 +56,6 @@ except ImportError:
 
 from gulfofmexico.base import (
     InterpretationError,
-    NonFormattedError,
     OperatorType,
     Token,
     TokenType,
@@ -81,9 +82,9 @@ from gulfofmexico.builtin import (
     GulfOfMexicoSpecialBlankValue,
     GulfOfMexicoString,
     GulfOfMexicoUndefined,
+    GulfOfMexicoValue,
     Name,
     Variable,
-    GulfOfMexicoValue,
     VariableLifetime,
     db_not,
     db_to_boolean,
@@ -91,19 +92,18 @@ from gulfofmexico.builtin import (
     db_to_string,
     is_int,
 )
-from gulfofmexico.serialize import serialize_obj, deserialize_obj
-from gulfofmexico.processor.lexer import tokenize as db_tokenize
 from gulfofmexico.processor.expression_tree import (
+    ExpressionNode,
     ExpressionTreeNode,
     FunctionNode,
+    IndexNode,
     ListNode,
     SingleOperatorNode,
     ValueNode,
-    IndexNode,
-    ExpressionNode,
     build_expression_tree,
     get_expr_first_token,
 )
+from gulfofmexico.processor.lexer import tokenize as db_tokenize
 from gulfofmexico.processor.syntax_tree import (
     AfterStatement,
     AgileStatement,
@@ -129,19 +129,17 @@ from gulfofmexico.processor.syntax_tree import (
     SecurityTheaterStatement,
     StartupStatement,
     SuperstitiousStatement,
-    TimeTravelStatement,
     TryWhateverStatement,
     VariableAssignment,
     VariableDeclaration,
     WhenStatement,
 )
+from gulfofmexico.serialize import deserialize_obj, serialize_obj
 
 # several "ratios" used in the approx equal function
 NUM_EQUALITY_RATIO = 0.1  # a-b / b
 STRING_EQUALITY_RATIO = 0.7  # min ratio to be considered equal
-LIST_EQUALITY_RATIO = (
-    0.7  # min ratio of all the elements of a list to be equal for the lists to be equal
-)
+LIST_EQUALITY_RATIO = 0.7  # min ratio of all the elements of a list to be equal for the lists to be equal
 MAP_EQUALITY_RATIO = 0.6  # lower thresh cause i feel like it
 FUNCTION_EQUALITY_RATIO = 0.6  # yeah
 OBJECT_EQUALITY_RATIO = 0.6
@@ -193,11 +191,7 @@ WhenStatementWatchers: TypeAlias = list[
 def get_built_expression(
     expr: Union[list[Token], ExpressionTreeNode],
 ) -> ExpressionTreeNode:
-    return (
-        expr
-        if isinstance(expr, ExpressionTreeNode)
-        else build_expression_tree(filename, expr, code)
-    )
+    return expr if isinstance(expr, ExpressionTreeNode) else build_expression_tree(filename, expr, code)
 
 
 def get_modified_next_name(name: str, ns: int) -> str:
@@ -216,7 +210,6 @@ def evaluate_normal_function(
     args: list[GulfOfMexicoValue],
     when_statement_watchers: WhenStatementWatchers,
 ) -> GulfOfMexicoValue:
-
     # check to evaluate builtin
     if isinstance(func, BuiltinFunction):
         if func.arg_count > len(args):
@@ -258,10 +251,7 @@ def evaluate_normal_function(
                         )
 
                     # Call init with instance namespace in scope
-                    init_namespace: Namespace = {
-                        name: Name(name, arg)
-                        for name, arg in zip(init_func.args, init_args)
-                    }
+                    init_namespace: Namespace = {name: Name(name, arg) for name, arg in zip(init_func.args, init_args)}
                     interpret_code_statements(
                         init_func.code,
                         namespaces + [instance.namespace, init_namespace],
@@ -283,9 +273,7 @@ def evaluate_normal_function(
             f"Expected more arguments for function call with {len(func.args)} argument{'s' if len(func.args) != 1 else ''}.",
             expr.name,
         )
-    new_namespace: Namespace = {
-        name: Name(name, arg) for name, arg in zip(func.args, args)
-    }
+    new_namespace: Namespace = {name: Name(name, arg) for name, arg in zip(func.args, args)}
     return (
         interpret_code_statements(
             func.code,
@@ -314,9 +302,7 @@ def register_async_function(
             f"Expected more arguments for function call with {len(func.args)} argument{'s' if len(func.args) != 1 else ''}.",
             expr.name,
         )
-    function_namespaces = namespaces + [
-        {name: Name(name, arg) for name, arg in zip(func.args, args)}
-    ]
+    function_namespaces = namespaces + [{name: Name(name, arg) for name, arg in zip(func.args, args)}]
     async_statements.append((func.code, function_namespaces, 0, 1))
 
 
@@ -354,7 +340,6 @@ def remove_from_all_when_statement_watchers(
 
 
 def load_global_gulfofmexico_variables(namespaces: list[Namespace]) -> None:
-
     dir_path = Path().home() / DB_RUNTIME_PATH
     inf_values_path = dir_path / INF_VAR_VALUES_PATH
     inf_var_list = dir_path / INF_VAR_PATH
@@ -370,15 +355,9 @@ def load_global_gulfofmexico_variables(namespaces: list[Namespace]) -> None:
             if not line.strip():
                 continue
 
-            name, identity, can_be_reset, can_edit_value, confidence = line.split(
-                DB_VAR_TO_VALUE_SEP
-            )
-            can_be_reset = (
-                eval(can_be_reset) if can_be_reset in ["True", "False"] else True
-            )  # safe code !!!!!!!!!!!!
-            can_edit_value = (
-                eval(can_edit_value) if can_edit_value in ["True", "False"] else True
-            )
+            name, identity, can_be_reset, can_edit_value, confidence = line.split(DB_VAR_TO_VALUE_SEP)
+            can_be_reset = eval(can_be_reset) if can_be_reset in ["True", "False"] else True  # safe code !!!!!!!!!!!!
+            can_edit_value = eval(can_edit_value) if can_edit_value in ["True", "False"] else True
 
             with open(dir_path / INF_VAR_VALUES_PATH / identity, "rb") as data_f:
                 value = pickle.load(data_f)
@@ -417,9 +396,7 @@ def load_local_immutable_constants(namespaces: list[Namespace]) -> None:
 
             try:
                 name, identity, confidence = line.split(DB_VAR_TO_VALUE_SEP)
-                with open(
-                    dir_path / IMMUTABLE_CONSTANTS_VALUES_PATH / identity, "rb"
-                ) as data_f:
+                with open(dir_path / IMMUTABLE_CONSTANTS_VALUES_PATH / identity, "rb") as data_f:
                     value = pickle.load(data_f)
                 # Immutable constants: can_be_reset=False, can_edit_value=False
                 namespaces[-1][name] = Variable(
@@ -440,9 +417,7 @@ def load_local_immutable_constants(namespaces: list[Namespace]) -> None:
                 continue
 
 
-def save_local_immutable_constant(
-    name: str, value: GulfOfMexicoValue, confidence: int
-) -> None:
+def save_local_immutable_constant(name: str, value: GulfOfMexicoValue, confidence: int) -> None:
     """Save an immutable constant locally."""
     dir_path = Path().home() / DB_RUNTIME_PATH
     immutable_values_path = dir_path / IMMUTABLE_CONSTANTS_VALUES_PATH
@@ -462,9 +437,7 @@ def save_local_immutable_constant(
         f.write(f"{name}{SEP}{generated_addr}{SEP}{confidence}\n")
 
     # Save value
-    with open(
-        dir_path / IMMUTABLE_CONSTANTS_VALUES_PATH / str(generated_addr), "wb"
-    ) as f:
+    with open(dir_path / IMMUTABLE_CONSTANTS_VALUES_PATH / str(generated_addr), "wb") as f:
         pickle.dump(value, f)
 
 
@@ -484,9 +457,7 @@ def load_public_global_variables(namespaces: list[Namespace]) -> None:
                 name, address, confidence = line.split(DB_VAR_TO_VALUE_SEP)
                 can_be_reset = can_edit_value = False  # these were const
 
-                serialized_value_response = requests.get(
-                    f"{repo_url}/serialized_objects/{address}", timeout=5
-                )
+                serialized_value_response = requests.get(f"{repo_url}/serialized_objects/{address}", timeout=5)
                 serialized_value_response.raise_for_status()
                 serialized_value = serialized_value_response.text
 
@@ -535,9 +506,7 @@ def open_global_variable_issue(name: str, value: GulfOfMexicoValue, confidence: 
     issue_body = json.dumps(serialize_obj(value))
     with github.Github(auth=github.Auth.Token(access_token)) as g:  # type: ignore
         repo = g.get_repo("James-HoneyBadger/gulfofmexico-interpreter-globals")
-        repo.create_issue(
-            f"Create Public Global: {name}{DB_VAR_TO_VALUE_SEP}{confidence}", issue_body
-        )
+        repo.create_issue(f"Create Public Global: {name}{DB_VAR_TO_VALUE_SEP}{confidence}", issue_body)
 
 
 def check_type_annotation(value: GulfOfMexicoValue, type_tokens: list[Token]) -> None:
@@ -555,30 +524,20 @@ def check_type_annotation(value: GulfOfMexicoValue, type_tokens: list[Token]) ->
     # Check type compatibility
     if type_name == "Int":
         if not isinstance(value, GulfOfMexicoNumber):
-            raise InterpretationError(
-                f"Type error: expected Int, got {type(value).__name__}"
-            )
+            raise InterpretationError(f"Type error: expected Int, got {type(value).__name__}")
     elif type_name == "String":
         if not isinstance(value, GulfOfMexicoString):
-            raise InterpretationError(
-                f"Type error: expected String, got {type(value).__name__}"
-            )
+            raise InterpretationError(f"Type error: expected String, got {type(value).__name__}")
     elif type_name == "Char[]":
         if not isinstance(value, GulfOfMexicoString):
-            raise InterpretationError(
-                f"Type error: expected Char[], got {type(value).__name__}"
-            )
+            raise InterpretationError(f"Type error: expected Char[], got {type(value).__name__}")
     elif type_name == "Int9":
         if not isinstance(value, GulfOfMexicoNumber):
-            raise InterpretationError(
-                f"Type error: expected Int9, got {type(value).__name__}"
-            )
+            raise InterpretationError(f"Type error: expected Int9, got {type(value).__name__}")
         # Int9 represents binary, but for now we'll just check it's a number
     elif type_name == "Int99":
         if not isinstance(value, GulfOfMexicoNumber):
-            raise InterpretationError(
-                f"Type error: expected Int99, got {type(value).__name__}"
-            )
+            raise InterpretationError(f"Type error: expected Int99, got {type(value).__name__}")
         # Int99 represents some other representation, but for now we'll just check it's a number
     # Add more type checks as needed
 
@@ -640,9 +599,7 @@ def declare_new_variable(
         check_type_annotation(value, statement.type_annotation)
 
     # Check if this is a global immutable constant (const const const)
-    is_triple_const = len(statement.modifiers) == 3 and all(
-        mod.value == "const" for mod in statement.modifiers
-    )
+    is_triple_const = len(statement.modifiers) == 3 and all(mod.value == "const" for mod in statement.modifiers)
 
     if is_triple_const:
         # Save as immutable global constant
@@ -658,14 +615,10 @@ def declare_new_variable(
             pass
 
     # Trigger when statement watchers for this new variable
-    when_watchers = get_code_from_when_statement_watchers(
-        id(var), when_statement_watchers
-    )
+    when_watchers = get_code_from_when_statement_watchers(id(var), when_statement_watchers)
     for when_watcher in when_watchers:
         condition, inside_statements = when_watcher
-        condition_val = evaluate_expression(
-            condition, namespaces, async_statements, when_statement_watchers
-        )
+        condition_val = evaluate_expression(condition, namespaces, async_statements, when_statement_watchers)
         if isinstance(value, GulfOfMexicoMutable):
             if id(value) not in when_statement_watchers[-1]:
                 when_statement_watchers[-1][id(value)] = []
@@ -703,16 +656,11 @@ def assign_variable(
         base_name, tail = parts[0], parts[1:]
         base_entry, _ = get_name_and_namespace_from_namespaces(base_name, namespaces)
         if base_entry is None:
-            raise_error_at_token(
-                filename, code, "Attempted to set a name that is undefined.", name_token
-            )
+            raise_error_at_token(filename, code, "Attempted to set a name that is undefined.", name_token)
         container_val = base_entry.value  # type: ignore[attr-defined]
         # Traverse through intermediate segments
         for seg in tail[:-1]:
-            if (
-                not isinstance(container_val, GulfOfMexicoNamespaceable)
-                or seg not in container_val.namespace
-            ):
+            if not isinstance(container_val, GulfOfMexicoNamespaceable) or seg not in container_val.namespace:
                 raise_error_at_token(
                     filename,
                     code,
@@ -723,14 +671,10 @@ def assign_variable(
             container_val = next_entry.value  # type: ignore[attr-defined]
         # Now container_val should be namespaceable, assign into last segment
         if not isinstance(container_val, GulfOfMexicoNamespaceable):
-            raise_error_at_token(
-                filename, code, "Attempted to set a name that is undefined.", name_token
-            )
+            raise_error_at_token(filename, code, "Attempted to set a name that is undefined.", name_token)
         dotted_target = (container_val, tail[-1])
     elif var is None:
-        raise_error_at_token(
-            filename, code, "Attempted to set a name that is undefined.", name_token
-        )
+        raise_error_at_token(filename, code, "Attempted to set a name that is undefined.", name_token)
 
     # Check type annotation if the variable was declared with one
     # Type is stored in the original VariableDeclaration, but we can't access it here
@@ -780,15 +724,12 @@ def assign_variable(
 
     visited_whens = []
     if indexes:
-
         # goes down the list until it can assign something in the list
         def assign_variable_helper(
             value_to_modify: GulfOfMexicoValue,
             remaining_indexes: list[GulfOfMexicoValue],
         ):
-            if not value_to_modify or not isinstance(
-                value_to_modify, GulfOfMexicoIndexable
-            ):
+            if not value_to_modify or not isinstance(value_to_modify, GulfOfMexicoIndexable):
                 raise_error_at_line(
                     filename,
                     code,
@@ -800,13 +741,9 @@ def assign_variable(
             if not remaining_indexes:  # perform actual assignment here
                 value_to_modify.assign_index(index, new_value)
             else:
-                assign_variable_helper(
-                    value_to_modify.access_index(index), remaining_indexes
-                )
+                assign_variable_helper(value_to_modify.access_index(index), remaining_indexes)
             # check for some watchers here too!!!!!!!!!!!
-            when_watchers = get_code_from_when_statement_watchers(
-                id(value_to_modify), when_statement_watchers
-            )
+            when_watchers = get_code_from_when_statement_watchers(id(value_to_modify), when_statement_watchers)
             for when_watcher in when_watchers:  # i just wanna be done with this :(
                 if any([when_watcher == x for x in visited_whens]):
                     continue
@@ -898,22 +835,14 @@ def assign_variable(
     if watcher := name_watchers.get(watchers_key):
         st, stored_nexts, watcher_ns, promise = watcher
         mod_name = get_modified_next_name(*watchers_key)
-        watcher_ns[-1][mod_name] = Name(
-            mod_name, new_value
-        )  # add the value to the uppermost namespace
-        stored_nexts.remove(
-            watchers_key
-        )  # remove the name from the set containing remaining names
+        watcher_ns[-1][mod_name] = Name(mod_name, new_value)  # add the value to the uppermost namespace
+        stored_nexts.remove(watchers_key)  # remove the name from the set containing remaining names
         if not stored_nexts:  # not waiting on anybody else, execute the code
-            interpret_name_watching_statement(
-                st, watcher_ns, promise, async_statements, when_statement_watchers
-            )
+            interpret_name_watching_statement(st, watcher_ns, promise, async_statements, when_statement_watchers)
         del name_watchers[watchers_key]  # stop watching this name
 
     # check if this name appears in a when statement of the appropriate scope  --  it would have to be watching the name
-    if when_watchers := get_code_from_when_statement_watchers(
-        id(var), when_statement_watchers
-    ):
+    if when_watchers := get_code_from_when_statement_watchers(id(var), when_statement_watchers):
         for when_watcher in when_watchers:  # i just wanna be done with this :(
             if len(when_watcher) == 3:
                 condition, inside_statements, captured_namespaces = when_watcher
@@ -944,9 +873,7 @@ def assign_variable(
             if id(var) not in when_statement_watchers[-1]:
                 when_statement_watchers[-1][id(var)] = []
             if when_watcher not in when_statement_watchers[-1][id(var)]:
-                when_statement_watchers[-1][id(var)].append(
-                    when_watcher
-                )  # put this where the new variable is
+                when_statement_watchers[-1][id(var)].append(when_watcher)  # put this where the new variable is
             execute_conditional(
                 condition_val,
                 inside_statements,
@@ -958,9 +885,7 @@ def assign_variable(
         # Removed: remove_from_all_when_statement_watchers(id(var), when_statement_watchers)
 
 
-def perform_single_value_operation(
-    val: GulfOfMexicoValue, operator_token: Token
-) -> GulfOfMexicoValue:
+def perform_single_value_operation(val: GulfOfMexicoValue, operator_token: Token) -> GulfOfMexicoValue:
     match operator_token.type:
         case TokenType.SUBTRACT:
             match val:
@@ -980,14 +905,10 @@ def perform_single_value_operation(
         case TokenType.SEMICOLON:
             val_bool = db_to_boolean(val)
             return db_not(val_bool)
-    raise_error_at_token(
-        filename, code, "Something went wrong. My bad.", operator_token
-    )
+    raise_error_at_token(filename, code, "Something went wrong. My bad.", operator_token)
 
 
-def is_approx_equal(
-    left: GulfOfMexicoValue, right: GulfOfMexicoValue
-) -> GulfOfMexicoBoolean:
+def is_approx_equal(left: GulfOfMexicoValue, right: GulfOfMexicoValue) -> GulfOfMexicoBoolean:
     """Approximate equality with fuzzy matching based on ratios."""
     if type(left) != type(right):
         return GulfOfMexicoBoolean(False)
@@ -998,14 +919,9 @@ def is_approx_equal(
                 return GulfOfMexicoBoolean(False)
             if left.value == right.value:
                 return GulfOfMexicoBoolean(True)
-            if (
-                abs(left.value) < FLOAT_TO_INT_PREC
-                and abs(right.value) < FLOAT_TO_INT_PREC
-            ):
+            if abs(left.value) < FLOAT_TO_INT_PREC and abs(right.value) < FLOAT_TO_INT_PREC:
                 return GulfOfMexicoBoolean(True)
-            ratio = abs(left.value - right.value) / max(
-                abs(left.value), abs(right.value)
-            )
+            ratio = abs(left.value - right.value) / max(abs(left.value), abs(right.value))
             return GulfOfMexicoBoolean(ratio <= NUM_EQUALITY_RATIO)
 
         case GulfOfMexicoString():
@@ -1050,11 +966,7 @@ def is_approx_equal(
             if not isinstance(right, GulfOfMexicoFunction):
                 return GulfOfMexicoBoolean(False)
             # Functions are equal if they have the same args and code
-            if (
-                left.args == right.args
-                and left.code == right.code
-                and left.is_async == right.is_async
-            ):
+            if left.args == right.args and left.code == right.code and left.is_async == right.is_async:
                 return GulfOfMexicoBoolean(True)
             return GulfOfMexicoBoolean(False)
 
@@ -1068,9 +980,7 @@ def is_approx_equal(
             total_count = len(left.namespace)
             for key in left.namespace:
                 if key in right.namespace:
-                    if is_approx_equal(
-                        left.namespace[key].value, right.namespace[key].value
-                    ).value:
+                    if is_approx_equal(left.namespace[key].value, right.namespace[key].value).value:
                         equal_count += 1
             if total_count == 0:
                 return GulfOfMexicoBoolean(True)
@@ -1091,9 +1001,7 @@ def is_equal(left: GulfOfMexicoValue, right: GulfOfMexicoValue) -> GulfOfMexicoB
         case GulfOfMexicoNumber():
             if not isinstance(right, GulfOfMexicoNumber):
                 return GulfOfMexicoBoolean(False)
-            return GulfOfMexicoBoolean(
-                abs(left.value - right.value) < FLOAT_TO_INT_PREC
-            )
+            return GulfOfMexicoBoolean(abs(left.value - right.value) < FLOAT_TO_INT_PREC)
 
         case GulfOfMexicoString():
             if not isinstance(right, GulfOfMexicoString):
@@ -1106,10 +1014,7 @@ def is_equal(left: GulfOfMexicoValue, right: GulfOfMexicoValue) -> GulfOfMexicoB
             if len(left.values) != len(right.values):
                 return GulfOfMexicoBoolean(False)
             return GulfOfMexicoBoolean(
-                all(
-                    is_equal(l_val, r_val).value
-                    for l_val, r_val in zip(left.values, right.values)
-                )
+                all(is_equal(l_val, r_val).value for l_val, r_val in zip(left.values, right.values))
             )
 
         case GulfOfMexicoMap():
@@ -1119,8 +1024,7 @@ def is_equal(left: GulfOfMexicoValue, right: GulfOfMexicoValue) -> GulfOfMexicoB
                 return GulfOfMexicoBoolean(False)
             return GulfOfMexicoBoolean(
                 all(
-                    key in right.self_dict
-                    and is_equal(left.self_dict[key], right.self_dict[key]).value
+                    key in right.self_dict and is_equal(left.self_dict[key], right.self_dict[key]).value
                     for key in left.self_dict
                 )
             )
@@ -1129,9 +1033,7 @@ def is_equal(left: GulfOfMexicoValue, right: GulfOfMexicoValue) -> GulfOfMexicoB
             if not isinstance(right, GulfOfMexicoFunction):
                 return GulfOfMexicoBoolean(False)
             return GulfOfMexicoBoolean(
-                left.args == right.args
-                and left.code == right.code
-                and left.is_async == right.is_async
+                left.args == right.args and left.code == right.code and left.is_async == right.is_async
             )
 
         case GulfOfMexicoObject():
@@ -1141,10 +1043,7 @@ def is_equal(left: GulfOfMexicoValue, right: GulfOfMexicoValue) -> GulfOfMexicoB
                 return GulfOfMexicoBoolean(False)
             return GulfOfMexicoBoolean(
                 all(
-                    key in right.namespace
-                    and is_equal(
-                        left.namespace[key].value, right.namespace[key].value
-                    ).value
+                    key in right.namespace and is_equal(left.namespace[key].value, right.namespace[key].value).value
                     for key in left.namespace
                 )
             )
@@ -1153,9 +1052,7 @@ def is_equal(left: GulfOfMexicoValue, right: GulfOfMexicoValue) -> GulfOfMexicoB
             return GulfOfMexicoBoolean(left == right)
 
 
-def is_really_equal(
-    left: GulfOfMexicoValue, right: GulfOfMexicoValue
-) -> GulfOfMexicoBoolean:
+def is_really_equal(left: GulfOfMexicoValue, right: GulfOfMexicoValue) -> GulfOfMexicoBoolean:
     """Really equal - even stricter, checks identity for mutable objects."""
     if type(left) != type(right):
         return GulfOfMexicoBoolean(False)
@@ -1171,16 +1068,12 @@ def is_really_equal(
     return is_equal(left, right)
 
 
-def is_really_really_equal(
-    left: GulfOfMexicoValue, right: GulfOfMexicoValue
-) -> GulfOfMexicoBoolean:
+def is_really_really_equal(left: GulfOfMexicoValue, right: GulfOfMexicoValue) -> GulfOfMexicoBoolean:
     """Really really equal - strictest equality, always checks identity."""
     return GulfOfMexicoBoolean(left is right)
 
 
-def is_less_than(
-    left: GulfOfMexicoValue, right: GulfOfMexicoValue
-) -> GulfOfMexicoBoolean:
+def is_less_than(left: GulfOfMexicoValue, right: GulfOfMexicoValue) -> GulfOfMexicoBoolean:
     """Less than comparison."""
     if type(left) != type(right):
         return GulfOfMexicoBoolean(False)
@@ -1219,28 +1112,17 @@ def perform_two_value_operation(
 ) -> GulfOfMexicoValue:
     match operator:
         case OperatorType.ADD:
-            if isinstance(left, GulfOfMexicoString) or isinstance(
-                right, GulfOfMexicoString
-            ):
-                return GulfOfMexicoString(
-                    db_to_string(left).value + db_to_string(right).value
-                )
+            if isinstance(left, GulfOfMexicoString) or isinstance(right, GulfOfMexicoString):
+                return GulfOfMexicoString(db_to_string(left).value + db_to_string(right).value)
             left_num = db_to_number(left)
             right_num = db_to_number(right)
             return GulfOfMexicoNumber(left_num.value + right_num.value)
         case OperatorType.SUB | OperatorType.MUL | OperatorType.DIV | OperatorType.EXP:
             left_num = db_to_number(left)
             right_num = db_to_number(right)
-            if (
-                operator == OperatorType.DIV
-                and abs(right_num.value) < FLOAT_TO_INT_PREC
-            ):  # pretty much zero
+            if operator == OperatorType.DIV and abs(right_num.value) < FLOAT_TO_INT_PREC:  # pretty much zero
                 return GulfOfMexicoUndefined()
-            elif (
-                operator == OperatorType.EXP
-                and left_num.value < -FLOAT_TO_INT_PREC
-                and not is_int(right_num.value)
-            ):
+            elif operator == OperatorType.EXP and left_num.value < -FLOAT_TO_INT_PREC and not is_int(right_num.value):
                 raise_error_at_line(
                     filename,
                     code,
@@ -1321,16 +1203,11 @@ def perform_two_value_operation(
     raise_error_at_token(filename, code, "Something went wrong here.", operator_token)
 
 
-def get_value_from_namespaces(
-    name_or_value: Token, namespaces: list[Namespace]
-) -> GulfOfMexicoValue:
-
+def get_value_from_namespaces(name_or_value: Token, namespaces: list[Namespace]) -> GulfOfMexicoValue:
     # what the frick am i doing rn
     if v := get_name_from_namespaces(name_or_value.value, namespaces):
         if isinstance(v.value, GulfOfMexicoPromise):
-            return deepcopy(
-                v.value.value
-            )  # consider not deepcopying this but it doesnt really matter
+            return deepcopy(v.value.value)  # consider not deepcopying this but it doesnt really matter
         return v.value
     return determine_non_name_value(name_or_value)
 
@@ -1398,9 +1275,7 @@ def interpret_formatted_string(
             # Build expression tree
             expr_tree = build_expression_tree(filename, tokens, code)
             # Evaluate the expression
-            value = evaluate_expression(
-                expr_tree, namespaces, async_statements, when_statement_watchers
-            )
+            value = evaluate_expression(expr_tree, namespaces, async_statements, when_statement_watchers)
             # Convert to string
             result += db_to_string(value).value
             i = j
@@ -1426,13 +1301,8 @@ def evaluate_expression(
         when_statement_watchers,
         ignore_string_escape_sequences,
     )
-    if (
-        isinstance(retval, (GulfOfMexicoNumber, GulfOfMexicoString))
-        and retval in deleted_values
-    ):
-        raise_error_at_line(
-            filename, code, current_line, f"The value {retval.value} has been deleted."
-        )
+    if isinstance(retval, (GulfOfMexicoNumber, GulfOfMexicoString)) and retval in deleted_values:
+        raise_error_at_line(filename, code, current_line, f"The value {retval.value} has been deleted.")
     return retval
 
 
@@ -1456,19 +1326,15 @@ def evaluate_expression_for_real(
     when_statement_watchers: WhenStatementWatchers,
     ignore_string_escape_sequences: bool,
 ) -> GulfOfMexicoValue:
-
     expr = get_built_expression(expr)
     match expr:
         case FunctionNode():  # done :)
-
             # for a function, the thing must be in the namespace
             func = get_name_from_namespaces(expr.name.value, namespaces)
 
             # make sure it exists and it is actually a function in the namespace
             if func is None:
-                raise_error_at_token(
-                    filename, code, "Cannot find token in namespace.", expr.name
-                )
+                raise_error_at_token(filename, code, "Cannot find token in namespace.", expr.name)
 
             # check the thing in the await symbol. if awaiting a single function that is async, evaluate it as not async
             force_execute_sync = False
@@ -1519,9 +1385,7 @@ def evaluate_expression_for_real(
                     force_execute_sync = True
 
                     # check for None again
-                    val = get_name_from_namespaces(
-                        expr.args[0].name_or_value.value, namespaces
-                    )
+                    val = get_name_from_namespaces(expr.args[0].name_or_value.value, namespaces)
                     if not isinstance(val, Variable):
                         raise_error_at_token(
                             filename,
@@ -1549,9 +1413,7 @@ def evaluate_expression_for_real(
                     force_execute_sync = True
 
                     # check for None again
-                    val = get_name_from_namespaces(
-                        expr.args[0].name_or_value.value, namespaces
-                    )
+                    val = get_name_from_namespaces(expr.args[0].name_or_value.value, namespaces)
                     if not isinstance(val, Variable):
                         raise_error_at_token(
                             filename,
@@ -1564,9 +1426,7 @@ def evaluate_expression_for_real(
                     promise = GulfOfMexicoPromise(None)
 
                     # Get the namespace ID for the watcher key
-                    _, ns = get_name_and_namespace_from_namespaces(
-                        expr.args[0].name_or_value.value, namespaces
-                    )
+                    _, ns = get_name_and_namespace_from_namespaces(expr.args[0].name_or_value.value, namespaces)
                     if not ns:
                         raise_error_at_token(
                             filename,
@@ -1581,9 +1441,7 @@ def evaluate_expression_for_real(
                     # This is a bit of a hack, but it works with the existing watcher system
                     dummy_return = ReturnStatement(
                         keyword=None,
-                        expression=[
-                            expr.args[0].name_or_value
-                        ],  # Just return the variable value
+                        expression=[expr.args[0].name_or_value],  # Just return the variable value
                         debug=0,
                     )
 
@@ -1611,22 +1469,14 @@ def evaluate_expression_for_real(
             if dotted_call:
                 caller = ".".join(name_split[:-1])
                 # Only inject caller as first arg for builtin methods that modify the caller
-                if (
-                    isinstance(func.value, BuiltinFunction)
-                    and func.value.modifies_caller
-                ):
+                if isinstance(func.value, BuiltinFunction) and func.value.modifies_caller:
                     expr = deepcopy(expr)  # avoid mutating original
                     expr.args.insert(
                         0,
-                        ValueNode(
-                            Token(TokenType.NAME, caller, expr.name.line, expr.name.col)
-                        ),
+                        ValueNode(Token(TokenType.NAME, caller, expr.name.line, expr.name.col)),
                     )
             args = [
-                evaluate_expression(
-                    arg, namespaces, async_statements, when_statement_watchers
-                )
-                for arg in expr.args
+                evaluate_expression(arg, namespaces, async_statements, when_statement_watchers) for arg in expr.args
             ]
             if isinstance(args[0], GulfOfMexicoSpecialBlankValue):
                 args = args[1:]
@@ -1638,26 +1488,15 @@ def evaluate_expression_for_real(
                     caller_val = caller_entry.value
                     if isinstance(caller_val, GulfOfMexicoNamespaceable):
                         extended_namespaces = namespaces + [caller_val.namespace]
-            if (
-                isinstance(func.value, GulfOfMexicoFunction)
-                and func.value.is_async
-                and not force_execute_sync
-            ):
-                register_async_function(
-                    expr, func.value, extended_namespaces, args, async_statements
-                )
+            if isinstance(func.value, GulfOfMexicoFunction) and func.value.is_async and not force_execute_sync:
+                register_async_function(expr, func.value, extended_namespaces, args, async_statements)
                 return GulfOfMexicoUndefined()
             elif (
                 isinstance(func.value, BuiltinFunction) and func.value.modifies_caller
             ):  # special cases where the function itself modifies the caller
-                if (
-                    caller
-                ):  # seems like a needless check but it makes the errors go away
+                if caller:  # seems like a needless check but it makes the errors go away
                     caller_var = get_name_from_namespaces(caller, namespaces)
-                    if (
-                        isinstance(caller_var, Variable)
-                        and not caller_var.can_edit_value
-                    ):
+                    if isinstance(caller_var, Variable) and not caller_var.can_edit_value:
                         raise_error_at_line(
                             filename,
                             code,
@@ -1665,12 +1504,8 @@ def evaluate_expression_for_real(
                             "Cannot edit the value of this variable.",
                         )
 
-                retval = evaluate_normal_function(
-                    expr, func.value, extended_namespaces, args, when_statement_watchers
-                )
-                when_watchers = get_code_from_when_statement_watchers(
-                    id(args[0]), when_statement_watchers
-                )
+                retval = evaluate_normal_function(expr, func.value, extended_namespaces, args, when_statement_watchers)
+                when_watchers = get_code_from_when_statement_watchers(id(args[0]), when_statement_watchers)
                 for when_watcher in when_watchers:  # i just wanna be done with this :(
                     if len(when_watcher) == 3:
                         condition, inside_statements, captured_namespaces = when_watcher
@@ -1693,18 +1528,11 @@ def evaluate_expression_for_real(
                     )
                 return retval
 
-            return evaluate_normal_function(
-                expr, func.value, extended_namespaces, args, when_statement_watchers
-            )
+            return evaluate_normal_function(expr, func.value, extended_namespaces, args, when_statement_watchers)
 
         case ListNode():  # done :)
             return GulfOfMexicoList(
-                [
-                    evaluate_expression(
-                        x, namespaces, async_statements, when_statement_watchers
-                    )
-                    for x in expr.values
-                ]
+                [evaluate_expression(x, namespaces, async_statements, when_statement_watchers) for x in expr.values]
             )
 
         case ValueNode():  # done :)
@@ -1721,12 +1549,8 @@ def evaluate_expression_for_real(
             return get_value_from_namespaces(expr.name_or_value, namespaces)
 
         case IndexNode():  # done :)
-            value = evaluate_expression(
-                expr.value, namespaces, async_statements, when_statement_watchers
-            )
-            index = evaluate_expression(
-                expr.index, namespaces, async_statements, when_statement_watchers
-            )
+            value = evaluate_expression(expr.value, namespaces, async_statements, when_statement_watchers)
+            index = evaluate_expression(expr.index, namespaces, async_statements, when_statement_watchers)
             if not isinstance(value, GulfOfMexicoIndexable):
                 raise_error_at_line(
                     filename,
@@ -1737,9 +1561,7 @@ def evaluate_expression_for_real(
             return value.access_index(index)
 
         case ExpressionNode():  # done :)
-            left = evaluate_expression(
-                expr.left, namespaces, async_statements, when_statement_watchers
-            )
+            left = evaluate_expression(expr.left, namespaces, async_statements, when_statement_watchers)
             if (
                 db_to_boolean(left).value == True and expr.operator == OperatorType.OR
             ):  # handle short curcuiting for True or __
@@ -1748,17 +1570,11 @@ def evaluate_expression_for_real(
                 db_to_boolean(left).value == False and expr.operator == OperatorType.AND
             ):  # handle short curcuiting for False and __
                 return left
-            right = evaluate_expression(
-                expr.right, namespaces, async_statements, when_statement_watchers
-            )
-            return perform_two_value_operation(
-                left, right, expr.operator, expr.operator_token
-            )
+            right = evaluate_expression(expr.right, namespaces, async_statements, when_statement_watchers)
+            return perform_two_value_operation(left, right, expr.operator, expr.operator_token)
 
         case SingleOperatorNode():
-            val = evaluate_expression(
-                expr.expression, namespaces, async_statements, when_statement_watchers
-            )
+            val = evaluate_expression(expr.expression, namespaces, async_statements, when_statement_watchers)
             return perform_single_value_operation(val, expr.operator)
 
     return GulfOfMexicoUndefined()
@@ -1783,7 +1599,6 @@ def handle_next_expressions(
     inner_nexts: list[tuple[set[tuple[str, int]], set[str]]] = []
     match expr:
         case FunctionNode():
-
             func = get_name_from_namespaces(expr.name.value, namespaces)
             if func is None:
                 raise_error_at_token(
@@ -1794,16 +1609,11 @@ def handle_next_expressions(
                 )
 
             # check if it is a next or await
-            is_next = is_await = (
-                False  # i don't need this but it makes my LSP stop crying so it's here
-            )
+            is_next = is_await = False  # i don't need this but it makes my LSP stop crying so it's here
             if isinstance(func.value, GulfOfMexicoKeyword) and (
-                (is_next := func.value.value == "next")
-                or (is_await := func.value.value == "await")
+                (is_next := func.value.value == "next") or (is_await := func.value.value == "await")
             ):
-
                 if is_next:
-
                     # add it to list of things to watch for and change the returned expression to the name being next-ed
                     if len(expr.args) != 1 or not isinstance(expr.args[0], ValueNode):
                         raise_error_at_token(
@@ -1827,13 +1637,8 @@ def handle_next_expressions(
                     expr.name_or_value.value = get_modified_next_name(last_name, id(ns))
 
                 elif is_await:
-
-                    if len(expr.args) != 1 or not isinstance(
-                        expr.args[0], FunctionNode
-                    ):
-                        raise_error_at_token(
-                            filename, code, "Can only await a function.", expr.name
-                        )
+                    if len(expr.args) != 1 or not isinstance(expr.args[0], FunctionNode):
+                        raise_error_at_token(filename, code, "Can only await a function.", expr.name)
                     inner_expr = expr.args[0]
 
                     func = get_name_from_namespaces(expr.args[0].name.value, namespaces)
@@ -1845,13 +1650,8 @@ def handle_next_expressions(
                             expr.name,
                         )
 
-                    if (
-                        isinstance(func.value, GulfOfMexicoKeyword)
-                        and func.value.value == "next"
-                    ):
-                        if len(inner_expr.args) != 1 or not isinstance(
-                            inner_expr.args[0], ValueNode
-                        ):
+                    if isinstance(func.value, GulfOfMexicoKeyword) and func.value.value == "next":
+                        if len(inner_expr.args) != 1 or not isinstance(inner_expr.args[0], ValueNode):
                             raise_error_at_token(
                                 filename,
                                 code,
@@ -1872,16 +1672,12 @@ def handle_next_expressions(
                             name
                         )  # only need to store the name for the async ones because we are going to wait anyways
                         expr = inner_expr.args[0]
-                        expr.name_or_value.value = get_modified_next_name(
-                            last_name, id(ns)
-                        )
+                        expr.name_or_value.value = get_modified_next_name(last_name, id(ns))
 
             else:
                 replacement_args = []
                 for arg in expr.args:
-                    new_expr, normal_arg_nexts, async_arg_nexts = (
-                        handle_next_expressions(arg, namespaces)
-                    )
+                    new_expr, normal_arg_nexts, async_arg_nexts = handle_next_expressions(arg, namespaces)
                     inner_nexts.append((normal_arg_nexts, async_arg_nexts))
                     replacement_args.append(new_expr)
                 expr.args = replacement_args
@@ -1889,19 +1685,13 @@ def handle_next_expressions(
         case ListNode():
             replacement_values = []
             for ex in expr.values:
-                new_expr, normal_expr_nexts, async_expr_nexts = handle_next_expressions(
-                    ex, namespaces
-                )
+                new_expr, normal_expr_nexts, async_expr_nexts = handle_next_expressions(ex, namespaces)
                 inner_nexts.append((normal_expr_nexts, async_expr_nexts))
                 replacement_values.append(new_expr)
             expr.values = replacement_values
         case IndexNode():
-            new_value, normal_value_nexts, async_value_nexts = handle_next_expressions(
-                expr.value, namespaces
-            )
-            new_index, normal_index_nexts, async_index_nexts = handle_next_expressions(
-                expr.index, namespaces
-            )
+            new_value, normal_value_nexts, async_value_nexts = handle_next_expressions(expr.value, namespaces)
+            new_index, normal_index_nexts, async_index_nexts = handle_next_expressions(expr.index, namespaces)
             expr.value = new_value
             expr.index = new_index
             inner_nexts.extend(
@@ -1911,12 +1701,8 @@ def handle_next_expressions(
                 ]
             )
         case ExpressionNode():
-            new_left, normal_left_nexts, async_left_nexts = handle_next_expressions(
-                expr.left, namespaces
-            )
-            new_right, normal_right_nexts, async_right_nexts = handle_next_expressions(
-                expr.right, namespaces
-            )
+            new_left, normal_left_nexts, async_left_nexts = handle_next_expressions(expr.left, namespaces)
+            new_right, normal_right_nexts, async_right_nexts = handle_next_expressions(expr.right, namespaces)
             expr.left = new_left
             expr.right = new_right
             inner_nexts.extend(
@@ -1926,9 +1712,7 @@ def handle_next_expressions(
                 ]
             )
         case SingleOperatorNode():
-            new_expr, normal_expr_nexts, async_expr_nexts = handle_next_expressions(
-                expr.expression, namespaces
-            )
+            new_expr, normal_expr_nexts, async_expr_nexts = handle_next_expressions(expr.expression, namespaces)
             expr.expression = new_expr
             inner_nexts.append((normal_expr_nexts, async_expr_nexts))
     for nn, an in inner_nexts:
@@ -1940,7 +1724,6 @@ def handle_next_expressions(
 def save_previous_values_next_expr(
     expr_to_modify: ExpressionTreeNode, nexts: set[str], namespaces: list[Namespace]
 ) -> Namespace:
-
     saved_namespace: Namespace = {}
     match expr_to_modify:
         case ValueNode():
@@ -1956,20 +1739,12 @@ def save_previous_values_next_expr(
             expr_to_modify.name_or_value.value = mod_name
             return {mod_name: Name(mod_name, val.value)}
         case ExpressionNode():
-            left_ns = save_previous_values_next_expr(
-                expr_to_modify.left, nexts, namespaces
-            )
-            right_ns = save_previous_values_next_expr(
-                expr_to_modify.right, nexts, namespaces
-            )
+            left_ns = save_previous_values_next_expr(expr_to_modify.left, nexts, namespaces)
+            right_ns = save_previous_values_next_expr(expr_to_modify.right, nexts, namespaces)
             return left_ns | right_ns
         case IndexNode():
-            value_ns = save_previous_values_next_expr(
-                expr_to_modify.value, nexts, namespaces
-            )
-            index_ns = save_previous_values_next_expr(
-                expr_to_modify.index, nexts, namespaces
-            )
+            value_ns = save_previous_values_next_expr(expr_to_modify.value, nexts, namespaces)
+            index_ns = save_previous_values_next_expr(expr_to_modify.index, nexts, namespaces)
             return value_ns | index_ns
         case ListNode():
             for ex in expr_to_modify.values:
@@ -1977,14 +1752,10 @@ def save_previous_values_next_expr(
             return saved_namespace
         case FunctionNode():
             for arg in expr_to_modify.args:
-                saved_namespace |= save_previous_values_next_expr(
-                    arg, nexts, namespaces
-                )
+                saved_namespace |= save_previous_values_next_expr(arg, nexts, namespaces)
             return saved_namespace
         case SingleOperatorNode():
-            return save_previous_values_next_expr(
-                expr_to_modify.expression, nexts, namespaces
-            )
+            return save_previous_values_next_expr(expr_to_modify.expression, nexts, namespaces)
     return saved_namespace
 
 
@@ -2045,19 +1816,13 @@ def determine_statement_type(
                 return st
             # Primary path: resolve via namespaces to allow keyword aliasing.
             val = get_name_from_namespaces(st.keyword.value, namespaces)
-            if (
-                val
-                and isinstance(val.value, GulfOfMexicoKeyword)
-                and val.value.value == "return"
-            ):
+            if val and isinstance(val.value, GulfOfMexicoKeyword) and val.value.value == "return":
                 return st
             # Fallback: if the literal token text is 'return', still treat as return.
             # This avoids mis-disambiguation when the keyword namespace isn't visible in scope.
             if st.keyword.value == "return":
                 return st
-        elif isinstance(
-            st, FunctionDefinition
-        ):  # allow for async and normal function definitions
+        elif isinstance(st, FunctionDefinition):  # allow for async and normal function definitions
             if len(st.keywords) == 1:
                 val = get_name_from_namespaces(st.keywords[0].value, namespaces)
                 if (
@@ -2078,13 +1843,10 @@ def determine_statement_type(
                     and val.value.value == "async"
                 ):
                     return st
-        elif isinstance(
-            st, VariableDeclaration
-        ):  # allow for const const const and normal declarations
+        elif isinstance(st, VariableDeclaration):  # allow for const const const and normal declarations
             if len(st.modifiers) == 1:
                 if (
-                    (val := get_name_from_namespaces(st.modifiers[0].value, namespaces))
-                    is not None
+                    (val := get_name_from_namespaces(st.modifiers[0].value, namespaces)) is not None
                     and isinstance(val.value, GulfOfMexicoKeyword)
                     and val.value.value in {"const", "var"}
                 ):
@@ -2092,8 +1854,7 @@ def determine_statement_type(
             elif len(st.modifiers) == 2:
                 if all(
                     [
-                        (val := get_name_from_namespaces(mod.value, namespaces))
-                        is not None
+                        (val := get_name_from_namespaces(mod.value, namespaces)) is not None
                         and isinstance(val.value, GulfOfMexicoKeyword)
                         and val.value.value in {"const", "var"}
                         for mod in st.modifiers
@@ -2103,8 +1864,7 @@ def determine_statement_type(
             elif len(st.modifiers) == 3:
                 if all(
                     [
-                        (val := get_name_from_namespaces(mod.value, namespaces))
-                        is not None
+                        (val := get_name_from_namespaces(mod.value, namespaces)) is not None
                         and isinstance(val.value, GulfOfMexicoKeyword)
                         and val.value.value == "const"
                         for mod in st.modifiers
@@ -2144,19 +1904,12 @@ def adjust_for_normal_nexts(
     namespaces: list[Namespace],
     prev_namespace: Namespace,
 ):
-
     old_async_vals, old_normal_vals = [], []
-    get_state_watcher = lambda val: (
-        None if not val else len(v) if (v := getattr(val, "prev_values")) else 0
-    )
+    get_state_watcher = lambda val: (None if not val else len(v) if (v := getattr(val, "prev_values")) else 0)
     for name in async_nexts:
-        old_async_vals.append(
-            get_state_watcher(get_name_from_namespaces(name, namespaces))
-        )
+        old_async_vals.append(get_state_watcher(get_name_from_namespaces(name, namespaces)))
     for name, _ in normal_nexts:
-        old_normal_vals.append(
-            get_state_watcher(get_name_from_namespaces(name, namespaces))
-        )
+        old_normal_vals.append(get_state_watcher(get_name_from_namespaces(name, namespaces)))
 
     # for each async one, wait until each one is different
     for name, start_len in zip(async_nexts, old_async_vals):
@@ -2179,14 +1932,10 @@ def adjust_for_normal_nexts(
         mod_name = get_modified_next_name(name, id(ns))
         match old_len:
             case None:
-                new_namespace[mod_name] = Name(
-                    mod_name, v.value if isinstance(v, Name) else v.prev_values[0]
-                )
+                new_namespace[mod_name] = Name(mod_name, v.value if isinstance(v, Name) else v.prev_values[0])
             case i:
                 if not isinstance(v, Variable):
-                    raise_error_at_line(
-                        filename, code, current_line, "Something went wrong."
-                    )
+                    raise_error_at_line(filename, code, current_line, "Something went wrong.")
                 new_namespace[mod_name] = Name(mod_name, v.prev_values[i])
 
     # now, adjust for any values that may have already been modified by next statements
@@ -2198,14 +1947,10 @@ def adjust_for_normal_nexts(
         normal_nexts.remove((name, ns_id))
         match old_len:
             case None:
-                new_namespace[mod_name] = Name(
-                    mod_name, v.value if isinstance(v, Name) else v.prev_values[0]
-                )
+                new_namespace[mod_name] = Name(mod_name, v.value if isinstance(v, Name) else v.prev_values[0])
             case i:
                 if not isinstance(v, Variable):
-                    raise_error_at_line(
-                        filename, code, current_line, "Something went wrong."
-                    )
+                    raise_error_at_line(filename, code, current_line, "Something went wrong.")
                 new_namespace[mod_name] = Name(mod_name, v.prev_values[i])
 
     # the remaining values are still waiting on a result, add these to the list of name watchers
@@ -2221,18 +1966,11 @@ def adjust_for_normal_nexts(
         )
 
 
-def wait_for_async_nexts(
-    async_nexts: set[str], namespaces: list[Namespace]
-) -> Namespace:
-
+def wait_for_async_nexts(async_nexts: set[str], namespaces: list[Namespace]) -> Namespace:
     old_async_vals = []
-    get_state_watcher = lambda val: (
-        None if not val else len(v) if (v := getattr(val, "prev_values")) else 0
-    )
+    get_state_watcher = lambda val: (None if not val else len(v) if (v := getattr(val, "prev_values")) else 0)
     for name in async_nexts:
-        old_async_vals.append(
-            get_state_watcher(get_name_from_namespaces(name, namespaces))
-        )
+        old_async_vals.append(get_state_watcher(get_name_from_namespaces(name, namespaces)))
 
     # for each async one, wait until each one is different
     for name, start_len in zip(async_nexts, old_async_vals):
@@ -2264,18 +2002,10 @@ def interpret_name_watching_statement(
     async_statements: AsyncStatements,
     when_statement_watchers: WhenStatementWatchers,
 ):
-
     # evaluate the expression using the names off the top
-    expr_val = evaluate_expression(
-        statement.expression, namespaces, async_statements, when_statement_watchers
-    )
+    expr_val = evaluate_expression(statement.expression, namespaces, async_statements, when_statement_watchers)
     index_vals = (
-        [
-            evaluate_expression(
-                expr, namespaces, async_statements, when_statement_watchers
-            )
-            for expr in statement.indexes
-        ]
+        [evaluate_expression(expr, namespaces, async_statements, when_statement_watchers) for expr in statement.indexes]
         if isinstance(statement, VariableAssignment)
         else []
     )
@@ -2284,10 +2014,10 @@ def interpret_name_watching_statement(
     match statement:
         case ReturnStatement():
             if promise is None:
-                raise_error_at_line(
-                    filename, code, current_line, "Something went wrong."
-                )
-            promise.value = expr_val  # simply change the promise to that value as the return statement already returned a promise
+                raise_error_at_line(filename, code, current_line, "Something went wrong.")
+            promise.value = (
+                expr_val  # simply change the promise to that value as the return statement already returned a promise
+            )
         case VariableDeclaration():
             declare_new_variable(
                 statement,
@@ -2306,13 +2036,9 @@ def interpret_name_watching_statement(
                 when_statement_watchers,
             )
         case Conditional():
-            execute_conditional(
-                expr_val, statement.code, namespaces, when_statement_watchers, {}, []
-            )
+            execute_conditional(expr_val, statement.code, namespaces, when_statement_watchers, {}, [])
         case AfterStatement():
-            execute_after_statement(
-                expr_val, statement.code, namespaces, when_statement_watchers
-            )
+            execute_after_statement(expr_val, statement.code, namespaces, when_statement_watchers)
         case ExpressionStatement():
             print_expression_debug(
                 statement.debug,
@@ -2322,9 +2048,7 @@ def interpret_name_watching_statement(
             )
 
 
-def clear_temp_namespace(
-    namespaces: list[Namespace], temp_namespace: Namespace
-) -> None:
+def clear_temp_namespace(namespaces: list[Namespace], temp_namespace: Namespace) -> None:
     for key in temp_namespace:
         del namespaces[-1][key]
 
@@ -2339,11 +2063,7 @@ def execute_conditional(
     exported_names: list[tuple[str, str, GulfOfMexicoValue]],
 ) -> Optional[GulfOfMexicoValue]:
     condition = db_to_boolean(condition)
-    execute = (
-        condition.value == True
-        if condition.value is not None
-        else random.random() < 0.50
-    )
+    execute = condition.value == True if condition.value is not None else random.random() < 0.50
     if execute:
         return interpret_code_statements(
             statements_inside_scope,
@@ -2356,9 +2076,7 @@ def execute_conditional(
 
 
 # this is the equaivalent of an event listener
-def get_mouse_event_object(
-    x: int, y: int, button: mouse.Button, event: str
-) -> GulfOfMexicoObject:
+def get_mouse_event_object(x: int, y: int, button: mouse.Button, event: str) -> GulfOfMexicoObject:
     return GulfOfMexicoObject(
         "MouseEvent",
         {
@@ -2370,9 +2088,7 @@ def get_mouse_event_object(
     )
 
 
-def get_keyboard_event_object(
-    key: Optional[Union[keyboard.Key, keyboard.KeyCode]], event: str
-) -> GulfOfMexicoObject:
+def get_keyboard_event_object(key: Optional[Union[keyboard.Key, keyboard.KeyCode]], event: str) -> GulfOfMexicoObject:
     return GulfOfMexicoObject(
         "KeyboardEvent",
         {
@@ -2390,7 +2106,6 @@ def execute_after_statement(
     importable_names: dict[str, dict[str, GulfOfMexicoValue]],
     exported_names: list[tuple[str, str, GulfOfMexicoValue]],
 ) -> None:
-
     if not KEY_MOUSE_IMPORTED:
         raise_error_at_line(
             filename,
@@ -2416,9 +2131,7 @@ def execute_after_statement(
                 if pressed:
                     mouse_buttons[button] = (x, y)
                 else:
-                    if mouse_buttons[
-                        button
-                    ]:  # it has been released and then pressed again
+                    if mouse_buttons[button]:  # it has been released and then pressed again
                         interpret_code_statements(
                             statements_inside_scope,
                             namespaces
@@ -2426,9 +2139,7 @@ def execute_after_statement(
                                 {
                                     "event": Name(
                                         "event",
-                                        get_mouse_event_object(
-                                            x, y, button, event.value
-                                        ),
+                                        get_mouse_event_object(x, y, button, event.value),
                                     )
                                 }
                             ],
@@ -2499,8 +2210,17 @@ def execute_after_statement(
             def on_release(key: Optional[Union[keyboard.Key, keyboard.KeyCode]]):
                 nonlocal namespaces, statements_inside_scope
                 if key in keys:
-                    event_object = get_keyboard_event_object(key.char if isinstance(key, keyboard.KeyCode) else key, event.value)  # type: ignore
-                    interpret_code_statements(statements_inside_scope, namespaces + [{"event": Name("event", event_object)}], [], when_statement_watchers + [{}], importable_names, exported_names)  # type: ignore
+                    event_object = get_keyboard_event_object(
+                        key.char if isinstance(key, keyboard.KeyCode) else key, event.value
+                    )  # type: ignore
+                    interpret_code_statements(
+                        statements_inside_scope,
+                        namespaces + [{"event": Name("event", event_object)}],
+                        [],
+                        when_statement_watchers + [{}],
+                        importable_names,
+                        exported_names,
+                    )  # type: ignore
                 keys.discard(key)
 
             listener = keyboard.Listener(on_press=on_press, on_release=on_release)  # type: ignore
@@ -2509,7 +2229,9 @@ def execute_after_statement(
 
             def on_press(key: Optional[Union[keyboard.Key, keyboard.KeyCode]]):
                 nonlocal namespaces, statements_inside_scope
-                event_object = get_keyboard_event_object(key.char if isinstance(key, keyboard.KeyCode) else key, event.value)  # type: ignore
+                event_object = get_keyboard_event_object(
+                    key.char if isinstance(key, keyboard.KeyCode) else key, event.value
+                )  # type: ignore
                 interpret_code_statements(
                     statements_inside_scope,
                     namespaces + [{"event": Name("event", event_object)}],
@@ -2525,7 +2247,9 @@ def execute_after_statement(
 
             def on_release(key: Optional[Union[keyboard.Key, keyboard.KeyCode]]):
                 nonlocal namespaces, statements_inside_scope
-                event_object = get_keyboard_event_object(key.char if isinstance(key, keyboard.KeyCode) else key, event.value)  # type: ignore
+                event_object = get_keyboard_event_object(
+                    key.char if isinstance(key, keyboard.KeyCode) else key, event.value
+                )  # type: ignore
                 interpret_code_statements(
                     statements_inside_scope,
                     namespaces + [{"event": Name("event", event_object)}],
@@ -2559,13 +2283,9 @@ def gather_names_or_values(expr: ExpressionTreeNode) -> set[Token]:
             for val in expr.values:
                 names |= gather_names_or_values(val)
         case ExpressionNode():
-            names |= gather_names_or_values(expr.right) | gather_names_or_values(
-                expr.left
-            )
+            names |= gather_names_or_values(expr.right) | gather_names_or_values(expr.left)
         case IndexNode():
-            names |= gather_names_or_values(expr.index) | gather_names_or_values(
-                expr.value
-            )
+            names |= gather_names_or_values(expr.index) | gather_names_or_values(expr.value)
         case SingleOperatorNode():
             names |= gather_names_or_values(expr.expression)
         case ValueNode():
@@ -2582,23 +2302,14 @@ def register_when_statement(
     importable_names: dict[str, dict[str, GulfOfMexicoValue]],
     exported_names: list[tuple[str, str, GulfOfMexicoValue]],
 ):
-
     # if it is a variable, store it as the address to that variable.
     # if the internal value is a list, store it as an address to that mutable type.
     built_condition = get_built_expression(condition)
     gathered_names = gather_names_or_values(built_condition)
-    caller_names = [
-        n for name in gathered_names if (n := ".".join(name.value.split(".")[:-1]))
-    ]
+    caller_names = [n for name in gathered_names if (n := ".".join(name.value.split(".")[:-1]))]
     dict_keys = (
         [
-            (
-                id(v)
-                if isinstance(
-                    v := get_name_from_namespaces(name.value, namespaces), Variable
-                )
-                else name.value
-            )
+            (id(v) if isinstance(v := get_name_from_namespaces(name.value, namespaces), Variable) else name.value)
             for name in gathered_names
         ]
         + [
@@ -2607,11 +2318,7 @@ def register_when_statement(
             if (v := get_name_from_namespaces(name.value, namespaces)) is not None
             and isinstance(v.value, GulfOfMexicoMutable)
         ]
-        + [
-            id(v)
-            for name in caller_names
-            if isinstance(v := get_name_from_namespaces(name, namespaces), Variable)
-        ]
+        + [id(v) for name in caller_names if isinstance(v := get_name_from_namespaces(name, namespaces), Variable)]
         + [
             id(v.value)
             for name in caller_names
@@ -2632,23 +2339,17 @@ def register_when_statement(
         # DEBUG: Print what we're capturing
         try:
             debug_keys = [list(ns.keys()) for ns in captured_ns]
-            debug_print_no_token(
-                filename, f"Capturing namespaces for when: {debug_keys}"
-            )
+            debug_print_no_token(filename, f"Capturing namespaces for when: {debug_keys}")
         except Exception:
             pass
-        when_statement_watchers[-1][name].append(
-            (built_condition, statements_inside_scope, captured_ns)
-        )
+        when_statement_watchers[-1][name].append((built_condition, statements_inside_scope, captured_ns))
 
     # check the condition now
     # Evaluate the condition immediately inside the same namespaces that the
     # when statement was defined. If a name cannot be found, include some
     # cheap debugging info to aid diagnosis of nested scoping issues.
     try:
-        condition_value = evaluate_expression(
-            built_condition, namespaces, async_statements, when_statement_watchers
-        )
+        condition_value = evaluate_expression(built_condition, namespaces, async_statements, when_statement_watchers)
     except Exception:
         # Only print a compact debug message so this doesn't pollute
         # normal runs. This will help track down missing names during
@@ -2658,8 +2359,7 @@ def register_when_statement(
             available_ns = [list(ns.keys()) for ns in namespaces]
             debug_print_no_token(
                 filename,
-                f"Failed to evaluate when condition {gathered} "
-                f"with namespaces: {available_ns}",
+                f"Failed to evaluate when condition {gathered} " f"with namespaces: {available_ns}",
             )
         except Exception:
             pass
@@ -2689,9 +2389,7 @@ def load_globals(
     pass
 
 
-def get_name_from_namespaces(
-    name: str, namespaces: list[Namespace]
-) -> Optional[Union[Variable, Name]]:
+def get_name_from_namespaces(name: str, namespaces: list[Namespace]) -> Optional[Union[Variable, Name]]:
     """Get a name or variable from the namespaces, searching from most local to global.
 
     Supports dotted access for namespaceable values (object/list/string namespaces).
@@ -2745,10 +2443,7 @@ def determine_non_name_value(name_or_value: Token) -> GulfOfMexicoValue:
             # Try to parse as number
             try:
                 # Check if it's an integer
-                if (
-                    "." not in name_or_value.value
-                    and "e" not in name_or_value.value.lower()
-                ):
+                if "." not in name_or_value.value and "e" not in name_or_value.value.lower():
                     return GulfOfMexicoNumber(int(name_or_value.value))
                 else:
                     return GulfOfMexicoNumber(float(name_or_value.value))
@@ -2981,9 +2676,7 @@ def interpret_code_statements(
                 # Create a class object (simplified for now)
                 class_obj = GulfOfMexicoObject(statement.name.value, {})
                 # Execute the class body in a new scope
-                class_namespace = {
-                    statement.name.value: Name(statement.name.value, class_obj)
-                }
+                class_namespace = {statement.name.value: Name(statement.name.value, class_obj)}
                 interpret_code_statements(
                     statement.code,
                     namespaces + [class_namespace],
@@ -2998,15 +2691,11 @@ def interpret_code_statements(
                         continue
                     class_obj.namespace[k] = v
                 # Add the class to the namespace
-                namespaces[-1][statement.name.value] = Name(
-                    statement.name.value, class_obj
-                )
+                namespaces[-1][statement.name.value] = Name(statement.name.value, class_obj)
 
             case DeleteStatement():
                 # Mark value as deleted
-                var, ns = get_name_and_namespace_from_namespaces(
-                    statement.name.value, namespaces
-                )
+                var, ns = get_name_and_namespace_from_namespaces(statement.name.value, namespaces)
                 if var and isinstance(var, Variable):
                     deleted_values.add(var.value)
                     if ns:
@@ -3058,9 +2747,7 @@ def interpret_code_statements(
                 # Corporate speak with satirical implementations
                 keyword = statement.keyword.value
                 args_values = [
-                    evaluate_expression(
-                        arg, namespaces, async_statements, when_statement_watchers
-                    )
+                    evaluate_expression(arg, namespaces, async_statements, when_statement_watchers)
                     for arg in statement.args
                 ]
 
@@ -3069,20 +2756,12 @@ def interpret_code_statements(
                         # Combine two values (concatenate or add)
                         if len(args_values) >= 2:
                             val1, val2 = args_values[0], args_values[1]
-                            if isinstance(val1, GulfOfMexicoString) or isinstance(
-                                val2, GulfOfMexicoString
-                            ):
-                                result = GulfOfMexicoString(
-                                    str(val1.value) + str(val2.value)
-                                )
-                            elif isinstance(val1, GulfOfMexicoNumber) and isinstance(
-                                val2, GulfOfMexicoNumber
-                            ):
+                            if isinstance(val1, GulfOfMexicoString) or isinstance(val2, GulfOfMexicoString):
+                                result = GulfOfMexicoString(str(val1.value) + str(val2.value))
+                            elif isinstance(val1, GulfOfMexicoNumber) and isinstance(val2, GulfOfMexicoNumber):
                                 result = GulfOfMexicoNumber(val1.value + val2.value)
                             else:
-                                result = GulfOfMexicoString(
-                                    str(val1.value) + str(val2.value)
-                                )
+                                result = GulfOfMexicoString(str(val1.value) + str(val2.value))
 
                     case "leverage":
                         # Multiply value by 2 (leverage for maximum impact!)
@@ -3102,9 +2781,7 @@ def interpret_code_statements(
                             if isinstance(val, GulfOfMexicoNumber):
                                 result = GulfOfMexicoNumber(-val.value)
                             elif isinstance(val, GulfOfMexicoBoolean):
-                                result = GulfOfMexicoBoolean(
-                                    not val.value if val.value is not None else None
-                                )
+                                result = GulfOfMexicoBoolean(not val.value if val.value is not None else None)
                             elif isinstance(val, GulfOfMexicoString):
                                 result = GulfOfMexicoString(val.value[::-1])
                             else:
@@ -3196,9 +2873,7 @@ def interpret_code_statements(
                             print("🍀 [LUCKY] Success! The luck held!")
                         except Exception as e:
                             # Even in lucky block, show error but continue
-                            print(
-                                f"🍀 [LUCKY] Uh oh, ran out of luck: {type(e).__name__}"
-                            )
+                            print(f"🍀 [LUCKY] Uh oh, ran out of luck: {type(e).__name__}")
 
                     case "unlucky":
                         # Unlucky block - expect things to go wrong
@@ -3271,18 +2946,13 @@ def interpret_code_statements(
                     print(
                         f"⚛️  [QUANTUM] Variable '{var_name}' in superposition of {len(superposition_value.values)} states"
                     )
-                elif (
-                    isinstance(superposition_value, GulfOfMexicoBoolean)
-                    and superposition_value.value == 2
-                ):
+                elif isinstance(superposition_value, GulfOfMexicoBoolean) and superposition_value.value == 2:
                     # 'maybe' creates true/false superposition
                     QUANTUM_STATES[var_name] = [
                         GulfOfMexicoBoolean(1),  # true
                         GulfOfMexicoBoolean(0),  # false
                     ]
-                    print(
-                        f"⚛️  [QUANTUM] Variable '{var_name}' in true/false superposition"
-                    )
+                    print(f"⚛️  [QUANTUM] Variable '{var_name}' in true/false superposition")
                 else:
                     # Single value quantum state
                     QUANTUM_STATES[var_name] = [superposition_value]
@@ -3332,14 +3002,10 @@ def interpret_code_statements(
                             importable_names,
                             exported_names,
                         )
-                        print(
-                            "⛓️  [BLOCKCHAIN] Transaction validated on distributed ledger!"
-                        )
+                        print("⛓️  [BLOCKCHAIN] Transaction validated on distributed ledger!")
 
                     case "smart_contract":
-                        print(
-                            "📜 [SMART_CONTRACT] Deploying trustless code execution..."
-                        )
+                        print("📜 [SMART_CONTRACT] Deploying trustless code execution...")
                         interpret_code_statements(
                             statement.code,
                             namespaces + [{}],
@@ -3352,46 +3018,28 @@ def interpret_code_statements(
 
                     case "mine":
                         # Mining - waste CPU cycles
-                        expr_tree = build_expression_tree(
-                            filename, statement.args, code
-                        )
-                        blocks = evaluate_expression(
-                            expr_tree, namespaces, filename, code
-                        )
-                        num_blocks = (
-                            int(blocks.value)
-                            if isinstance(blocks, GulfOfMexicoNumber)
-                            else 1
-                        )
+                        expr_tree = build_expression_tree(filename, statement.args, code)
+                        blocks = evaluate_expression(expr_tree, namespaces, filename, code)
+                        num_blocks = int(blocks.value) if isinstance(blocks, GulfOfMexicoNumber) else 1
 
                         print(f"⛏️  [MINING] Mining {num_blocks} block(s)...")
-                        import time
                         import random
+                        import time
 
                         for i in range(num_blocks):
                             time.sleep(0.2)  # Simulate mining
                             hash_val = random.randint(1000, 9999)
                             print(f"⛏️  [MINING] Block {i+1} mined! Hash: 0x{hash_val}")
 
-                        print(
-                            f"⛏️  [MINING] Earned {num_blocks * 0.00001} cryptocurrency!"
-                        )
+                        print(f"⛏️  [MINING] Earned {num_blocks * 0.00001} cryptocurrency!")
 
                     case "immutable_ledger":
                         # Store value as "immutable" (but we can still change it because irony)
-                        print(
-                            "📒 [IMMUTABLE_LEDGER] Recording on permanent blockchain..."
-                        )
+                        print("📒 [IMMUTABLE_LEDGER] Recording on permanent blockchain...")
                         # Just execute the args as an expression
-                        expr_tree = build_expression_tree(
-                            filename, statement.args, code
-                        )
-                        value = evaluate_expression(
-                            expr_tree, namespaces, filename, code
-                        )
-                        print(
-                            f"📒 [IMMUTABLE_LEDGER] Value permanently recorded: {value}"
-                        )
+                        expr_tree = build_expression_tree(filename, statement.args, code)
+                        value = evaluate_expression(expr_tree, namespaces, filename, code)
+                        print(f"📒 [IMMUTABLE_LEDGER] Value permanently recorded: {value}")
 
             case AIBuzzwordStatement():
                 # AI/ML buzzword satire
@@ -3428,8 +3076,8 @@ def interpret_code_statements(
 
                     case "ai_powered":
                         print("🤖 [AI_POWERED] Applying machine learning algorithms...")
-                        import time
                         import random
+                        import time
 
                         time.sleep(0.3)
 
@@ -3711,9 +3359,7 @@ def interpret_code_statements(
                         for i in range(4):
                             delay = 0.1 * (1.5**i)
                             time.sleep(delay)
-                            print(
-                                f"🏒 [HOCKEY_STICK] Growth month {i+1}: {int(10 * (2**i))}%"
-                            )
+                            print(f"🏒 [HOCKEY_STICK] Growth month {i+1}: {int(10 * (2**i))}%")
                         interpret_code_statements(
                             statement.code,
                             namespaces + [{}],
@@ -3726,9 +3372,7 @@ def interpret_code_statements(
 
             case ReverseStatement():
                 # Reverse operation - reverses lists and strings in-place
-                var, ns = get_name_and_namespace_from_namespaces(
-                    statement.name.value, namespaces
-                )
+                var, ns = get_name_and_namespace_from_namespaces(statement.name.value, namespaces)
                 if var is None:
                     raise_error_at_token(
                         filename,
@@ -3816,8 +3460,6 @@ def interpret_code_statements(
             # Update index for next execution
             new_index = current_index + (1 if direction == 1 else -1)
             if 0 <= new_index < len(statements_list):
-                async_statements.append(
-                    (statements_list, async_namespaces, new_index, direction)
-                )
+                async_statements.append((statements_list, async_namespaces, new_index, direction))
 
     return result

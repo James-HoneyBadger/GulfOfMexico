@@ -66,7 +66,7 @@ quantum reality ["real", "simulation", "dream", "maybe"]!
 cross_fingers {
    const our_reality = observe("reality")!
    print "🤞 We live in: ${our_reality}"!
-   
+
    const future_reality = future("our_reality")!
    print "🔮 Future reality prediction: ${future_reality}"!
 }

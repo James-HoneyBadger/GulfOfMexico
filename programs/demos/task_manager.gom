@@ -4,12 +4,12 @@ class Task {
    var name = "Untitled"!
    var completed = false!
    var priority = 1!
-   
+
    function complete() => {
       completed = true!
       print "✓ Completed: ${name}"!
    }!
-   
+
    function info() => {
       const status = completed!
       print "Task: ${name} | Priority: ${priority} | Done: ${status}"!

@@ -1,10 +1,11 @@
 """Utility functions for the Gulf of Mexico interpreter."""
 
 from typing import Optional, Union
+
 from gulfofmexico.builtin import (
     GulfOfMexicoValue,
-    Variable,
     Name,
+    Variable,
 )
 
 
@@ -38,9 +39,9 @@ def is_truthy(value: GulfOfMexicoValue) -> bool:
     """
     from gulfofmexico.builtin import (
         GulfOfMexicoBoolean,
+        GulfOfMexicoList,
         GulfOfMexicoNumber,
         GulfOfMexicoString,
-        GulfOfMexicoList,
         GulfOfMexicoUndefined,
     )
 

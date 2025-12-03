@@ -8,22 +8,23 @@ for an alternative modular architecture.
 """
 
 from typing import Optional, Type
-from gulfofmexico.handlers import StatementHandler
-from gulfofmexico.processor.syntax_tree import (
-    CodeStatement,
-    FunctionDefinition,
-    ClassDeclaration,
-)
-from gulfofmexico.context import ExecutionContext
+
 from gulfofmexico.builtin import (
-    GulfOfMexicoValue,
     GulfOfMexicoFunction,
     GulfOfMexicoObject,
+    GulfOfMexicoValue,
+    Name,
     Variable,
     VariableLifetime,
-    Name,
 )
 from gulfofmexico.constants import MAX_CONFIDENCE
+from gulfofmexico.context import ExecutionContext
+from gulfofmexico.handlers import StatementHandler
+from gulfofmexico.processor.syntax_tree import (
+    ClassDeclaration,
+    CodeStatement,
+    FunctionDefinition,
+)
 
 
 class FunctionDefinitionHandler(StatementHandler):
@@ -130,9 +131,7 @@ class ClassDeclarationHandler(StatementHandler):
         )
 
         # Add the class to the namespace
-        context.namespaces[-1][statement.name.value] = Name(
-            statement.name.value, class_obj
-        )
+        context.namespaces[-1][statement.name.value] = Name(statement.name.value, class_obj)
 
         return None
 

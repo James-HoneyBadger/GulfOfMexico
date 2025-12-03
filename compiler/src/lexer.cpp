@@ -151,36 +151,36 @@ std::vector<Token> Lexer::tokenize() {
 
 Token Lexer::nextToken() {
     skipWhitespace();
-    
+
     if (isAtEnd()) {
         return Token(TokenType::EOF_TOKEN, "", line, column);
     }
-    
+
     int startLine = line;
     int startCol = column;
     char c = peek();
-    
+
     // Comments
     if (c == '/' && peek(1) == '/') {
         skipComment();
         return nextToken();
     }
-    
+
     // Numbers
     if (isDigit(c)) {
         return tokenizeNumber();
     }
-    
+
     // Strings
     if (c == '"' || c == '\'' || c == '`') {
         return tokenizeString();
     }
-    
+
     // Identifiers and keywords
     if (isAlpha(c) || c == '_') {
         return tokenizeIdentifierOrKeyword();
     }
-    
+
     // Operators and delimiters
     return tokenizeOperator();
 }
@@ -194,7 +194,7 @@ char Lexer::peek(int offset) const {
 
 char Lexer::advance() {
     if (isAtEnd()) return '\0';
-    
+
     char c = source[pos++];
     if (c == '\n') {
         line++;
@@ -229,18 +229,18 @@ Token Lexer::tokenizeNumber() {
     int startLine = line;
     int startCol = column;
     std::string value;
-    
+
     while (isDigit(peek())) {
         value += advance();
     }
-    
+
     if (peek() == '.' && isDigit(peek(1))) {
         value += advance(); // consume '.'
         while (isDigit(peek())) {
             value += advance();
         }
     }
-    
+
     return Token(TokenType::NUMBER, value, startLine, startCol);
 }
 
@@ -249,7 +249,7 @@ Token Lexer::tokenizeString() {
     int startCol = column;
     char quote = advance(); // consume opening quote
     std::string value;
-    
+
     while (!isAtEnd() && peek() != quote) {
         if (peek() == '\\') {
             advance(); // consume backslash
@@ -269,11 +269,11 @@ Token Lexer::tokenizeString() {
             value += advance();
         }
     }
-    
+
     if (!isAtEnd()) {
         advance(); // consume closing quote
     }
-    
+
     return Token(TokenType::STRING, value, startLine, startCol);
 }
 
@@ -281,16 +281,16 @@ Token Lexer::tokenizeIdentifierOrKeyword() {
     int startLine = line;
     int startCol = column;
     std::string value;
-    
+
     while (isAlphaNumeric(peek()) || peek() == '_') {
         value += advance();
     }
-    
+
     auto it = keywords.find(value);
     if (it != keywords.end()) {
         return Token(it->second, value, startLine, startCol);
     }
-    
+
     return Token(TokenType::IDENTIFIER, value, startLine, startCol);
 }
 
@@ -298,7 +298,7 @@ Token Lexer::tokenizeOperator() {
     int startLine = line;
     int startCol = column;
     char c = advance();
-    
+
     switch (c) {
         case '+': return Token(TokenType::PLUS, "+", startLine, startCol);
         case '-': return Token(TokenType::MINUS, "-", startLine, startCol);

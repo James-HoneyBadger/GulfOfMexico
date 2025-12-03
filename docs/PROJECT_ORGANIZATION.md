@@ -384,6 +384,6 @@ cat DOCUMENTATION.md
 
 ---
 
-**Everything is organized and documented!** 
+**Everything is organized and documented!**
 
 **Start exploring**: [README.md](README.md) or [DOCUMENTATION.md](DOCUMENTATION.md)

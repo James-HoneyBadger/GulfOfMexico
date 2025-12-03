@@ -31,19 +31,19 @@ function processPixel() => {
    // Map to complex plane (simplified)
    const px = (col + 1) * 256 / width - 128!
    const py = (row + 1) * 256 / height - 128!
-   
+
    // Simple iteration count (just based on position for now)
    const iter = ((col + row) % 4)!
-   
+
    drawPixel(col, row, iter)!
-   
+
    col = col + 1!
 }!
 
 // Process one row
 function processRow() => {
    col = -1!
-   
+
    processPixel()!
    processPixel()!
    processPixel()!
@@ -54,7 +54,7 @@ function processRow() => {
    processPixel()!
    processPixel()!
    processPixel()!
-   
+
    row = row + 1!
 }!
 

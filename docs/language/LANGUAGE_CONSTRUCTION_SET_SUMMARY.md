@@ -37,7 +37,7 @@ The **Language Construction Set** is a comprehensive system that allows you to c
 ### Configuration Presets
 4. **configs/python_like.yaml**
    - Python-style syntax (def, 0-based indexing, # comments)
-   
+
 5. **configs/spanish_professional.yaml**
    - Professional Spanish variant
    - Translated keywords and functions

@@ -8,15 +8,16 @@ for an alternative modular architecture.
 """
 
 from typing import Optional, Type
+
+from gulfofmexico.builtin import GulfOfMexicoValue
+from gulfofmexico.context import ExecutionContext
 from gulfofmexico.handlers import StatementHandler
 from gulfofmexico.processor.syntax_tree import (
+    AfterStatement,
     CodeStatement,
     Conditional,
     WhenStatement,
-    AfterStatement,
 )
-from gulfofmexico.context import ExecutionContext
-from gulfofmexico.builtin import GulfOfMexicoValue
 
 
 class ConditionalHandler(StatementHandler):
@@ -47,7 +48,7 @@ class ConditionalHandler(StatementHandler):
         Returns:
             Optional return value from conditional code
         """
-        from gulfofmexico.interpreter import (
+        from gulfofmexico.interpreter import (  # pylint: disable=import-outside-toplevel
             evaluate_expression,
             execute_conditional,
         )
@@ -82,7 +83,10 @@ class ConditionalHandler(StatementHandler):
             Conditional class
         """
         # Tests expect ConditionalStatement compatibility class
-        from gulfofmexico.processor.syntax_tree import ConditionalStatement
+        from gulfofmexico.processor.syntax_tree import (
+            ConditionalStatement,  # pylint: disable=import-outside-toplevel
+        )
+
         return ConditionalStatement
 
 
@@ -114,7 +118,9 @@ class WhenStatementHandler(StatementHandler):
         Returns:
             None (when statements register watchers, don't return)
         """
-        from gulfofmexico.interpreter import register_when_statement
+        from gulfofmexico.interpreter import (
+            register_when_statement,  # pylint: disable=import-outside-toplevel
+        )
 
         assert isinstance(statement, WhenStatement)
 
@@ -169,7 +175,7 @@ class AfterStatementHandler(StatementHandler):
         Returns:
             None (after statements register listeners, don't return)
         """
-        from gulfofmexico.interpreter import (
+        from gulfofmexico.interpreter import (  # pylint: disable=import-outside-toplevel
             evaluate_expression,
             execute_after_statement,
         )

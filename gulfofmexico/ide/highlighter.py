@@ -3,16 +3,16 @@ from __future__ import annotations
 try:
     from PySide6.QtGui import (
         QColor,
-        QTextCharFormat,
-        QSyntaxHighlighter,
         QFont,
+        QSyntaxHighlighter,
+        QTextCharFormat,
     )
 except ImportError:
     from PyQt5.QtGui import (
         QColor,
-        QTextCharFormat,
-        QSyntaxHighlighter,
         QFont,
+        QSyntaxHighlighter,
+        QTextCharFormat,
     )
 
 from gulfofmexico.processor.lexer import tokenize

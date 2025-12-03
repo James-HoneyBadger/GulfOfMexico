@@ -27,18 +27,17 @@ Note: Used by export/import statements and const const const global storage.
 
 import dataclasses
 from typing import Any, Callable, Type, Union, assert_never
+
 from gulfofmexico.base import NonFormattedError, Token, TokenType
-
 from gulfofmexico.builtin import *
-from gulfofmexico.processor.syntax_tree import *
-
 from gulfofmexico.builtin import (
     KEYWORDS,
     BuiltinFunction,
-    Name,
     GulfOfMexicoValue,
+    Name,
     Variable,
 )
+from gulfofmexico.processor.syntax_tree import *
 from gulfofmexico.processor.syntax_tree import CodeStatement
 
 SerializedDict = dict[str, Union[str, dict, list]]
@@ -60,9 +59,7 @@ def deserialize_obj(val: dict) -> Any:
     elif "python_obj_type" in val:
         return deserialize_python_obj(val)
     else:
-        raise NonFormattedError(
-            "Invalid object type in GulfOfMexico Variable deserialization."
-        )
+        raise NonFormattedError("Invalid object type in GulfOfMexico Variable deserialization.")
 
 
 def serialize_python_obj(obj: Any) -> dict[str, Union[str, dict, list]]:
@@ -71,9 +68,7 @@ def serialize_python_obj(obj: Any) -> dict[str, Union[str, dict, list]]:
             val = obj.value
         case dict():
             if not all(isinstance(k, str) for k in obj):
-                raise NonFormattedError(
-                    "Serialization Error: Encountered non-string dictionary keys."
-                )
+                raise NonFormattedError("Serialization Error: Encountered non-string dictionary keys.")
             val = {k: serialize_obj(v) for k, v in obj.items()}
         case list() | tuple():
             val = [serialize_obj(x) for x in obj]
@@ -86,9 +81,7 @@ def serialize_python_obj(obj: Any) -> dict[str, Union[str, dict, list]]:
         case _:
             assert_never(obj)
     return {
-        "python_obj_type": (
-            type(obj).__name__ if not isinstance(obj, Callable) else "function"
-        ),
+        "python_obj_type": (type(obj).__name__ if not isinstance(obj, Callable) else "function"),
         "value": val,
     }
 
@@ -107,9 +100,7 @@ def deserialize_python_obj(val: dict) -> Any:
         "bool",
     ]:
         print(val["python_obj_type"])
-        raise NonFormattedError(
-            "Invalid `python_obj_type` detected in deserialization."
-        )
+        raise NonFormattedError("Invalid `python_obj_type` detected in deserialization.")
 
     match val["python_obj_type"]:
         case "list":
@@ -124,16 +115,12 @@ def deserialize_python_obj(val: dict) -> Any:
             return None
         case "bool":
             if val["value"] not in ["True", "False"]:
-                raise NonFormattedError(
-                    "Invalid boolean detected in object deserialization."
-                )
+                raise NonFormattedError("Invalid boolean detected in object deserialization.")
             return eval(val["value"])
         case "TokenType":
             if v := TokenType.from_val(val["value"]):
                 return v
-            raise NonFormattedError(
-                "Invalid TokenType detected in object deserialization."
-            )
+            raise NonFormattedError("Invalid TokenType detected in object deserialization.")
         case "function":
             if val["value"] in [
                 "db_list_pop",
@@ -142,12 +129,8 @@ def deserialize_python_obj(val: dict) -> Any:
                 "db_str_push",
             ]:
                 return eval(val["value"])  # trust me bro this is W code
-            if not (v := KEYWORDS.get(val["value"])) or not isinstance(
-                v.value, BuiltinFunction
-            ):
-                raise NonFormattedError(
-                    "Invalid builtin function detected in object deserialization."
-                )
+            if not (v := KEYWORDS.get(val["value"])) or not isinstance(v.value, BuiltinFunction):
+                raise NonFormattedError("Invalid builtin function detected in object deserialization.")
             return v.value.function
         case invalid:
             assert_never(invalid)
@@ -177,9 +160,7 @@ def deserialize_gulfofmexico_obj(val: dict) -> DataclassSerializations:
         *get_subclass_name_list(CodeStatement),
         *get_subclass_name_list(GulfOfMexicoValue),
     ]:
-        raise NonFormattedError(
-            "Invalid `gulfofmexico_obj_type` detected in deserialization."
-        )
+        raise NonFormattedError("Invalid `gulfofmexico_obj_type` detected in deserialization.")
 
     # beautiful, elegant, error-free, safe python code :D
     attrs = {at["name"]: deserialize_obj(at["value"]) for at in val["attributes"]}
@@ -187,7 +168,6 @@ def deserialize_gulfofmexico_obj(val: dict) -> DataclassSerializations:
 
 
 if __name__ == "__main__":
-
     list_test_case = GulfOfMexicoList(
         [
             GulfOfMexicoString("Hello world!"),

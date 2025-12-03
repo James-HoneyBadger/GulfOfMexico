@@ -4,8 +4,8 @@ Documentation for the Mandelbrot fractal program: graphics features, usage, impl
 
 ## Program Details
 
-**File**: `examples/mandelbrot.gom`  
-**Executable**: `executables/mandelbrot`  
+**File**: `examples/mandelbrot.gom`
+**Executable**: `executables/mandelbrot`
 **Output**: `mandelbrot.png` (600x400 pixels)
 
 ## Description
@@ -136,6 +136,6 @@ The program is:
 
 ---
 
-**Created**: November 16, 2024  
-**Repository**: https://github.com/James-HoneyBadger/GulfOfMexico  
+**Created**: November 16, 2024
+**Repository**: https://github.com/James-HoneyBadger/GulfOfMexico
 **Branch**: main

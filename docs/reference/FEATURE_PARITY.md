@@ -106,18 +106,18 @@ Feature comparison between the Python interpreter and C++ compiler implementatio
    - reverse statement
    - Approximate equality operators (=, ===, ====)
    - Full string interpolation
-   
+
 ### Phase 2: Extended Operators (Medium Priority)
 2. Add to compiler:
    - Map/Dictionary type
    - Type conversion functions (Number, String, Boolean)
-   
+
 ### Phase 3: Built-in Functions (Medium Priority)
 3. Add to compiler:
    - Basic I/O: read(), write()
    - Control: sleep(), exit()
    - Math functions (from math.h)
-   
+
 ### Phase 4: Advanced Features (Lower Priority)
 4. Decide on scope for:
    - Probabilistic variables (complex in compiled code)
@@ -125,7 +125,7 @@ Feature comparison between the Python interpreter and C++ compiler implementatio
    - Fractional indexing (performance implications)
    - Three-valued logic (requires runtime changes)
    - When/After reactive programming (requires event loop)
-   
+
 ### Phase 5: Satirical Features (Optional)
 5. Add satirical keywords to compiler:
    - All emotional/superstitious/corporate keywords

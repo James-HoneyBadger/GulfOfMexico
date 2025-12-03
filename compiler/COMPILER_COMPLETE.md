@@ -14,15 +14,15 @@ Successfully created a working C++ compiler for the Gulf of Mexico programming l
 - **Runtime Library** (200 lines): Dynamic typing via `std::variant`
 
 ### Key Features Implemented
-✅ Variables (const/var)  
-✅ Functions (arrow syntax `=>`)  
-✅ Arithmetic operators (+, -, *, /, %)  
-✅ Comparison operators (==, !=, <, >, <=, >=)  
-✅ Logical operators (&&, ||, !)  
-✅ Arrays with **-1 indexing** (Gulf of Mexico's signature feature!)  
-✅ If statements  
-✅ Print function  
-✅ Return statements  
+✅ Variables (const/var)
+✅ Functions (arrow syntax `=>`)
+✅ Arithmetic operators (+, -, *, /, %)
+✅ Comparison operators (==, !=, <, >, <=, >=)
+✅ Logical operators (&&, ||, !)
+✅ Arrays with **-1 indexing** (Gulf of Mexico's signature feature!)
+✅ If statements
+✅ Print function
+✅ Return statements
 
 ### Test Results
 
@@ -55,7 +55,7 @@ Implemented dynamic typing in statically-typed C++ using `std::variant`:
 ```cpp
 class GomValue {
     std::variant<double, std::string, bool, std::vector<GomValue>> data;
-    
+
     double as_number() const;
     std::string as_string() const;
     bool as_bool() const;
@@ -125,7 +125,7 @@ compiler/
 
 ## Performance
 
-The compiler is fast - generates C++ code in milliseconds.  
+The compiler is fast - generates C++ code in milliseconds.
 Compiled programs run at native C++ speed!
 
 ```bash
@@ -184,6 +184,6 @@ Created a **fully functional C++ compiler** for Gulf of Mexico that:
 
 The compiler demonstrates that GOM can be compiled to native code, opening the door for high-performance implementations of the language!
 
-**Total Development Time**: ~2 hours  
-**Result**: Working compiler with 1,500+ lines of clean C++ code  
+**Total Development Time**: ~2 hours
+**Result**: Working compiler with 1,500+ lines of clean C++ code
 **Status**: ✅ Complete and tested

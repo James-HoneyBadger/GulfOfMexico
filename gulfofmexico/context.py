@@ -9,9 +9,8 @@ module-level global variables instead.
 """
 
 from dataclasses import dataclass, field
-from typing import Optional
-from gulfofmexico.builtin import GulfOfMexicoValue
 
+from gulfofmexico.builtin import GulfOfMexicoValue
 
 # Type aliases for complex types
 Namespace = dict[str, "Variable | Name"]  # noqa: F821

@@ -1,33 +1,33 @@
 from __future__ import annotations
 
-import os
-from pathlib import Path
 import json
+import os
 from functools import partial
+from pathlib import Path
 
 # Use compatibility layer for Qt
 try:
     from gulfofmexico.ide.qt_compat import (
-        Qt,
-        QThread,
-        Signal,
-        QObject,
-        QTimer,
-        QApplication,
-        QFileDialog,
-        QMainWindow,
-        QMessageBox,
-        QDockWidget,
-        QWidget,
-        QVBoxLayout,
-        QHBoxLayout,
-        QPushButton,
-        QTextEdit,
-        QTabWidget,
-        QAction,
-        QGuiApplication,
-        QMenu,
         QT_VERSION,
+        QAction,
+        QApplication,
+        QDockWidget,
+        QFileDialog,
+        QGuiApplication,
+        QHBoxLayout,
+        QMainWindow,
+        QMenu,
+        QMessageBox,
+        QObject,
+        QPushButton,
+        Qt,
+        QTabWidget,
+        QTextEdit,
+        QThread,
+        QTimer,
+        QVBoxLayout,
+        QWidget,
+        Signal,
     )
 
     PYSIDE_AVAILABLE = True
@@ -359,9 +359,7 @@ if PYSIDE_AVAILABLE:
             mbox.setIcon(QMessageBox.Icon.Warning)
             mbox.setText(f"Save changes to {name}?")
             mbox.setStandardButtons(
-                QMessageBox.StandardButton.Save
-                | QMessageBox.StandardButton.Discard
-                | QMessageBox.StandardButton.Cancel
+                QMessageBox.StandardButton.Save | QMessageBox.StandardButton.Discard | QMessageBox.StandardButton.Cancel
             )
             choice = mbox.exec()
             if choice == QMessageBox.StandardButton.Save:
@@ -491,9 +489,7 @@ if PYSIDE_AVAILABLE:
             mbox.setIcon(QMessageBox.Icon.Warning)
             mbox.setText(f"Replace unsaved buffer with {name}?")
             mbox.setStandardButtons(
-                QMessageBox.StandardButton.Save
-                | QMessageBox.StandardButton.Discard
-                | QMessageBox.StandardButton.Cancel
+                QMessageBox.StandardButton.Save | QMessageBox.StandardButton.Discard | QMessageBox.StandardButton.Cancel
             )
             choice = mbox.exec()
             if choice == QMessageBox.StandardButton.Save:
@@ -552,18 +548,10 @@ if PYSIDE_AVAILABLE:
             s = self._loaded_settings or {}
             # Apply window size/position
             size = s.get("size")
-            if (
-                isinstance(size, list)
-                and len(size) == 2
-                and all(isinstance(x, int) for x in size)
-            ):
+            if isinstance(size, list) and len(size) == 2 and all(isinstance(x, int) for x in size):
                 self.resize(int(size[0]), int(size[1]))
             pos = s.get("pos")
-            if (
-                isinstance(pos, list)
-                and len(pos) == 2
-                and all(isinstance(x, int) for x in pos)
-            ):
+            if isinstance(pos, list) and len(pos) == 2 and all(isinstance(x, int) for x in pos):
                 self.move(int(pos[0]), int(pos[1]))
 
             # Restore last open files

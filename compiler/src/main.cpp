@@ -20,7 +20,7 @@ std::string readFile(const std::string& filename) {
     if (!file.is_open()) {
         throw std::runtime_error("Could not open file: " + filename);
     }
-    
+
     std::stringstream buffer;
     buffer << file.rdbuf();
     return buffer.str();
@@ -39,11 +39,11 @@ int main(int argc, char* argv[]) {
         printUsage(argv[0]);
         return 1;
     }
-    
+
     std::string inputFile;
     std::string outputFile = "a.cpp";
     bool verbose = false;
-    
+
     // Parse arguments
     for (int i = 1; i < argc; i++) {
         std::string arg = argv[i];
@@ -62,34 +62,34 @@ int main(int argc, char* argv[]) {
             return 1;
         }
     }
-    
+
     if (inputFile.empty()) {
         std::cerr << "Error: No input file specified\n";
         printUsage(argv[0]);
         return 1;
     }
-    
+
     try {
         if (verbose) std::cout << "Compiling " << inputFile << "...\n";
-        
+
         // Read source
         std::string source = readFile(inputFile);
-        
+
         // Lexical analysis
         gom::Lexer lexer(source);
         auto tokens = lexer.tokenize();
         if (verbose) std::cout << "Lexer: Generated " << tokens.size() << " tokens\n";
-        
+
         // Parsing
         gom::Parser parser(tokens);
         auto ast = parser.parse();
         if (verbose) std::cout << "Parser: Built AST with " << ast->statements.size() << " statements\n";
-        
+
         // Code generation
         gom::CodeGenerator codegen;
         std::string cppCode = codegen.generate(*ast);
         if (verbose) std::cout << "CodeGen: Generated C++ code\n";
-        
+
         // Write output
         writeFile(outputFile, cppCode);
         if (verbose) {
@@ -98,9 +98,9 @@ int main(int argc, char* argv[]) {
             std::cout << "  g++ -std=c++17 " << outputFile << " -o program\n";
             std::cout << "  ./program\n";
         }
-        
+
         return 0;
-        
+
     } catch (const std::exception& e) {
         std::cerr << "Error: " << e.what() << "\n";
         return 1;

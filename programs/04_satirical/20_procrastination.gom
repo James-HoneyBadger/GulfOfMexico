@@ -9,7 +9,7 @@ later {
    print "  ✓ Actually doing homework now"!
 }
 
-// eventually: 75% chance of execution  
+// eventually: 75% chance of execution
 print "Task 2: Clean room (eventually)"!
 eventually {
    print "  ✓ Fine, I'll clean my room"!

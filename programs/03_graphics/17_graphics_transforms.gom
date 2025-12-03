@@ -35,7 +35,7 @@ function fn drawSpiral() {
    canvas.translate(radius, 0)!
    canvas.circle(0, 0, 5, "cyan")!
    canvas.restoreTransform()!
-   
+
    var angle angle + 30!
    var radius radius + 5!
 }

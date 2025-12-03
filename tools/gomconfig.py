@@ -14,15 +14,14 @@ Usage:
     gomconfig convert FILE --from FORMAT --to FORMAT
 """
 
-import sys
 import argparse
+import sys
 from pathlib import Path
-from typing import Optional
 
 from gulfofmexico.language_config import (
     LanguageConfig,
-    list_presets,
     create_custom_config_interactive,
+    list_presets,
 )
 from gulfofmexico.language_runtime import LanguageRuntime
 
@@ -109,7 +108,7 @@ def cmd_validate(args):
             return 1
         else:
             print(f"✓ Configuration is valid: {filepath}")
-            print(f"\nSummary:")
+            print("\nSummary:")
             print(f"  Name: {config.name}")
             print(f"  Version: {config.version}")
             print(f"  Keywords: {len(config.keyword_mappings)}")
@@ -146,13 +145,13 @@ def cmd_info(args):
     print("=" * 70)
     print(f"Language Configuration: {config.name}")
     print("=" * 70)
-    print(f"\nMetadata:")
+    print("\nMetadata:")
     print(f"  Version: {config.version}")
     print(f"  Description: {config.description}")
     if config.author:
         print(f"  Author: {config.author}")
 
-    print(f"\nComponents:")
+    print("\nComponents:")
     print(f"  Keywords: {len(config.keyword_mappings)}")
     print(f"  Functions: {len(config.builtin_functions)}")
     print(f"  Operators: {len(config.operators)}")
@@ -162,25 +161,23 @@ def cmd_info(args):
     for mapping in config.keyword_mappings.values():
         categories[mapping.category] = categories.get(mapping.category, 0) + 1
 
-    print(f"\nKeyword Categories:")
+    print("\nKeyword Categories:")
     for cat, count in sorted(categories.items()):
         print(f"  {cat}: {count}")
 
     # Show enabled/disabled functions
     enabled = sum(1 for f in config.builtin_functions.values() if f.enabled)
     disabled = len(config.builtin_functions) - enabled
-    print(f"\nFunctions:")
+    print("\nFunctions:")
     print(f"  Enabled: {enabled}")
     if disabled > 0:
         print(f"  Disabled: {disabled}")
 
     # Show syntax options
     opts = config.syntax_options
-    print(f"\nSyntax Options:")
+    print("\nSyntax Options:")
     print(f"  Array indexing: starts at {opts.array_start_index}")
-    print(
-        f"  Fractional indexing: {'enabled' if opts.allow_fractional_indexing else 'disabled'}"
-    )
+    print(f"  Fractional indexing: {'enabled' if opts.allow_fractional_indexing else 'disabled'}")
     print(f"  Comment style: {opts.single_line_comment}")
     print(f"  Statement terminator: '{opts.statement_terminator}'")
 
@@ -200,7 +197,7 @@ def cmd_info(args):
     if features:
         print(f"  Features: {', '.join(features)}")
 
-    print(f"\nRuntime:")
+    print("\nRuntime:")
     print(f"  Debug mode: {'enabled' if config.debug_mode else 'disabled'}")
     print(f"  Strict mode: {'enabled' if config.strict_mode else 'disabled'}")
     print(f"  Compatibility: {config.compatibility_mode}")
@@ -265,8 +262,8 @@ def cmd_list_presets(args):
             print(f"\n{preset}: (error loading: {e})")
 
     print("\nUsage:")
-    print(f"  gomconfig create --preset PRESET_NAME")
-    print(f"  python -m gulfofmexico --preset PRESET_NAME script.gom")
+    print("  gomconfig create --preset PRESET_NAME")
+    print("  python -m gulfofmexico --preset PRESET_NAME script.gom")
 
     return 0
 
@@ -284,9 +281,7 @@ def cmd_convert(args):
         print(f"Error loading config: {e}")
         return 1
 
-    from_format = args.from_format or (
-        "yaml" if filepath.suffix in [".yaml", ".yml"] else "json"
-    )
+    from_format = args.from_format or ("yaml" if filepath.suffix in [".yaml", ".yml"] else "json")
     to_format = args.to_format
 
     output = args.output or f"{filepath.stem}.{to_format}"
@@ -337,16 +332,13 @@ def cmd_diff(args):
         common = keys1 & keys2
         renamed = []
         for key in common:
-            if (
-                config1.keyword_mappings[key].custom
-                != config2.keyword_mappings[key].custom
-            ):
+            if config1.keyword_mappings[key].custom != config2.keyword_mappings[key].custom:
                 renamed.append(
                     f"{key}: '{config1.keyword_mappings[key].custom}' -> '{config2.keyword_mappings[key].custom}'"
                 )
 
         if renamed:
-            print(f"  Renamed:")
+            print("  Renamed:")
             for r in renamed:
                 print(f"    {r}")
     else:
@@ -374,9 +366,7 @@ def cmd_diff(args):
 
     differences = []
     if opts1.array_start_index != opts2.array_start_index:
-        differences.append(
-            f"array_start_index: {opts1.array_start_index} -> {opts2.array_start_index}"
-        )
+        differences.append(f"array_start_index: {opts1.array_start_index} -> {opts2.array_start_index}")
     if opts1.allow_fractional_indexing != opts2.allow_fractional_indexing:
         differences.append(
             f"fractional_indexing: {opts1.allow_fractional_indexing} -> {opts2.allow_fractional_indexing}"
@@ -399,58 +389,59 @@ def cmd_diff(args):
 def cmd_update(args):
     """Update a configuration file."""
     from pathlib import Path
-    
+
     filepath = Path(args.file)
     if not filepath.exists():
         print(f"Error: File not found: {filepath}")
         return 1
-    
+
     try:
         config = LanguageConfig.load(filepath)
         print(f"Loaded: {filepath}")
-        
+
         # Apply updates from --set flags
         if args.set:
             updates = {}
             for key, value in args.set:
                 # Parse nested keys like "metadata.author"
-                parts = key.split('.')
+                parts = key.split(".")
                 current = updates
                 for part in parts[:-1]:
                     if part not in current:
                         current[part] = {}
                     current = current[part]
-                
+
                 # Try to parse value as JSON for complex types
                 try:
                     import json
+
                     parsed_value = json.loads(value)
                     current[parts[-1]] = parsed_value
                 except:
                     # Keep as string if not valid JSON
                     current[parts[-1]] = value
-            
+
             config.update(updates, merge=True)
             print(f"Applied {len(args.set)} update(s)")
-        
+
         # Merge with another config
         if args.merge:
             merge_path = Path(args.merge)
             if not merge_path.exists():
                 print(f"Error: Merge file not found: {merge_path}")
                 return 1
-            
+
             merge_config = LanguageConfig.load(merge_path)
             config.merge(merge_config, prefer_other=True)
             print(f"Merged with: {merge_path}")
-        
+
         # Save result
         output = args.output or args.file
         config.save(output)
         print(f"✓ Updated configuration saved to: {output}")
-        
+
         return 0
-        
+
     except Exception as e:
         print(f"Error: {e}")
         return 1
@@ -459,18 +450,18 @@ def cmd_update(args):
 def cmd_delete(args):
     """Delete elements from configuration."""
     from pathlib import Path
-    
+
     filepath = Path(args.file)
     if not filepath.exists():
         print(f"Error: File not found: {filepath}")
         return 1
-    
+
     try:
         config = LanguageConfig.load(filepath)
         print(f"Loaded: {filepath}")
-        
+
         deleted_count = 0
-        
+
         # Delete keywords
         if args.keyword:
             for kw in args.keyword:
@@ -479,7 +470,7 @@ def cmd_delete(args):
                     deleted_count += 1
                 else:
                     print(f"  ✗ Keyword not found: {kw}")
-        
+
         # Delete functions
         if args.function:
             for func in args.function:
@@ -488,7 +479,7 @@ def cmd_delete(args):
                     deleted_count += 1
                 else:
                     print(f"  ✗ Function not found: {func}")
-        
+
         # Delete operators
         if args.operator:
             for op in args.operator:
@@ -497,18 +488,18 @@ def cmd_delete(args):
                     deleted_count += 1
                 else:
                     print(f"  ✗ Operator not found: {op}")
-        
+
         if deleted_count == 0:
             print("No elements deleted")
             return 0
-        
+
         # Save result
         output = args.output or args.file
         config.save(output)
         print(f"\n✓ Configuration with {deleted_count} deletion(s) saved to: {output}")
-        
+
         return 0
-        
+
     except Exception as e:
         print(f"Error: {e}")
         return 1
@@ -522,25 +513,25 @@ def main():
 Examples:
   # Create from preset
   gomconfig create --preset python_like --output my_lang.yaml
-  
+
   # Create interactively
   gomconfig create --interactive
-  
+
   # Validate configuration
   gomconfig validate my_lang.yaml
-  
+
   # Show info
   gomconfig info my_lang.yaml
-  
+
   # Export documentation
   gomconfig export my_lang.yaml --format markdown
-  
+
   # List available presets
   gomconfig list-presets
-  
+
   # Convert between formats
   gomconfig convert my_lang.yaml --to json
-  
+
   # Compare configurations
   gomconfig diff config1.yaml config2.yaml
         """,
@@ -551,17 +542,11 @@ Examples:
     # Create command
     create_parser = subparsers.add_parser("create", help="Create new configuration")
     create_parser.add_argument("--preset", help="Start from preset")
-    create_parser.add_argument(
-        "--interactive", "-i", action="store_true", help="Interactive mode"
-    )
-    create_parser.add_argument(
-        "--output", "-o", help="Output file (default: language_config.yaml)"
-    )
+    create_parser.add_argument("--interactive", "-i", action="store_true", help="Interactive mode")
+    create_parser.add_argument("--output", "-o", help="Output file (default: language_config.yaml)")
 
     # Edit command
-    edit_parser = subparsers.add_parser(
-        "edit", help="Edit configuration in text editor"
-    )
+    edit_parser = subparsers.add_parser("edit", help="Edit configuration in text editor")
     edit_parser.add_argument("file", help="Configuration file to edit")
 
     # Validate command
@@ -570,16 +555,12 @@ Examples:
 
     # Info command
     info_parser = subparsers.add_parser("info", help="Show configuration information")
-    info_parser.add_argument(
-        "file", nargs="?", help="Configuration file (default: current runtime)"
-    )
+    info_parser.add_argument("file", nargs="?", help="Configuration file (default: current runtime)")
 
     # Export command
     export_parser = subparsers.add_parser("export", help="Export configuration")
     export_parser.add_argument("file", help="Configuration file to export")
-    export_parser.add_argument(
-        "--format", "-f", choices=["markdown", "json", "yaml"], help="Export format"
-    )
+    export_parser.add_argument("--format", "-f", choices=["markdown", "json", "yaml"], help="Export format")
     export_parser.add_argument("--output", "-o", help="Output file")
 
     # List presets command
@@ -602,16 +583,17 @@ Examples:
     diff_parser = subparsers.add_parser("diff", help="Compare two configurations")
     diff_parser.add_argument("file1", help="First configuration file")
     diff_parser.add_argument("file2", help="Second configuration file")
-    
+
     # Update command
     update_parser = subparsers.add_parser("update", help="Update configuration")
     update_parser.add_argument("file", help="Configuration file to update")
-    update_parser.add_argument("--set", action="append", nargs=2, metavar=("KEY", "VALUE"),
-                               help="Set key=value (can be used multiple times)")
+    update_parser.add_argument(
+        "--set", action="append", nargs=2, metavar=("KEY", "VALUE"), help="Set key=value (can be used multiple times)"
+    )
     update_parser.add_argument("--merge", help="Merge with another config file")
     update_parser.add_argument("--output", "-o", help="Output file (default: update in place)")
-    
-    # Delete command  
+
+    # Delete command
     delete_parser = subparsers.add_parser("delete", help="Delete config elements")
     delete_parser.add_argument("file", help="Configuration file")
     delete_parser.add_argument("--keyword", action="append", help="Delete keyword (can be repeated)")

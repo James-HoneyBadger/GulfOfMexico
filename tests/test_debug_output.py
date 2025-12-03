@@ -145,11 +145,10 @@ print("After error")!
 
 def test_flush_debug_logs_function():
     """Test the flush_debug_logs() function directly."""
-    from gulfofmexico.builtin import db_print, flush_debug_logs, _DEBUG_LOGS
-    from gulfofmexico.builtin import GulfOfMexicoString
     import io
-    import sys
     from contextlib import redirect_stderr
+
+    from gulfofmexico.builtin import _DEBUG_LOGS, GulfOfMexicoString, db_print, flush_debug_logs
 
     # Clear any existing debug logs
     _DEBUG_LOGS.clear()
@@ -197,9 +196,7 @@ def test_no_debug_in_repl_success():
 
 def test_web_ide_debug_suppression():
     """Verify web IDE suppresses debug output when GULFOFMEXICO_DEBUG is not set."""
-    from gulfofmexico.ide.web_ide import WEB_IDE_DEBUG, _webide_debug
     import io
-    import sys
     from contextlib import redirect_stderr
 
     # Verify WEB_IDE_DEBUG respects environment
@@ -212,6 +209,7 @@ def test_web_ide_debug_suppression():
 
         # Reimport to pick up new env var
         import importlib
+
         import gulfofmexico.ide.web_ide as web_ide_module
 
         importlib.reload(web_ide_module)

@@ -27,11 +27,12 @@ Reality:
 """
 
 from typing import Optional
-from gulfofmexico.handlers import HandlerRegistry
-from gulfofmexico.context import ExecutionContext, InterpreterConfig
-from gulfofmexico.processor.syntax_tree import CodeStatement
+
 from gulfofmexico.builtin import GulfOfMexicoValue
+from gulfofmexico.context import ExecutionContext, InterpreterConfig
 from gulfofmexico.engine.evaluator import ExpressionEvaluator
+from gulfofmexico.handlers import HandlerRegistry
+from gulfofmexico.processor.syntax_tree import CodeStatement
 
 
 class InterpretEngine:
@@ -52,35 +53,33 @@ class InterpretEngine:
         """
         self.config = config or InterpreterConfig()
         self.registry = HandlerRegistry()
-        self.evaluator = ExpressionEvaluator(
-            enable_cache=self.config.enable_expression_cache
-        )
+        self.evaluator = ExpressionEvaluator(enable_cache=self.config.enable_expression_cache)
 
         # Register default handlers
         self._register_default_handlers()
 
     def _register_default_handlers(self) -> None:
         """Register all default statement handlers."""
-        from gulfofmexico.engine.handlers.variables import (
-            VariableDeclarationHandler,
-            VariableAssignmentHandler,
-        )
         from gulfofmexico.engine.handlers.control_flow import (
+            AfterStatementHandler,
             ConditionalHandler,
             WhenStatementHandler,
-            AfterStatementHandler,
         )
         from gulfofmexico.engine.handlers.functions import (
-            FunctionDefinitionHandler,
             ClassDeclarationHandler,
+            FunctionDefinitionHandler,
         )
         from gulfofmexico.engine.handlers.special import (
             DeleteStatementHandler,
-            ReverseStatementHandler,
-            ImportStatementHandler,
             ExportStatementHandler,
-            ReturnStatementHandler,
             ExpressionStatementHandler,
+            ImportStatementHandler,
+            ReturnStatementHandler,
+            ReverseStatementHandler,
+        )
+        from gulfofmexico.engine.handlers.variables import (
+            VariableAssignmentHandler,
+            VariableDeclarationHandler,
         )
 
         # Register variable handlers

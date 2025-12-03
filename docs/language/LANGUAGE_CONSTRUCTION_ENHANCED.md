@@ -18,34 +18,34 @@ class ParsingConfig:
     block_end: str = "}"
     list_start: str = "["
     list_end: str = "]"
-    
+
     # Separators
     statement_separator: str = ";"
     parameter_separator: str = ","
     key_value_separator: str = ":"
-    
+
     # String literals
     string_delimiters: list[str]
     escape_character: str = "\\"
     allow_raw_strings: bool = True
-    
+
     # Expression syntax
     member_access: str = "."
     index_access_start: str = "["
     function_call_start: str = "("
-    
+
     # Control flow syntax
     if_then_separator: Optional[str] = None
     else_keyword: str = "else"
     elif_keyword: str = "elif"
-    
+
     # Function definition syntax
     function_param_start: str = "("
     function_arrow: Optional[str] = None  # "->" for arrow functions
-    
+
     # Class definition syntax
     class_inheritance_separator: str = ":"
-    
+
     # Import/Export syntax
     import_separator: str = "."
     from_keyword: str = "from"
@@ -218,7 +218,7 @@ PROCEDURE getActiveUsers() {
 label start
   mov r1 0
   mov r2 10
-  
+
 label loop
   add r1 1
   cmp r1 r2
@@ -418,15 +418,15 @@ The system is designed for future expansion:
 The Language Construction Set is now a **complete, production-ready system** that:
 
 ✅ **Loads** configurations from files or URLs
-✅ **Updates** configurations programmatically or via CLI  
-✅ **Deletes** keywords, functions, operators easily  
-✅ **Merges** multiple configurations  
-✅ **Validates** all changes  
-✅ **Creates** entirely new programming languages  
-✅ **Customizes** parsing, syntax, and features deeply  
-✅ **Scopes** to interpreter only (not compiler)  
-✅ **Documents** clearly with examples  
-✅ **Tests** comprehensively  
+✅ **Updates** configurations programmatically or via CLI
+✅ **Deletes** keywords, functions, operators easily
+✅ **Merges** multiple configurations
+✅ **Validates** all changes
+✅ **Creates** entirely new programming languages
+✅ **Customizes** parsing, syntax, and features deeply
+✅ **Scopes** to interpreter only (not compiler)
+✅ **Documents** clearly with examples
+✅ **Tests** comprehensively
 
 You can now use this system to:
 - Create language variants for education

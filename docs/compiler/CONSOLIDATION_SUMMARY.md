@@ -49,7 +49,7 @@ Python Interpreter: ~3000 lines, 100+ features
     ✅ All analysis functions
     ✅ Reactive programming
 
-C++ Compiler: ~1500 lines, 20 features  
+C++ Compiler: ~1500 lines, 20 features
     ↓
     ✅ Lexer updated (recognizes 100+ keywords)
     ⚠️ Parser needs work (handles ~20 statement types)
@@ -88,7 +88,7 @@ Generate C++ code for new statements:
 #### Phase 4: Core Features (HIGH - 3-4 hours)
 Add essential missing features:
 - `const var` support
-- `delete` and `reverse` statements  
+- `delete` and `reverse` statements
 - Map type
 - Built-in functions (Number, String, Boolean, etc.)
 

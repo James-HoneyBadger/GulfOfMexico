@@ -8,16 +8,17 @@ via pattern matching in interpreter.py, not through these handlers.
 """
 
 import unittest
+
 from gulfofmexico.engine.handlers.control_flow import (
+    AfterStatementHandler,
     ConditionalHandler,
     WhenStatementHandler,
-    AfterStatementHandler,
 )
 from gulfofmexico.processor.syntax_tree import (
-    ConditionalStatement,
-    WhenStatement,
     AfterStatement,
+    ConditionalStatement,
     VariableDeclaration,
+    WhenStatement,
 )
 
 

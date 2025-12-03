@@ -10,7 +10,7 @@ print "Canvas initialized - drawing fractal pattern..."!
 
 // Create color palette from dark blue to white
 const c0 = Color(0, 0, 51)!      // Darkest blue
-const c1 = Color(0, 0, 102)!     // Dark blue  
+const c1 = Color(0, 0, 102)!     // Dark blue
 const c2 = Color(0, 0, 153)!     // Medium dark blue
 const c3 = Color(0, 0, 204)!     // Medium blue
 const c4 = Color(0, 0, 255)!     // Bright blue

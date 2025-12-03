@@ -63,4 +63,3 @@ The format is simple date-based entries. Dates use ISO-8601 (YYYY-MM-DD).
   - `programs/examples/`, `programs/demos/` for examples
   - `compiler/examples/` for compiler-specific samples
   - Python unit tests live in `tests/`
-

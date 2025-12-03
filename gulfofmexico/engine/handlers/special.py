@@ -8,25 +8,26 @@ for an alternative modular architecture.
 """
 
 from typing import Optional, Type
+
+from gulfofmexico.base import raise_error_at_token
+from gulfofmexico.builtin import (
+    GulfOfMexicoList,
+    GulfOfMexicoString,
+    GulfOfMexicoValue,
+    Name,
+    Variable,
+)
+from gulfofmexico.context import ExecutionContext
 from gulfofmexico.handlers import StatementHandler
 from gulfofmexico.processor.syntax_tree import (
     CodeStatement,
     DeleteStatement,
-    ReverseStatement,
-    ImportStatement,
     ExportStatement,
-    ReturnStatement,
     ExpressionStatement,
+    ImportStatement,
+    ReturnStatement,
+    ReverseStatement,
 )
-from gulfofmexico.context import ExecutionContext
-from gulfofmexico.builtin import (
-    GulfOfMexicoValue,
-    GulfOfMexicoList,
-    GulfOfMexicoString,
-    Variable,
-    Name,
-)
-from gulfofmexico.base import raise_error_at_token
 
 
 class DeleteStatementHandler(StatementHandler):
@@ -45,9 +46,7 @@ class DeleteStatementHandler(StatementHandler):
         assert isinstance(statement, DeleteStatement)
 
         # Mark value as deleted
-        var, ns = get_name_and_namespace_from_namespaces(
-            statement.name.value, context.namespaces
-        )
+        var, ns = get_name_and_namespace_from_namespaces(statement.name.value, context.namespaces)
 
         if var and isinstance(var, Variable):
             context.mark_deleted(var.value)
@@ -76,9 +75,7 @@ class ReverseStatementHandler(StatementHandler):
 
         assert isinstance(statement, ReverseStatement)
 
-        var, ns = get_name_and_namespace_from_namespaces(
-            statement.name.value, context.namespaces
-        )
+        var, ns = get_name_and_namespace_from_namespaces(statement.name.value, context.namespaces)
 
         if var is None:
             raise_error_at_token(
@@ -114,8 +111,7 @@ class ReverseStatementHandler(StatementHandler):
             raise_error_at_token(
                 context.filename,
                 context.code,
-                f"Cannot reverse type {type(value).__name__}. "
-                f"Only lists and strings can be reversed.",
+                f"Cannot reverse type {type(value).__name__}. " f"Only lists and strings can be reversed.",
                 statement.name,
             )
 

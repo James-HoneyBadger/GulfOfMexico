@@ -16,4 +16,3 @@ One place for the core user guides.
 - Follow the [Docs style guide](../../DOCUMENTATION.md#-docs-style-guide)
 - Use short sections and bullet lists
 - Add small examples where helpful
-

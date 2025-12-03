@@ -2,19 +2,19 @@
 """Web-based Gulf of Mexico IDE - works without Qt dependencies."""
 
 import http.server
-import socketserver
 import json
-import sys
 import os
-from pathlib import Path
-from urllib.parse import parse_qs, urlparse
+import socketserver
+import sys
 import threading
 import webbrowser
+from pathlib import Path
+from urllib.parse import parse_qs, urlparse
 
+from gulfofmexico.builtin import KEYWORDS
+from gulfofmexico.interpreter import interpret_code_statements_main_wrapper
 from gulfofmexico.processor.lexer import tokenize
 from gulfofmexico.processor.syntax_tree import generate_syntax_tree
-from gulfofmexico.interpreter import interpret_code_statements_main_wrapper
-from gulfofmexico.builtin import KEYWORDS
 
 # Local debug flag for the web IDE. When set, verbose internal messages
 # are written to stderr. Otherwise these internal messages are suppressed
@@ -70,7 +70,7 @@ class GOMWebIDEHandler(http.server.SimpleHTTPRequestHandler):
             if not str(filepath).startswith(str(self.workspace_dir.resolve())):
                 raise ValueError("Access denied")
 
-            if not filepath.exists() or not filepath.suffix.lower() in [
+            if not filepath.exists() or filepath.suffix.lower() not in [
                 ".png",
                 ".jpg",
                 ".jpeg",
@@ -96,7 +96,7 @@ class GOMWebIDEHandler(http.server.SimpleHTTPRequestHandler):
             self.end_headers()
             self.wfile.write(content)
 
-        except Exception as e:
+        except Exception as e:  # pylint: disable=broad-exception-caught
             self.send_response(404)
             self.send_header("Content-type", "text/plain")
             self.end_headers()
@@ -104,7 +104,6 @@ class GOMWebIDEHandler(http.server.SimpleHTTPRequestHandler):
 
     def do_POST(self):
         """Handle POST requests for code execution and file operations."""
-        import sys
 
         content_length = int(self.headers["Content-Length"])
         post_data = self.rfile.read(content_length)
@@ -141,7 +140,7 @@ class GOMWebIDEHandler(http.server.SimpleHTTPRequestHandler):
             self.send_header("Content-type", "application/json")
             self.end_headers()
             self.wfile.write(json.dumps({"success": True, "files": gom_files}).encode())
-        except Exception as e:
+        except Exception as e:  # pylint: disable=broad-exception-caught
             self.send_response(200)
             self.send_header("Content-type", "application/json")
             self.end_headers()
@@ -172,12 +171,8 @@ class GOMWebIDEHandler(http.server.SimpleHTTPRequestHandler):
             self.send_response(200)
             self.send_header("Content-type", "application/json")
             self.end_headers()
-            self.wfile.write(
-                json.dumps(
-                    {"success": True, "filename": filename, "content": content}
-                ).encode()
-            )
-        except Exception as e:
+            self.wfile.write(json.dumps({"success": True, "filename": filename, "content": content}).encode())
+        except Exception as e:  # pylint: disable=broad-exception-caught
             self.send_response(200)
             self.send_header("Content-type", "application/json")
             self.end_headers()
@@ -214,14 +209,14 @@ class GOMWebIDEHandler(http.server.SimpleHTTPRequestHandler):
                 "message": f"Saved to {filename}",
                 "filename": filename,
             }
-        except Exception as e:
+        except Exception as e:  # pylint: disable=broad-exception-caught
             return {"success": False, "error": str(e)}
 
     def execute_code(self, code):
         """Execute Gulf of Mexico code and capture output."""
         import io
-        import sys
-        from contextlib import redirect_stdout, redirect_stderr
+        import sys  # pylint: disable=reimported
+        from contextlib import redirect_stderr, redirect_stdout
 
         _webide_debug(f"[WEB IDE] Received code: {repr(code[:50])}\n")
 
@@ -253,9 +248,7 @@ class GOMWebIDEHandler(http.server.SimpleHTTPRequestHandler):
                 # Execute
                 namespaces = [KEYWORDS.copy()]
                 _webide_debug("[WEB IDE] Executing...\n")
-                result = interpret_code_statements_main_wrapper(
-                    statements, namespaces, [], [{}], {}, []
-                )
+                result = interpret_code_statements_main_wrapper(statements, namespaces, [], [{}], {}, [])
                 _webide_debug("[WEB IDE] Execution complete\n")
 
                 # Force flush
@@ -268,11 +261,7 @@ class GOMWebIDEHandler(http.server.SimpleHTTPRequestHandler):
             all_pngs = set(self.workspace_dir.glob("*.png"))
             new_pngs = all_pngs - existing_pngs
             # Also check for modified existing files
-            modified_pngs = {
-                p
-                for p in existing_pngs
-                if p.exists() and p.stat().st_mtime > execution_start
-            }
+            modified_pngs = {p for p in existing_pngs if p.exists() and p.stat().st_mtime > execution_start}
             changed_pngs = new_pngs | modified_pngs
             images = sorted([str(p.name) for p in changed_pngs]) if changed_pngs else []
 
@@ -285,14 +274,12 @@ class GOMWebIDEHandler(http.server.SimpleHTTPRequestHandler):
             }
 
             # Log to real stderr (not captured)
-            _webide_debug(
-                f"[WEB IDE] Output length: {len(output_val)}, content: {repr(output_val[:100])}\n"
-            )
+            _webide_debug(f"[WEB IDE] Output length: {len(output_val)}, content: {repr(output_val[:100])}\n")
             if images:
                 _webide_debug(f"[WEB IDE] Created images: {images}\n")
 
             return response
-        except Exception as e:
+        except Exception as e:  # pylint: disable=broad-exception-caught
             import traceback
 
             error_val = stderr_capture.getvalue()
@@ -769,13 +756,14 @@ print("add(7, 35) =")!
 print(sum)!
 shout("hello functions")!
 
-// 6) Reactive programming
-var count = 0!
-when count > 2 {
-   print("when triggered! count =", count)!
-}!
-count = 1!
-count = 3!   // triggers
+// 6) Reactive programming (commented out for web IDE)
+// var count = 0!
+// when count > 2 {
+//    print("when triggered! count =", count)!
+// }!
+// count = 1!
+// count = 3!   // triggers
+print("(Reactive demo skipped in web IDE)")!
 
 // 7) Async / Await
 async function greet_async() => {
@@ -810,7 +798,7 @@ const model = linear_regression xs, ys!
 print("linear_regression([0..4],[1,3,5,7,9]) [slope, intercept]:")!
 print(model)!
 
-const roots = quadratic_solve 1, -7, 12!
+const roots = quadratic_solve 1, sub 0, 7, 12!
 print("quadratic_solve(1, -7, 12) roots:")!
 print(roots)!
 
@@ -915,7 +903,7 @@ print "Drawing shapes..."!
 // Draw a big red circle
 canvas.circle 100, 100, 40, red!
 
-// Draw a blue rectangle  
+// Draw a blue rectangle
 canvas.rect 180, 50, 100, 80, blue!
 
 // Draw a green line
@@ -956,7 +944,7 @@ print "Previous:", previous x!`
                     tab.classList.add('active');
                 }
             });
-            
+
             // Update tab content
             const contents = document.querySelectorAll('.tab-content');
             contents.forEach(content => content.classList.remove('active'));
@@ -1011,7 +999,7 @@ print "Previous:", previous x!`
                 }
 
                 output.innerHTML = html;
-                
+
                 // Display graphics if any images were created
                 const graphics = document.getElementById('graphics');
                 console.log('Images in result:', result.images);
@@ -1186,9 +1174,9 @@ print "Previous:", previous x!`
 </body>
 </html>"""
 
-    def log_message(self, format, *args):
+    def log_message(self, fmt, *args):
         """Suppress default logging."""
-        pass
+        return None
 
 
 def run_web_ide(port=8080):
@@ -1218,5 +1206,5 @@ def run_web_ide(port=8080):
 
 
 if __name__ == "__main__":
-    port = int(sys.argv[1]) if len(sys.argv) > 1 else 8080
+    port = int(sys.argv[1]) if len(sys.argv) > 1 else 8080  # pylint: disable=redefined-outer-name
     run_web_ide(port)

@@ -8,14 +8,15 @@ proof-of-concept for an alternative modular architecture.
 """
 
 from typing import Optional, Type
+
+from gulfofmexico.builtin import GulfOfMexicoValue
+from gulfofmexico.context import ExecutionContext
 from gulfofmexico.handlers import StatementHandler
 from gulfofmexico.processor.syntax_tree import (
     CodeStatement,
-    VariableDeclaration,
     VariableAssignment,
+    VariableDeclaration,
 )
-from gulfofmexico.context import ExecutionContext
-from gulfofmexico.builtin import GulfOfMexicoValue
 
 
 class VariableDeclarationHandler(StatementHandler):
@@ -48,8 +49,8 @@ class VariableDeclarationHandler(StatementHandler):
         """
         # Import here to avoid circular dependencies
         from gulfofmexico.interpreter import (
-            evaluate_expression,
             declare_new_variable,
+            evaluate_expression,
         )
 
         # Type assertion for type checker
@@ -114,8 +115,8 @@ class VariableAssignmentHandler(StatementHandler):
         """
         # Import here to avoid circular dependencies
         from gulfofmexico.interpreter import (
-            evaluate_expression,
             assign_variable,
+            evaluate_expression,
         )
 
         # Type assertion for type checker

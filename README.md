@@ -106,9 +106,37 @@ pip install pytest
 pytest -q tests
 ```
 
+## 🧹 Linting
+
+Run code quality checks locally:
+
+```bash
+ruff check gulfofmexico scripts
+pylint gulfofmexico scripts
+```
+
+CI also runs these checks on pushes and pull requests.
+Configuration files: `pylintrc`, `ruff.toml`. CI fails on lint errors.
+
+**Pre-commit Hooks** (recommended):
+
+```bash
+# Install pre-commit
+pip install pre-commit
+
+# Install the git hook scripts
+pre-commit install
+
+# (optional) Run against all files
+pre-commit run --all-files
+```
+
+After installation, ruff, pylint, and other checks run automatically before each commit.
+
 ## 🛠️ CI
 
 GitHub Actions runs Python tests and builds the C++ compiler on push/PR (`.github/workflows/ci.yml`).
+It also includes a code-quality job for linting with `ruff` and `pylint`.
 ```
 
 ### Try Examples
@@ -333,7 +361,7 @@ config = LanguageConfig(name="MyLanguage")
 config.rename_keyword("if", "cuando")
 config.rename_keyword("function", "función")
 
-# Customize functions  
+# Customize functions
 config.rename_function("print", "imprimir")
 
 # Disable satirical features
@@ -426,7 +454,7 @@ class Person {
     this.name = name!
     this.age = age!
   }
-  
+
   function greet() {
     print("Hello, I'm " + this.name)!
   }
@@ -495,7 +523,7 @@ python tools/demos/demo_create_new_languages.py
 
 This creates 5 complete language variants:
 - **GulfLisp** - Lisp-like with parentheses
-- **GulfTurtle** - Logo/Turtle graphics  
+- **GulfTurtle** - Logo/Turtle graphics
 - **GulfQL** - SQL-like query language
 - **GulfASM** - Minimal assembly-like
 - Plus CRUD operations demonstration!

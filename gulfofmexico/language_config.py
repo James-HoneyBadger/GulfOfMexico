@@ -28,11 +28,12 @@ Usage:
 """
 
 from __future__ import annotations
+
 import json
-from pathlib import Path
-from typing import Any, Callable, Optional, Union
-from dataclasses import dataclass, field, asdict
 from copy import deepcopy
+from dataclasses import asdict, dataclass, field
+from pathlib import Path
+from typing import Any, Optional, Union
 
 # Optional YAML support
 try:
@@ -111,9 +112,7 @@ class ParsingConfig:
     function_call_end: str = ")"
 
     # Control flow syntax
-    if_then_separator: Optional[str] = (
-        None  # None means block-based, "then" for keyword
-    )
+    if_then_separator: Optional[str] = None  # None means block-based, "then" for keyword
     else_keyword: str = "else"
     elif_keyword: str = "elif"
 
@@ -189,9 +188,7 @@ class LanguageConfig:
     version: str = "1.0.0"
     description: str = "A customizable programming language"
     author: str = ""
-    target_interpreter: str = (
-        "python"  # Only affects Python interpreter, not C++ compiler
-    )
+    target_interpreter: str = "python"  # Only affects Python interpreter, not C++ compiler
 
     # Configuration sections
     keyword_mappings: dict[str, KeywordMapping] = field(default_factory=dict)
@@ -222,157 +219,75 @@ class LanguageConfig:
             "when": KeywordMapping("when", "when", "control", "Reactive programming"),
             "after": KeywordMapping("after", "after", "control", "Temporal execution"),
             # Functions
-            "function": KeywordMapping(
-                "function", "function", "function", "Function definition"
-            ),
+            "function": KeywordMapping("function", "function", "function", "Function definition"),
             "async": KeywordMapping("async", "async", "function", "Async function"),
             "await": KeywordMapping("await", "await", "function", "Await async result"),
             "return": KeywordMapping("return", "return", "function", "Return value"),
             # Variables
-            "const": KeywordMapping(
-                "const", "const", "variable", "Constant declaration"
-            ),
+            "const": KeywordMapping("const", "const", "variable", "Constant declaration"),
             "var": KeywordMapping("var", "var", "variable", "Variable declaration"),
             # Classes
             "class": KeywordMapping("class", "class", "oop", "Class definition"),
-            "className": KeywordMapping(
-                "className", "className", "oop", "Alternative class keyword"
-            ),
+            "className": KeywordMapping("className", "className", "oop", "Alternative class keyword"),
             # Special
             "delete": KeywordMapping("delete", "delete", "special", "Delete variable"),
-            "reverse": KeywordMapping(
-                "reverse", "reverse", "special", "Reverse operation"
-            ),
+            "reverse": KeywordMapping("reverse", "reverse", "special", "Reverse operation"),
             "export": KeywordMapping("export", "export", "module", "Export to file"),
             "import": KeywordMapping("import", "import", "module", "Import from file"),
-            "previous": KeywordMapping(
-                "previous", "previous", "special", "Previous value"
-            ),
+            "previous": KeywordMapping("previous", "previous", "special", "Previous value"),
             "next": KeywordMapping("next", "next", "special", "Next value"),
             # Error handling
             "try": KeywordMapping("try", "try", "error", "Try block"),
             "whatever": KeywordMapping("whatever", "whatever", "error", "Catch-all"),
             # Satirical - Procrastination
-            "later": KeywordMapping(
-                "later", "later", "satirical", "Execute later (maybe)"
-            ),
-            "eventually": KeywordMapping(
-                "eventually", "eventually", "satirical", "Execute eventually"
-            ),
-            "whenever": KeywordMapping(
-                "whenever", "whenever", "satirical", "Execute whenever"
-            ),
+            "later": KeywordMapping("later", "later", "satirical", "Execute later (maybe)"),
+            "eventually": KeywordMapping("eventually", "eventually", "satirical", "Execute eventually"),
+            "whenever": KeywordMapping("whenever", "whenever", "satirical", "Execute whenever"),
             # Satirical - Corporate
-            "synergize": KeywordMapping(
-                "synergize", "synergize", "satirical", "Corporate synergy"
-            ),
-            "leverage": KeywordMapping(
-                "leverage", "leverage", "satirical", "Leverage resources"
-            ),
-            "paradigm_shift": KeywordMapping(
-                "paradigm_shift", "paradigm_shift", "satirical", "Shift paradigm"
-            ),
-            "circle_back": KeywordMapping(
-                "circle_back", "circle_back", "satirical", "Circle back later"
-            ),
-            "touch_base": KeywordMapping(
-                "touch_base", "touch_base", "satirical", "Touch base"
-            ),
+            "synergize": KeywordMapping("synergize", "synergize", "satirical", "Corporate synergy"),
+            "leverage": KeywordMapping("leverage", "leverage", "satirical", "Leverage resources"),
+            "paradigm_shift": KeywordMapping("paradigm_shift", "paradigm_shift", "satirical", "Shift paradigm"),
+            "circle_back": KeywordMapping("circle_back", "circle_back", "satirical", "Circle back later"),
+            "touch_base": KeywordMapping("touch_base", "touch_base", "satirical", "Touch base"),
             # Satirical - Emotional
-            "happy": KeywordMapping(
-                "happy", "happy", "satirical", "Execute when happy"
-            ),
+            "happy": KeywordMapping("happy", "happy", "satirical", "Execute when happy"),
             "sad": KeywordMapping("sad", "sad", "satirical", "Execute when sad"),
-            "angry": KeywordMapping(
-                "angry", "angry", "satirical", "Execute when angry"
-            ),
-            "excited": KeywordMapping(
-                "excited", "excited", "satirical", "Execute when excited"
-            ),
-            "tired": KeywordMapping(
-                "tired", "tired", "satirical", "Execute when tired"
-            ),
+            "angry": KeywordMapping("angry", "angry", "satirical", "Execute when angry"),
+            "excited": KeywordMapping("excited", "excited", "satirical", "Execute when excited"),
+            "tired": KeywordMapping("tired", "tired", "satirical", "Execute when tired"),
             # Satirical - Superstitious
             "lucky": KeywordMapping("lucky", "lucky", "satirical", "Lucky execution"),
-            "unlucky": KeywordMapping(
-                "unlucky", "unlucky", "satirical", "Unlucky execution"
-            ),
-            "cross_fingers": KeywordMapping(
-                "cross_fingers", "cross_fingers", "satirical", "Cross fingers"
-            ),
-            "knock_on_wood": KeywordMapping(
-                "knock_on_wood", "knock_on_wood", "satirical", "Knock on wood"
-            ),
+            "unlucky": KeywordMapping("unlucky", "unlucky", "satirical", "Unlucky execution"),
+            "cross_fingers": KeywordMapping("cross_fingers", "cross_fingers", "satirical", "Cross fingers"),
+            "knock_on_wood": KeywordMapping("knock_on_wood", "knock_on_wood", "satirical", "Knock on wood"),
             # Satirical - Quantum/Blockchain/AI
-            "quantum": KeywordMapping(
-                "quantum", "quantum", "satirical", "Quantum computing"
-            ),
-            "blockchain": KeywordMapping(
-                "blockchain", "blockchain", "satirical", "Blockchain technology"
-            ),
-            "immutable_ledger": KeywordMapping(
-                "immutable_ledger", "immutable_ledger", "satirical", "Immutable ledger"
-            ),
-            "smart_contract": KeywordMapping(
-                "smart_contract", "smart_contract", "satirical", "Smart contract"
-            ),
+            "quantum": KeywordMapping("quantum", "quantum", "satirical", "Quantum computing"),
+            "blockchain": KeywordMapping("blockchain", "blockchain", "satirical", "Blockchain technology"),
+            "immutable_ledger": KeywordMapping("immutable_ledger", "immutable_ledger", "satirical", "Immutable ledger"),
+            "smart_contract": KeywordMapping("smart_contract", "smart_contract", "satirical", "Smart contract"),
             "mine": KeywordMapping("mine", "mine", "satirical", "Mine cryptocurrency"),
-            "deep_learning": KeywordMapping(
-                "deep_learning", "deep_learning", "satirical", "Deep learning"
-            ),
-            "neural_network": KeywordMapping(
-                "neural_network", "neural_network", "satirical", "Neural network"
-            ),
-            "ai_powered": KeywordMapping(
-                "ai_powered", "ai_powered", "satirical", "AI powered"
-            ),
+            "deep_learning": KeywordMapping("deep_learning", "deep_learning", "satirical", "Deep learning"),
+            "neural_network": KeywordMapping("neural_network", "neural_network", "satirical", "Neural network"),
+            "ai_powered": KeywordMapping("ai_powered", "ai_powered", "satirical", "AI powered"),
             # Satirical - Agile/DevOps/Startup
             "sprint": KeywordMapping("sprint", "sprint", "satirical", "Agile sprint"),
-            "standup": KeywordMapping(
-                "standup", "standup", "satirical", "Daily standup"
-            ),
+            "standup": KeywordMapping("standup", "standup", "satirical", "Daily standup"),
             "retro": KeywordMapping("retro", "retro", "satirical", "Retrospective"),
-            "burndown": KeywordMapping(
-                "burndown", "burndown", "satirical", "Burndown chart"
-            ),
-            "encrypt": KeywordMapping(
-                "encrypt", "encrypt", "satirical", "Encrypt data"
-            ),
-            "two_factor": KeywordMapping(
-                "two_factor", "two_factor", "satirical", "Two-factor auth"
-            ),
-            "penetration_test": KeywordMapping(
-                "penetration_test", "penetration_test", "satirical", "Pen test"
-            ),
-            "zero_trust": KeywordMapping(
-                "zero_trust", "zero_trust", "satirical", "Zero trust"
-            ),
-            "containerize": KeywordMapping(
-                "containerize", "containerize", "satirical", "Containerize app"
-            ),
-            "orchestrate": KeywordMapping(
-                "orchestrate", "orchestrate", "satirical", "Orchestrate services"
-            ),
-            "microservice": KeywordMapping(
-                "microservice", "microservice", "satirical", "Microservice"
-            ),
-            "kubernetes": KeywordMapping(
-                "kubernetes", "kubernetes", "satirical", "Kubernetes"
-            ),
+            "burndown": KeywordMapping("burndown", "burndown", "satirical", "Burndown chart"),
+            "encrypt": KeywordMapping("encrypt", "encrypt", "satirical", "Encrypt data"),
+            "two_factor": KeywordMapping("two_factor", "two_factor", "satirical", "Two-factor auth"),
+            "penetration_test": KeywordMapping("penetration_test", "penetration_test", "satirical", "Pen test"),
+            "zero_trust": KeywordMapping("zero_trust", "zero_trust", "satirical", "Zero trust"),
+            "containerize": KeywordMapping("containerize", "containerize", "satirical", "Containerize app"),
+            "orchestrate": KeywordMapping("orchestrate", "orchestrate", "satirical", "Orchestrate services"),
+            "microservice": KeywordMapping("microservice", "microservice", "satirical", "Microservice"),
+            "kubernetes": KeywordMapping("kubernetes", "kubernetes", "satirical", "Kubernetes"),
             "pivot": KeywordMapping("pivot", "pivot", "satirical", "Business pivot"),
-            "disrupt": KeywordMapping(
-                "disrupt", "disrupt", "satirical", "Disrupt industry"
-            ),
-            "unicorn": KeywordMapping(
-                "unicorn", "unicorn", "satirical", "Unicorn startup"
-            ),
-            "hockey_stick": KeywordMapping(
-                "hockey_stick", "hockey_stick", "satirical", "Hockey stick growth"
-            ),
+            "disrupt": KeywordMapping("disrupt", "disrupt", "satirical", "Disrupt industry"),
+            "unicorn": KeywordMapping("unicorn", "unicorn", "satirical", "Unicorn startup"),
+            "hockey_stick": KeywordMapping("hockey_stick", "hockey_stick", "satirical", "Hockey stick growth"),
             # Special features
-            "definitely_not": KeywordMapping(
-                "definitely_not", "definitely_not", "special", "Gaslighting"
-            ),
+            "definitely_not": KeywordMapping("definitely_not", "definitely_not", "special", "Gaslighting"),
         }
         self.keyword_mappings = default_keywords
 
@@ -384,24 +299,14 @@ class LanguageConfig:
             "read": FunctionConfig("read", 0, "builtin.db_read", "Read from stdin"),
             "write": FunctionConfig("write", 2, "builtin.db_write", "Write to file"),
             # Type conversions
-            "Number": FunctionConfig(
-                "Number", 1, "builtin.db_to_number", "Convert to number"
-            ),
-            "String": FunctionConfig(
-                "String", 1, "builtin.db_to_string", "Convert to string"
-            ),
-            "Boolean": FunctionConfig(
-                "Boolean", 1, "builtin.db_to_boolean", "Convert to boolean"
-            ),
+            "Number": FunctionConfig("Number", 1, "builtin.db_to_number", "Convert to number"),
+            "String": FunctionConfig("String", 1, "builtin.db_to_string", "Convert to string"),
+            "Boolean": FunctionConfig("Boolean", 1, "builtin.db_to_boolean", "Convert to boolean"),
             # Data structures
-            "List": FunctionConfig(
-                "List", -1, "builtin.GulfOfMexicoList", "Create list"
-            ),
+            "List": FunctionConfig("List", -1, "builtin.GulfOfMexicoList", "Create list"),
             "Map": FunctionConfig("Map", 0, "builtin.GulfOfMexicoMap", "Create map"),
             # Utilities
-            "sleep": FunctionConfig(
-                "sleep", 1, "builtin.db_sleep", "Sleep for seconds"
-            ),
+            "sleep": FunctionConfig("sleep", 1, "builtin.db_sleep", "Sleep for seconds"),
             "exit": FunctionConfig("exit", 0, "builtin.db_exit", "Exit program"),
             "use": FunctionConfig("use", 1, "builtin.db_use", "Create reactive signal"),
             "new": FunctionConfig("new", -1, "builtin.db_new", "Instantiate class"),
@@ -416,34 +321,22 @@ class LanguageConfig:
             "round": FunctionConfig("round", 1, "builtin.db_round", "Round to nearest"),
             "min": FunctionConfig("min", 2, "builtin.db_min", "Minimum of two values"),
             "max": FunctionConfig("max", 2, "builtin.db_max", "Maximum of two values"),
-            "random": FunctionConfig(
-                "random", 0, "builtin.db_random", "Random number [0,1)"
-            ),
+            "random": FunctionConfig("random", 0, "builtin.db_random", "Random number [0,1)"),
             # String functions
             "length": FunctionConfig("length", 1, "builtin.db_len", "Get length"),
             "split": FunctionConfig("split", 2, "builtin.db_split", "Split string"),
             "join": FunctionConfig("join", 2, "builtin.db_join", "Join list"),
-            "replace": FunctionConfig(
-                "replace", 3, "builtin.db_replace", "Replace substring"
-            ),
+            "replace": FunctionConfig("replace", 3, "builtin.db_replace", "Replace substring"),
             # List functions
             "push": FunctionConfig("push", 2, "builtin.db_list_push", "Add to end"),
             "pop": FunctionConfig("pop", 1, "builtin.db_list_pop", "Remove from end"),
             "slice": FunctionConfig("slice", 3, "builtin.db_slice", "Slice sequence"),
             "sort": FunctionConfig("sort", 1, "builtin.db_sort", "Sort list"),
-            "reverse_list": FunctionConfig(
-                "reverse_list", 1, "builtin.db_reverse_list", "Reverse list"
-            ),
+            "reverse_list": FunctionConfig("reverse_list", 1, "builtin.db_reverse_list", "Reverse list"),
             # Regex
-            "regex_match": FunctionConfig(
-                "regex_match", 2, "builtin.db_regex_match", "Match regex"
-            ),
-            "regex_findall": FunctionConfig(
-                "regex_findall", 2, "builtin.db_regex_findall", "Find all matches"
-            ),
-            "regex_replace": FunctionConfig(
-                "regex_replace", 3, "builtin.db_regex_replace", "Replace with regex"
-            ),
+            "regex_match": FunctionConfig("regex_match", 2, "builtin.db_regex_match", "Match regex"),
+            "regex_findall": FunctionConfig("regex_findall", 2, "builtin.db_regex_findall", "Find all matches"),
+            "regex_replace": FunctionConfig("regex_replace", 3, "builtin.db_regex_replace", "Replace with regex"),
         }
         self.builtin_functions = default_functions
 
@@ -496,9 +389,7 @@ class LanguageConfig:
 
         self.keyword_mappings[original].custom = new_name
 
-    def add_keyword(
-        self, name: str, category: str = "custom", description: str = ""
-    ) -> None:
+    def add_keyword(self, name: str, category: str = "custom", description: str = "") -> None:
         """Add a new custom keyword.
 
         Args:
@@ -526,9 +417,7 @@ class LanguageConfig:
         """Disable all satirical keywords (for serious mode)."""
         # Create list of satirical keywords to remove (avoid modifying dict during iteration)
         satirical_keywords = [
-            keyword
-            for keyword, mapping in self.keyword_mappings.items()
-            if mapping.category == "satirical"
+            keyword for keyword, mapping in self.keyword_mappings.items() if mapping.category == "satirical"
         ]
         for keyword in satirical_keywords:
             self.remove_keyword(keyword)
@@ -543,11 +432,7 @@ class LanguageConfig:
         Returns:
             List of keyword names in that category
         """
-        return [
-            kw
-            for kw, mapping in self.keyword_mappings.items()
-            if mapping.category == category
-        ]
+        return [kw for kw, mapping in self.keyword_mappings.items() if mapping.category == category]
 
     # === Function Management ===
 
@@ -566,9 +451,7 @@ class LanguageConfig:
             implementation: Python code or reference
             description: Function description
         """
-        self.builtin_functions[name] = FunctionConfig(
-            name, arity, implementation, description, True
-        )
+        self.builtin_functions[name] = FunctionConfig(name, arity, implementation, description, True)
 
     def rename_function(self, original: str, new_name: str) -> None:
         """Rename a built-in function.
@@ -618,9 +501,7 @@ class LanguageConfig:
 
     # === Operator Management ===
 
-    def add_operator(
-        self, symbol: str, precedence: int, associativity: str = "left"
-    ) -> None:
+    def add_operator(self, symbol: str, precedence: int, associativity: str = "left") -> None:
         """Add a custom operator.
 
         Args:
@@ -661,9 +542,7 @@ class LanguageConfig:
 
     # === Syntax Options ===
 
-    def set_array_indexing(
-        self, start_index: int, allow_fractional: bool = True
-    ) -> None:
+    def set_array_indexing(self, start_index: int, allow_fractional: bool = True) -> None:
         """Configure array indexing behavior.
 
         Args:
@@ -821,13 +700,9 @@ class LanguageConfig:
         # Check operator precedences
         for symbol, op in self.operators.items():
             if op.precedence < 0:
-                errors.append(
-                    f"Operator '{symbol}' has invalid precedence: {op.precedence}"
-                )
+                errors.append(f"Operator '{symbol}' has invalid precedence: {op.precedence}")
             if op.associativity not in ["left", "right", "none"]:
-                errors.append(
-                    f"Operator '{symbol}' has invalid associativity: {op.associativity}"
-                )
+                errors.append(f"Operator '{symbol}' has invalid associativity: {op.associativity}")
 
         return errors
 
@@ -878,19 +753,13 @@ class LanguageConfig:
             config.author = data["metadata"].get("author", config.author)
 
         if "keywords" in data:
-            config.keyword_mappings = {
-                k: KeywordMapping(**v) for k, v in data["keywords"].items()
-            }
+            config.keyword_mappings = {k: KeywordMapping(**v) for k, v in data["keywords"].items()}
 
         if "functions" in data:
-            config.builtin_functions = {
-                k: FunctionConfig(**v) for k, v in data["functions"].items()
-            }
+            config.builtin_functions = {k: FunctionConfig(**v) for k, v in data["functions"].items()}
 
         if "operators" in data:
-            config.operators = {
-                k: OperatorConfig(**v) for k, v in data["operators"].items()
-            }
+            config.operators = {k: OperatorConfig(**v) for k, v in data["operators"].items()}
 
         if "syntax_options" in data:
             config.syntax_options = SyntaxOptions(**data["syntax_options"])
@@ -901,9 +770,7 @@ class LanguageConfig:
         if "runtime" in data:
             config.debug_mode = data["runtime"].get("debug_mode", False)
             config.strict_mode = data["runtime"].get("strict_mode", False)
-            config.compatibility_mode = data["runtime"].get(
-                "compatibility_mode", "standard"
-            )
+            config.compatibility_mode = data["runtime"].get("compatibility_mode", "standard")
 
         return config
 
@@ -949,8 +816,7 @@ class LanguageConfig:
         is_yaml = filepath.suffix in [".yaml", ".yml"]
         if is_yaml and not YAML_AVAILABLE:
             raise ImportError(
-                "YAML support not available. Install with: pip install pyyaml\n"
-                "Or use JSON format instead."
+                "YAML support not available. Install with: pip install pyyaml\n" "Or use JSON format instead."
             )
 
         with open(filepath, "r") as f:
@@ -998,8 +864,7 @@ class LanguageConfig:
             else:
                 # Replace all keywords
                 self.keyword_mappings = {
-                    k: KeywordMapping(**v) if isinstance(v, dict) else v
-                    for k, v in updates["keywords"].items()
+                    k: KeywordMapping(**v) if isinstance(v, dict) else v for k, v in updates["keywords"].items()
                 }
 
         if "functions" in updates:
@@ -1011,8 +876,7 @@ class LanguageConfig:
                         self.builtin_functions[key] = value
             else:
                 self.builtin_functions = {
-                    k: FunctionConfig(**v) if isinstance(v, dict) else v
-                    for k, v in updates["functions"].items()
+                    k: FunctionConfig(**v) if isinstance(v, dict) else v for k, v in updates["functions"].items()
                 }
 
         if "operators" in updates:
@@ -1024,8 +888,7 @@ class LanguageConfig:
                         self.operators[key] = value
             else:
                 self.operators = {
-                    k: OperatorConfig(**v) if isinstance(v, dict) else v
-                    for k, v in updates["operators"].items()
+                    k: OperatorConfig(**v) if isinstance(v, dict) else v for k, v in updates["operators"].items()
                 }
 
         if "syntax_options" in updates:
@@ -1247,8 +1110,7 @@ class LanguageConfig:
         lines.append("|----------|--------|----------|-------------|")
         for original, mapping in sorted(self.keyword_mappings.items()):
             lines.append(
-                f"| `{mapping.original}` | `{mapping.custom}` | "
-                f"{mapping.category} | {mapping.description} |"
+                f"| `{mapping.original}` | `{mapping.custom}` | " f"{mapping.category} | {mapping.description} |"
             )
 
         lines.append("\n## Built-in Functions\n")
@@ -1257,10 +1119,7 @@ class LanguageConfig:
         for name, func in sorted(self.builtin_functions.items()):
             arity_str = "variadic" if func.arity == -1 else str(func.arity)
             enabled_str = "✓" if func.enabled else "✗"
-            lines.append(
-                f"| `{func.name}` | {arity_str} | "
-                f"{func.description} | {enabled_str} |"
-            )
+            lines.append(f"| `{func.name}` | {arity_str} | " f"{func.description} | {enabled_str} |")
 
         lines.append("\n## Syntax Options\n")
         lines.append("| Option | Value |")

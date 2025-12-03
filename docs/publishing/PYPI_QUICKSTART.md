@@ -40,7 +40,7 @@ gulfofmexico --help
 - **Name**: gulfofmexico
 - **Current Version**: 0.1.1
 - **PyPI URL**: https://pypi.org/project/gulfofmexico/
-- **Commands installed**: 
+- **Commands installed**:
   - `gulfofmexico` / `gom` - Main interpreter
   - `gomconfig` - Language configuration tool
   - `gom-ide` - Graphical IDE

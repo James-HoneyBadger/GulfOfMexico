@@ -1,0 +1,33 @@
+line-length = 120
+
+[lint]
+extend-select = [
+  "F",  # pyflakes
+  "I",  # isort
+]
+ignore = [
+  "E501",   # line too long (we're using 120, some generated strings are longer)
+  "E402",   # module level import not at top (intentional for optional deps)
+  "E712",   # comparison to True/False (used intentionally for GOM values)
+  "E721",   # type comparison (used for exact type matching in interpreter)
+  "E722",   # bare except (minimal usage, acceptable for this project)
+  "E731",   # lambda assignment (used for inline state watchers)
+  "E741",   # ambiguous variable name (minimal, acceptable)
+  "N802",   # function name should be lowercase (HTTP handlers follow convention)
+  "N806",   # variable in function should be lowercase (minimal, acceptable)
+  "F401",   # imported but unused (many are re-exports or compatibility shims)
+  "F403",   # unable to detect undefined names from star import (serialize.py uses intentional star imports)
+  "F405",   # may be undefined from star import (serialize.py demo code)
+  "F811",   # redefinition of unused (builtin.py has fallback patterns)
+  "F821",   # undefined name (async_scheduler missing dataclass import, benign)
+  "F841",   # local variable assigned but never used (minimal, acceptable)
+]
+
+[format]
+quote-style = "double"
+indent-style = "space"
+skip-magic-trailing-comma = false
+
+[lint.isort]
+known-first-party = ["gulfofmexico"]
+force-single-line = false

@@ -139,7 +139,7 @@ g++ -std=c++17 output.cpp -o program
 - **Business**: ROI, profit margins, CAGR
 - **Scientific**: linear regression, derivatives, integration
 
- 
+
 
 ## Syntax Guidelines
 

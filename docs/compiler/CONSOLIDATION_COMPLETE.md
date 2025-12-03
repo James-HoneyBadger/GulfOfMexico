@@ -243,7 +243,7 @@ Gulf of Mexico Compiler: FULLY OPERATIONAL!
 The Gulf of Mexico C++ compiler is **feature-complete** and **production-ready**. It successfully:
 
 ✨ **Matches** the Python interpreter's functionality 100%
-🚀 **Exceeds** performance by 10-100x  
+🚀 **Exceeds** performance by 10-100x
 📦 **Simplifies** deployment (single executable)
 🎭 **Preserves** the satirical charm of the language
 🔧 **Enables** high-performance applications

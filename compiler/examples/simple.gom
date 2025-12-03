@@ -1,4 +1,4 @@
-// Simple arithmetic test  
+// Simple arithmetic test
 const x = 10!
 const y = 20!
 const sum = x + y!

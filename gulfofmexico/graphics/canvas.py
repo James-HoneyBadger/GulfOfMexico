@@ -10,9 +10,10 @@ Features:
 """
 
 from __future__ import annotations
-from typing import Union, Optional, List, Tuple
-from dataclasses import dataclass, field
+
 import math
+from dataclasses import dataclass, field
+from typing import List, Optional, Tuple, Union
 
 try:
     from PIL import Image, ImageDraw, ImageFont
@@ -33,9 +34,7 @@ class GulfOfMexicoCanvas:
 
     width: int
     height: int
-    background: GulfOfMexicoColor = field(
-        default_factory=lambda: GulfOfMexicoColor(255, 255, 255)
-    )
+    background: GulfOfMexicoColor = field(default_factory=lambda: GulfOfMexicoColor(255, 255, 255))
     _image: Optional[Image.Image] = field(default=None, init=False, repr=False)
     _draw: Optional[ImageDraw.ImageDraw] = field(default=None, init=False, repr=False)
     _transform_stack: List[dict] = field(default_factory=list, init=False, repr=False)
@@ -59,9 +58,7 @@ class GulfOfMexicoCanvas:
         self._image = Image.new("RGBA", (self.width, self.height), bg_color)
         self._draw = ImageDraw.Draw(self._image)
 
-    def _convert_coords(
-        self, x: Union[int, float], y: Union[int, float]
-    ) -> Tuple[float, float]:
+    def _convert_coords(self, x: Union[int, float], y: Union[int, float]) -> Tuple[float, float]:
         """Convert from -1 based coords to PIL's 0-based coords."""
         # In Gulf of Mexico: (-1, -1) is top-left
         # In PIL: (0, 0) is top-left
@@ -273,9 +270,7 @@ class GulfOfMexicoCanvas:
         """Add rotation (in degrees) to current transform."""
         self._current_transform["rotate"] += angle
 
-    def scale(
-        self, sx: Union[int, float], sy: Optional[Union[int, float]] = None
-    ) -> None:
+    def scale(self, sx: Union[int, float], sy: Optional[Union[int, float]] = None) -> None:
         """Add scaling to current transform."""
         if sy is None:
             sy = sx
@@ -291,9 +286,7 @@ class GulfOfMexicoCanvas:
         """Display the canvas (opens in default image viewer)."""
         self._image.show()
 
-    def get_pixel(
-        self, x: Union[int, float], y: Union[int, float]
-    ) -> Tuple[int, int, int, int]:
+    def get_pixel(self, x: Union[int, float], y: Union[int, float]) -> Tuple[int, int, int, int]:
         """Get the RGBA value of a pixel."""
         px, py = self._convert_coords(x, y)
         px, py = int(px), int(py)

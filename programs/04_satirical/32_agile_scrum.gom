@@ -21,7 +21,7 @@ standup {
    const yesterday = "Attended meetings"!
    const today = "Will attend more meetings"!
    const blockers = "Need to refill coffee"!
-   
+
    print "Status update delivered!"!
    print "Actual work done: 0"!
 }!

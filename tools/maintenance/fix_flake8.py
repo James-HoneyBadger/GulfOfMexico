@@ -2,8 +2,8 @@
 """
 Automatically fix common Flake8 issues in the codebase.
 """
+
 import re
-import sys
 from pathlib import Path
 
 

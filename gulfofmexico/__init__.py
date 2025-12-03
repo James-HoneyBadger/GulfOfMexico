@@ -29,15 +29,15 @@ import sys
 from time import sleep
 from typing import Optional, Union
 
-from gulfofmexico.builtin import KEYWORDS, Name, GulfOfMexicoValue, Variable
-from gulfofmexico.processor.lexer import tokenize
-from gulfofmexico.processor.syntax_tree import generate_syntax_tree
+from gulfofmexico.builtin import KEYWORDS, GulfOfMexicoValue, Name, Variable
 from gulfofmexico.interpreter import (
     interpret_code_statements_main_wrapper,
     load_global_gulfofmexico_variables,
     load_globals,
     load_public_global_variables,
 )
+from gulfofmexico.processor.lexer import tokenize
+from gulfofmexico.processor.syntax_tree import generate_syntax_tree
 
 __all__ = ["run_file"]
 
@@ -57,9 +57,7 @@ def run_file(main_filename: str) -> None:
     """
 
     with open(main_filename, "r", encoding="utf-8") as f:
-        code_lines = (
-            f.readlines()
-        )  # split up into separate 'files' by finding which lines start with
+        code_lines = f.readlines()  # split up into separate 'files' by finding which lines start with
     # multiple equal signs
     files: list[tuple[Optional[str], str]] = []
     if any(matches := [re.match(r"=====.*", line) for line in code_lines]):
@@ -78,7 +76,7 @@ def run_file(main_filename: str) -> None:
     for filename, code in files:
         filename = filename or "__unnamed_file__"
         # Set global variables for interpreter
-        import gulfofmexico.interpreter as interpreter
+        import gulfofmexico.interpreter as interpreter  # pylint: disable=import-outside-toplevel
 
         interpreter.filename = filename
         interpreter.code = code
@@ -102,15 +100,13 @@ def run_file(main_filename: str) -> None:
         load_global_gulfofmexico_variables(namespaces)
         load_public_global_variables(namespaces)
         try:
-            interpret_code_statements_main_wrapper(
-                statements, namespaces, [], [{}], importable_names, exported_names
-            )
-        except Exception:
+            interpret_code_statements_main_wrapper(statements, namespaces, [], [{}], importable_names, exported_names)
+        except Exception:  # pylint: disable=broad-exception-caught
             # Flush any buffered debug logs so debugging information is available
             # when a program errors out. Re-raise after flushing to preserve
             # the original traceback behavior.
             try:
-                import gulfofmexico.builtin as _builtin
+                import gulfofmexico.builtin as _builtin  # pylint: disable=import-outside-toplevel
 
                 _builtin.flush_debug_logs()
             except Exception:
@@ -125,7 +121,7 @@ def run_file(main_filename: str) -> None:
 
     # Optional wait loop for interactive scenarios; disabled by default
     # to allow non-interactive executions (tests, scripts) to complete.
-    import os
+    import os  # pylint: disable=import-outside-toplevel
 
     if os.environ.get("GULFOFMEXICO_VERBOSE"):
         print(

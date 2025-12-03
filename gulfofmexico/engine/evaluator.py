@@ -7,12 +7,10 @@ for expression evaluation. This experimental evaluator demonstrates how caching
 could improve performance in a future refactoring.
 """
 
-from typing import Optional
-from functools import lru_cache
-from gulfofmexico.context import ExecutionContext
 from gulfofmexico.builtin import GulfOfMexicoValue
-from gulfofmexico.processor.expression_tree import ExpressionTreeNode
 from gulfofmexico.constants import EXPRESSION_CACHE_SIZE
+from gulfofmexico.context import ExecutionContext
+from gulfofmexico.processor.expression_tree import ExpressionTreeNode
 
 
 class ExpressionEvaluator:
@@ -69,11 +67,7 @@ class ExpressionEvaluator:
         )
 
         # Cache result if applicable
-        if (
-            self.enable_cache
-            and self._is_pure(expression)
-            and len(self._cache) < EXPRESSION_CACHE_SIZE
-        ):
+        if self.enable_cache and self._is_pure(expression) and len(self._cache) < EXPRESSION_CACHE_SIZE:
             cache_key = self._get_cache_key(expression, context)
             self._cache[cache_key] = result
 
@@ -99,9 +93,9 @@ class ExpressionEvaluator:
             True if expression is pure
         """
         from gulfofmexico.processor.expression_tree import (
-            ValueNode,
-            SingleOperatorNode,
             FunctionNode,
+            SingleOperatorNode,
+            ValueNode,
         )
 
         if isinstance(expression, ValueNode):
@@ -150,9 +144,8 @@ class ExpressionEvaluator:
             Hash of the tree structure
         """
         from gulfofmexico.processor.expression_tree import (
-            ValueNode,
             SingleOperatorNode,
-            FunctionNode,
+            ValueNode,
         )
 
         if isinstance(node, ValueNode):

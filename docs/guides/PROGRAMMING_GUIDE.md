@@ -72,7 +72,7 @@ if condition {
 Keep lines under 80-100 characters when possible. Break long expressions:
 
 ```gom
-const longCalculation 
+const longCalculation
    (value1 + value2) * multiplier ^ exponent!
 ```
 
@@ -265,11 +265,11 @@ One responsibility per class:
 // Good: Single purpose
 class Timer {
    var seconds 0!
-   
+
    function tick() => {
       seconds = seconds + 1!
    }!
-   
+
    function reset() => {
       seconds = 0!
    }!
@@ -295,11 +295,11 @@ Encapsulate operations inside methods:
 ```gom
 class BankAccount {
    var balance 0!
-   
+
    function deposit(amount) => {
       balance = balance + amount!
    }!
-   
+
    function withdraw(amount) => {
       if balance >= amount {
          balance = balance - amount!
@@ -322,11 +322,11 @@ class Engine {
 
 class Car {
    var engine null!
-   
+
    function initialize() => {
       engine = new Engine()!
    }!
-   
+
    function start() => {
       engine.start()!
    }!
@@ -603,10 +603,10 @@ No debugger, so use strategic prints:
 function calculate(x) => {
    const step1 x * 2!
    print("step1: ${step1}")!
-   
+
    const step2 step1 + 10!
    print("step2: ${step2}")!
-   
+
    return step2!
 }!
 ```
@@ -684,7 +684,7 @@ const b process2(a)!
 ```gom
 class StateMachine {
    var state "idle"!
-   
+
    function transition(newState) => {
       print("Transitioning: ${state} -> ${newState}")!
       state = newState!
@@ -721,12 +721,12 @@ class ConfigBuilder {
    var host "localhost"!
    var port 8080!
    var debug false!
-   
+
    function setHost(h) => {
       host = h!
       return this!
    }!
-   
+
    function setPort(p) => {
       port = p!
       return this!

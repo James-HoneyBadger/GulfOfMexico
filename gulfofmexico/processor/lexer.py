@@ -22,9 +22,10 @@ Inspired by: https://craftinginterpreters.com/scanning.html
 """
 
 from __future__ import annotations
+
 from typing import Optional
 
-from gulfofmexico.base import Token, TokenType, ALPH_NUMS, raise_error_at_line
+from gulfofmexico.base import ALPH_NUMS, Token, TokenType, raise_error_at_line
 
 
 def add_to_tokens(
@@ -34,9 +35,7 @@ def add_to_tokens(
     token: TokenType,
     value: Optional[str] = None,
 ):
-    token_list.append(
-        Token(token, value if value is not None else token.value, line, col)
-    )
+    token_list.append(Token(token, value if value is not None else token.value, line, col))
 
 
 def get_effective_whitespace_value(char: str) -> str:
@@ -66,10 +65,7 @@ def is_matching_pair(quote_value: str) -> bool:
     return False
 
 
-def get_string_token(
-    code: str, curr: int, filename: str, error_line: int
-) -> tuple[int, str]:
-
+def get_string_token(code: str, curr: int, filename: str, error_line: int) -> tuple[int, str]:
     """
     Scans the code for the shortest possible string and returns it.
     Returns as soon as a pair of quote groups is found that is equal in terms of quote count on both sides.
@@ -142,9 +138,7 @@ def tokenize(filename: str, code: str) -> list[Token]:
                 if len(value) == 1:
                     add_to_tokens(tokens, line_count, curr - start, TokenType.SEMICOLON)
                 else:
-                    add_to_tokens(
-                        tokens, line_count, curr - start, TokenType.NOT_EQUAL, value
-                    )
+                    add_to_tokens(tokens, line_count, curr - start, TokenType.NOT_EQUAL, value)
             case ",":
                 add_to_tokens(tokens, line_count, curr - start, TokenType.COMMA)
             case "+":
@@ -152,9 +146,7 @@ def tokenize(filename: str, code: str) -> list[Token]:
                     add_to_tokens(tokens, line_count, curr - start, TokenType.INCREMENT)
                     curr += 1
                 else:
-                    add_to_tokens(
-                        tokens, line_count, curr - start, TokenType.ADD
-                    )  # YOU NEVER SAID I HAD TO DO +=
+                    add_to_tokens(tokens, line_count, curr - start, TokenType.ADD)  # YOU NEVER SAID I HAD TO DO +=
             case "-":
                 if code[curr + 1] == "-":
                     add_to_tokens(tokens, line_count, curr - start, TokenType.DECREMENT)
@@ -176,19 +168,13 @@ def tokenize(filename: str, code: str) -> list[Token]:
                 add_to_tokens(tokens, line_count, curr - start, TokenType.CARROT)
             case ">":
                 if code[curr + 1] == "=":
-                    add_to_tokens(
-                        tokens, line_count, curr - start, TokenType.GREATER_EQUAL
-                    )
+                    add_to_tokens(tokens, line_count, curr - start, TokenType.GREATER_EQUAL)
                     curr += 1
                 else:
-                    add_to_tokens(
-                        tokens, line_count, curr - start, TokenType.GREATER_THAN
-                    )
+                    add_to_tokens(tokens, line_count, curr - start, TokenType.GREATER_THAN)
             case "<":
                 if code[curr + 1] == "=":
-                    add_to_tokens(
-                        tokens, line_count, curr - start, TokenType.LESS_EQUAL
-                    )
+                    add_to_tokens(tokens, line_count, curr - start, TokenType.LESS_EQUAL)
                     curr += 1
                 else:
                     add_to_tokens(tokens, line_count, curr - start, TokenType.LESS_THAN)
@@ -210,46 +196,32 @@ def tokenize(filename: str, code: str) -> list[Token]:
                         line_count,
                         "User is too confused. Aborting due to trust issues.",
                     )  # heheheheheheh
-                add_to_tokens(
-                    tokens, line_count, curr - start, TokenType.QUESTION, value
-                )
+                add_to_tokens(tokens, line_count, curr - start, TokenType.QUESTION, value)
             case "=":
                 value = "="
                 if code[curr + 1] == ">":
                     curr += 1
-                    add_to_tokens(
-                        tokens, line_count, curr - start, TokenType.FUNC_POINT
-                    )
+                    add_to_tokens(tokens, line_count, curr - start, TokenType.FUNC_POINT)
                 else:
                     while code[curr + 1] == "=":
                         value += "="
                         curr += 1
-                    add_to_tokens(
-                        tokens, line_count, curr - start, TokenType.EQUAL, value
-                    )
+                    add_to_tokens(tokens, line_count, curr - start, TokenType.EQUAL, value)
             case '"' | "'":
                 curr, value = get_string_token(code, curr, filename, line_count)
                 add_to_tokens(tokens, line_count, curr - start, TokenType.STRING, value)
             case " " | "\t" | "(" | ")":
                 if code[curr] == "(" and curr + 1 < len(code) and code[curr + 1] == ")":
-                    add_to_tokens(
-                        tokens, line_count, curr - start, TokenType.WHITESPACE, ""
-                    )
-                    add_to_tokens(
-                        tokens, line_count, curr - start, TokenType.NAME, ""
-                    )  # please please please work
-                    add_to_tokens(
-                        tokens, line_count, curr - start, TokenType.WHITESPACE, ""
-                    )
+                    add_to_tokens(tokens, line_count, curr - start, TokenType.WHITESPACE, "")
+                    add_to_tokens(tokens, line_count, curr - start, TokenType.NAME, "")  # please please please work
+                    add_to_tokens(tokens, line_count, curr - start, TokenType.WHITESPACE, "")
                     curr += 1
                 else:
                     value = get_effective_whitespace_value(code[curr])
                     while curr + 1 < len(code) and code[curr + 1] in " ()\t":
                         value += get_effective_whitespace_value(code[curr + 1])
                         curr += 1
-                    add_to_tokens(
-                        tokens, line_count, curr - start, TokenType.WHITESPACE, value
-                    )
+                    add_to_tokens(tokens, line_count, curr - start, TokenType.WHITESPACE, value)
             case c:
                 value = c
                 while code[curr + 1] in ALPH_NUMS:

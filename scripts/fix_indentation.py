@@ -1,7 +1,6 @@
 #!/usr/bin/env python3
 """Fix indentation in all .gom files to use multiples of 3 spaces."""
 
-import re
 from pathlib import Path
 
 

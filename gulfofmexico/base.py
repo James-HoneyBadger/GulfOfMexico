@@ -27,9 +27,9 @@ Color Codes:
 
 from __future__ import annotations
 
+from dataclasses import dataclass, field
 from enum import Enum
 from typing import NoReturn, Optional
-from dataclasses import dataclass, field
 
 ALPH_NUMS = set("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789_.")
 
@@ -71,9 +71,7 @@ def debug_print_no_token(filename: str, message: str) -> None:
     print("\n", debug_string, "\n", sep="")
 
 
-def raise_error_at_token(
-    filename: str, code: str, message: str, token: Token
-) -> NoReturn:
+def raise_error_at_token(filename: str, code: str, message: str, token: Token) -> NoReturn:
     if not code:  # adjust for repl-called code
         raise InterpretationError(f"\n\033[31m{message}\033[39m\n")
     line = token.line
@@ -171,7 +169,6 @@ STR_TO_OPERATOR = {op.value: op for op in OperatorType}
 # 3 weeks later, i am very glad i made a class for this
 @dataclass(unsafe_hash=True)
 class Token:
-
     type: TokenType
     value: str
     line: int = field(hash=False)

@@ -434,11 +434,11 @@ Functions without explicit `return` return nothing (implicitly).
 class ClassName {
    var field1 initial_value!
    var field2 initial_value!
-   
+
    function method1() => {
       // body
    }!
-   
+
    function method2(param) => {
       // body
    }!
@@ -461,7 +461,7 @@ If a class defines an `init` method, you can pass arguments during instantiation
 class Person {
    var name = "Unknown"!
    var age = 0!
-   
+
    function init(n, a) => {
       name = n!
       age = a!
@@ -488,11 +488,11 @@ obj.method1()!
 ```gom
 class Counter {
    var count 0!
-   
+
    function increment() => {
       count = count + 1!
    }!
-   
+
    function getValue() => {
       return count!
    }!
@@ -794,19 +794,19 @@ Simplified grammar notation:
 ```
 Program       := FileSection* Statement*
 FileSection   := "=====" Identifier "=====" Statement*
-Statement     := Declaration | Assignment | FunctionCall | 
-                 IfStmt | WhenStmt | AfterStmt | 
-                 ClassDecl | FunctionDecl | Return | 
+Statement     := Declaration | Assignment | FunctionCall |
+                 IfStmt | WhenStmt | AfterStmt |
+                 ClassDecl | FunctionDecl | Return |
                  Import | Export | Delete "!"
-                 
+
 Declaration   := ("const" | "var" | "const var") Identifier Expression "!"
 Assignment    := LValue "=" Expression "!"
 IfStmt        := "if" Expression "{" Statement* "}"
 WhenStmt      := "when" Expression "{" Statement* "}"
 AfterStmt     := "after" "<" Number ">" "{" Statement* "}"
 
-Expression    := Literal | Identifier | BinaryOp | UnaryOp | 
-                 FunctionCall | ArrayAccess | MemberAccess | 
+Expression    := Literal | Identifier | BinaryOp | UnaryOp |
+                 FunctionCall | ArrayAccess | MemberAccess |
                  StringInterpolation | ArrayLiteral
 ```
 

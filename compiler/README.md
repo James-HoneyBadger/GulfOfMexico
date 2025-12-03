@@ -117,7 +117,7 @@ GOM values are represented by the `GomValue` class:
 ```cpp
 class GomValue {
     std::variant<double, std::string, bool, std::vector<GomValue>> data;
-    
+
     double as_number() const;
     std::string as_string() const;
     bool as_bool() const;
@@ -186,7 +186,7 @@ done
 
 ## Performance
 
-The compiler generates straightforward C++ code without optimization.  
+The compiler generates straightforward C++ code without optimization.
 For production use, compile generated code with optimization flags:
 
 ```bash
@@ -195,7 +195,7 @@ g++ -std=c++17 -O3 output.cpp -o program
 
 ## Contributing
 
-This is a prototype compiler demonstrating feasibility of compiling GOM to C++.  
+This is a prototype compiler demonstrating feasibility of compiling GOM to C++.
 For the reference implementation, see the Python interpreter in the parent directory.
 
 ## License

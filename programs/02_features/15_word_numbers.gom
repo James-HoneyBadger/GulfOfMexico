@@ -20,4 +20,3 @@ const myFortyTwo = forty two!
 print "twenty = ${myTwenty}"!
 print "thirty = ${myThirty}"!
 print "forty + two = ${myFortyTwo}"!
-

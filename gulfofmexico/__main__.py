@@ -52,11 +52,19 @@ def _run_inline(code: str, show_tb: bool) -> int:
     Returns:
         Exit code (0 for success, 1 for error)
     """
-    import gulfofmexico.interpreter as interpreter
-    from gulfofmexico.processor.lexer import tokenize
-    from gulfofmexico.processor.syntax_tree import generate_syntax_tree
-    from gulfofmexico.builtin import KEYWORDS, Name, GulfOfMexicoValue, Variable
-    from typing import Union
+    from typing import Union  # pylint: disable=import-outside-toplevel
+
+    import gulfofmexico.interpreter as interpreter  # pylint: disable=import-outside-toplevel
+    from gulfofmexico.builtin import (  # pylint: disable=import-outside-toplevel
+        KEYWORDS,
+        GulfOfMexicoValue,
+        Name,
+        Variable,
+    )
+    from gulfofmexico.processor.lexer import tokenize  # pylint: disable=import-outside-toplevel
+    from gulfofmexico.processor.syntax_tree import (
+        generate_syntax_tree,  # pylint: disable=import-outside-toplevel
+    )
 
     try:
         filename = "__inline__"
@@ -92,7 +100,7 @@ def _run_inline(code: str, show_tb: bool) -> int:
             exported_names,
         )
         return 0
-    except Exception:
+    except Exception:  # pylint: disable=broad-exception-caught
         if show_tb:
             raise
         print("Error during execution.", file=sys.stderr)
@@ -133,7 +141,7 @@ def _main(argv: Optional[list[str]] = None) -> int:
     if ns.inline_code is not None:
         try:
             return _run_inline(ns.inline_code, ns.show_traceback)
-        except Exception:
+        except Exception:  # pylint: disable=broad-exception-caught
             if ns.show_traceback:
                 raise
             return 1
@@ -143,7 +151,7 @@ def _main(argv: Optional[list[str]] = None) -> int:
         try:
             run_file(ns.file)
             return 0
-        except Exception:
+        except Exception:  # pylint: disable=broad-exception-caught
             if ns.show_traceback:
                 raise
             return 1
@@ -151,7 +159,7 @@ def _main(argv: Optional[list[str]] = None) -> int:
     # Default: REPL
     try:
         return repl_main([])
-    except Exception:
+    except Exception:  # pylint: disable=broad-exception-caught
         if ns.show_traceback:
             raise
         return 1

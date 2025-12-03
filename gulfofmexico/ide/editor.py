@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from gulfofmexico.ide.qt_compat import Qt, QWidget, QTextEdit
+from gulfofmexico.ide.qt_compat import Qt, QTextEdit, QWidget
 
 try:
     from PySide6.QtCore import QRect, QSize
@@ -58,9 +58,7 @@ class CodeEditor(QPlainTextEdit):
     def resizeEvent(self, event):  # noqa: N802
         super().resizeEvent(event)
         cr = self.contentsRect()
-        self._line_area.setGeometry(
-            QRect(cr.left(), cr.top(), self.line_number_area_width(), cr.height())
-        )
+        self._line_area.setGeometry(QRect(cr.left(), cr.top(), self.line_number_area_width(), cr.height()))
 
     def line_number_area_paint_event(self, event):
         painter = QPainter(self._line_area)
@@ -68,9 +66,7 @@ class CodeEditor(QPlainTextEdit):
 
         block = self.firstVisibleBlock()
         block_number = block.blockNumber()
-        top = int(
-            self.blockBoundingGeometry(block).translated(self.contentOffset()).top()
-        )
+        top = int(self.blockBoundingGeometry(block).translated(self.contentOffset()).top())
         bottom = top + int(self.blockBoundingRect(block).height())
 
         while block.isValid() and top <= event.rect().bottom():

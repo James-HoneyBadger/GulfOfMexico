@@ -31,7 +31,7 @@ Output:
 ```
 Available Presets:
   python_like    - Python-style syntax
-  js_like        - JavaScript-style syntax  
+  js_like        - JavaScript-style syntax
   serious        - No satirical features
   minimal        - Teaching mode (6 keywords, 5 functions)
   spanish        - Spanish keywords

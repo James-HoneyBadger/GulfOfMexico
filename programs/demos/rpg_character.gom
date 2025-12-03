@@ -5,17 +5,17 @@ class Character {
    var health = 100!
    var mana = 50!
    var level = 1!
-   
+
    function takeDamage(damage) => {
       health = health - damage!
       print "${name} took ${damage} damage! Health: ${health}"!
    }!
-   
+
    function heal(amount) => {
       health = health + amount!
       print "${name} healed ${amount}. Health: ${health}"!
    }!
-   
+
    function castSpell(cost) => {
       if mana > cost {
          mana = mana - cost!
@@ -25,7 +25,7 @@ class Character {
       print "${name} not enough mana!"!
       return false!
    }!
-   
+
    function levelUp() => {
       level = level + 1!
       health = health + 20!

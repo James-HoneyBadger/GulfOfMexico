@@ -48,7 +48,7 @@ This directory contains example programs demonstrating all features of the Gulf 
   - `later {}` - 50% chance of execution
   - `eventually {}` - 75% chance
   - `whenever {}` - 90% chance
-  
+
   Run multiple times to see probabilistic behavior!
 
 #### Corporate Speak 💼
@@ -86,7 +86,7 @@ This directory contains example programs demonstrating all features of the Gulf 
   - `quantum x [1,2,3]` - Variables in superposition
   - `observe("x")` - Collapse wavefunction
   - `quantum uncertain maybe` - True/false superposition
-  
+
   Run multiple times to see different quantum collapses!
 
 #### Time Travel Programming ⏰
@@ -165,7 +165,7 @@ Gulf of Mexico is not just a programming language - it's a satirical commentary 
 - Quantum mechanics and temporal paradoxes
 - The importance of not taking code too seriously
 
-**Remember**: 
+**Remember**:
 - If your code doesn't have feelings, is it even alive? 😊
 - Reality is just a probabilistic wavefunction ⚛️
 - Time is an illusion, and so are bugs ⏰

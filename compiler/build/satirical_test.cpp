@@ -10,27 +10,27 @@
 class GomValue {
 public:
     std::variant<double, std::string, bool, std::vector<GomValue>> data;
-    
+
     GomValue() : data(0.0) {}
     GomValue(double d) : data(d) {}
     GomValue(const std::string& s) : data(s) {}
     GomValue(bool b) : data(b) {}
     GomValue(const std::vector<GomValue>& v) : data(v) {}
-    
+
     double as_number() const {
         if (std::holds_alternative<double>(data)) return std::get<double>(data);
         if (std::holds_alternative<bool>(data)) return std::get<bool>(data) ? 1.0 : 0.0;
         if (std::holds_alternative<std::string>(data)) return std::stod(std::get<std::string>(data));
         return 0.0;
     }
-    
+
     std::string as_string() const {
         if (std::holds_alternative<std::string>(data)) return std::get<std::string>(data);
         if (std::holds_alternative<double>(data)) return std::to_string(std::get<double>(data));
         if (std::holds_alternative<bool>(data)) return std::get<bool>(data) ? "true" : "false";
         return "undefined";
     }
-    
+
     bool as_bool() const {
         if (std::holds_alternative<bool>(data)) return std::get<bool>(data);
         if (std::holds_alternative<double>(data)) return std::get<double>(data) != 0.0;

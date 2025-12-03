@@ -29,7 +29,8 @@ Reality:
 """
 
 from abc import ABC, abstractmethod
-from typing import Optional, Callable
+from typing import Callable, Optional
+
 from gulfofmexico.builtin import GulfOfMexicoValue
 from gulfofmexico.handlers import StatementHandler
 
@@ -54,7 +55,7 @@ class Plugin(ABC):
     @abstractmethod
     def name(self) -> str:
         """Plugin identifier name."""
-        pass
+        raise NotImplementedError
 
     @property
     @abstractmethod
@@ -64,7 +65,7 @@ class Plugin(ABC):
         Returns:
             Version string (e.g., "1.0.0")
         """
-        pass
+        raise NotImplementedError
 
     @property
     def description(self) -> str:
@@ -248,11 +249,13 @@ class ExamplePlugin(Plugin):
         self,
     ) -> dict[str, Callable[..., GulfOfMexicoValue]]:
         """Return custom built-in functions."""
-        from gulfofmexico.builtin import GulfOfMexicoString
+        from gulfofmexico.builtin import (
+            GulfOfMexicoString,  # pylint: disable=import-outside-toplevel
+        )
 
         def hello(name: GulfOfMexicoValue) -> GulfOfMexicoString:
             """Custom hello function."""
-            from gulfofmexico.builtin import db_to_string
+            from gulfofmexico.builtin import db_to_string  # pylint: disable=import-outside-toplevel
 
             name_str = db_to_string(name).value
             return GulfOfMexicoString(f"Hello from plugin, {name_str}!")
@@ -273,14 +276,14 @@ if __name__ == "__main__":
     manager = PluginManager()
 
     # Register example plugin
-    plugin = ExamplePlugin()
+    plugin = ExamplePlugin()  # pylint: disable=redefined-outer-name
     manager.register(plugin)
 
     # List plugins
     manager.list_plugins()
 
     # Get built-in functions
-    functions = manager.get_all_builtin_functions()
+    functions = manager.get_all_builtin_functions()  # pylint: disable=redefined-outer-name
     print(f"\nAvailable functions: {list(functions.keys())}")
 
     # Unregister plugin

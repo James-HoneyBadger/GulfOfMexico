@@ -32,7 +32,7 @@ unicorn {
    const valuation = 1000000000!
    const actual_revenue = 127!
    const burn_rate = 500000!
-   
+
    print "Valuation: $${valuation}"!
    print "Revenue: $${actual_revenue}/month"!
    print "Burn rate: $${burn_rate}/day"!
@@ -48,7 +48,7 @@ hockey_stick {
    const month2_users = 15!
    const month3_users = 12!
    const month4_users = 8!
-   
+
    print "Growth trajectory: Definitely hockey stick!"!
    print "(If you squint and turn the chart upside down)"!
 }!

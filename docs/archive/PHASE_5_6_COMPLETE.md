@@ -31,7 +31,7 @@ Successfully implemented Map/Dictionary support and a comprehensive library of 3
 #### Testing
 ```
 ✅ Map() creates empty map
-✅ Array access with positive indices  
+✅ Array access with positive indices
 ✅ Array access with negative indices (-1 indexing)
 ✅ Array printing formatted correctly
 ```

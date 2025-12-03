@@ -26,7 +26,7 @@ sad {
    print "Something went wrong earlier :("!
 }
 
-// Angry mode - would execute if there were 3+ errors  
+// Angry mode - would execute if there were 3+ errors
 angry {
    print "THIS IS UNACCEPTABLE!!!"!
    print "RAGE MODE ACTIVATED!"!

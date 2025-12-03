@@ -191,4 +191,3 @@ CMakeFiles/gomcc.dir/clean:
 CMakeFiles/gomcc.dir/depend:
 	cd /home/james/GulfOfMexico/compiler/build_ci && $(CMAKE_COMMAND) -E cmake_depends "Unix Makefiles" /home/james/GulfOfMexico/compiler /home/james/GulfOfMexico/compiler /home/james/GulfOfMexico/compiler/build_ci /home/james/GulfOfMexico/compiler/build_ci /home/james/GulfOfMexico/compiler/build_ci/CMakeFiles/gomcc.dir/DependInfo.cmake "--color=$(COLOR)" gomcc
 .PHONY : CMakeFiles/gomcc.dir/depend
-

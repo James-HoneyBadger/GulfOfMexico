@@ -9,26 +9,26 @@ CodeGenerator::CodeGenerator() : indentLevel(0) {}
 std::string CodeGenerator::generate(const Program& program) {
     code.str("");
     code.clear();
-    
+
     // Generate includes and runtime
     emit(generateRuntimeIncludes());
     emit("\n");
     emit(generateRuntimeCode());
     emit("\n");
-    
+
     // Generate main function start
     emitLine("int main() {");
     indentLevel++;
-    
+
     // Generate all statements
     for (const auto& stmt : program.statements) {
         generateNode(stmt.get());
     }
-    
+
     // Generate main function end
     indentLevel--;
     emitLine("}");
-    
+
     return code.str();
 }
 
@@ -131,21 +131,21 @@ void CodeGenerator::generateAssignment(const Assignment* node) {
 void CodeGenerator::generateFunctionDef(const FunctionDef* node) {
     indent();
     emit("auto " + node->name + " = [&](");
-    
+
     // Parameters
     for (size_t i = 0; i < node->params.size(); i++) {
         emit("GomValue " + node->params[i]);
         if (i < node->params.size() - 1) emit(", ");
     }
-    
+
     emit(") -> GomValue {\n");
     indentLevel++;
-    
+
     // Body
     for (const auto& stmt : node->body) {
         generateStatement(stmt.get());
     }
-    
+
     indentLevel--;
     indent();
     emit("};\n");
@@ -160,13 +160,13 @@ void CodeGenerator::generateIfStatement(const IfStatement* node) {
     emit("if (gom_to_bool(");
     generateExpression(node->condition.get());
     emit(")) {\n");
-    
+
     indentLevel++;
     for (const auto& stmt : node->thenBranch) {
         generateStatement(stmt.get());
     }
     indentLevel--;
-    
+
     indent();
     emit("}\n");
 }
@@ -207,7 +207,7 @@ void CodeGenerator::generateFunctionCall(const FunctionCall* node) {
         "roi", "profit_margin", "cagr",
         "linear_regression", "quadratic_solve"
     };
-    
+
     if (node->name == "print") {
         emit("gom_print(");
         if (!node->args.empty()) {
@@ -277,14 +277,14 @@ std::string CodeGenerator::generateRuntimeCode() {
 class GomValue {
 public:
     std::variant<double, std::string, bool, std::vector<GomValue>, std::map<std::string, GomValue>> data;
-    
+
     GomValue() : data(0.0) {}
     GomValue(double d) : data(d) {}
     GomValue(const std::string& s) : data(s) {}
     GomValue(bool b) : data(b) {}
     GomValue(const std::vector<GomValue>& v) : data(v) {}
     GomValue(const std::map<std::string, GomValue>& m) : data(m) {}
-    
+
     double as_number() const {
         if (std::holds_alternative<double>(data)) return std::get<double>(data);
         if (std::holds_alternative<bool>(data)) return std::get<bool>(data) ? 1.0 : 0.0;
@@ -297,7 +297,7 @@ public:
         }
         return 0.0;
     }
-    
+
     std::string as_string() const {
         if (std::holds_alternative<std::string>(data)) return std::get<std::string>(data);
         if (std::holds_alternative<double>(data)) return std::to_string(std::get<double>(data));
@@ -317,7 +317,7 @@ public:
         }
         return "undefined";
     }
-    
+
     bool as_bool() const {
         if (std::holds_alternative<bool>(data)) return std::get<bool>(data);
         if (std::holds_alternative<double>(data)) return std::get<double>(data) != 0.0;
@@ -407,8 +407,8 @@ GomValue gom_round(const GomValue& v) { return GomValue(std::round(v.as_number()
 GomValue gom_log(const GomValue& v) { return GomValue(std::log(v.as_number())); }
 GomValue gom_log10(const GomValue& v) { return GomValue(std::log10(v.as_number())); }
 GomValue gom_exp(const GomValue& v) { return GomValue(std::exp(v.as_number())); }
-GomValue gom_pow(const GomValue& base, const GomValue& exp) { 
-    return GomValue(std::pow(base.as_number(), exp.as_number())); 
+GomValue gom_pow(const GomValue& base, const GomValue& exp) {
+    return GomValue(std::pow(base.as_number(), exp.as_number()));
 }
 
 // Statistical functions
@@ -439,7 +439,7 @@ GomValue gom_stdev(const GomValue& list) {
     if (!std::holds_alternative<std::vector<GomValue>>(list.data)) return GomValue(0.0);
     const auto& vec = std::get<std::vector<GomValue>>(list.data);
     if (vec.size() < 2) return GomValue(0.0);
-    
+
     double mean = gom_mean(list).as_number();
     double sum_sq_diff = 0.0;
     for (const auto& v : vec) {
@@ -487,7 +487,7 @@ GomValue gom_sum_list(const GomValue& list) {
 }
 
 // Financial functions
-GomValue gom_compound_interest(const GomValue& principal, const GomValue& rate, 
+GomValue gom_compound_interest(const GomValue& principal, const GomValue& rate,
                                const GomValue& time, const GomValue& n) {
     double p = principal.as_number();
     double r = rate.as_number();
@@ -542,14 +542,14 @@ GomValue gom_linear_regression(const GomValue& x_list, const GomValue& y_list) {
         !std::holds_alternative<std::vector<GomValue>>(y_list.data)) {
         return GomValue(std::vector<GomValue>{GomValue(0.0), GomValue(0.0)});
     }
-    
+
     const auto& x_vec = std::get<std::vector<GomValue>>(x_list.data);
     const auto& y_vec = std::get<std::vector<GomValue>>(y_list.data);
-    
+
     if (x_vec.size() != y_vec.size() || x_vec.size() < 2) {
         return GomValue(std::vector<GomValue>{GomValue(0.0), GomValue(0.0)});
     }
-    
+
     size_t n = x_vec.size();
     double x_mean = 0.0, y_mean = 0.0;
     for (size_t i = 0; i < n; i++) {
@@ -558,7 +558,7 @@ GomValue gom_linear_regression(const GomValue& x_list, const GomValue& y_list) {
     }
     x_mean /= n;
     y_mean /= n;
-    
+
     double numerator = 0.0, denominator = 0.0;
     for (size_t i = 0; i < n; i++) {
         double x_diff = x_vec[i].as_number() - x_mean;
@@ -566,14 +566,14 @@ GomValue gom_linear_regression(const GomValue& x_list, const GomValue& y_list) {
         numerator += x_diff * y_diff;
         denominator += x_diff * x_diff;
     }
-    
+
     if (denominator == 0) {
         return GomValue(std::vector<GomValue>{GomValue(0.0), GomValue(0.0)});
     }
-    
+
     double slope = numerator / denominator;
     double intercept = y_mean - slope * x_mean;
-    
+
     return GomValue(std::vector<GomValue>{GomValue(slope), GomValue(intercept)});
 }
 
@@ -581,15 +581,15 @@ GomValue gom_quadratic_solve(const GomValue& a, const GomValue& b, const GomValu
     double av = a.as_number();
     double bv = b.as_number();
     double cv = c.as_number();
-    
+
     if (av == 0) return GomValue(std::vector<GomValue>{GomValue(0.0), GomValue(0.0)});
-    
+
     double discriminant = bv * bv - 4 * av * cv;
     if (discriminant < 0) return GomValue(std::vector<GomValue>{GomValue(0.0), GomValue(0.0)});
-    
+
     double root1 = (-bv + std::sqrt(discriminant)) / (2 * av);
     double root2 = (-bv - std::sqrt(discriminant)) / (2 * av);
-    
+
     return GomValue(std::vector<GomValue>{GomValue(root1), GomValue(root2)});
 }
 )";

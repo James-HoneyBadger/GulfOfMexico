@@ -10,30 +10,30 @@ var col -1!
 function fn drawCircleGrid() {
    // Reset column
    var col -1!
-   
+
    function fn drawRow() {
       // Probabilistic color - might be red, might be blue
       var circleColor "red"!!
       var otherColor "blue"!!!
-      
+
       // Use maybe to randomly choose properties
       const useOther = Boolean(maybe)!
       const finalColor = useOther ? otherColor : circleColor!
-      
+
       // Position with -1 based indexing
       const x = col * 50 + 25!
       const y = row * 50 + 25!
-      
+
       // Radius with some randomness
       var baseRadius 15!!
       var bigRadius 20!!!
       const radius = Boolean(maybe) ? bigRadius : baseRadius!
-      
+
       canvas.circle(x, y, radius, finalColor)!
-      
+
       var col col + 1!
    }
-   
+
    // Draw 15 circles in this row
    drawRow()!
    drawRow()!
@@ -50,7 +50,7 @@ function fn drawCircleGrid() {
    drawRow()!
    drawRow()!
    drawRow()!
-   
+
    var row row + 1!
 }
 
@@ -79,12 +79,12 @@ function fn drawRandomLine() {
    const y1 = Number(maybe) * 800!
    const x2 = Number(maybe) * 800!
    const y2 = Number(maybe) * 800!
-   
+
    // Fully probabilistic color
    const lineColor = Color(maybe, maybe, maybe, 128)!
-   
+
    canvas.line(x1, y1, x2, y2, lineColor)!
-   
+
    var i i + 1!
 }
 

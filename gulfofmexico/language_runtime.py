@@ -19,18 +19,22 @@ Integration Points:
 """
 
 from __future__ import annotations
-from typing import Optional, Dict, Any, Callable
-from pathlib import Path
-import os
 
-from gulfofmexico.language_config import LanguageConfig
+import os
+from pathlib import Path
+from typing import Any, Dict, Optional
+
 from gulfofmexico.builtin import (
-    GulfOfMexicoValue,
-    GulfOfMexicoKeyword,
-    Name,
-    KEYWORDS as DEFAULT_KEYWORDS,
     BUILTIN_FUNCTION_KEYWORDS as DEFAULT_FUNCTIONS,
 )
+from gulfofmexico.builtin import (
+    KEYWORDS as DEFAULT_KEYWORDS,
+)
+from gulfofmexico.builtin import (
+    GulfOfMexicoKeyword,
+    Name,
+)
+from gulfofmexico.language_config import LanguageConfig
 
 
 class LanguageRuntime:
@@ -59,9 +63,7 @@ class LanguageRuntime:
         return cls._instance
 
     @classmethod
-    def load_config(
-        cls, config: Optional[LanguageConfig] = None, config_file: Optional[str] = None
-    ) -> None:
+    def load_config(cls, config: Optional[LanguageConfig] = None, config_file: Optional[str] = None) -> None:
         """Load a language configuration.
 
         Args:
@@ -106,8 +108,7 @@ class LanguageRuntime:
 
         # Build keyword reverse map: custom name -> original name
         self._keyword_reverse_map = {
-            mapping.custom: mapping.original
-            for mapping in self._config.keyword_mappings.values()
+            mapping.custom: mapping.original for mapping in self._config.keyword_mappings.values()
         }
 
         # Build function map
@@ -314,9 +315,7 @@ class LanguageRuntime:
         return "\n".join(info)
 
 
-def apply_config_to_interpreter(
-    namespaces: list[Dict[str, Any]], config: Optional[LanguageConfig] = None
-) -> None:
+def apply_config_to_interpreter(namespaces: list[Dict[str, Any]], config: Optional[LanguageConfig] = None) -> None:
     """Apply language configuration to interpreter namespaces.
 
     This function modifies the interpreter's namespace to use custom

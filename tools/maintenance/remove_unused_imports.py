@@ -1,8 +1,8 @@
 #!/usr/bin/env python3
 """Remove specific unused imports based on Flake8 output."""
+
 import re
 from pathlib import Path
-
 
 # Map of file paths to unused imports
 UNUSED_IMPORTS = {

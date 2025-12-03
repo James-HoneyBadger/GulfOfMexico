@@ -16,12 +16,11 @@ Features demonstrated:
 """
 
 from gulfofmexico.language_config import (
-    LanguageConfig,
-    KeywordMapping,
     FunctionConfig,
-    OperatorConfig,
-    SyntaxOptions,
+    KeywordMapping,
+    LanguageConfig,
     ParsingConfig,
+    SyntaxOptions,
 )
 
 
@@ -80,11 +79,11 @@ def demo_lisp_like_language():
 
     # Save configuration
     config.save("demo_gulplisp.json")
-    print(f"\n✓ Created GulfLisp configuration")
-    print(f"  - Saved to: demo_gulplisp.json")
+    print("\n✓ Created GulfLisp configuration")
+    print("  - Saved to: demo_gulplisp.json")
     print(f"  - Keywords: {len(config.keyword_mappings)}")
     print(f"  - Block syntax: () instead of {'{}'}")
-    print(f"  - Comment style: ; (Lisp)")
+    print("  - Comment style: ; (Lisp)")
 
     # Example code snippet
     example = """
@@ -93,10 +92,10 @@ def demo_lisp_like_language():
       (if (< n 2)
         1
         (* n (factorial (- n 1)))))
-    
+
     (print (factorial 5))
     """
-    print(f"\n  Example GulfLisp code:")
+    print("\n  Example GulfLisp code:")
     print("  " + "\n  ".join(example.strip().split("\n")))
 
     return config
@@ -189,10 +188,10 @@ def demo_logo_like_language():
 
     # Save configuration
     config.save("demo_gulfturtle.json")
-    print(f"\n✓ Created GulfTurtle configuration")
-    print(f"  - Saved to: demo_gulfturtle.json")
-    print(f"  - Added 6 turtle graphics functions")
-    print(f"  - Simple, imperative syntax")
+    print("\n✓ Created GulfTurtle configuration")
+    print("  - Saved to: demo_gulfturtle.json")
+    print("  - Added 6 turtle graphics functions")
+    print("  - Simple, imperative syntax")
 
     # Example code
     example = """
@@ -206,10 +205,10 @@ def demo_logo_like_language():
       right 90
       forward :size
     }
-    
+
     square 100
     """
-    print(f"\n  Example GulfTurtle code:")
+    print("\n  Example GulfTurtle code:")
     print("  " + "\n  ".join(example.strip().split("\n")))
 
     return config
@@ -303,27 +302,27 @@ def demo_sql_like_language():
 
     # Save configuration
     config.save("demo_gulfql.json")
-    print(f"\n✓ Created GulfQL configuration")
-    print(f"  - Saved to: demo_gulfql.json")
-    print(f"  - Added 6 SQL-like functions")
-    print(f"  - Semicolon-terminated statements")
+    print("\n✓ Created GulfQL configuration")
+    print("  - Saved to: demo_gulfql.json")
+    print("  - Added 6 SQL-like functions")
+    print("  - Semicolon-terminated statements")
 
     # Example code
     example = """
     -- GulfQL Example
     DECLARE users;
-    
+
     PROCEDURE getActiveUsers() {
       SELECT name, email, status
       FROM users
       WHERE status == "active"
       ORDER_BY name;
     }
-    
+
     DECLARE results;
     results = getActiveUsers();
     """
-    print(f"\n  Example GulfQL code:")
+    print("\n  Example GulfQL code:")
     print("  " + "\n  ".join(example.strip().split("\n")))
 
     return config
@@ -368,17 +367,17 @@ def demo_crud_operations():
         },
         merge=True,
     )
-    print(f"   ✓ Added COUNT function")
+    print("   ✓ Added COUNT function")
 
     # DELETE: Remove a function
     print("\n3. DELETE: Removing a function...")
     if config.delete_function("GROUP_BY"):
-        print(f"   ✓ Deleted GROUP_BY function")
+        print("   ✓ Deleted GROUP_BY function")
 
     # DELETE: Remove a keyword
     print("\n4. DELETE: Removing a keyword...")
     if config.delete_keyword("when"):
-        print(f"   ✓ Deleted 'when' keyword")
+        print("   ✓ Deleted 'when' keyword")
 
     # MERGE: Merge with another config
     print("\n5. MERGE: Merging with Turtle config...")
@@ -386,14 +385,14 @@ def demo_crud_operations():
     original_func_count = len(config.builtin_functions)
     config.merge(turtle_config, prefer_other=False)
     new_func_count = len(config.builtin_functions)
-    print(f"   ✓ Merged configurations")
+    print("   ✓ Merged configurations")
     print(f"   ✓ Functions: {original_func_count} → {new_func_count}")
 
     # CLONE: Create a copy
     print("\n6. CLONE: Creating a deep copy...")
     cloned = config.clone()
     cloned.name = "GulfQL Extended"
-    print(f"   ✓ Cloned configuration")
+    print("   ✓ Cloned configuration")
     print(f"   ✓ Original: {config.name}")
     print(f"   ✓ Clone: {cloned.name}")
 
@@ -406,7 +405,7 @@ def demo_crud_operations():
 
     # Save result
     config.save("demo_gulfql_modified.json")
-    print(f"\n   ✓ Saved modified config to: demo_gulfql_modified.json")
+    print("\n   ✓ Saved modified config to: demo_gulfql_modified.json")
 
 
 def demo_extreme_customization():
@@ -480,11 +479,11 @@ def demo_extreme_customization():
     )
 
     config.save("demo_gulfasm.json")
-    print(f"\n✓ Created GulfASM configuration")
-    print(f"  - Saved to: demo_gulfasm.json")
+    print("\n✓ Created GulfASM configuration")
+    print("  - Saved to: demo_gulfasm.json")
     print(f"  - {len(config.keyword_mappings)} keywords (vs 61 default)")
     print(f"  - {len(config.builtin_functions)} functions (vs 35 default)")
-    print(f"  - All satirical features disabled")
+    print("  - All satirical features disabled")
 
     # Example code
     example = """
@@ -492,20 +491,20 @@ def demo_extreme_customization():
     label start
       mov r1 0
       mov r2 10
-      
+
     label loop
       add r1 1
       cmp r1 r2
       jmp loop
-      
+
       call print_result
       ret
-      
+
     label print_result
       syscall write r1
       ret
     """
-    print(f"\n  Example GulfASM code:")
+    print("\n  Example GulfASM code:")
     print("  " + "\n  ".join(example.strip().split("\n")))
 
     return config
@@ -556,9 +555,7 @@ def main():
     print("Try loading these configs:")
     print("  python gomconfig.py info examples/configs/demo_gulplisp.json")
     print("  python gomconfig.py validate examples/configs/demo_gulfturtle.json")
-    print(
-        "  python gomconfig.py diff examples/configs/demo_gulfql.json examples/configs/demo_gulfql_modified.json"
-    )
+    print("  python gomconfig.py diff examples/configs/demo_gulfql.json examples/configs/demo_gulfql_modified.json")
     print("=" * 70)
 
 

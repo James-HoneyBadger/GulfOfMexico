@@ -9,8 +9,9 @@ architecture could work for potential future refactoring.
 
 from abc import ABC, abstractmethod
 from typing import Optional, Type
-from gulfofmexico.processor.syntax_tree import CodeStatement
+
 from gulfofmexico.builtin import GulfOfMexicoValue
+from gulfofmexico.processor.syntax_tree import CodeStatement
 
 
 class StatementHandler(ABC):
@@ -127,10 +128,7 @@ class HandlerRegistry:
         """
         handler = self.get_handler(statement)
         if handler is None:
-            raise ValueError(
-                f"No handler registered for statement type: "
-                f"{type(statement).__name__}"
-            )
+            raise ValueError(f"No handler registered for statement type: " f"{type(statement).__name__}")
 
         return handler.execute(statement, context)
 

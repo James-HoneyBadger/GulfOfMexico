@@ -184,7 +184,7 @@ ai_powered {
     // Predictive model
     const x_data = [1, 2, 3, 4, 5]!
     const y_data = [1200, 1500, 1800, 1600, 2000]!
-    
+
     const model = linear_regression(x_data, y_data)!
     print("Sales trend model: ")!
     print(model)!                // → [slope, intercept]

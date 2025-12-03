@@ -261,11 +261,11 @@ Object-oriented programming, Gulf of Mexico style:
 class Person {
    var name "Unknown"!
    var age 0!
-   
+
    function greet() => {
       print("Hi, I'm ${name}!")!
    }!
-   
+
    function birthday() => {
       age = age + 1!
    }!

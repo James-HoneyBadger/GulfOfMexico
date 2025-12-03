@@ -3,19 +3,19 @@
 class BankAccount {
    var balance = 0!
    var accountName = "Unknown"!
-   
+
    function deposit(amount) => {
       balance = balance + amount!
       print "${accountName}: Deposited ${amount}. New balance: ${balance}"!
    }!
-   
+
    function withdraw(amount) => {
       if balance > amount {
          balance = balance - amount!
          print "${accountName}: Withdrew ${amount}. New balance: ${balance}"!
       }
    }!
-   
+
    function transfer(amount, target) => {
       if balance > amount {
          balance = balance - amount!
@@ -23,7 +23,7 @@ class BankAccount {
          print "${accountName}: Transferred ${amount} to ${target.accountName}"!
       }
    }!
-   
+
    function getBalance() => {
       return balance!
    }!

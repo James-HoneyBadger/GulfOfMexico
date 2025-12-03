@@ -13,11 +13,12 @@ To add a new statement type to the production interpreter, you must:
 """
 
 from typing import Optional, Type
-from gulfofmexico.plugin_system import Plugin
-from gulfofmexico.handlers import StatementHandler
+
+from gulfofmexico.builtin import GulfOfMexicoValue
 from gulfofmexico.context import ExecutionContext
+from gulfofmexico.handlers import StatementHandler
+from gulfofmexico.plugin_system import Plugin
 from gulfofmexico.processor.syntax_tree import CodeStatement
-from gulfofmexico.builtin import GulfOfMexicoValue, GulfOfMexicoNumber
 
 
 # Define a custom statement type (would normally be in syntax_tree.py)

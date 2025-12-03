@@ -8,13 +8,14 @@ via pattern matching in interpreter.py, not through these handlers.
 """
 
 import unittest
+
 from gulfofmexico.engine.handlers.functions import (
-    FunctionDefinitionHandler,
     ClassDeclarationHandler,
+    FunctionDefinitionHandler,
 )
 from gulfofmexico.processor.syntax_tree import (
-    FunctionDefinition,
     ClassDeclaration,
+    FunctionDefinition,
     VariableDeclaration,
 )
 

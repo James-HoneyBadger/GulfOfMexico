@@ -5,7 +5,8 @@ lookups with caching and invalidation.
 """
 
 from typing import Optional, Union
-from gulfofmexico.builtin import Variable, Name
+
+from gulfofmexico.builtin import Name, Variable
 from gulfofmexico.constants import NAMESPACE_CACHE_SIZE
 
 
@@ -29,9 +30,7 @@ class NamespaceManager:
         self._cache_hits = 0
         self._cache_misses = 0
 
-    def lookup(
-        self, name: str
-    ) -> tuple[Optional[Union[Variable, Name]], Optional[dict]]:
+    def lookup(self, name: str) -> tuple[Optional[Union[Variable, Name]], Optional[dict]]:
         """Find a variable in the namespace stack.
 
         Args:
@@ -45,10 +44,7 @@ class NamespaceManager:
             scope_idx, var = self._cache[name]
 
             # Validate cache entry
-            if (
-                scope_idx < len(self.namespaces)
-                and self.namespaces[scope_idx].get(name) is var
-            ):
+            if scope_idx < len(self.namespaces) and self.namespaces[scope_idx].get(name) is var:
                 self._cache_hits += 1
                 return var, self.namespaces[scope_idx]
 

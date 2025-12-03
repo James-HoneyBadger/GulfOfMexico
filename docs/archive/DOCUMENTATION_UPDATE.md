@@ -67,7 +67,7 @@ All documentation now references:
 ```
 programs/
 ├── 01_basics/          7 programs   - Core language features
-├── 02_features/        8 programs   - Advanced features  
+├── 02_features/        8 programs   - Advanced features
 ├── 03_graphics/        5 programs   - Graphics/visualization
 ├── 04_satirical/      17 programs   - Satirical keywords
 ├── 05_analysis/        7 programs   - Math/stats/finance

@@ -14,24 +14,24 @@ monolithic production interpreter in gulfofmexico/interpreter.py.
 """
 
 from __future__ import annotations
+
+import re
 import sys
 from pathlib import Path
 from typing import Optional, Union
-import re
 
+import gulfofmexico.builtin as builtin
+import gulfofmexico.interpreter as interpreter
+from gulfofmexico.base import InterpretationError
 from gulfofmexico.builtin import (
     KEYWORDS,
-    Name,
-    GulfOfMexicoValue,
-    Variable,
     GulfOfMexicoUndefined,
+    GulfOfMexicoValue,
+    Name,
+    Variable,
 )
-import gulfofmexico.builtin as builtin
 from gulfofmexico.processor.lexer import tokenize
 from gulfofmexico.processor.syntax_tree import generate_syntax_tree
-from gulfofmexico.base import InterpretationError
-import gulfofmexico.interpreter as interpreter
-
 
 PRIMARY_PROMPT = "gom> "
 CONT_PROMPT = " ...> "
@@ -77,10 +77,7 @@ class GomRepl:
         interpreter.load_public_global_variables(self.namespaces)
 
     def banner(self) -> str:
-        return (
-            "Gulf of Mexico REPL (production interpreter)\n"
-            "Type :help for commands, :quit to exit."
-        )
+        return "Gulf of Mexico REPL (production interpreter)\n" "Type :help for commands, :quit to exit."
 
     def _read_multiline(self) -> Optional[str]:
         """
@@ -127,9 +124,7 @@ class GomRepl:
                 # Check for common trailing characters or unmatched braces
                 open_braces = candidate.count("{") - candidate.count("}")
                 ends_with_open = candidate.rstrip().endswith(("{", ",", ":"))
-                missing_punct = not candidate.rstrip().endswith(
-                    ("!", "?", "}", ")", "]")
-                )
+                missing_punct = not candidate.rstrip().endswith(("!", "?", "}", ")", "]"))
                 if open_braces > 0 or ends_with_open or missing_punct:
                     prompt = CONT_PROMPT
                     continue
@@ -366,10 +361,7 @@ class GomRepl:
             if self._copy_to_clipboard(content):
                 print("Copied to clipboard.")
             else:
-                msg = (
-                    "Clipboard not available. Printed block below; "
-                    + "copy manually:\n"
-                )
+                msg = "Clipboard not available. Printed block below; " + "copy manually:\n"
                 print(msg + content)
             return True
         print(f"Unknown command: {op}. Try :help")

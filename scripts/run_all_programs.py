@@ -26,16 +26,8 @@ def run_file(path: Path):
             cwd=str(ROOT),
         )
         code = proc.returncode
-        out = (
-            proc.stdout.decode(errors="replace")
-            if isinstance(proc.stdout, bytes)
-            else proc.stdout
-        )
-        status = (
-            "PASS"
-            if any(m in out for m in PASS_MARKERS) or code in (0, 124, 130, 143)
-            else "UNKNOWN"
-        )
+        out = proc.stdout.decode(errors="replace") if isinstance(proc.stdout, bytes) else proc.stdout
+        status = "PASS" if any(m in out for m in PASS_MARKERS) or code in (0, 124, 130, 143) else "UNKNOWN"
         return status, code, out
     except subprocess.TimeoutExpired as e:
         out = e.stdout or b""

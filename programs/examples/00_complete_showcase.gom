@@ -86,7 +86,7 @@ happy {
       eventually {
          print "  🎉 Triple combo: Happy + Lucky + Eventually!"!
          print "  🎉 What are the odds?!"!
-         
+
          const magic = String("MAGIC")!
          leverage magic!
          print "  🎉 Leveraged magic:", magic!

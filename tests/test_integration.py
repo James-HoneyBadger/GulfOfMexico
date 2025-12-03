@@ -11,9 +11,9 @@ gulfofmexico.__init__.run_file() and verify the output.
 """
 
 import unittest
-from gulfofmexico.context import ExecutionContext, InterpreterConfig
+
+from gulfofmexico.context import InterpreterConfig
 from gulfofmexico.engine.core import InterpretEngine
-from gulfofmexico.handlers import HandlerRegistry
 
 
 class TestInterpretEngine(unittest.TestCase):
@@ -40,13 +40,13 @@ class TestInterpretEngine(unittest.TestCase):
 
     def test_handler_registry(self):
         """Test handler registry functionality."""
+        from gulfofmexico.base import Token, TokenType
         from gulfofmexico.engine.handlers.variables import (
             VariableDeclarationHandler,
         )
         from gulfofmexico.processor.syntax_tree import (
             VariableDeclaration,
         )
-        from gulfofmexico.base import Token, TokenType
 
         # Create a sample statement
         stmt = VariableDeclaration(
@@ -104,8 +104,8 @@ class TestPluginSystem(unittest.TestCase):
     def test_plugin_registration(self):
         """Test plugin registration."""
         from gulfofmexico.plugin_system import (
-            PluginManager,
             ExamplePlugin,
+            PluginManager,
         )
 
         manager = PluginManager()
@@ -119,8 +119,8 @@ class TestPluginSystem(unittest.TestCase):
     def test_plugin_unregistration(self):
         """Test plugin unregistration."""
         from gulfofmexico.plugin_system import (
-            PluginManager,
             ExamplePlugin,
+            PluginManager,
         )
 
         manager = PluginManager()

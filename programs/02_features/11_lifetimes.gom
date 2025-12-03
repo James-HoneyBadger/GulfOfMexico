@@ -11,4 +11,3 @@ print "Line 5: shortLived = ${shortLived}"!
 // Time-based lifetime (expires after seconds)
 const temporary < 2.0 > = "I'll disappear soon"!
 print "temporary = ${temporary}"!
-

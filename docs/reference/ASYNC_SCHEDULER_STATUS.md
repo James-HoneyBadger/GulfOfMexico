@@ -48,7 +48,7 @@ Status and implementation notes for the async scheduler: what works, what's bloc
 2. **Backward Compatibility**: Current sync-async works via queue system
    - Changing to scheduler requires careful migration
    - Risk of breaking 49 existing test programs
-   
+
 3. **Complexity**: The interpreter is monolithic (~3,000 lines)
    - Changes have cascading effects
    - Need comprehensive testing at each step
@@ -84,10 +84,10 @@ Status and implementation notes for the async scheduler: what works, what's bloc
 
 ### New Files
 - `gulfofmexico/async_scheduler.py` - Complete async scheduler (133 lines)
-  
+
 Note: Internal GOM test programs were removed in Nov 2025. Use user-facing examples/demos for validation.
 
-### Modified Files  
+### Modified Files
 - `gulfofmexico/interpreter.py`:
   - Added time-based `after` support in `execute_after_statement()`
   - Import for `get_scheduler` (not currently used)
@@ -130,7 +130,7 @@ python3 -m gulfofmexico programs/demos/async_pipeline.gom   # Runs synchronously
    async function task() => return 42!
    const val = await task()!
    print val!  // Should print 42
-   
+
    // Test 2: Time-based after
    after <1.0> {
       print "Delayed"!
@@ -164,8 +164,8 @@ python3 -m gulfofmexico programs/demos/async_pipeline.gom   # Runs synchronously
 
 ## Conclusion
 
-The async scheduler infrastructure is **complete and ready** but **not integrated**.  
-Integration requires more careful design and testing to avoid breaking existing functionality.  
+The async scheduler infrastructure is **complete and ready** but **not integrated**.
+Integration requires more careful design and testing to avoid breaking existing functionality.
 Recommend treating this as a **medium-priority future enhancement** rather than current sprint work.
 
 Current interpreter functionality is **fully preserved** - no regressions introduced.

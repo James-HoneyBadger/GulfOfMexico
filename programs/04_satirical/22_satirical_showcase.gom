@@ -6,15 +6,15 @@ print "=== The Ultimate Corporate Procrastinator ==="!
 // Corporate meeting with passive-aggressive error handling
 try {
    print "\n🏢 QUARTERLY PLANNING SESSION"!
-   
+
    const q1_target = Number(1000000)!
    const q1_actual = Number(750000)!
-   
+
    synergize q1_target, q1_actual!
    leverage q1_actual!
-   
+
    print "Q1 targets achieved (kind of)"!
-   
+
 } whatever {
    print "Whatever, numbers are just social constructs anyway"!
 }
@@ -24,7 +24,7 @@ print "\n📋 ACTION ITEMS:"!
 
 later {
    print "  • Update TPS reports"!
-   
+
    try {
       const reports = Number(47)!
       leverage reports!
@@ -51,14 +51,14 @@ try {
    const oldStrategy = String("reactive")!
    paradigm_shift oldStrategy!
    print "Shifted from reactive to proactive approach"!
-   
+
    later {
       const synergy = String("cross-functional")!
       const alignment = String("stakeholder")!
       synergize synergy, alignment!
       print "Creating", synergy, alignment, "synergies"!
    }
-   
+
 } whatever {
    print "Strategy schmrategy, let's just wing it"!
 }

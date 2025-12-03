@@ -1,0 +1,94 @@
+[MASTER]
+disable=
+    import-outside-toplevel,
+    broad-exception-caught,
+    redefined-outer-name,
+    redefined-builtin,
+    wrong-import-order,
+    wrong-import-position
+
+[MESSAGES CONTROL]
+disable=
+    missing-module-docstring,
+    missing-class-docstring,
+    missing-function-docstring,
+    too-many-lines,
+    too-many-locals,
+    too-many-branches,
+    too-many-statements,
+    too-many-return-statements,
+    too-many-instance-attributes,
+    too-many-public-methods,
+    too-many-positional-arguments,
+    too-few-public-methods,
+    too-many-nested-blocks,
+    line-too-long,
+    invalid-name,
+    unused-import,
+    unused-variable,
+    unused-argument,
+    useless-return,
+    unnecessary-pass,
+    no-else-return,
+    no-else-raise,
+    no-else-continue,
+    consider-using-from-import,
+    consider-using-in,
+    consider-using-enumerate,
+    use-a-generator,
+    unnecessary-lambda,
+    unnecessary-lambda-assignment,
+    singleton-comparison,
+    use-dict-literal,
+    protected-access,
+    attribute-defined-outside-init,
+    super-init-not-called,
+    unspecified-encoding,
+    raise-missing-from,
+    eval-used,
+    wildcard-import,
+    unused-wildcard-import,
+    implicit-str-concat,
+    fixme,
+    global-statement,
+    consider-using-sys-exit,
+    useless-else-on-loop,
+    inconsistent-return-statements,
+    possibly-used-before-assignment,
+    used-before-assignment,
+    undefined-variable,
+    function-redefined,
+    no-value-for-parameter,
+    reimported,
+    bare-except,
+    duplicate-code,
+    keyword-arg-before-vararg,
+    unnecessary-negation,
+    redefined-argument-from-local,
+    arguments-differ,
+    use-maxsplit-arg,
+    import-error,
+    disallowed-name,
+    too-many-boolean-expressions,
+    subprocess-run-check
+
+[FORMAT]
+max-line-length=120
+
+[DESIGN]
+max-args=15
+max-attributes=20
+
+[TYPECHECK]
+ignored-modules=
+    gulfofmexico.engine.handlers.control_flow,
+    gulfofmexico.plugin_system
+
+[REPORTS]
+output-format=colorized
+
+[SIMILARITIES]
+min-similarity-lines=10
+
+[LOGGING]
+disable=logging-fstring-interpolation

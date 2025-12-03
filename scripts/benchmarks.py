@@ -16,17 +16,16 @@ To benchmark the production interpreter, you would need to:
 3. Compare with/without proposed optimizations to interpreter.py
 """
 
-import time
 import statistics
-from typing import Callable, Any
-from gulfofmexico.engine.evaluator import ExpressionEvaluator
-from gulfofmexico.engine.namespace import NamespaceManager
+import time
+from typing import Callable
+
 from gulfofmexico.builtin import (
     GulfOfMexicoNumber,
     Variable,
     VariableLifetime,
-    Name,
 )
+from gulfofmexico.engine.namespace import NamespaceManager
 
 
 def benchmark(func: Callable, iterations: int = 1000) -> dict[str, float]:
@@ -114,13 +113,13 @@ def benchmark_expression_evaluation():
 
 def benchmark_handler_dispatch():
     """Benchmark handler registry dispatch."""
-    from gulfofmexico.handlers import HandlerRegistry
+    from gulfofmexico.base import Token, TokenType
     from gulfofmexico.engine.handlers.variables import (
         VariableDeclarationHandler,
     )
-    from gulfofmexico.processor.syntax_tree import VariableDeclaration
-    from gulfofmexico.base import Token, TokenType
+    from gulfofmexico.handlers import HandlerRegistry
     from gulfofmexico.processor.expression_tree import ValueNode
+    from gulfofmexico.processor.syntax_tree import VariableDeclaration
 
     registry = HandlerRegistry()
     registry.register(VariableDeclarationHandler())

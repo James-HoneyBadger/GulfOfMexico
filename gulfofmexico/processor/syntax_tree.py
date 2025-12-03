@@ -30,8 +30,8 @@ then executed by pattern matching in interpreter.py.
 """
 
 from abc import ABCMeta
-from typing import Optional, Union
 from dataclasses import dataclass
+from typing import Optional, Union
 
 from gulfofmexico.base import (
     STR_TO_OPERATOR,
@@ -79,8 +79,6 @@ __all__ = [
 class CodeStatement:
     """Base class for all statement types."""
 
-    pass
-
 
 class CodeStatementKeywordable(metaclass=ABCMeta):
     """Statements that have a keyword token (if, when, class, etc.)."""
@@ -124,7 +122,9 @@ class ClassDeclaration(CodeStatement, CodeStatementKeywordable):
     keyword: Token
     name: Token
     code: list[tuple[CodeStatement, ...]]
+
     # Compatibility init for experimental tests
+
     def __init__(self, keyword=None, name=None, code=None, *args, **kwargs):
         self.keyword = keyword
         self.name = name
@@ -227,7 +227,9 @@ class ReturnStatement(CodeStatement, CodeStatementDebuggable):
     keyword: Optional[Token]
     expression: Union[list[Token], ExpressionTreeNode]
     debug: int
+
     # Compatibility init for experimental tests constructing with minimal args
+
     def __init__(self, keyword=None, expression=None, debug=0):
         self.keyword = keyword
         self.expression = expression
@@ -240,7 +242,9 @@ class DeleteStatement(CodeStatement, CodeStatementKeywordable, CodeStatementDebu
     keyword: Token
     name: Token
     debug: int
+
     # Compatibility init for experimental tests
+
     def __init__(self, keyword=None, name=None, debug=0):
         self.keyword = keyword
         self.name = name
@@ -249,13 +253,13 @@ class DeleteStatement(CodeStatement, CodeStatementKeywordable, CodeStatementDebu
 
 # reverse name!
 @dataclass
-class ReverseStatement(
-    CodeStatement, CodeStatementKeywordable, CodeStatementDebuggable
-):
+class ReverseStatement(CodeStatement, CodeStatementKeywordable, CodeStatementDebuggable):
     keyword: Token  # The 'reverse' keyword token
     name: Token  # The variable to reverse
     debug: int
+
     # Compatibility init for experimental tests
+
     def __init__(self, keyword=None, name=None, debug=0):
         self.keyword = keyword
         self.name = name
@@ -305,7 +309,9 @@ class ExportStatement(CodeStatement, CodeStatementDebuggable):
     to_keyword: Token
     target_file: Token
     debug: int
+
     # Compatibility init for experimental tests
+
     def __init__(
         self,
         export_keyword=None,
@@ -327,7 +333,9 @@ class ImportStatement(CodeStatement, CodeStatementKeywordable, CodeStatementDebu
     keyword: Token
     names: list[Token]
     debug: int
+
     # Compatibility init for experimental tests
+
     def __init__(self, keyword=None, names=None, debug=0):
         self.keyword = keyword
         self.names = names or []
@@ -606,17 +614,12 @@ def split_into_statements(tokens: list[Token]) -> list[list[Token]]:
     statements = [[]]
     bracket_layers = 0
     for token in tokens:
-
         # check for expression-ending newlines
         if (
             token.type == TokenType.WHITESPACE and not statements[-1]
         ):  # don't care about whitespace at the beginning or end of an expression, idk
             continue
-        if (
-            token.type == TokenType.NEWLINE
-            and not statements[-1]
-            and len(statements) > 1
-        ):
+        if token.type == TokenType.NEWLINE and not statements[-1] and len(statements) > 1:
             statements[-2].append(token)
         else:
             statements[-1].append(token)
@@ -627,13 +630,8 @@ def split_into_statements(tokens: list[Token]) -> list[list[Token]]:
         elif token.type == TokenType.R_CURLY:
             bracket_layers -= 1
 
-        if (
-            token.type in [TokenType.R_CURLY, TokenType.BANG, TokenType.QUESTION]
-            and bracket_layers == 0
-        ):
-            while (
-                statements[-1][-1].type == TokenType.NEWLINE
-            ):  # remove newlines at the end of a statement
+        if token.type in [TokenType.R_CURLY, TokenType.BANG, TokenType.QUESTION] and bracket_layers == 0:
+            while statements[-1][-1].type == TokenType.NEWLINE:  # remove newlines at the end of a statement
                 statements[-1].pop()
             statements.append([])
 
@@ -679,11 +677,7 @@ def extract_type_annotations(
                 square_bracket_layers += 1
             elif t.type == TokenType.R_SQUARE:
                 square_bracket_layers -= 1
-            elif (
-                t.type == TokenType.COLON
-                and scope_layers == 0
-                and square_bracket_layers == 0
-            ):
+            elif t.type == TokenType.COLON and scope_layers == 0 and square_bracket_layers == 0:
                 # Found a type annotation - extract everything from here
                 # until the equals sign
                 type_tokens = []
@@ -705,9 +699,7 @@ def extract_type_annotations(
     return result
 
 
-def remove_type_hints(
-    filename: str, code: str, statements: list[list[Token]]
-) -> list[list[Token]]:
+def remove_type_hints(filename: str, code: str, statements: list[list[Token]]) -> list[list[Token]]:
     new_statements = []
     for tokens in statements:
         new_tokens = []
@@ -734,19 +726,13 @@ def remove_type_hints(
                 adding_tokens = False
                 ref_square_bracket_layers = square_bracket_layers  # prob gonna be zero but idek imma just do this
             if not adding_tokens:
-
                 # check if it is at an operator
-                if (
-                    STR_TO_OPERATOR.get(t.value)
-                    and square_bracket_layers == ref_square_bracket_layers
-                ):
+                if STR_TO_OPERATOR.get(t.value) and square_bracket_layers == ref_square_bracket_layers:
                     adding_tokens = True
 
                 # adjust for Name<...> things, which also allows regex to pass too
                 elif (
-                    t.type == TokenType.NAME
-                    and curr + 1 < len(tokens)
-                    and tokens[curr + 1].type == TokenType.LESS_THAN
+                    t.type == TokenType.NAME and curr + 1 < len(tokens) and tokens[curr + 1].type == TokenType.LESS_THAN
                 ):
                     try:
                         while tokens[curr + 1].type != TokenType.GREATER_THAN:
@@ -760,9 +746,7 @@ def remove_type_hints(
                             t,
                         )
 
-            if (
-                adding_tokens
-            ):  # cannot be elif because adding_tokens can be modified in the previous statement
+            if adding_tokens:  # cannot be elif because adding_tokens can be modified in the previous statement
                 new_tokens.append(t)
 
             curr += 1
@@ -795,7 +779,6 @@ def create_function_definition(
     code: str,
     statements_inside_scope: list[tuple[CodeStatement, ...]],
 ) -> tuple[CodeStatement, ...]:
-
     # Parse function declaration
     # First, collect the initial NAME tokens (keywords and function name)
     names_in_row = []
@@ -864,12 +847,9 @@ def create_scoped_code_statement(
     code: str,
     type_annotation: Optional[list[Token]] = None,
 ) -> tuple[CodeStatement, ...]:
-
     # this means that a scope is detected in the statement
     ends_with_punc = tokens[-1].type in {TokenType.BANG, TokenType.QUESTION}
-    if (
-        tokens[-1 - int(ends_with_punc)].type != TokenType.R_CURLY
-    ):  # end will never be whitespace
+    if tokens[-1 - int(ends_with_punc)].type != TokenType.R_CURLY:  # end will never be whitespace
         raise_error_at_token(
             filename,
             code,
@@ -891,11 +871,7 @@ def create_scoped_code_statement(
 
     # see the function pointer -> immediately know
     can_be_function = any(
-        [
-            t.type == TokenType.FUNC_POINT
-            for i, t in enumerate(without_whitespace)
-            if i < scope_open_index
-        ]
+        [t.type == TokenType.FUNC_POINT for i, t in enumerate(without_whitespace) if i < scope_open_index]
     )
 
     # now finally, check for classes
@@ -926,17 +902,12 @@ def create_scoped_code_statement(
     # this dude is separated to another function because the same code is reused in () => ... functions (no scope)
     possibilities = []
     if can_be_function:
-        return create_function_definition(
-            filename, without_whitespace, code, statements_inside_scope
-        )
+        return create_function_definition(filename, without_whitespace, code, statements_inside_scope)
 
     if can_be_function_block:
-        return create_function_definition(
-            filename, without_whitespace, code, statements_inside_scope
-        )
+        return create_function_definition(filename, without_whitespace, code, statements_inside_scope)
 
     if can_be_class:
-
         # build thing for the class statement
         possibilities.append(
             ClassDeclaration(
@@ -982,12 +953,8 @@ def create_scoped_code_statement(
 
             if second_scope_start != -1:
                 # Extract whatever block code
-                whatever_code_tokens = tokens[
-                    second_scope_start + 1 : len(tokens) - ends_with_punc - 1
-                ]
-                whatever_statements = generate_syntax_tree(
-                    filename, whatever_code_tokens, code
-                )
+                whatever_code_tokens = tokens[second_scope_start + 1 : len(tokens) - ends_with_punc - 1]
+                whatever_statements = generate_syntax_tree(filename, whatever_code_tokens, code)
 
                 return (
                     TryWhateverStatement(
@@ -1102,23 +1069,17 @@ def create_scoped_code_statement(
         [
             Conditional(
                 keyword=without_whitespace[0],
-                expression=tokens[
-                    int(tokens[0].type == TokenType.WHITESPACE) + 1 : scope_open_index
-                ],
+                expression=tokens[int(tokens[0].type == TokenType.WHITESPACE) + 1 : scope_open_index],
                 code=statements_inside_scope,
             ),
             AfterStatement(
                 keyword=without_whitespace[0],
-                expression=tokens[
-                    int(tokens[0].type == TokenType.WHITESPACE) + 1 : scope_open_index
-                ],
+                expression=tokens[int(tokens[0].type == TokenType.WHITESPACE) + 1 : scope_open_index],
                 code=statements_inside_scope,
             ),
             WhenStatement(
                 keyword=without_whitespace[0],
-                expression=tokens[
-                    int(tokens[0].type == TokenType.WHITESPACE) + 1 : scope_open_index
-                ],
+                expression=tokens[int(tokens[0].type == TokenType.WHITESPACE) + 1 : scope_open_index],
                 code=statements_inside_scope,
             ),
         ]
@@ -1132,12 +1093,7 @@ def is_proper_comma_list(
 ) -> bool:
     looking_for_comma = without_whitespace[0].type != TokenType.COMMA
     for t in without_whitespace[1:]:
-        if (
-            not looking_for_comma
-            and t.type not in accepted_tokens
-            or looking_for_comma
-            and t.type != TokenType.COMMA
-        ):
+        if not looking_for_comma and t.type not in accepted_tokens or looking_for_comma and t.type != TokenType.COMMA:
             return False
         looking_for_comma = not looking_for_comma
     return True
@@ -1150,6 +1106,11 @@ def create_unscoped_code_statement(
     code: str,
     type_annotation: Optional[list[Token]] = None,
 ) -> tuple[CodeStatement, ...]:
+    """Parse statements without curly braces into AST nodes.
+
+    Handles variable declarations, assignments, imports, exports,
+    function definitions, return/delete statements, and satirical keywords.
+    """
 
     is_debug = tokens[-1].type == TokenType.QUESTION
     confidence = 0 if is_debug else len(tokens[-1].value)
@@ -1165,10 +1126,7 @@ def create_unscoped_code_statement(
         "circle_back",
         "touch_base",
     ]
-    if (
-        without_whitespace[0].type == TokenType.NAME
-        and without_whitespace[0].value in corporate_keywords
-    ):
+    if without_whitespace[0].type == TokenType.NAME and without_whitespace[0].value in corporate_keywords:
         # Parse arguments (everything between keyword and !)
         args_tokens = tokens[int(tokens[0].type == TokenType.WHITESPACE) + 1 : -1]
         # Split by comma to get individual arguments
@@ -1212,9 +1170,7 @@ def create_unscoped_code_statement(
 
     # import statement: import name, name, name!
     can_be_import = (
-        all(
-            t.type in {TokenType.NAME, TokenType.COMMA} for t in without_whitespace[:-1]
-        )
+        all(t.type in {TokenType.NAME, TokenType.COMMA} for t in without_whitespace[:-1])
         and len(without_whitespace) >= 3
         and is_proper_comma_list(without_whitespace[1:-1])
         and without_whitespace[0].type == TokenType.NAME
@@ -1223,10 +1179,7 @@ def create_unscoped_code_statement(
 
     # export statement: export name, name, name to string/name!
     can_be_export = (
-        all(
-            t.type in {TokenType.STRING, TokenType.NAME, TokenType.COMMA}
-            for t in without_whitespace[:-1]
-        )
+        all(t.type in {TokenType.STRING, TokenType.NAME, TokenType.COMMA} for t in without_whitespace[:-1])
         and len(without_whitespace) >= 5
         and is_proper_comma_list(without_whitespace[1:-3])
         and without_whitespace[0].type == TokenType.NAME
@@ -1244,11 +1197,7 @@ def create_unscoped_code_statement(
         and without_whitespace[2].type in {TokenType.BANG, TokenType.QUESTION}
     )
 
-    contains_equals = any(
-        tokens_is_equal := [
-            t.type == TokenType.EQUAL and t.value == "=" for t in tokens
-        ]
-    )
+    contains_equals = any(tokens_is_equal := [t.type == TokenType.EQUAL and t.value == "=" for t in tokens])
     can_be_var_assignment = can_be_var_declaration = contains_equals
 
     # checking for single name and index for variable assignment
@@ -1257,12 +1206,9 @@ def create_unscoped_code_statement(
         and without_whitespace[0].type == TokenType.NAME
         and without_whitespace[1].type in {TokenType.EQUAL, TokenType.L_SQUARE}
     )
-    var_assignment_index: list[list[Token]] = [
-        []
-    ]  # is list[list] to handle multiple indexes
+    var_assignment_index: list[list[Token]] = [[]]  # is list[list] to handle multiple indexes
     bracket_layers, add_to_var_assignment_index = 0, False
     for t in tokens:
-
         if not can_be_var_assignment:
             break
 
@@ -1277,9 +1223,7 @@ def create_unscoped_code_statement(
                 add_to_var_assignment_index = False
                 var_assignment_index.append([])
             continue
-        elif (
-            bracket_layers == 0 and t.type == TokenType.EQUAL
-        ):  # exit when hitting the equals
+        elif bracket_layers == 0 and t.type == TokenType.EQUAL:  # exit when hitting the equals
             break
 
         if add_to_var_assignment_index:
@@ -1303,11 +1247,7 @@ def create_unscoped_code_statement(
                     break
             names_in_row.append(t)
         else:
-            if (
-                t.type == TokenType.GREATER_THAN
-                or not 3 <= len(names_in_row) <= 4
-                or not can_be_var_declaration
-            ):
+            if t.type == TokenType.GREATER_THAN or not 3 <= len(names_in_row) <= 4 or not can_be_var_declaration:
                 break
             if not lifetime:
                 lifetime = t.value
@@ -1356,9 +1296,7 @@ def create_unscoped_code_statement(
     ):
         possibilities.append(
             ReverseStatement(
-                keyword=tokens_no_ws[
-                    0
-                ],  # candidate keyword (should resolve to 'reverse')
+                keyword=tokens_no_ws[0],  # candidate keyword (should resolve to 'reverse')
                 name=tokens_no_ws[1],
                 debug=debug_level,
             )
@@ -1366,9 +1304,7 @@ def create_unscoped_code_statement(
     if can_be_return:
         possibilities.append(
             ReturnStatement(
-                keyword=without_whitespace[
-                    0
-                ],  # should be the same as tokens[0].value but this makes me feel safe
+                keyword=without_whitespace[0],  # should be the same as tokens[0].value but this makes me feel safe
                 expression=tokens[1:-1],
                 debug=debug_level,
             )
@@ -1412,9 +1348,7 @@ def create_unscoped_code_statement(
             QuantumStatement(
                 keyword=without_whitespace[0],
                 name=without_whitespace[1],
-                value=tokens[
-                    value_start_index:-1
-                ],  # After variable name until punctuation
+                value=tokens[value_start_index:-1],  # After variable name until punctuation
                 debug=debug_level,
             )
         )
@@ -1465,9 +1399,7 @@ def create_unscoped_code_statement(
                 name=names_in_row[-1],
                 modifiers=names_in_row[:-1],
                 lifetime=lifetime,
-                expression=tokens[
-                    tokens_is_equal.index(True) + 1 : -1
-                ],  # the end should be a puncutation
+                expression=tokens[tokens_is_equal.index(True) + 1 : -1],  # the end should be a puncutation
                 confidence=confidence,
                 debug=debug_level,
                 type_annotation=type_annotation,
@@ -1486,33 +1418,26 @@ def create_unscoped_code_statement(
     return tuple(possibilities)
 
 
-def generate_syntax_tree(
-    filename: str, tokens: list[Token], code: str
-) -> list[tuple[CodeStatement, ...]]:
+def generate_syntax_tree(filename: str, tokens: list[Token], code: str) -> list[tuple[CodeStatement, ...]]:
     """Split the code up into lines, which are then parsed and shit"""
 
     assert_proper_indentation(filename, tokens, code)
     statements = split_into_statements(tokens)
     extracted_types = extract_type_annotations(filename, code, statements)
-    removed_hints = remove_type_hints(
-        filename, code, [tokens for tokens, _ in extracted_types]
-    )
+    removed_hints = remove_type_hints(filename, code, [tokens for tokens, _ in extracted_types])
     final_statements = []
 
     # now we need to perform pattern matching on each list of statements
-    for (original_tokens, type_annotation), tokens in zip(
+    for (_, type_annotation), tokens in zip(  # pylint: disable=unused-variable
         extracted_types, removed_hints
     ):
-
         without_whitespace = [t for t in tokens if t.type != TokenType.WHITESPACE]
 
         try:
             # contains an open scope :)
             if any(t.type == TokenType.L_CURLY for t in tokens):
                 final_statements.append(
-                    create_scoped_code_statement(
-                        filename, tokens, without_whitespace, code, type_annotation
-                    )
+                    create_scoped_code_statement(filename, tokens, without_whitespace, code, type_annotation)
                 )
 
             else:
@@ -1529,9 +1454,7 @@ def generate_syntax_tree(
             # exit if some possiblity was found
             if final_statements[-1]:
                 continue
-        except (
-            IndexError
-        ):  # i have no idea what kind of errors are going to be rasied here
+        except IndexError:  # i have no idea what kind of errors are going to be rasied here
             pass
         raise_error_at_line(
             filename,

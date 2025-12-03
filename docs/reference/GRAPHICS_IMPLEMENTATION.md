@@ -81,17 +81,17 @@ canvas.save("output.png")!
 
 ### Status
 
-✅ Graphics module created  
-✅ Canvas class with -1 indexing implemented  
-✅ Color system with maybe support  
-✅ All drawing primitives  
-✅ Transformation stack  
-✅ Integration with builtin.py  
-✅ Pillow added to pyproject.toml  
-🔧 Method signatures need arg count fixes  
-⏳ Example programs need syntax corrections  
-⏳ Full testing pending  
-⏳ Documentation pending  
+✅ Graphics module created
+✅ Canvas class with -1 indexing implemented
+✅ Color system with maybe support
+✅ All drawing primitives
+✅ Transformation stack
+✅ Integration with builtin.py
+✅ Pillow added to pyproject.toml
+🔧 Method signatures need arg count fixes
+⏳ Example programs need syntax corrections
+⏳ Full testing pending
+⏳ Documentation pending
 
 ### Known Issues
 
@@ -103,7 +103,7 @@ canvas.save("output.png")!
 ### Next Steps
 
 1. Fix arg counts in builtin.py canvas method wrappers
-2. Test each drawing primitive individually  
+2. Test each drawing primitive individually
 3. Update example programs with correct syntax
 4. Create comprehensive GRAPHICS_GUIDE.md
 5. Add graphics examples to README.md

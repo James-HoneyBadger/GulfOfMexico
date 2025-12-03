@@ -6,7 +6,7 @@ print "=== The Ultimate Satirical Programming Experience ==="!
 // Start with happiness
 happy {
    print "\n😊 Beginning with positive vibes!"!
-   
+
    // Corporate speak in happy mode
    const team = String("A-Team")!
    const project = String("MVP")!

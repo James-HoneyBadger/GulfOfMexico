@@ -12,14 +12,15 @@ To add a new built-in function to the production interpreter, you must:
 """
 
 from typing import Callable
-from gulfofmexico.plugin_system import Plugin
-from gulfofmexico.handlers import StatementHandler
+
 from gulfofmexico.builtin import (
-    GulfOfMexicoValue,
+    GulfOfMexicoList,
     GulfOfMexicoNumber,
     GulfOfMexicoString,
-    GulfOfMexicoList,
+    GulfOfMexicoValue,
 )
+from gulfofmexico.handlers import StatementHandler
+from gulfofmexico.plugin_system import Plugin
 
 
 def builtin_sum(args: list[GulfOfMexicoValue]) -> GulfOfMexicoValue:

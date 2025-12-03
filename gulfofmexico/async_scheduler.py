@@ -4,12 +4,11 @@ Async Scheduler for Gulf of Mexico
 Provides non-blocking async execution with cooperative multitasking.
 """
 
-from typing import Optional
 import time
+from typing import Optional
 
 from gulfofmexico.builtin import (
     GulfOfMexicoPromise,
-    GulfOfMexicoValue,
     GulfOfMexicoUndefined,
 )
 

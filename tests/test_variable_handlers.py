@@ -8,22 +8,23 @@ via pattern matching in interpreter.py, not through these handlers.
 """
 
 import unittest
-from gulfofmexico.engine.handlers.variables import (
-    VariableDeclarationHandler,
-    VariableAssignmentHandler,
-)
-from gulfofmexico.processor.syntax_tree import (
-    VariableDeclaration,
-    VariableAssignment,
-)
-from gulfofmexico.context import ExecutionContext
+
+from gulfofmexico.base import Token, TokenType
 from gulfofmexico.builtin import (
     GulfOfMexicoNumber,
     Variable,
     VariableLifetime,
 )
-from gulfofmexico.base import Token, TokenType
+from gulfofmexico.context import ExecutionContext
+from gulfofmexico.engine.handlers.variables import (
+    VariableAssignmentHandler,
+    VariableDeclarationHandler,
+)
 from gulfofmexico.processor.expression_tree import ValueNode
+from gulfofmexico.processor.syntax_tree import (
+    VariableAssignment,
+    VariableDeclaration,
+)
 
 
 class TestVariableDeclarationHandler(unittest.TestCase):
@@ -86,11 +87,7 @@ class TestVariableAssignmentHandler(unittest.TestCase):
                 {
                     "x": Variable(
                         "x",
-                        [
-                            VariableLifetime(
-                                GulfOfMexicoNumber(5), 100000000000, 0, True, True
-                            )
-                        ],
+                        [VariableLifetime(GulfOfMexicoNumber(5), 100000000000, 0, True, True)],
                         [],
                     )
                 }

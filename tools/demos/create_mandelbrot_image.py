@@ -2,6 +2,7 @@
 """
 Create a colorful Mandelbrot-style fractal image
 """
+
 from PIL import Image, ImageDraw
 
 

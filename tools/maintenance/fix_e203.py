@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """Fix E203 whitespace before ':' in slice operations."""
-import re
+
 from pathlib import Path
 
 

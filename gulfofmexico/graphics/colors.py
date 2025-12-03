@@ -9,9 +9,10 @@ Supports:
 """
 
 from __future__ import annotations
-from dataclasses import dataclass
-from typing import Optional, Union
+
 import random
+from dataclasses import dataclass
+from typing import Union
 
 
 @dataclass
@@ -100,9 +101,7 @@ def parse_color(
         if len(color_spec) == 3:
             return GulfOfMexicoColor(color_spec[0], color_spec[1], color_spec[2])
         elif len(color_spec) == 4:
-            return GulfOfMexicoColor(
-                color_spec[0], color_spec[1], color_spec[2], color_spec[3]
-            )
+            return GulfOfMexicoColor(color_spec[0], color_spec[1], color_spec[2], color_spec[3])
 
     # Default to black if can't parse
     return GulfOfMexicoColor(0, 0, 0)

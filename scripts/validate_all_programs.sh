@@ -22,7 +22,7 @@ SKIPPED=0
 test_program() {
    local file="$1"
    local filename=$(basename "$file")
-   
+
    # Skip certain files that are known to require special handling
    if [[ "$filename" == "multi_file.gom" ]] || \
       [[ "$filename" == "test_imports.gom" ]] || \
@@ -31,7 +31,7 @@ test_program() {
       ((SKIPPED++))
       return
    fi
-   
+
    # Test the program with timeout
    if timeout 2 python3 -m gulfofmexico "$file" >/dev/null 2>&1; then
       echo -e "${GREEN}✓ PASS${NC} $file"

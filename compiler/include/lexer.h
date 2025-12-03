@@ -14,7 +14,7 @@ enum class TokenType {
     BOOL_FALSE,
     UNDEFINED,
     MAYBE,
-    
+
     // Identifiers and keywords
     IDENTIFIER,
     FUNCTION,
@@ -36,45 +36,45 @@ enum class TokenType {
     AWAIT,
     NEXT,
     PREVIOUS,
-    
+
     // Try/Whatever
     TRY,
     WHATEVER,
-    
+
     // Procrastination
     LATER,
     EVENTUALLY,
     WHENEVER,
-    
+
     // Corporate Speak
     SYNERGIZE,
     LEVERAGE,
     PARADIGM_SHIFT,
     CIRCLE_BACK,
     TOUCH_BASE,
-    
+
     // Emotional
     HAPPY,
     SAD,
     ANGRY,
     EXCITED,
     TIRED,
-    
+
     // Superstitious
     LUCKY,
     UNLUCKY,
     CROSS_FINGERS,
     KNOCK_ON_WOOD,
-    
+
     // Quantum
     QUANTUM,
-    
+
     // Time Travel
     TIME_TRAVEL,
-    
+
     // Gaslighting
     DEFINITELY_NOT,
-    
+
     // Blockchain
     BLOCKCHAIN,
     SMART_CONTRACT,
@@ -86,37 +86,37 @@ enum class TokenType {
     DAO,
     DEFI,
     HODL,
-    
+
     // AI Buzzwords
     AI_POWERED,
     DEEP_LEARNING,
     NEURAL_NETWORK,
     MACHINE_LEARNING,
-    
+
     // Agile
     SPRINT,
     STANDUP,
     RETRO,
     BURNDOWN,
-    
+
     // Security Theater
     PENETRATION_TEST,
     VULNERABILITY_SCAN,
     SECURITY_AUDIT,
     COMPLIANCE_CHECK,
-    
+
     // DevOps
     CONTAINERIZE,
     ORCHESTRATE,
     MICROSERVICE,
     KUBERNETES,
-    
+
     // Startup
     PIVOT,
     DISRUPT,
     UNICORN,
     HOCKEY_STICK,
-    
+
     // Built-in functions
     NUMBER_FUNC,
     STRING_FUNC,
@@ -149,7 +149,7 @@ enum class TokenType {
     CAGR,
     LINEAR_REGRESSION,
     QUADRATIC_SOLVE,
-    
+
     // Operators
     PLUS,
     MINUS,
@@ -170,7 +170,7 @@ enum class TokenType {
     OR,
     NOT,
     BANG,
-    
+
     // Delimiters
     LPAREN,
     RPAREN,
@@ -185,7 +185,7 @@ enum class TokenType {
     ARROW,
     DOUBLE_ARROW,
     COLON,
-    
+
     // Special
     NEWLINE,
     EOF_TOKEN,
@@ -197,7 +197,7 @@ struct Token {
     std::string value;
     int line;
     int column;
-    
+
     Token(TokenType t, std::string v, int l, int c)
         : type(t), value(std::move(v)), line(l), column(c) {}
 };
@@ -205,26 +205,26 @@ struct Token {
 class Lexer {
 public:
     explicit Lexer(std::string source);
-    
+
     std::vector<Token> tokenize();
     Token nextToken();
-    
+
 private:
     std::string source;
     size_t pos;
     int line;
     int column;
-    
+
     char peek(int offset = 0) const;
     char advance();
     void skipWhitespace();
     void skipComment();
-    
+
     Token tokenizeNumber();
     Token tokenizeString();
     Token tokenizeIdentifierOrKeyword();
     Token tokenizeOperator();
-    
+
     bool isDigit(char c) const;
     bool isAlpha(char c) const;
     bool isAlphaNumeric(char c) const;

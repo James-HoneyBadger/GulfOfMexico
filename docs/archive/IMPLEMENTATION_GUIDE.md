@@ -9,7 +9,7 @@
 **Features**: 100+ language features, all satirical keywords, all analysis functions
 
 ### C++ Compiler (Performance-Focused)
-**Location**: `compiler/` directory  
+**Location**: `compiler/` directory
 **Build**: `cd compiler/build && cmake .. && make`
 **Run**: `./gomcc program.gom -o output.cpp && g++ -std=c++17 output.cpp -o program && ./program`
 **Features**: Core language features, working on parity
@@ -78,7 +78,7 @@
 - All operators tokenized
 - Compiler builds successfully
 
-### Phase 2: Parser ⏳ IN PROGRESS  
+### Phase 2: Parser ⏳ IN PROGRESS
 - Need to add statement parsing for satirical features
 - Estimated time: 2-3 hours
 

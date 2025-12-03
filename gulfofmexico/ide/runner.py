@@ -6,11 +6,11 @@ import threading
 from dataclasses import dataclass, field
 from typing import Optional, Union
 
-from gulfofmexico.builtin import KEYWORDS, Name, GulfOfMexicoValue, Variable
-from gulfofmexico.processor.lexer import tokenize
-from gulfofmexico.processor.syntax_tree import generate_syntax_tree
 import gulfofmexico.interpreter as interpreter
 from gulfofmexico.base import InterpretationError
+from gulfofmexico.builtin import KEYWORDS, GulfOfMexicoValue, Name, Variable
+from gulfofmexico.processor.lexer import tokenize
+from gulfofmexico.processor.syntax_tree import generate_syntax_tree
 
 
 @dataclass
@@ -19,12 +19,8 @@ class ExecutionSession:
         default_factory=lambda: [KEYWORDS.copy()]  # type: ignore
     )
     async_statements: interpreter.AsyncStatements = field(default_factory=list)
-    when_watchers: interpreter.WhenStatementWatchers = field(
-        default_factory=lambda: [{}]
-    )
-    importable_names: dict[str, dict[str, GulfOfMexicoValue]] = field(
-        default_factory=dict
-    )
+    when_watchers: interpreter.WhenStatementWatchers = field(default_factory=lambda: [{}])
+    importable_names: dict[str, dict[str, GulfOfMexicoValue]] = field(default_factory=dict)
 
     def init_globals(self, filename: str, code: str) -> None:
         exported_names: list[tuple[str, str, GulfOfMexicoValue]] = []
@@ -50,9 +46,7 @@ class OutputCapture(io.StringIO):
             return super().write(s)
 
 
-def run_code(
-    session: ExecutionSession, code: str, filename: str = "__ide_buffer__"
-) -> tuple[str, Optional[str]]:
+def run_code(session: ExecutionSession, code: str, filename: str = "__ide_buffer__") -> tuple[str, Optional[str]]:
     """Run code via production interpreter and capture stdout.
 
     Returns (stdout, error) where error is formatted message or None.

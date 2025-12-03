@@ -2,42 +2,27 @@
 
 try:
     # Try PySide6 first
-    from PySide6.QtCore import Qt, QThread, Signal, QObject, QTimer
+    from PySide6.QtCore import QObject, Qt, QThread, QTimer, Signal
+    from PySide6.QtGui import QAction, QGuiApplication
     from PySide6.QtWidgets import (
         QApplication,
-        QFileDialog,
-        QMainWindow,
-        QMessageBox,
         QDockWidget,
-        QWidget,
-        QVBoxLayout,
+        QFileDialog,
         QHBoxLayout,
-        QPushButton,
-        QTextEdit,
-        QTabWidget,
+        QMainWindow,
         QMenu,
+        QMessageBox,
+        QPushButton,
+        QTabWidget,
+        QTextEdit,
+        QVBoxLayout,
+        QWidget,
     )
-    from PySide6.QtGui import QAction, QGuiApplication
 
     QT_VERSION = "PySide6"
 
 except ImportError:
     # Fall back to PyQt5
-    from PyQt5.QtWidgets import (
-        QApplication,
-        QFileDialog,
-        QMainWindow,
-        QMessageBox,
-        QDockWidget,
-        QWidget,
-        QVBoxLayout,
-        QHBoxLayout,
-        QPushButton,
-        QTextEdit,
-        QTabWidget,
-        QMenu,
-        QAction,
-    )
 
     QT_VERSION = "PyQt5"
 

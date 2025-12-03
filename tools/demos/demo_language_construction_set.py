@@ -61,9 +61,7 @@ def demo_2_presets():
     print(f"   Name: {config.name}")
     print(f"   Description: {config.description}")
     print(f"   Array indexing: starts at {config.syntax_options.array_start_index}")
-    print(
-        f"   Satirical features: {'enabled' if config.syntax_options.enable_satirical_keywords else 'disabled'}"
-    )
+    print(f"   Satirical features: {'enabled' if config.syntax_options.enable_satirical_keywords else 'disabled'}")
 
     return config
 
@@ -231,9 +229,7 @@ def demo_6_runtime():
     print("\n4. Checking feature status:")
     features = ["satirical", "quantum", "three_valued_logic"]
     for feature in features:
-        status = (
-            "enabled" if LanguageRuntime.is_feature_enabled(feature) else "disabled"
-        )
+        status = "enabled" if LanguageRuntime.is_feature_enabled(feature) else "disabled"
         print(f"   {feature:20} {status}")
 
     print("\n5. Getting array configuration:")
@@ -256,9 +252,7 @@ def demo_7_validation():
     print("\n1. Creating a valid configuration:")
     config = LanguageConfig()
     errors = config.validate()
-    print(
-        f"   Validation result: {'✓ Valid' if not errors else f'✗ {len(errors)} errors'}"
-    )
+    print(f"   Validation result: {'✓ Valid' if not errors else f'✗ {len(errors)} errors'}")
 
     print("\n2. Creating an invalid configuration:")
     bad_config = LanguageConfig()
@@ -296,7 +290,7 @@ def demo_8_documentation():
     table = config.export_mapping_table("demo_spanish_docs.md")
 
     print("   ✓ Generated documentation")
-    print(f"   ✓ Saved to: demo_spanish_docs.md")
+    print("   ✓ Saved to: demo_spanish_docs.md")
 
     print("\n2. Table preview (first 20 lines):")
     lines = table.split("\n")[:20]
@@ -311,13 +305,7 @@ def main():
     """Run all demos."""
     print("\n")
     print("╔" + "=" * 68 + "╗")
-    print(
-        "║"
-        + " " * 10
-        + "Gulf of Mexico Language Construction Set Demo"
-        + " " * 12
-        + "║"
-    )
+    print("║" + " " * 10 + "Gulf of Mexico Language Construction Set Demo" + " " * 12 + "║")
     print("╚" + "=" * 68 + "╝")
 
     demos = [

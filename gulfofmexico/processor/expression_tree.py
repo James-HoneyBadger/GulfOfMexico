@@ -37,16 +37,15 @@ Special Features:
 """
 
 from __future__ import annotations
+
 from abc import ABCMeta, abstractmethod
 from typing import Optional
 
 from gulfofmexico.base import (
     STR_TO_OPERATOR,
-    NonFormattedError,
+    OperatorType,
     Token,
     TokenType,
-    OperatorType,
-    InterpretationError,
     raise_error_at_token,
 )
 
@@ -170,9 +169,7 @@ def get_expr_first_token(expr: ExpressionTreeNode) -> Optional[Token]:
             return get_expr_first_token(expr.value) or get_expr_first_token(expr.index)
 
 
-def build_expression_tree(
-    filename: str, tokens: list[Token], code: str
-) -> ExpressionTreeNode:
+def build_expression_tree(filename: str, tokens: list[Token], code: str) -> ExpressionTreeNode:
     """
     This language has significant whitespace, so the biggest split happens where there is most space
      - func a, b  +  c becomes func(a, b) + c but func a, b+c  becomes func(a, b + c)
@@ -187,9 +184,7 @@ def build_expression_tree(
     # tabs at the beginning or end do not matter
     for token in tokens[1:-1]:
         if token.type == TokenType.WHITESPACE and "\t" in token.value:
-            raise_error_at_token(
-                filename, code, "Tabs are not allowed in expressions.", token
-            )
+            raise_error_at_token(filename, code, "Tabs are not allowed in expressions.", token)
         elif token.type == TokenType.NEWLINE:
             raise_error_at_token(
                 filename,
@@ -199,9 +194,7 @@ def build_expression_tree(
             )
 
     # create a new list consisting and tokens and a brand new type: the list
-    tokens_without_whitespace = [
-        token for token in tokens if token.type != TokenType.WHITESPACE
-    ]
+    tokens_without_whitespace = [token for token in tokens if token.type != TokenType.WHITESPACE]
     if (
         len(tokens_without_whitespace) == 2
         and tokens_without_whitespace[0].type == TokenType.L_SQUARE
@@ -223,7 +216,6 @@ def build_expression_tree(
             bracket_layers -= 1
         if isinstance(updated_list[i], OperatorType) and bracket_layers == 0:
             try:
-
                 # first check for negative sign -- this is horrible :D
                 if (
                     i == 0
@@ -260,9 +252,7 @@ def build_expression_tree(
 
     # detecting single argument function
     # this doesn't seem to adhere to my standards 100%, so its not a bug, its a feature
-    starts_with_operator = int(
-        tokens_without_whitespace[0].type in {TokenType.SEMICOLON, TokenType.SUBTRACT}
-    )
+    starts_with_operator = int(tokens_without_whitespace[0].type in {TokenType.SEMICOLON, TokenType.SUBTRACT})
     first_name_index = int(starts_with_whitespace) + int(starts_with_operator)
     if (
         len(tokens) >= 3 + first_name_index
@@ -294,15 +284,12 @@ def build_expression_tree(
         or updated_list[max_index] == OperatorType.COM
     ):
         return SingleOperatorNode(
-            build_expression_tree(
-                filename, tokens[int(starts_with_whitespace) + 1 :], code
-            ),
+            build_expression_tree(filename, tokens[int(starts_with_whitespace) + 1 :], code),
             tokens_without_whitespace[0],
         )
 
     # value, like a list, name, or anything else
     if max_index == -1:
-
         # just making sure the input is correct
         try:
             name_or_value = tokens_without_whitespace[0]
@@ -318,9 +305,7 @@ def build_expression_tree(
                     tokens_without_whitespace[0],
                 )
         except IndexError:
-            raise_error_at_token(
-                filename, code, "Expected name or value.", tokens_without_whitespace[0]
-            )
+            raise_error_at_token(filename, code, "Expected name or value.", tokens_without_whitespace[0])
 
         # this is a list :)
         if name_or_value.type == TokenType.L_SQUARE:
@@ -334,7 +319,6 @@ def build_expression_tree(
                 # this means the closing happen, signifying the end of the list
                 if bracket_layers == 0:
                     if i == len(tokens_without_whitespace) - 1:
-
                         # let's find the most significant comma, and split by that
                         # if there's a function in the middle of the list, too bad :)
                         # [func a, b]  == [func(a), b] and also [func(a, b)]  # literally how do i tell them apart
@@ -342,17 +326,12 @@ def build_expression_tree(
                         # need to consider the width of whitespace from either side fr
                         l_width = (
                             len(token.value)
-                            if (token := tokens[int(starts_with_whitespace) + 1]).type
-                            == TokenType.WHITESPACE
+                            if (token := tokens[int(starts_with_whitespace) + 1]).type == TokenType.WHITESPACE
                             else 0
                         )
                         r_width = (
                             len(token.value)
-                            if (
-                                token := tokens[
-                                    len(tokens) - int(ends_with_whitespace) - 2
-                                ]
-                            ).type
+                            if (token := tokens[len(tokens) - int(ends_with_whitespace) - 2]).type
                             == TokenType.WHITESPACE
                             else 0
                         )
@@ -396,9 +375,7 @@ def build_expression_tree(
                                             [int(starts_with_whitespace), *all_commas],
                                             [
                                                 *all_commas,
-                                                len(tokens)
-                                                - 1
-                                                - int(ends_with_whitespace),
+                                                len(tokens) - 1 - int(ends_with_whitespace),
                                             ],
                                         )  # adjusting here in order to avoid the bracket tokens
                                     ]
@@ -411,10 +388,7 @@ def build_expression_tree(
                                 build_expression_tree(
                                     filename,
                                     tokens[
-                                        int(starts_with_whitespace)
-                                        + 1 : len(tokens)
-                                        - int(ends_with_whitespace)
-                                        - 1
+                                        int(starts_with_whitespace) + 1 : len(tokens) - int(ends_with_whitespace) - 1
                                     ],
                                     code,
                                 )
@@ -428,9 +402,7 @@ def build_expression_tree(
         if tokens_without_whitespace[-1].type == TokenType.R_SQUARE:
             bracket_layers = -1
             end_index = len(tokens) - int(ends_with_whitespace) - 1
-            for i, token in reversed(
-                list(enumerate(tokens[:end_index]))
-            ):  # i don't like this one bit  :(
+            for i, token in reversed(list(enumerate(tokens[:end_index]))):  # i don't like this one bit  :(
                 if token.type == TokenType.L_SQUARE:
                     bracket_layers += 1
                 elif token.type == TokenType.R_SQUARE:
@@ -439,12 +411,8 @@ def build_expression_tree(
                 # first index!!!!!!!!!!!!!!!!!!!!
                 if bracket_layers == 0:
                     return IndexNode(
-                        build_expression_tree(
-                            filename, tokens[int(starts_with_whitespace) : i], code
-                        ),
-                        build_expression_tree(
-                            filename, tokens[i + 1 : end_index], code
-                        ),
+                        build_expression_tree(filename, tokens[int(starts_with_whitespace) : i], code),
+                        build_expression_tree(filename, tokens[i + 1 : end_index], code),
                     )
 
         # finally end this vicious cycle
@@ -456,9 +424,7 @@ def build_expression_tree(
         # we need to find every other comma as they become the arguments of the function
         # additionally, there needs to be a spacing of equal length between the name of the function and the next argument
 
-        if tokens_without_whitespace[
-            0
-        ].type != TokenType.NAME or tokens_without_whitespace[1].type not in [
+        if tokens_without_whitespace[0].type != TokenType.NAME or tokens_without_whitespace[1].type not in [
             TokenType.NAME,
             TokenType.L_SQUARE,
             TokenType.STRING,
@@ -472,16 +438,10 @@ def build_expression_tree(
 
         all_commas = []
         for i in range(len(updated_list)):
-            if (
-                updated_list[i].value == ","
-            ):  # okay this is weird because enums have .value and tokens have .value
+            if updated_list[i].value == ",":  # okay this is weird because enums have .value and tokens have .value
                 if (
                     max_width == 0
-                    or (
-                        tokens[i + 1].type == TokenType.WHITESPACE
-                        and len(tokens[i + 1].value)
-                    )
-                    == max_width
+                    or (tokens[i + 1].type == TokenType.WHITESPACE and len(tokens[i + 1].value)) == max_width
                 ):
                     all_commas.append(i)
 
@@ -503,9 +463,7 @@ def build_expression_tree(
     else:
         operator = updated_list[max_index]
         if not isinstance(operator, OperatorType):
-            raise_error_at_token(
-                filename, code, "Something went wrong. My bad.", tokens[max_index]
-            )
+            raise_error_at_token(filename, code, "Something went wrong. My bad.", tokens[max_index])
         return ExpressionNode(
             build_expression_tree(filename, tokens[:max_index], code),
             build_expression_tree(filename, tokens[max_index + 1 :], code),

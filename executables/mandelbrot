@@ -5,8 +5,7 @@ Creates a colorful fractal pattern resembling the Mandelbrot set
 """
 
 import sys
-import os
-from pathlib import Path
+
 from PIL import Image, ImageDraw
 
 
