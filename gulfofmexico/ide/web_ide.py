@@ -798,7 +798,7 @@ const model = linear_regression xs, ys!
 print("linear_regression([0..4],[1,3,5,7,9]) [slope, intercept]:")!
 print(model)!
 
-const roots = quadratic_solve 1, sub 0, 7, 12!
+const roots = quadratic_solve 1, 0 - 7, 12!
 print("quadratic_solve(1, -7, 12) roots:")!
 print(roots)!
 
@@ -1206,5 +1206,19 @@ def run_web_ide(port=8080):
 
 
 if __name__ == "__main__":
-    port = int(sys.argv[1]) if len(sys.argv) > 1 else 8080  # pylint: disable=redefined-outer-name
-    run_web_ide(port)
+    import argparse
+
+    parser = argparse.ArgumentParser(description="Gulf of Mexico Web IDE server")
+    parser.add_argument("port", nargs="?", type=int, help="Port to run the web IDE on")
+    parser.add_argument("--port", dest="port_kw", type=int, help="Port to run the web IDE on")
+    args = parser.parse_args()
+
+    # Priority: --port > positional port > env > default
+    env_port = os.environ.get("GULFOFMEXICO_WEB_IDE_PORT")
+    selected_port = (
+        args.port_kw
+        if args.port_kw is not None
+        else (args.port if args.port is not None else (int(env_port) if env_port else 8080))
+    )
+
+    run_web_ide(selected_port)
