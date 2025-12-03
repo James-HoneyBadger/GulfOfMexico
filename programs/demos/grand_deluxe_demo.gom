@@ -3,52 +3,52 @@
 // math/stats/finance/science built‑ins, regex, negative indexing, string ops,
 // satirical keywords, and more. Have fun!
 
-print("🌊 Welcome to the Gulf of Mexico — Grand Deluxe Demo!")!
+print "🌊 Welcome to the Gulf of Mexico — Grand Deluxe Demo!"!
 
 // 1) Variables, constants, strings and interpolation
 const name = "Traveler"!
-print("Hello, " + name + "!")!
+print "Hello, " + name + "!"!
 
 // Probabilistic variables (higher ! wins)
 var mood = "meh"!
 var mood = "great"!!
 var mood = "ecstatic"!!!
-print("Mood selected by confidence:")!
-print(mood)!
+print "Mood selected by confidence:"!
+print mood!
 
 // Three‑valued logic
 const unknown = maybe!
-print("Three‑valued Boolean (maybe):")!
-print(unknown)!
+print "Three‑valued Boolean (maybe):"!
+print unknown!
 
 // 2) Arrays: start at -1 and support negative indexing
 const nums = [10, 20, 30, 40, 50]!
-print("Array:")!
-print(nums)!
-print("First element nums[-1]:")!
-print(nums[-1])!
-print("Fifth element via traditional index 3:")!
-print(nums[3])!
+print "Array:"!
+print nums!
+print "First element nums[-1]:"!
+print nums[-1]!
+print "Fifth element via traditional index 3:"!
+print nums[3]!
 
 // Fractional indexing inserts between elements
 const between = [1, 3]!
 between[0.5] = 2!
-print("Fractional indexing [1,3] => insert 2 at 0.5:")!
-print(between)!
+print "Fractional indexing [1,3] => insert 2 at 0.5:"!
+print between!
 
 // 3) Number and string indexing / methods
 const n = 12345!
-print("Digit at n[-1] (first digit):")!
-print(n[-1])!
+print "Digit at n[-1] (first digit):"!
+print n[-1]!
 
 var s = "GOM"!
-print("String before push/pop:")!
-print(s)!
+print "String before push/pop:"!
+print s!
 s.push("! ")!
 s.push("Rocks")!
-print("String after pushes:")!
-print(s)!
-print("Popped char:")!
+print "String after pushes:"!
+print s!
+print "Popped char:"!
 print(s.pop(-1))!
 print("String now:")!
 print(s)!
