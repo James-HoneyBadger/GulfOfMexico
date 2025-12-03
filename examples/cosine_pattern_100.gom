@@ -5,27 +5,27 @@
 // Indentation pattern repeats a 10-step cosine approximation across 10 cycles.
 // Base indents per 10-step cycle: 20,18,13,6,3,0,3,6,13,18
 
-print("                    @")!
-print("                  #")!
-print("             *")!
-print("      &")!
-print("   %")!
-print("?")!
-print("   X")!
-print("      =")!
-print("             +")!
-print("                  ~")!
-print("                    $")!
-print("                  7")!
-print("             a")!
-print("      ^")!
-print("   ")!
-print("!")!
-print("   Z")!
-print("      :")!
-print("             [")!
-print("                  )")!
-print("                    R")!
+print "                    @"!
+print "                  #"!
+print "             *"!
+print "      &"!
+print "   %"!
+print "?"!
+print "   X"!
+print "      ="!
+print "             +"!
+print "                  ~"!
+print "                    $"!
+print "                  7"!
+print "             a"!
+print "      ^"!
+print "   "!
+print "!"!
+print "   Z"!
+print "      :"!
+print "             ["!
+print "                  )"!
+print "                    R"!
 print("                  9")!
 print("             q")!
 print("      <")!

@@ -5,13 +5,13 @@
 // 10 lines: indentation approximates a cosine over one period.
 // Indents chosen from scaled cos values: 20,18,13,6,3,0,3,6,13,18
 
-print("                    @")!
-print("                  #")!
-print("             *")!
-print("      &")!
-print("   %")!
-print("?")!
-print("   X")!
-print("      =")!
-print("             +")!
-print("                  ~")!
+print "                    @"!
+print "                  #"!
+print "             *"!
+print "      &"!
+print "   %"!
+print "?"!
+print "   X"!
+print "      ="!
+print "             +"!
+print "                  ~"!
