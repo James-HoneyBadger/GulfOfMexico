@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "gulfofmexico"
-version = "0.1.5"
+version = "0.1.6"
 description = "Experimental interpreter based on Lu Wilson's (TodePond) Gulf of Mexico conceptual design - featuring probabilistic variables, negative indexing, and temporal lifetimes"
 readme = "README.md"
 authors = ["James Temple <james@honey-badger.org>"]

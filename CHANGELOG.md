@@ -64,7 +64,7 @@ The format is simple date-based entries. Dates use ISO-8601 (YYYY-MM-DD).
   - `compiler/examples/` for compiler-specific samples
   - Python unit tests live in `tests/`
 
-## 2025-12-03 (unreleased)
+## 2025-12-03 (v0.1.6)
 
 ### No-paren normalization sweep & bugfixes
 - Normalized many example and program source files to the canonical "no-paren" calling style.
