@@ -2,13 +2,15 @@ from __future__ import annotations
 
 import json
 import os
+import socket
 from functools import partial
+from html import escape as _html_escape
 from pathlib import Path
 
 # Use compatibility layer for Qt
 try:
     from gulfofmexico.ide.qt_compat import (
-        QT_VERSION,
+        # QT_VERSION,
         QAction,
         QApplication,
         QDockWidget,
@@ -37,6 +39,26 @@ except ImportError as e:
     print("Install with: pip install PySide6 or pip install PyQt5")
 
 from gulfofmexico.ide.runner import ExecutionSession, run_code
+from gulfofmexico.ide.web_ide import run_web_ide
+
+
+def _format_error_html(err: str) -> str:
+    """Return HTML-safe formatted error snippet for console display.
+
+    Uses monospace <pre> with the GOM error color so rich text appears correctly in
+    the Qt console without allowing raw HTML injection.
+    """
+    return f"<pre style='color:#e06c75; font-family:monospace; white-space: pre-wrap;'>{_html_escape(err)}</pre>"
+
+
+def is_port_open(port: int) -> bool:
+    """Return True if a TCP server is accepting connections on localhost:port."""
+    try:
+        with socket.create_connection(("127.0.0.1", port), timeout=0.3):
+            return True
+    except OSError:
+        return False
+
 
 if PYSIDE_AVAILABLE:
     # Local imports only when GUI libs are present
@@ -271,9 +293,9 @@ if PYSIDE_AVAILABLE:
             if out:
                 self.console.append(out)
             if err:
-                prefix = "<span style='color:# e06c75'>"
-                suffix = "</span>"
-                self.console.append(prefix + err + suffix)
+                # format and escape error output to avoid raw HTML + use readable monospace
+                html_err = _format_error_html(err)
+                self.console.append(html_err)
             self.btn_run.setEnabled(True)
             self.btn_stop.setEnabled(False)
             self.statusBar().showMessage("Ready")
@@ -350,6 +372,13 @@ if PYSIDE_AVAILABLE:
             act_clear.triggered.connect(self._clear_console)
             run_menu.addAction(act_clear)
 
+            # Tools menu - allow launching the web IDE from the Qt app
+            tools_menu = mb.addMenu("Tools")
+            act_open_webide = QAction("Open Web IDE", self)
+            act_open_webide.setShortcut("Ctrl+Shift+W")
+            act_open_webide.triggered.connect(self._open_web_ide)
+            tools_menu.addAction(act_open_webide)
+
         def _maybe_save_editor(self, ed: "CodeEditor") -> bool:
             if not ed.document().isModified():
                 return True
@@ -381,6 +410,42 @@ if PYSIDE_AVAILABLE:
 
         def _clear_console(self) -> None:
             self.console.clear()
+
+        def _open_web_ide(self, port: int | None = None) -> None:
+            """Start or open the Web IDE in the user's browser.
+
+            Behavior:
+            - If a server is already running on the preferred port (default 8080), open it.
+            - Otherwise start the bundled web IDE in a background thread.
+            """
+            import threading
+            import webbrowser
+
+            preferred = port or 8080
+
+            def _port_open(p: int) -> bool:
+                try:
+                    with socket.create_connection(("127.0.0.1", p), timeout=0.3):
+                        return True
+                except OSError:
+                    return False
+
+            if _port_open(preferred):
+                url = f"http://localhost:{preferred}/ide"
+                webbrowser.open(url)
+                self.statusBar().showMessage(f"Opened existing Web IDE at {url}")
+                return
+
+            # Try to start the web IDE server in a background thread
+            def _start_server():
+                try:
+                    run_web_ide(preferred)
+                except OSError:  # port in use or failed to bind
+                    # If run_web_ide fails (port taken), open the browser in case it's an external server
+                    webbrowser.open(f"http://localhost:{preferred}/ide")
+
+            threading.Thread(target=_start_server, daemon=True).start()
+            self.statusBar().showMessage(f"Starting Web IDE on port {preferred} — opening browser")
 
         def _show_console_menu(self, pos) -> None:
             menu = QMenu(self)
