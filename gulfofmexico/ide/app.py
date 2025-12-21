@@ -41,7 +41,6 @@ except ImportError as e:
     print("Install with: pip install PySide6 or pip install PyQt5")
 
 from gulfofmexico.ide.runner import ExecutionSession, run_code
-from gulfofmexico.ide.web_ide import run_web_ide
 
 
 def _format_error_html(err: str) -> str:
@@ -141,9 +140,6 @@ if PYSIDE_AVAILABLE:
 
             # Status bar and recent files
             self.statusBar().showMessage("Ready")
-            # Web IDE status label (permanent in status bar)
-            self.web_ide_label = QLabel("Web IDE: stopped")
-            self.statusBar().addPermanentWidget(self.web_ide_label)
             self.recent_files: list[str] = []
             self._open_recent_menu = None
             self._recent_path = Path.home() / ".config" / "gom-ide" / "recent.json"
@@ -377,12 +373,7 @@ if PYSIDE_AVAILABLE:
             act_clear.triggered.connect(self._clear_console)
             run_menu.addAction(act_clear)
 
-            # Tools menu - allow launching the web IDE from the Qt app
-            tools_menu = mb.addMenu("Tools")
-            act_open_webide = QAction("Open Web IDE", self)
-            act_open_webide.setShortcut("Ctrl+Shift+W")
-            act_open_webide.triggered.connect(self._ask_and_open_web_ide)
-            tools_menu.addAction(act_open_webide)
+
 
         def _maybe_save_editor(self, ed: "CodeEditor") -> bool:
             if not ed.document().isModified():
@@ -416,54 +407,7 @@ if PYSIDE_AVAILABLE:
         def _clear_console(self) -> None:
             self.console.clear()
 
-        def _open_web_ide(self, port: int | None = None) -> None:
-            """Start or open the Web IDE in the user's browser.
 
-            Behavior:
-            - If a server is already running on the preferred port (default 8080), open it.
-            - Otherwise start the bundled web IDE in a background thread.
-            """
-            import threading
-            import webbrowser
-
-            preferred = port or 8080
-
-            def _port_open(p: int) -> bool:
-                try:
-                    with socket.create_connection(("127.0.0.1", p), timeout=0.3):
-                        return True
-                except OSError:
-                    return False
-
-            if _port_open(preferred):
-                url = f"http://localhost:{preferred}/ide"
-                webbrowser.open(url)
-                self.statusBar().showMessage(f"Opened existing Web IDE at {url}")
-                self.web_ide_label.setText(f"Web IDE: open ({preferred})")
-                return
-
-            # Try to start the web IDE server in a background thread
-            def _start_server():
-                try:
-                    run_web_ide(preferred)
-                except OSError:  # port in use or failed to bind
-                    # If run_web_ide fails (port taken), open the browser in case it's an external server
-                    webbrowser.open(f"http://localhost:{preferred}/ide")
-
-            threading.Thread(target=_start_server, daemon=True).start()
-            self.statusBar().showMessage(f"Starting Web IDE on port {preferred} — opening browser")
-            self.web_ide_label.setText(f"Web IDE: starting ({preferred})")
-
-        def _ask_and_open_web_ide(self) -> None:
-            """Prompt the user for a port then open/start the Web IDE.
-
-            Uses a simple QInputDialog to pick a port (default 8080). If the user
-            cancels, no action is performed.
-            """
-            port, ok = QInputDialog.getInt(self, "Open Web IDE", "Port:", 8080, 1, 65535)
-            if not ok:
-                return
-            self._open_web_ide(port)
 
         def _show_console_menu(self, pos) -> None:
             menu = QMenu(self)
