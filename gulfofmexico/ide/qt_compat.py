@@ -9,6 +9,8 @@ try:
         QDockWidget,
         QFileDialog,
         QHBoxLayout,
+        QInputDialog,
+        QLabel,
         QMainWindow,
         QMenu,
         QMessageBox,
@@ -23,6 +25,25 @@ try:
 
 except ImportError:
     # Fall back to PyQt5
+    from PyQt5.QtCore import Qt, QThread, Signal, QObject, QTimer
+    from PyQt5.QtWidgets import (
+        QApplication,
+        QFileDialog,
+        QInputDialog,
+        QLabel,
+        QMainWindow,
+        QMessageBox,
+        QDockWidget,
+        QWidget,
+        QVBoxLayout,
+        QHBoxLayout,
+        QPushButton,
+        QTextEdit,
+        QTabWidget,
+        QMenu,
+        QAction,
+    )
+    from PyQt5.QtGui import QGuiApplication
 
     QT_VERSION = "PyQt5"
 
