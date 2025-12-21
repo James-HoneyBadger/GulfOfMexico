@@ -188,6 +188,42 @@ WhenStatementWatchers: TypeAlias = list[
 ]  # bro there are six square brackets...
 
 
+# ============================================================================
+# Phase 4: Handler Integration System
+# ============================================================================
+# This section enables handler-based statement dispatch as part of Phase 4
+# integration. Handlers are progressively migrated from pattern matching.
+
+_handler_registry = None  # Lazy-initialized
+
+
+def _initialize_handler_registry():
+    """Initialize the handler registry (lazy initialization).
+    
+    This is called once on first use to set up the handler registry
+    with all registered handlers. We do this lazily to avoid circular
+    imports and initialization issues.
+    """
+    global _handler_registry
+    if _handler_registry is None:
+        try:
+            from gulfofmexico.handler_registry import create_production_registry
+
+            _handler_registry = create_production_registry()
+        except Exception as e:
+            debug_print_no_token(f"Warning: Could not initialize handlers: {e}")
+            _handler_registry = None
+    return _handler_registry
+
+
+def get_handler_registry():
+    """Get the handler registry, initializing if necessary."""
+    return _initialize_handler_registry()
+
+
+# ============================================================================
+
+
 def get_built_expression(
     expr: Union[list[Token], ExpressionTreeNode],
 ) -> ExpressionTreeNode:
