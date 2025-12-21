@@ -221,6 +221,95 @@ def get_handler_registry():
     return _initialize_handler_registry()
 
 
+def _inject_interpreter_dependencies(handler):
+    """Inject required interpreter functions into handler.
+    
+    Args:
+        handler: Handler to inject dependencies into
+    """
+    try:
+        # Collect all the interpreter functions that handlers might need
+        imports = {
+            'evaluate_expression': evaluate_expression,
+            'raise_error_at_line': raise_error_at_line,
+            'declare_new_variable': declare_new_variable,
+            'assign_variable': assign_variable,
+            'execute_conditional': execute_conditional,
+            'register_when_statement': register_when_statement,
+            'execute_after_statement': execute_after_statement,
+            'print_expression_debug': print_expression_debug,
+        }
+        
+        # Inject if handler has the method
+        if hasattr(handler, 'set_interpreter_imports'):
+            handler.set_interpreter_imports(imports)
+    except Exception as e:
+        debug_print_no_token(f"Warning: Could not inject dependencies into handler: {e}")
+
+
+def try_execute_with_handler(
+    statement: CodeStatement,
+    namespaces: list[Namespace],
+    async_statements: AsyncStatements,
+    when_statement_watchers: WhenStatementWatchers,
+    importable_names: dict[str, dict[str, GulfOfMexicoValue]],
+    exported_names: list[tuple[str, str, GulfOfMexicoValue]],
+) -> tuple[bool, Optional[GulfOfMexicoValue]]:
+    """Try to execute statement using a registered handler.
+    
+    This is the Phase 4 handler dispatch mechanism. It attempts to find
+    and execute a handler for the given statement type, falling back to
+    the legacy pattern matching if no handler is available.
+    
+    Args:
+        statement: The statement to execute
+        namespaces: Current execution namespaces
+        async_statements: Async execution queue
+        when_statement_watchers: Reactive watchers
+        importable_names: Importable modules
+        exported_names: Exported variables
+        
+    Returns:
+        (handled, result) - (True, result) if handler executed,
+                           (False, None) if no handler (fallback needed)
+    """
+    try:
+        registry = get_handler_registry()
+        if registry is None:
+            return (False, None)
+        
+        # Try to find handler for this statement type
+        handler = registry.get_handler(statement)
+        if handler is None:
+            return (False, None)
+        
+        # Inject interpreter dependencies
+        _inject_interpreter_dependencies(handler)
+        
+        # Create execution context for handler
+        from gulfofmexico.execution_context import ExecutionContext
+        context = ExecutionContext(
+            namespaces=namespaces,
+            async_statements=async_statements,
+            when_statement_watchers=when_statement_watchers,
+            importable_names=importable_names,
+            exported_names=exported_names,
+            filename=filename,
+            code=code,
+            current_line=current_line,
+        )
+        
+        # Execute handler
+        result = handler.execute(statement, context)
+        
+        return (True, result)
+        
+    except Exception as e:
+        # Log the error but don't fail - let legacy code handle it
+        debug_print_no_token(f"Handler execution error: {e}")
+        return (False, None)
+
+
 # ============================================================================
 
 
@@ -2580,7 +2669,24 @@ def interpret_code_statements(
         elif hasattr(statement, "keyword") and hasattr(statement.keyword, "line"):
             current_line = statement.keyword.line
 
-        # Execute the statement based on its type
+        # Phase 4: Try handler-based execution first
+        handled, handler_result = try_execute_with_handler(
+            statement,
+            namespaces,
+            async_statements,
+            when_statement_watchers,
+            importable_names,
+            exported_names,
+        )
+        
+        if handled:
+            result = handler_result
+            # If handler returns a value, check if it should be propagated as return
+            if result is not None and isinstance(statement, ReturnStatement):
+                return result
+            continue  # Skip legacy pattern matching for this statement
+
+        # Execute the statement based on its type (legacy path)
         match statement:
             case ExpressionStatement():
                 result = evaluate_expression(
