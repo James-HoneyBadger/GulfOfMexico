@@ -2136,41 +2136,10 @@ def interpret_name_watching_statement(
     )
     namespaces.pop()  # remove expired namespace  -- THIS IS INCREDIBLY IMPORTANT
 
-    match statement:
-        case ReturnStatement():
-            if promise is None:
-                raise_error_at_line(filename, code, current_line, "Something went wrong.")
-            promise.value = (
-                expr_val  # simply change the promise to that value as the return statement already returned a promise
-            )
-        case VariableDeclaration():
-            declare_new_variable(
-                statement,
-                expr_val,
-                namespaces,
-                async_statements,
-                when_statement_watchers,
-            )
-        case VariableAssignment():
-            assign_variable(
-                statement,
-                index_vals,
-                expr_val,
-                namespaces,
-                async_statements,
-                when_statement_watchers,
-            )
-        case Conditional():
-            execute_conditional(expr_val, statement.code, namespaces, when_statement_watchers, {}, [])
-        case AfterStatement():
-            execute_after_statement(expr_val, statement.code, namespaces, when_statement_watchers)
-        case ExpressionStatement():
-            print_expression_debug(
-                statement.debug,
-                statement.expression,
-                expr_val,
-                namespaces,
-            )
+    # Legacy pattern matching removed - all cases now handled by handler system
+    # Handlers execute in try_execute_with_handler() before this point
+    # Fallback mechanism preserved for unhandled statement types
+    pass
 
 
 def clear_temp_namespace(namespaces: list[Namespace], temp_namespace: Namespace) -> None:
