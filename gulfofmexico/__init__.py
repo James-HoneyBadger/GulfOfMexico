@@ -38,8 +38,27 @@ from gulfofmexico.interpreter import (
 )
 from gulfofmexico.processor.lexer import tokenize
 from gulfofmexico.processor.syntax_tree import generate_syntax_tree
+from gulfofmexico.interpreter_phase5 import (
+    get_optimized_context,
+    enable_profiling,
+    disable_profiling,
+    enable_debugging,
+    disable_debugging,
+    get_execution_stats,
+    print_execution_report,
+)
 
-__all__ = ["run_file"]
+__all__ = [
+    "run_file",
+    # Phase 5 optimization tools
+    "get_optimized_context",
+    "enable_profiling",
+    "disable_profiling",
+    "enable_debugging",
+    "disable_debugging",
+    "get_execution_stats",
+    "print_execution_report",
+]
 
 __REPL_FILENAME = "__repl__"
 sys.setrecursionlimit(100000)
