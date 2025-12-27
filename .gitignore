@@ -48,3 +48,6 @@ secrets.txt
 # OS
 .DS_Store
 Thumbs.db
+
+# Phase archive (historical documents)
+docs/archive/
