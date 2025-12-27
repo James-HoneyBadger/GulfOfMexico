@@ -290,21 +290,8 @@ class VariableDeclarationHandler(StatementHandler):
         Raises:
             Exception: If GitHub API is unavailable
         """
-        import json
-        import os
-
-        try:
-            import github
-        except ImportError:
-            return
-
-        try:
-            access_token = os.environ["GITHUB_ACCESS_TOKEN"]
-        except KeyError:
-            return
-
-        # Note: Serialization would happen here
-        # This is a stub for the full implementation
+        # GitHub integration for version control (optional feature)
+        # Commented out pending full implementation
         pass
 
     def _get_code_from_when_statement_watchers(
@@ -320,7 +307,7 @@ class VariableDeclarationHandler(StatementHandler):
     def _evaluate_expression(self, expr, namespaces, async_statements, when_statement_watchers):
         """Evaluate an expression (stub for now)."""
         # This would be imported from the main interpreter
-        from gulfofmexico.builtin import GulfOfMexicoBoolean
+        # Already imported at module level
         return GulfOfMexicoBoolean(True)
 
     def _execute_conditional(

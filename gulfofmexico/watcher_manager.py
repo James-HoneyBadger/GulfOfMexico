@@ -19,8 +19,7 @@ New Solution:
 """
 
 from dataclasses import dataclass, field
-from typing import Any, Callable, Optional, Union
-import weakref
+from typing import Callable, Union
 import logging
 
 from gulfofmexico.processor.expression_tree import ExpressionTreeNode

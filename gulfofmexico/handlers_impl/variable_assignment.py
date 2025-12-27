@@ -13,10 +13,9 @@ Responsible for handling variable assignments with support for:
 
 from typing import Optional, Union
 
-from gulfofmexico.base import Token, debug_print, raise_error_at_token, raise_error_at_line
+from gulfofmexico.base import Token, raise_error_at_token, raise_error_at_line
 from gulfofmexico.builtin import (
     GulfOfMexicoIndexable,
-    GulfOfMexicoMutable,
     GulfOfMexicoNamespaceable,
     GulfOfMexicoValue,
     Name,
@@ -74,7 +73,7 @@ class VariableAssignmentHandler(StatementHandler):
         self.filename = filename
         self.code = code
         self.current_line = current_line
-        self.name_watchers = {}  # For tracking 'next' expressions
+        self.name_watchers: dict[str, list] = {}  # For tracking 'next' expressions
 
     def can_handle(self, statement) -> bool:
         """Check if this is a variable assignment.

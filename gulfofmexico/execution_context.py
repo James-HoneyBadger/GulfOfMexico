@@ -21,7 +21,7 @@ After (Handler Pattern):
 
 from dataclasses import dataclass, field
 from typing import Optional, Union
-from pathlib import Path
+# Path removed - not used in this module
 
 from gulfofmexico.builtin import (
     GulfOfMexicoValue,

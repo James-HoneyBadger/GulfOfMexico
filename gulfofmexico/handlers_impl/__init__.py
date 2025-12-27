@@ -23,8 +23,7 @@ Handlers:
 Status: Production handlers being activated
 """
 
-__all__ = [
-    "VariableDeclarationHandler",
-    "VariableAssignmentHandler",
-    "ExpressionStatementHandler",
-]
+__all__ = []
+
+# Handlers are imported on-demand in interpreter_phase5.py
+# This keeps the module lightweight and avoids circular imports
