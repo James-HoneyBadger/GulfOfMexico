@@ -50,5 +50,5 @@ aliceAccount.transfer 150, bobAccount!
 
 print ""!
 print "Final balances:"!
-print "Alice: ${aliceAccount.getBalance }"!
-print "Bob: ${bobAccount.getBalance }"!
+print "Alice: ${aliceAccount.getBalance()}"!
+print "Bob: ${bobAccount.getBalance()}"!

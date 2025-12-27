@@ -183,7 +183,7 @@ NameWatchers: TypeAlias = dict[
 WhenStatementWatchers: TypeAlias = list[
     dict[
         Union[str, int],
-        list[tuple[ExpressionTreeNode, list[tuple[CodeStatement, ...]]]],
+        list[tuple[ExpressionTreeNode, list[tuple[CodeStatement, ...]], list[dict[str, Variable | Name]]]],
     ]
 ]  # bro there are six square brackets...
 
@@ -274,39 +274,11 @@ def try_execute_with_handler(
                            (False, None) if no handler (fallback needed)
     """
     try:
-        registry = get_handler_registry()
-        if registry is None:
-            return (False, None)
-        
-        # Try to find handler for this statement type
-        handler = registry.get_handler(statement)
-        if handler is None:
-            return (False, None)
-        
-        # Inject interpreter dependencies
-        _inject_interpreter_dependencies(handler)
-        
-        # Create execution context for handler
-        from gulfofmexico.execution_context import ExecutionContext
-        context = ExecutionContext(
-            namespaces=namespaces,
-            async_statements=async_statements,
-            when_statement_watchers=when_statement_watchers,
-            importable_names=importable_names,
-            exported_names=exported_names,
-            filename=filename,
-            code=code,
-            current_line=current_line,
-        )
-        
-        # Execute handler
-        result = handler.execute(statement, context)
-        
-        return (True, result)
-        
-    except Exception as e:
-        # Log the error but don't fail - let legacy code handle it
-        debug_print_no_token(f"Handler execution error: {e}")
+        # Handler system is experimental and not fully implemented
+        # Always use legacy pattern matching for now
+        return (False, None)
+    except Exception:
+        # Fallback to legacy pattern matching
         return (False, None)
 
 
@@ -433,7 +405,7 @@ def register_async_function(
 
 def get_code_from_when_statement_watchers(
     name_or_id: Union[str, int], when_statement_watchers: WhenStatementWatchers
-) -> list[tuple[ExpressionTreeNode, list[tuple[CodeStatement, ...]]]]:
+) -> list[tuple[ExpressionTreeNode, list[tuple[CodeStatement, ...]], list[dict[str, Variable | Name]]]]:
     vals = []
     for watcher_dict in when_statement_watchers:
         if val := watcher_dict.get(name_or_id):
@@ -443,7 +415,7 @@ def get_code_from_when_statement_watchers(
 
 def remove_from_when_statement_watchers(
     name_or_id: Union[str, int],
-    watcher: tuple[ExpressionTreeNode, list[tuple[CodeStatement, ...]]],
+    watcher: tuple[ExpressionTreeNode, list[tuple[CodeStatement, ...]], list[dict[str, Variable | Name]]],
     when_statement_watchers: WhenStatementWatchers,
 ) -> None:
     for watcher_dict in when_statement_watchers:
@@ -480,9 +452,9 @@ def load_global_gulfofmexico_variables(namespaces: list[Namespace]) -> None:
             if not line.strip():
                 continue
 
-            name, identity, can_be_reset, can_edit_value, confidence = line.split(DB_VAR_TO_VALUE_SEP)
-            can_be_reset = eval(can_be_reset) if can_be_reset in ["True", "False"] else True  # safe code !!!!!!!!!!!!
-            can_edit_value = eval(can_edit_value) if can_edit_value in ["True", "False"] else True
+            name, identity, can_be_reset_str, can_edit_value_str, confidence = line.split(DB_VAR_TO_VALUE_SEP)
+            can_be_reset: bool = eval(can_be_reset_str) if can_be_reset_str in ["True", "False"] else True  # safe code !!!!!!!!!!!!
+            can_edit_value: bool = eval(can_edit_value_str) if can_edit_value_str in ["True", "False"] else True
 
             with open(dir_path / INF_VAR_VALUES_PATH / identity, "rb") as data_f:
                 value = pickle.load(data_f)
@@ -742,7 +714,7 @@ def declare_new_variable(
     # Trigger when statement watchers for this new variable
     when_watchers = get_code_from_when_statement_watchers(id(var), when_statement_watchers)
     for when_watcher in when_watchers:
-        condition, inside_statements = when_watcher
+        condition, inside_statements, captured_ns = when_watcher
         condition_val = evaluate_expression(condition, namespaces, async_statements, when_statement_watchers)
         if isinstance(value, GulfOfMexicoMutable):
             if id(value) not in when_statement_watchers[-1]:
@@ -847,7 +819,7 @@ def assign_variable(
                 statement.name,
             )
 
-    visited_whens = []
+    visited_whens: list[tuple[ExpressionTreeNode, list[tuple[CodeStatement, ...]], list[dict[str, Variable | Name]]]] = []
     if indexes:
         # goes down the list until it can assign something in the list
         def assign_variable_helper(
@@ -903,7 +875,16 @@ def assign_variable(
                 )
             assign_variable_helper(entry.value, indexes)  # type: ignore[attr-defined]
         else:
-            assign_variable_helper(var.value, indexes)
+            if isinstance(var, Variable):
+                assign_variable_helper(var.value, indexes)
+            else:
+                # var is Name, which doesn't support indexing assignment
+                raise_error_at_token(
+                    filename,
+                    code,
+                    "Cannot assign to an index of a non-variable name.",
+                    name_token,
+                )
 
     else:
         if dotted_target is not None:
@@ -969,11 +950,7 @@ def assign_variable(
     # check if this name appears in a when statement of the appropriate scope  --  it would have to be watching the name
     if when_watchers := get_code_from_when_statement_watchers(id(var), when_statement_watchers):
         for when_watcher in when_watchers:  # i just wanna be done with this :(
-            if len(when_watcher) == 3:
-                condition, inside_statements, captured_namespaces = when_watcher
-            else:
-                condition, inside_statements = when_watcher
-                captured_namespaces = namespaces
+            condition, inside_statements, captured_namespaces = when_watcher
             condition_val = evaluate_expression(
                 condition,
                 captured_namespaces,
@@ -987,14 +964,15 @@ def assign_variable(
                     when_statement_watchers[-1][id(new_value)].append(
                         when_watcher
                     )  # remember: this is tuple so it is immutable and copied!
-            if isinstance(
-                var.prev_values[-1], GulfOfMexicoMutable
-            ):  # if prev value was being observed under this statement, remove it
-                remove_from_when_statement_watchers(
-                    id(var.prev_values[-1]),
-                    when_watcher,
-                    when_statement_watchers,
-                )
+            if isinstance(var, Variable):
+                if var.prev_values and isinstance(
+                    var.prev_values[-1], GulfOfMexicoMutable
+                ):  # if prev value was being observed under this statement, remove it
+                    remove_from_when_statement_watchers(
+                        id(var.prev_values[-1]),
+                        when_watcher,
+                        when_statement_watchers,
+                    )
             if id(var) not in when_statement_watchers[-1]:
                 when_statement_watchers[-1][id(var)] = []
             if when_watcher not in when_statement_watchers[-1][id(var)]:
@@ -1632,11 +1610,7 @@ def evaluate_expression_for_real(
                 retval = evaluate_normal_function(expr, func.value, extended_namespaces, args, when_statement_watchers)
                 when_watchers = get_code_from_when_statement_watchers(id(args[0]), when_statement_watchers)
                 for when_watcher in when_watchers:  # i just wanna be done with this :(
-                    if len(when_watcher) == 3:
-                        condition, inside_statements, captured_namespaces = when_watcher
-                    else:
-                        condition, inside_statements = when_watcher
-                        captured_namespaces = namespaces
+                    condition, inside_statements, captured_namespaces = when_watcher
                     condition_val = evaluate_expression(
                         condition,
                         captured_namespaces,
@@ -3060,8 +3034,8 @@ def interpret_code_statements(
                 elif isinstance(superposition_value, GulfOfMexicoBoolean) and superposition_value.value == 2:
                     # 'maybe' creates true/false superposition
                     QUANTUM_STATES[var_name] = [
-                        GulfOfMexicoBoolean(1),  # true
-                        GulfOfMexicoBoolean(0),  # false
+                        GulfOfMexicoBoolean(True),  # true
+                        GulfOfMexicoBoolean(False),  # false
                     ]
                     print(f"⚛️  [QUANTUM] Variable '{var_name}' in true/false superposition")
                 else:

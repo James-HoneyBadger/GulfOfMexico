@@ -197,8 +197,11 @@ class GulfOfMexicoList(
     def __post_init__(self):
         self.create_namespace(False)
         self.indexer = dict()
-        for index in range(-1, len(self.values) - 1):
-            self.indexer[index] = index
+        # Initialize indexer for both positive and negative indices
+        list_len = len(self.values)
+        for i in range(list_len):
+            self.indexer[i] = i  # positive index
+            self.indexer[i - list_len] = i  # negative index
 
     def create_namespace(self, is_update: bool = True) -> None:
         if not is_update:
@@ -215,7 +218,8 @@ class GulfOfMexicoList(
     def access_index(self, index: GulfOfMexicoValue) -> GulfOfMexicoValue:
         if not isinstance(index, GulfOfMexicoNumber):
             raise NonFormattedError("Cannot index a list with a non-number value.")
-        if not -1 <= index.value <= len(self.values) - 1:
+        list_len = len(self.values)
+        if not -list_len <= index.value <= list_len - 1:
             raise NonFormattedError("Indexing out of list bounds.")
         elif index.value not in self.indexer:
             raise NonFormattedError("No value assigned to that index")  # if inbounds index doesnt have assigned val
@@ -228,13 +232,14 @@ class GulfOfMexicoList(
     def assign_index(self, index: GulfOfMexicoValue, val: GulfOfMexicoValue) -> None:
         if not isinstance(index, GulfOfMexicoNumber):
             raise NonFormattedError("Cannot index a list with a non-number value.")
+        list_len = len(self.values)
         if index.value in self.indexer:
-            if not -1 <= index.value <= len(self.values) - 1:
+            if not -list_len <= index.value <= list_len - 1:
                 raise NonFormattedError("Indexing out of list bounds.")
-            self.values[round(index.value)] = val
-            self.indexer[round(index.value)] = round(index.value)
+            real_idx = self.indexer.get(index.value)
+            self.values[round(real_idx)] = val
         else:  # assign in the middle of the array
-            if not -1 <= index.value <= len(self.values) - 1:
+            if not -list_len <= index.value <= list_len - 1:
                 raise NonFormattedError("Indexing out of list bounds.")
             nearest_int_down = round(max((index.value + 2) // 1, 0))
             self.values[nearest_int_down:nearest_int_down] = [val]
