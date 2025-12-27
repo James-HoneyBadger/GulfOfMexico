@@ -1,0 +1,63 @@
+// ============================================================================
+// CATEGORY: 07 - SPECIAL FEATURES
+// EXAMPLE: 01_three_valued_logic.gom
+// PURPOSE: GOM's unique three-valued logic (true, false, maybe)
+// ============================================================================
+
+print "=== THREE-VALUED LOGIC ==="!
+print ""!
+
+// Three boolean values
+const yes = true!
+const no = false!
+const unknown = maybe!
+
+print "BOOLEAN VALUES:"!
+print "true: ${yes}"!
+print "false: ${no}"!
+print "maybe: ${unknown}"!
+
+print ""!
+
+// Logical operations with maybe
+print "LOGICAL OPERATIONS:"!
+print "true AND true: ${true && true}"!
+print "true AND false: ${true && false}"!
+print "true AND maybe: ${true && maybe}"!
+print "false AND maybe: ${false && maybe}"!
+print "maybe AND maybe: ${maybe && maybe}"!
+
+print ""!
+print "true OR true: ${true || true}"!
+print "true OR false: ${true || false}"!
+print "true OR maybe: ${true || maybe}"!
+print "false OR false: ${false || false}"!
+print "false OR maybe: ${false || maybe}"!
+print "maybe OR maybe: ${maybe || maybe}"!
+
+print ""!
+print "NOT true: ${!true}"!
+print "NOT false: ${!false}"!
+print "NOT maybe: ${!maybe}"!
+
+print ""!
+
+// Probabilistic decision making
+function makeDecision(confidence) => {
+   if confidence > 0.75 {
+      return true!
+   }
+   if confidence > 0.25 {
+      return maybe!
+   }
+   return false!
+}!
+
+const decision1 = makeDecision(0.9)!
+const decision2 = makeDecision(0.5)!
+const decision3 = makeDecision(0.1)!
+
+print "PROBABILISTIC DECISIONS:"!
+print "High confidence (0.9): ${decision1}"!
+print "Medium confidence (0.5): ${decision2}"!
+print "Low confidence (0.1): ${decision3}"!

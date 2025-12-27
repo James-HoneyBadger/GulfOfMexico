@@ -1,0 +1,70 @@
+// ============================================================================
+// CATEGORY: 09 - DEMOS AND APPLICATIONS
+// EXAMPLE: 01_todo_list.gom
+// PURPOSE: A practical todo list application
+// ============================================================================
+
+print "=== TODO LIST APPLICATION ==="!
+print ""!
+
+// Todo item class
+class TodoItem {
+   var task = ""!
+   var completed = false!
+   var priority = 1!
+
+   function markComplete() => {
+      var completed = true!
+      print "Completed: ${task}"!
+   }!
+
+   function getStatus() => {
+      const status = completed ? "DONE" : "TODO"!
+      return "[${status}] ${task} (Priority: ${priority})"!
+   }!
+}!
+
+print "Creating todo list:"!
+print ""!
+
+const todo1 = new TodoItem!
+todo1.task = "Learn GOM"!
+todo1.priority = 3!
+
+const todo2 = new TodoItem!
+todo2.task = "Write code"!
+todo2.priority = 1!
+
+const todo3 = new TodoItem!
+todo3.task = "Test program"!
+todo3.priority = 2!
+
+print "INITIAL LIST:"!
+print todo1.getStatus()!
+print todo2.getStatus()!
+print todo3.getStatus()!
+
+print ""!
+print "Completing tasks:"!
+todo2.markComplete()!
+
+print ""!
+print "UPDATED LIST:"!
+print todo1.getStatus()!
+print todo2.getStatus()!
+print todo3.getStatus()!
+
+print ""!
+
+// Count completed tasks
+function countCompleted(todos, idx, count) => {
+   if idx >= todos.length {
+      return count!
+   }
+   const newCount = todos[idx].completed ? count + 1 : count!
+   return countCompleted(todos, idx + 1, newCount)!
+}!
+
+const todoList = [todo1, todo2, todo3]!
+const completedCount = countCompleted(todoList, 0, 0)!
+print "Completed: ${completedCount} out of ${todoList.length}"!

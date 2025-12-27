@@ -1,0 +1,67 @@
+// ============================================================================
+// CATEGORY: 07 - SPECIAL FEATURES
+// EXAMPLE: 02_probabilistic_variables.gom
+// PURPOSE: Variables with probabilistic/confidence values
+// ============================================================================
+
+print "=== PROBABILISTIC VARIABLES ==="!
+print ""!
+
+// Variables with uncertainty
+const weatherToday = 0.7!
+const rainProbability = 0.3!
+const sunny = 0.8!
+
+print "WEATHER PREDICTION:"!
+print "Sunny: ${sunny * 100}% confidence"!
+print "Rain probability: ${rainProbability * 100}%"!
+print ""!
+
+// Decision making with probabilities
+function shouldGoOutside(sunnyProb, rainProb) => {
+   if sunnyProb > rainProb {
+      return true!
+   }
+   return false!
+}!
+
+const goOutside = shouldGoOutside(sunny, rainProbability)!
+print "Should go outside? ${goOutside}"!
+
+print ""!
+
+// Testing hypothesis with confidence
+function testHypothesis(supportingEvidence, contraEvidence) => {
+   const support = supportingEvidence!
+   const contra = contraEvidence!
+   const net = support - contra!
+   
+   if net > 0.5 {
+      return true!
+   }
+   if net < -0.5 {
+      return false!
+   }
+   return maybe!
+}!
+
+const hypothesis1 = testHypothesis(0.8, 0.2)!
+const hypothesis2 = testHypothesis(0.6, 0.5)!
+const hypothesis3 = testHypothesis(0.2, 0.8)!
+
+print "HYPOTHESIS TESTING:"!
+print "Strong evidence: ${hypothesis1}"!
+print "Uncertain evidence: ${hypothesis2}"!
+print "Evidence against: ${hypothesis3}"!
+
+print ""!
+
+// Combining probabilities
+function combineResults(result1, result2, result3) => {
+   const average = (result1 + result2 + result3) / 3!
+   print "Combined probability: ${average}"!
+   return average > 0.5!
+}!
+
+const combined = combineResults(0.8, 0.6, 0.7)!
+print "Final decision: ${combined}"!

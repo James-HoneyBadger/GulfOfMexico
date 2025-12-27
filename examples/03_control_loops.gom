@@ -1,0 +1,59 @@
+// ============================================================================
+// CATEGORY: 03 - CONTROL FLOW
+// EXAMPLE: 02_loops.gom
+// PURPOSE: Loop structures and iteration
+// ============================================================================
+
+print "=== LOOP STRUCTURES ==="!
+print ""!
+
+// For-in loop with arrays
+const colors = ["red", "green", "blue"]!
+print "FOR-IN LOOP (Array iteration):"!
+var idx = 0!
+function printColor() => {
+   if idx < colors.length {
+      print "  ${colors[idx]}"!
+      var idx = idx + 1!
+      printColor()!
+   }
+}!
+printColor()!
+
+print ""!
+
+// Counting loops using recursion
+print "COUNTDOWN (5 to 1):"!
+function countdown(n) => {
+   if n > 0 {
+      print "  ${n}"!
+      countdown(n - 1)!
+   }
+}!
+countdown(5)!
+
+print ""!
+
+// Sum with recursion
+print "SUM OF NUMBERS (1 to 5):"!
+function sum(n) => {
+   if n <= 0 {
+      return 0!
+   }
+   return n + sum(n - 1)!
+}!
+const total = sum(5)!
+print "Result: ${total}"!
+
+print ""!
+
+// Factorial
+print "FACTORIAL (5!):"!
+function factorial(n) => {
+   if n <= 1 {
+      return 1!
+   }
+   return n * factorial(n - 1)!
+}!
+const fact = factorial(5)!
+print "Result: ${fact}"!

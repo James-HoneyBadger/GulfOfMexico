@@ -1,0 +1,82 @@
+// ============================================================================
+// CATEGORY: 06 - OBJECT-ORIENTED PROGRAMMING
+// EXAMPLE: 02_classes_advanced.gom
+// PURPOSE: More complex class patterns
+// ============================================================================
+
+print "=== ADVANCED CLASS PATTERNS ==="!
+print ""!
+
+// Bank account class
+class BankAccount {
+   var accountHolder = "Anonymous"!
+   var balance = 0!
+   var transactionCount = 0!
+
+   function deposit(amount) => {
+      var balance = balance + amount!
+      var transactionCount = transactionCount + 1!
+      print "${accountHolder} deposited ${amount}. New balance: ${balance}"!
+   }!
+
+   function withdraw(amount) => {
+      if balance >= amount {
+         var balance = balance - amount!
+         var transactionCount = transactionCount + 1!
+         print "${accountHolder} withdrew ${amount}. New balance: ${balance}"!
+      }
+   }!
+
+   function getBalance() => {
+      return balance!
+   }!
+
+   function getTransactions() => {
+      return transactionCount!
+   }!
+}!
+
+print "Creating bank accounts:"!
+const account1 = new BankAccount!
+account1.accountHolder = "Alice"!
+account1.deposit(1000)!
+account1.deposit(500)!
+account1.withdraw(200)!
+
+const balance1 = account1.getBalance()!
+const txCount1 = account1.getTransactions()!
+print "Account balance: ${balance1}, Transactions: ${txCount1}"!
+
+print ""!
+
+// Student class
+class Student {
+   var studentName = "Student"!
+   var grade = 0!
+   var gpa = 0!
+
+   function submitGrade(gradeValue) => {
+      var grade = gradeValue!
+      if gradeValue >= 90 {
+         var gpa = 4.0!
+      }
+      if gradeValue >= 80 {
+         var gpa = 3.5!
+      }
+      if gradeValue >= 70 {
+         var gpa = 3.0!
+      }
+      if gradeValue >= 60 {
+         var gpa = 2.0!
+      }
+      if gradeValue < 60 {
+         var gpa = 0!
+      }
+      print "${studentName} received grade ${grade} (GPA: ${gpa})"!
+   }!
+}!
+
+print "Creating student:"!
+const student1 = new Student!
+student1.studentName = "Charlie"!
+student1.submitGrade(85)!

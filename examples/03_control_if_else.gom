@@ -1,0 +1,63 @@
+// ============================================================================
+// CATEGORY: 03 - CONTROL FLOW
+// EXAMPLE: 01_if_else.gom
+// PURPOSE: Conditional statements (if/else)
+// ============================================================================
+
+print "=== IF/ELSE STATEMENTS ==="!
+print ""!
+
+const age = 25!
+
+print "Checking age: ${age}"!
+print ""!
+
+// Simple if
+if age >= 18 {
+   print "You are an adult"!
+}
+
+// if/else
+const score = 85!
+print ""!
+print "Score: ${score}"!
+
+if score >= 90 {
+   print "Grade: A"!
+}
+
+if score >= 80 {
+   print "Grade: B"!
+}
+
+if score >= 70 {
+   print "Grade: C"!
+}
+
+if score < 70 {
+   print "Grade: F"!
+}
+
+// Nested if
+print ""!
+const temperature = 22!
+print "Temperature: ${temperature}°C"!
+
+if temperature > 0 {
+   if temperature > 20 {
+      print "Hot"!
+   }
+   
+   if temperature <= 20 {
+      print "Comfortable"!
+   }
+}
+
+if temperature <= 0 {
+   print "Cold"!
+}
+
+// Ternary operator
+print ""!
+const grade = score >= 60 ? "Pass" : "Fail"!
+print "Result: ${grade}"!

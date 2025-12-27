@@ -1,0 +1,87 @@
+// ============================================================================
+// CATEGORY: 08 - MATH AND COMPUTATION
+// EXAMPLE: 02_algorithms.gom
+// PURPOSE: Common algorithms and computational patterns
+// ============================================================================
+
+print "=== ALGORITHMS ==="!
+print ""!
+
+// Linear search
+function linearSearch(arr, target, idx) => {
+   if idx >= arr.length {
+      return -1!
+   }
+   if arr[idx] == target {
+      return idx!
+   }
+   return linearSearch(arr, target, idx + 1)!
+}!
+
+const items = [5, 2, 8, 1, 9, 3]!
+const foundIdx = linearSearch(items, 8, 0)!
+print "Linear search for 8 in ${items}: index ${foundIdx}"!
+
+print ""!
+
+// Count occurrences
+function countOccurrences(arr, target, idx) => {
+   if idx >= arr.length {
+      return 0!
+   }
+   const count = arr[idx] == target ? 1 : 0!
+   return count + countOccurrences(arr, target, idx + 1)!
+}!
+
+const nums = [1, 2, 2, 3, 2, 4]!
+const twoCount = countOccurrences(nums, 2, 0)!
+print "Occurrences of 2 in ${nums}: ${twoCount}"!
+
+print ""!
+
+// Reverse an array
+function reverseArray(arr, idx) => {
+   if idx < 0 {
+      return []!
+   }
+   const first = [arr[idx]]!
+   const rest = reverseArray(arr, idx - 1)!
+   return first + rest!
+}!
+
+const original = [1, 2, 3, 4, 5]!
+const reversed = reverseArray(original, original.length - 1)!
+print "Reverse of ${original} = ${reversed}"!
+
+print ""!
+
+// Check if array is sorted
+function isSorted(arr, idx) => {
+   if idx >= arr.length - 1 {
+      return true!
+   }
+   if arr[idx] > arr[idx + 1] {
+      return false!
+   }
+   return isSorted(arr, idx + 1)!
+}!
+
+const sorted = [1, 2, 3, 4, 5]!
+const unsorted = [1, 3, 2, 4, 5]!
+print "Is ${sorted} sorted? ${isSorted(sorted, 0)}"!
+print "Is ${unsorted} sorted? ${isSorted(unsorted, 0)}"!
+
+print ""!
+
+// Find maximum in array
+function findMax(arr, idx, currentMax) => {
+   if idx >= arr.length {
+      return currentMax!
+   }
+   const newMax = arr[idx] > currentMax ? arr[idx] : currentMax!
+   return findMax(arr, idx + 1, newMax)!
+}!
+
+const values = [3, 7, 2, 9, 1]!
+const maximum = findMax(values, 0, values[0])!
+print "Maximum in ${values} = ${maximum}"!

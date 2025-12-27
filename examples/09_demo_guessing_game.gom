@@ -1,0 +1,65 @@
+// ============================================================================
+// CATEGORY: 09 - DEMOS AND APPLICATIONS
+// EXAMPLE: 03_game_guessing.gom
+// PURPOSE: A simple guessing game
+// ============================================================================
+
+print "=== GUESSING GAME ==="!
+print ""!
+
+// Game class
+class GuessingGame {
+   var secretNumber = 42!
+   var attempts = 0!
+   var gameOver = false!
+
+   function guess(num) => {
+      var attempts = attempts + 1!
+      
+      if gameOver {
+         print "Game is over!"!
+         return!
+      }
+
+      if num == secretNumber {
+         print "Correct! You guessed the secret number in ${attempts} attempts!"!
+         var gameOver = true!
+         return!
+      }
+
+      if num < secretNumber {
+         print "Too low! Try again."!
+         return!
+      }
+
+      if num > secretNumber {
+         print "Too high! Try again."!
+         return!
+      }
+   }!
+
+   function getAttempts() => {
+      return attempts!
+   }!
+
+   function isGameOver() => {
+      return gameOver!
+   }!
+}!
+
+print "Game: Guess the secret number (1-100)"!
+print ""!
+
+const game = new GuessingGame!
+
+print "Making guesses:"!
+game.guess(50)!
+game.guess(30)!
+game.guess(45)!
+game.guess(40)!
+game.guess(42)!
+
+print ""!
+const totalAttempts = game.getAttempts()!
+const finished = game.isGameOver()!
+print "Attempts: ${totalAttempts}, Game Over: ${finished}"!

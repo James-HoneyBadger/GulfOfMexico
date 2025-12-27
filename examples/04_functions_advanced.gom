@@ -1,0 +1,75 @@
+// ============================================================================
+// CATEGORY: 04 - FUNCTIONS
+// EXAMPLE: 02_function_advanced.gom
+// PURPOSE: Advanced function patterns
+// ============================================================================
+
+print "=== ADVANCED FUNCTION PATTERNS ==="!
+print ""!
+
+// Function that takes arrays
+function sumArray(arr) => {
+   function sumHelper(idx) => {
+      if idx >= arr.length {
+         return 0!
+      }
+      return arr[idx] + sumHelper(idx + 1)!
+   }!
+   return sumHelper(0)!
+}!
+
+const nums = [1, 2, 3, 4, 5]!
+const arraySum = sumArray(nums)!
+print "Sum of ${nums} = ${arraySum}"!
+
+print ""!
+
+// Function that returns a function-like behavior
+function makeAdder(x) => {
+   function adder(y) => {
+      return x + y!
+   }!
+   return adder!
+}!
+
+const add5 = makeAdder(5)!
+const result = add5(10)!
+print "makeAdder(5)(10) = ${result}"!
+
+print ""!
+
+// Higher-order function pattern
+function applyTwice(f, x) => {
+   const intermediate = f(x)!
+   return f(intermediate)!
+}!
+
+function double(n) => {
+   return n * 2!
+}!
+
+const doubled = applyTwice(double, 3)!
+print "applyTwice(double, 3) = ${doubled}"!
+
+print ""!
+
+// Transform array elements
+function transformArray(arr, transformer) => {
+   function transformHelper(idx) => {
+      if idx >= arr.length {
+         return []!
+      }
+      const first = [transformer(arr[idx])]!
+      const rest = transformHelper(idx + 1)!
+      return first + rest!
+   }!
+   return transformHelper(0)!
+}!
+
+function square(n) => {
+   return n * n!
+}!
+
+const numbers = [1, 2, 3, 4]!
+const squares = transformArray(numbers, square)!
+print "Squares of ${numbers} = ${squares}"!

@@ -1,0 +1,85 @@
+// ============================================================================
+// CATEGORY: 08 - MATH AND COMPUTATION
+// EXAMPLE: 01_mathematical_functions.gom
+// PURPOSE: Mathematical computations and algorithms
+// ============================================================================
+
+print "=== MATHEMATICAL FUNCTIONS ==="!
+print ""!
+
+// Absolute value
+function abs(n) => {
+   if n < 0 {
+      return -n!
+   }
+   return n!
+}!
+
+print "ABSOLUTE VALUE:"!
+print "abs(10) = ${abs(10)}"!
+print "abs(-10) = ${abs(-10)}"!
+print "abs(-3.14) = ${abs(-3.14)}"!
+
+print ""!
+
+// Power function
+function power(base, exp) => {
+   if exp == 0 {
+      return 1!
+   }
+   return base * power(base, exp - 1)!
+}!
+
+print "POWER FUNCTION:"!
+print "2^3 = ${power(2, 3)}"!
+print "3^4 = ${power(3, 4)}"!
+print "5^0 = ${power(5, 0)}"!
+
+print ""!
+
+// Greatest Common Divisor (Euclidean algorithm)
+function gcd(a, b) => {
+   if b == 0 {
+      return a!
+   }
+   return gcd(b, a - (a / b) * b)!
+}!
+
+print "GREATEST COMMON DIVISOR:"!
+print "gcd(48, 18) = ${gcd(48, 18)}"!
+print "gcd(100, 50) = ${gcd(100, 50)}"!
+
+print ""!
+
+// Minimum and maximum
+function min(a, b) => {
+   if a < b {
+      return a!
+   }
+   return b!
+}!
+
+function max(a, b) => {
+   if a > b {
+      return a!
+   }
+   return b!
+}!
+
+print "MIN/MAX:"!
+print "min(5, 3) = ${min(5, 3)}"!
+print "max(5, 3) = ${max(5, 3)}"!
+
+print ""!
+
+// Average of an array
+function average(arr, idx, sum) => {
+   if idx >= arr.length {
+      return sum / arr.length!
+   }
+   return average(arr, idx + 1, sum + arr[idx])!
+}!
+
+const nums = [10, 20, 30, 40, 50]!
+const avg = average(nums, 0, 0)!
+print "Average of ${nums} = ${avg}"!

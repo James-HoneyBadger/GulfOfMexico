@@ -1,0 +1,46 @@
+// ============================================================================
+// CATEGORY: 02 - OPERATORS
+// EXAMPLE: 03_string_operations.gom
+// PURPOSE: String concatenation and operations
+// ============================================================================
+
+print "=== STRING OPERATIONS ==="!
+print ""!
+
+const str1 = "Hello"!
+const str2 = "World"!
+const str3 = "Gulf of Mexico"!
+
+print "CONCATENATION:"!
+const greeting = str1 + " " + str2!
+print greeting!
+
+const fullName = "Welcome to " + str3!
+print fullName!
+print ""!
+
+// String properties
+const text = "Programming"!
+print "STRING PROPERTIES:"!
+print "Text: ${text}"!
+print "Length: ${text.length}"!
+print ""!
+
+// String interpolation with expressions
+const x = 10!
+const y = 20!
+const sum = x + y!
+
+print "STRING INTERPOLATION:"!
+print "x = ${x}"!
+print "y = ${y}"!
+print "Sum: ${sum}"!
+print "Expression in string: ${x} + ${y} = ${x + y}"!
+print ""!
+
+// Numeric to string conversion
+const num = 42!
+const numStr = "" + num!
+print "Number to string conversion:"!
+print "Original: ${num}"!
+print "As string: ${numStr}"!

@@ -1,0 +1,50 @@
+// ============================================================================
+// CATEGORY: 02 - OPERATORS
+// EXAMPLE: 01_arithmetic.gom
+// PURPOSE: Arithmetic operations and operator precedence
+// ============================================================================
+
+print "=== ARITHMETIC OPERATIONS ==="!
+print ""!
+
+const a = 10!
+const b = 3!
+
+print "Values: a = ${a}, b = ${b}"!
+print ""!
+
+// Basic arithmetic
+const sum = a + b!
+const diff = a - b!
+const product = a * b!
+const quotient = a / b!
+const power = a ^ b!
+
+print "BASIC ARITHMETIC:"!
+print "Addition: ${a} + ${b} = ${sum}"!
+print "Subtraction: ${a} - ${b} = ${diff}"!
+print "Multiplication: ${a} * ${b} = ${product}"!
+print "Division: ${a} / ${b} = ${quotient}"!
+print "Power: ${a} ^ ${b} = ${power}"!
+print ""!
+
+// Operator precedence
+const expr1 = 2 + 3 * 4!
+const expr2 = (2 + 3) * 4!
+const expr3 = 10 - 2 - 3!
+const expr4 = 2 ^ 3 ^ 2!
+
+print "OPERATOR PRECEDENCE:"!
+print "2 + 3 * 4 = ${expr1}"!
+print "(2 + 3) * 4 = ${expr2}"!
+print "10 - 2 - 3 = ${expr3}"!
+print "2 ^ 3 ^ 2 = ${expr4}"!
+print ""!
+
+// Unary operators
+const negA = -a!
+const negNeg = -(-5)!
+
+print "UNARY OPERATORS:"!
+print "-${a} = ${negA}"!
+print "-(-5) = ${negNeg}"!
