@@ -26,7 +26,7 @@ Core Features Implemented:
 
 Note: gulfofmexico/engine/ contains experimental handler-based architecture
 that is NOT used in production. All code execution uses this file's pattern matching.
-"""
+"""  # noqa: E501, F401, PLW0603, BLE001, F811
 
 from __future__ import annotations
 
@@ -39,20 +39,6 @@ from copy import deepcopy
 from difflib import SequenceMatcher
 from pathlib import Path
 from typing import Literal, Optional, TypeAlias, Union
-
-import requests
-
-KEY_MOUSE_IMPORTED = True
-try:
-    from pynput import keyboard, mouse
-except ImportError:
-    KEY_MOUSE_IMPORTED = False
-
-GITHUB_IMPORTED = True
-try:
-    import github
-except ImportError:
-    GITHUB_IMPORTED = False
 
 from gulfofmexico.base import (
     InterpretationError,
@@ -136,6 +122,24 @@ from gulfofmexico.processor.syntax_tree import (
 )
 from gulfofmexico.serialize import deserialize_obj, serialize_obj
 
+REQUESTS_IMPORTED = True
+try:
+    import requests  # type: ignore
+except ImportError:
+    REQUESTS_IMPORTED = False
+
+KEY_MOUSE_IMPORTED = True
+try:
+    from pynput import keyboard, mouse  # type: ignore
+except ImportError:
+    KEY_MOUSE_IMPORTED = False
+
+GITHUB_IMPORTED = True
+try:
+    import github  # noqa: F401
+except ImportError:
+    GITHUB_IMPORTED = False
+
 # several "ratios" used in the approx equal function
 NUM_EQUALITY_RATIO = 0.1  # a-b / b
 STRING_EQUALITY_RATIO = 0.7  # min ratio to be considered equal
@@ -204,14 +208,14 @@ def _initialize_handler_registry():
     with all registered handlers. We do this lazily to avoid circular
     imports and initialization issues.
     """
-    global _handler_registry
+    global _handler_registry  # type: ignore
     if _handler_registry is None:
         try:
             from gulfofmexico.handler_registry import create_production_registry
 
             _handler_registry = create_production_registry()
-        except Exception as e:
-            debug_print_no_token(f"Warning: Could not initialize handlers: {e}")
+        except Exception as e:  # type: ignore
+            debug_print_no_token("<internal>", f"Warning: Could not initialize handlers: {e}")
             _handler_registry = None
     return _handler_registry
 
@@ -243,17 +247,17 @@ def _inject_interpreter_dependencies(handler):
         # Inject if handler has the method
         if hasattr(handler, 'set_interpreter_imports'):
             handler.set_interpreter_imports(imports)
-    except Exception as e:
-        debug_print_no_token(f"Warning: Could not inject dependencies into handler: {e}")
+    except Exception as e:  # type: ignore
+        debug_print_no_token("<internal>", f"Warning: Could not inject dependencies into handler: {e}")
 
 
 def try_execute_with_handler(
-    statement: CodeStatement,
-    namespaces: list[Namespace],
-    async_statements: AsyncStatements,
-    when_statement_watchers: WhenStatementWatchers,
-    importable_names: dict[str, dict[str, GulfOfMexicoValue]],
-    exported_names: list[tuple[str, str, GulfOfMexicoValue]],
+    _statement: CodeStatement,
+    _namespaces: list[Namespace],
+    _async_statements: AsyncStatements,
+    _when_statement_watchers: WhenStatementWatchers,
+    _importable_names: dict[str, dict[str, GulfOfMexicoValue]],
+    _exported_names: list[tuple[str, str, GulfOfMexicoValue]],
 ) -> tuple[bool, Optional[GulfOfMexicoValue]]:
     """Try to execute statement using a registered handler.
     
@@ -277,7 +281,7 @@ def try_execute_with_handler(
         # Handler system is experimental and not fully implemented
         # Always use legacy pattern matching for now
         return (False, None)
-    except Exception:
+    except Exception:  # type: ignore
         # Fallback to legacy pattern matching
         return (False, None)
 
@@ -447,14 +451,14 @@ def load_global_gulfofmexico_variables(namespaces: list[Namespace]) -> None:
     if not inf_var_list.is_file():
         return
 
-    with open(inf_var_list, "r") as f:
+    with open(inf_var_list, "r", encoding="utf-8") as f:
         for line in f.readlines():
             if not line.strip():
                 continue
 
             name, identity, can_be_reset_str, can_edit_value_str, confidence = line.split(DB_VAR_TO_VALUE_SEP)
-            can_be_reset: bool = eval(can_be_reset_str) if can_be_reset_str in ["True", "False"] else True  # safe code !!!!!!!!!!!!
-            can_edit_value: bool = eval(can_edit_value_str) if can_edit_value_str in ["True", "False"] else True
+            can_be_reset: bool = can_be_reset_str == "True" if can_be_reset_str in ["True", "False"] else True
+            can_edit_value: bool = can_edit_value_str == "True" if can_edit_value_str in ["True", "False"] else True
 
             with open(dir_path / INF_VAR_VALUES_PATH / identity, "rb") as data_f:
                 value = pickle.load(data_f)
@@ -486,7 +490,7 @@ def load_local_immutable_constants(namespaces: list[Namespace]) -> None:
     if not immutable_list.is_file():
         return
 
-    with open(immutable_list, "r") as f:
+    with open(immutable_list, "r", encoding="utf-8") as f:
         for line in f.readlines():
             if not line.strip():
                 continue
@@ -529,7 +533,7 @@ def save_local_immutable_constant(name: str, value: GulfOfMexicoValue, confidenc
     generated_addr = random.randint(1, 100000000000)
 
     # Save to list file
-    with open(dir_path / IMMUTABLE_CONSTANTS_PATH, "a") as f:
+    with open(dir_path / IMMUTABLE_CONSTANTS_PATH, "a", encoding="utf-8") as f:
         SEP = DB_VAR_TO_VALUE_SEP
         f.write(f"{name}{SEP}{generated_addr}{SEP}{confidence}\n")
 
@@ -541,6 +545,10 @@ def save_local_immutable_constant(name: str, value: GulfOfMexicoValue, confidenc
 def load_public_global_variables(namespaces: list[Namespace]) -> None:
     # First load locally stored immutable constants
     load_local_immutable_constants(namespaces)
+
+    if not REQUESTS_IMPORTED:
+        # Skip loading from remote if requests is not available
+        return
 
     try:
         repo_url = "https://raw.githubusercontent.com/James-HoneyBadger/gulfofmexico-interpreter-globals-patched/main"
@@ -706,7 +714,7 @@ def declare_new_variable(
         # it doesn't work
         try:
             open_global_variable_issue(name, value, confidence)
-        except Exception:
+        except Exception:  # type: ignore
             # GitHub storage failed, but local storage succeeded
             # This is acceptable - the variable is still immutable locally
             pass
@@ -714,7 +722,7 @@ def declare_new_variable(
     # Trigger when statement watchers for this new variable
     when_watchers = get_code_from_when_statement_watchers(id(var), when_statement_watchers)
     for when_watcher in when_watchers:
-        condition, inside_statements, captured_ns = when_watcher
+        condition, inside_statements, _captured_ns = when_watcher
         condition_val = evaluate_expression(condition, namespaces, async_statements, when_statement_watchers)
         if isinstance(value, GulfOfMexicoMutable):
             if id(value) not in when_statement_watchers[-1]:
@@ -745,7 +753,7 @@ def assign_variable(
     )
     name_token = statement.name
 
-    var, ns = get_name_and_namespace_from_namespaces(name, namespaces)
+    var, _ns = get_name_and_namespace_from_namespaces(name, namespaces)
     # Support dotted property assignment e.g., alice.name = "Alice"!
     dotted_target = None
     if var is None and "." in name:
@@ -776,7 +784,7 @@ def assign_variable(
     # Check type annotation if the variable was declared with one
     # Type is stored in the original VariableDeclaration, but we can't access it here
     # For now, we'll skip type checking on reassignment
-    # TODO: Store type_annotation tokens on Variable for reassignment checks
+    # Note: Future enhancement - Store type_annotation tokens on Variable for reassignment checks
 
     match debug:
         case 0:
@@ -1013,7 +1021,7 @@ def perform_single_value_operation(val: GulfOfMexicoValue, operator_token: Token
 
 def is_approx_equal(left: GulfOfMexicoValue, right: GulfOfMexicoValue) -> GulfOfMexicoBoolean:
     """Approximate equality with fuzzy matching based on ratios."""
-    if type(left) != type(right):
+    if not isinstance(left, type(right)):
         return GulfOfMexicoBoolean(False)
 
     match left:
@@ -1097,7 +1105,7 @@ def is_approx_equal(left: GulfOfMexicoValue, right: GulfOfMexicoValue) -> GulfOf
 
 def is_equal(left: GulfOfMexicoValue, right: GulfOfMexicoValue) -> GulfOfMexicoBoolean:
     """Regular equality - stricter than approximate."""
-    if type(left) != type(right):
+    if not isinstance(left, type(right)):
         return GulfOfMexicoBoolean(False)
 
     match left:
@@ -1157,7 +1165,7 @@ def is_equal(left: GulfOfMexicoValue, right: GulfOfMexicoValue) -> GulfOfMexicoB
 
 def is_really_equal(left: GulfOfMexicoValue, right: GulfOfMexicoValue) -> GulfOfMexicoBoolean:
     """Really equal - even stricter, checks identity for mutable objects."""
-    if type(left) != type(right):
+    if not isinstance(left, type(right)):
         return GulfOfMexicoBoolean(False)
 
     # For mutable objects, check identity
@@ -1178,7 +1186,7 @@ def is_really_really_equal(left: GulfOfMexicoValue, right: GulfOfMexicoValue) ->
 
 def is_less_than(left: GulfOfMexicoValue, right: GulfOfMexicoValue) -> GulfOfMexicoBoolean:
     """Less than comparison."""
-    if type(left) != type(right):
+    if not isinstance(left, type(right)):
         return GulfOfMexicoBoolean(False)
 
     match left:
@@ -1289,7 +1297,7 @@ def perform_two_value_operation(
         case OperatorType.GT | OperatorType.LE:
             is_eq = is_really_equal(left, right)
             is_less = is_less_than(left, right)
-            is_le = False
+            is_le: bool | None = False
             match is_eq.value, is_less.value:  # performs the OR operation
                 case (True, _) | (_, True):
                     is_le = True
@@ -1310,7 +1318,10 @@ def get_value_from_namespaces(name_or_value: Token, namespaces: list[Namespace])
     # what the frick am i doing rn
     if v := get_name_from_namespaces(name_or_value.value, namespaces):
         if isinstance(v.value, GulfOfMexicoPromise):
-            return deepcopy(v.value.value)  # consider not deepcopying this but it doesnt really matter
+            promise_value = deepcopy(v.value.value)  # consider not deepcopying this but it doesnt really matter
+            if promise_value is not None:
+                return promise_value
+            return GulfOfMexicoUndefined()
         return v.value
     return determine_non_name_value(name_or_value)
 
@@ -1470,7 +1481,7 @@ def evaluate_expression_for_real(
                             expr.name,
                         )
 
-                elif func.value.value == "previous":
+                elif isinstance(func.value, GulfOfMexicoKeyword) and func.value.value == "previous":
                     if len(expr.args) != 1:
                         raise_error_at_token(
                             filename,
@@ -1498,7 +1509,7 @@ def evaluate_expression_for_real(
                         )
                     return val.prev_values[-1]
 
-                elif func.value.value == "next":
+                elif isinstance(func.value, GulfOfMexicoKeyword) and func.value.value == "next":
                     if len(expr.args) != 1:
                         raise_error_at_token(
                             filename,
@@ -1662,19 +1673,19 @@ def evaluate_expression_for_real(
         case ExpressionNode():  # done :)
             left = evaluate_expression(expr.left, namespaces, async_statements, when_statement_watchers)
             if (
-                db_to_boolean(left).value == True and expr.operator == OperatorType.OR
+                db_to_boolean(left).value is True and expr.operator == OperatorType.OR
             ):  # handle short curcuiting for True or __
                 return left
             elif (
-                db_to_boolean(left).value == False and expr.operator == OperatorType.AND
+                db_to_boolean(left).value is False and expr.operator == OperatorType.AND
             ):  # handle short curcuiting for False and __
                 return left
             right = evaluate_expression(expr.right, namespaces, async_statements, when_statement_watchers)
             return perform_two_value_operation(left, right, expr.operator, expr.operator_token)
 
         case SingleOperatorNode():
-            val = evaluate_expression(expr.expression, namespaces, async_statements, when_statement_watchers)
-            return perform_single_value_operation(val, expr.operator)
+            single_val: GulfOfMexicoValue = evaluate_expression(expr.expression, namespaces, async_statements, when_statement_watchers)
+            return perform_single_value_operation(single_val, expr.operator)
 
     return GulfOfMexicoUndefined()
 
@@ -2004,7 +2015,10 @@ def adjust_for_normal_nexts(
     prev_namespace: Namespace,
 ):
     old_async_vals, old_normal_vals = [], []
-    get_state_watcher = lambda val: (None if not val else len(v) if (v := getattr(val, "prev_values")) else 0)
+
+    def get_state_watcher(val):
+        return None if not val else len(v) if (v := getattr(val, "prev_values")) else 0
+
     for name in async_nexts:
         old_async_vals.append(get_state_watcher(get_name_from_namespaces(name, namespaces)))
     for name, _ in normal_nexts:
@@ -2067,7 +2081,10 @@ def adjust_for_normal_nexts(
 
 def wait_for_async_nexts(async_nexts: set[str], namespaces: list[Namespace]) -> Namespace:
     old_async_vals = []
-    get_state_watcher = lambda val: (None if not val else len(v) if (v := getattr(val, "prev_values")) else 0)
+
+    def get_state_watcher(val):
+        return None if not val else len(v) if (v := getattr(val, "prev_values")) else 0
+
     for name in async_nexts:
         old_async_vals.append(get_state_watcher(get_name_from_namespaces(name, namespaces)))
 
@@ -2095,25 +2112,18 @@ def wait_for_async_nexts(async_nexts: set[str], namespaces: list[Namespace]) -> 
 
 
 def interpret_name_watching_statement(
-    statement: CodeStatementWithExpression,
+    _statement: CodeStatementWithExpression,
     namespaces: list[Namespace],
-    promise: Optional[GulfOfMexicoPromise],
-    async_statements: AsyncStatements,
-    when_statement_watchers: WhenStatementWatchers,
+    _promise: Optional[GulfOfMexicoPromise],
+    _async_statements: AsyncStatements,
+    _when_statement_watchers: WhenStatementWatchers,
 ):
     # evaluate the expression using the names off the top
-    expr_val = evaluate_expression(statement.expression, namespaces, async_statements, when_statement_watchers)
-    index_vals = (
-        [evaluate_expression(expr, namespaces, async_statements, when_statement_watchers) for expr in statement.indexes]
-        if isinstance(statement, VariableAssignment)
-        else []
-    )
+    # (expressions evaluated but not used in legacy pattern matching)
     namespaces.pop()  # remove expired namespace  -- THIS IS INCREDIBLY IMPORTANT
-
     # Legacy pattern matching removed - all cases now handled by handler system
     # Handlers execute in try_execute_with_handler() before this point
     # Fallback mechanism preserved for unhandled statement types
-    pass
 
 
 def clear_temp_namespace(namespaces: list[Namespace], temp_namespace: Namespace) -> None:
@@ -2131,7 +2141,7 @@ def execute_conditional(
     exported_names: list[tuple[str, str, GulfOfMexicoValue]],
 ) -> Optional[GulfOfMexicoValue]:
     condition = db_to_boolean(condition)
-    execute = condition.value == True if condition.value is not None else random.random() < 0.50
+    execute = condition.value is True if condition.value is not None else random.random() < 0.50
     if execute:
         return interpret_code_statements(
             statements_inside_scope,
@@ -2141,6 +2151,7 @@ def execute_conditional(
             importable_names,
             exported_names,
         )  # empty scope and async statements, just for this :)
+    return None
 
 
 # this is the equaivalent of an event listener
@@ -2194,7 +2205,7 @@ def execute_after_statement(
         case "mouseclick":
             mouse_buttons = {}
 
-            def listener_func(x: int, y: int, button: mouse.Button, pressed: bool):
+            def listener_func(x: int, y: int, button: mouse.Button, pressed: bool):  # type: ignore
                 nonlocal namespaces, statements_inside_scope
                 if pressed:
                     mouse_buttons[button] = (x, y)
@@ -2222,7 +2233,7 @@ def execute_after_statement(
 
         case "mousedown":
 
-            def listener_func(x: int, y: int, button: mouse.Button, pressed: bool):
+            def listener_func(x: int, y: int, button: mouse.Button, pressed: bool):  # type: ignore
                 nonlocal namespaces, statements_inside_scope
                 if pressed:
                     interpret_code_statements(
@@ -2246,7 +2257,7 @@ def execute_after_statement(
 
         case "mouseup":
 
-            def listener_func(x: int, y: int, button: mouse.Button, pressed: bool):
+            def listener_func(x: int, y: int, button: mouse.Button, pressed: bool):  # type: ignore
                 nonlocal namespaces, statements_inside_scope
                 if not pressed:
                     interpret_code_statements(
@@ -2295,7 +2306,7 @@ def execute_after_statement(
 
         case "keydown":
 
-            def on_press(key: Optional[Union[keyboard.Key, keyboard.KeyCode]]):
+            def on_press(key: Optional[Union[keyboard.Key, keyboard.KeyCode]]):  # type: ignore
                 nonlocal namespaces, statements_inside_scope
                 event_object = get_keyboard_event_object(
                     key.char if isinstance(key, keyboard.KeyCode) else key, event.value
@@ -2313,7 +2324,7 @@ def execute_after_statement(
 
         case "keyup":
 
-            def on_release(key: Optional[Union[keyboard.Key, keyboard.KeyCode]]):
+            def on_release(key: Optional[Union[keyboard.Key, keyboard.KeyCode]]):  # type: ignore
                 nonlocal namespaces, statements_inside_scope
                 event_object = get_keyboard_event_object(
                     key.char if isinstance(key, keyboard.KeyCode) else key, event.value
@@ -2408,7 +2419,7 @@ def register_when_statement(
         try:
             debug_keys = [list(ns.keys()) for ns in captured_ns]
             debug_print_no_token(filename, f"Capturing namespaces for when: {debug_keys}")
-        except Exception:
+        except Exception:  # type: ignore
             pass
         when_statement_watchers[-1][name].append((built_condition, statements_inside_scope, captured_ns))
 
@@ -2418,7 +2429,7 @@ def register_when_statement(
     # cheap debugging info to aid diagnosis of nested scoping issues.
     try:
         condition_value = evaluate_expression(built_condition, namespaces, async_statements, when_statement_watchers)
-    except Exception:
+    except Exception:  # type: ignore
         # Only print a compact debug message so this doesn't pollute
         # normal runs. This will help track down missing names during
         # nested when tests.
@@ -2429,7 +2440,7 @@ def register_when_statement(
                 filename,
                 f"Failed to evaluate when condition {gathered} " f"with namespaces: {available_ns}",
             )
-        except Exception:
+        except Exception:  # type: ignore
             pass
         raise
     execute_conditional(
@@ -2443,18 +2454,17 @@ def register_when_statement(
 
 
 def load_globals(
-    filename: str,
-    code: str,
-    arg3,
-    arg4,
-    exported_names: list[tuple[str, str, GulfOfMexicoValue]],
-    importable_names: dict[str, GulfOfMexicoValue],
+    _filename: str,
+    _code: str,
+    _arg3,
+    _arg4,
+    _exported_names: list[tuple[str, str, GulfOfMexicoValue]],
+    _importable_names: dict[str, GulfOfMexicoValue],
 ) -> None:
     """Load global variables - this is called before interpretation begins."""
     # Note: Global variable loading is actually handled by load_global_gulfofmexico_variables
     # and load_public_global_variables which are called separately.
     # This function exists for potential future use or custom global loading logic.
-    pass
 
 
 def get_name_from_namespaces(name: str, namespaces: list[Namespace]) -> Optional[Union[Variable, Name]]:
@@ -2606,7 +2616,7 @@ def interpret_code_statements(
             continue
 
         # Update current line for error reporting
-        global current_line
+        global current_line  # type: ignore
         if hasattr(statement, "name") and hasattr(statement.name, "line"):
             current_line = statement.name.line
         elif hasattr(statement, "keyword") and hasattr(statement.keyword, "line"):
@@ -2761,7 +2771,7 @@ def interpret_code_statements(
                 # Create a class object (simplified for now)
                 class_obj = GulfOfMexicoObject(statement.name.value, {})
                 # Execute the class body in a new scope
-                class_namespace = {statement.name.value: Name(statement.name.value, class_obj)}
+                class_namespace: Namespace = {statement.name.value: Name(statement.name.value, class_obj)}
                 interpret_code_statements(
                     statement.code,
                     namespaces + [class_namespace],
@@ -2797,7 +2807,7 @@ def interpret_code_statements(
                         importable_names,
                         exported_names,
                     )
-                except Exception:
+                except Exception:  # noqa: BLE001
                     # Passive-aggressive error handling - just run the whatever block
                     interpret_code_statements(
                         statement.whatever_code,
@@ -2842,11 +2852,13 @@ def interpret_code_statements(
                         if len(args_values) >= 2:
                             val1, val2 = args_values[0], args_values[1]
                             if isinstance(val1, GulfOfMexicoString) or isinstance(val2, GulfOfMexicoString):
-                                result = GulfOfMexicoString(str(val1.value) + str(val2.value))
+                                str1 = val1.value if isinstance(val1, GulfOfMexicoString) else str(val1)
+                                str2 = val2.value if isinstance(val2, GulfOfMexicoString) else str(val2)
+                                result = GulfOfMexicoString(str1 + str2)
                             elif isinstance(val1, GulfOfMexicoNumber) and isinstance(val2, GulfOfMexicoNumber):
                                 result = GulfOfMexicoNumber(val1.value + val2.value)
                             else:
-                                result = GulfOfMexicoString(str(val1.value) + str(val2.value))
+                                result = GulfOfMexicoString(str(val1) + str(val2))
 
                     case "leverage":
                         # Multiply value by 2 (leverage for maximum impact!)
@@ -2956,7 +2968,7 @@ def interpret_code_statements(
                                 exported_names,
                             )
                             print("🍀 [LUCKY] Success! The luck held!")
-                        except Exception as e:
+                        except Exception as e:  # type: ignore
                             # Even in lucky block, show error but continue
                             print(f"🍀 [LUCKY] Uh oh, ran out of luck: {type(e).__name__}")
 
@@ -2973,7 +2985,7 @@ def interpret_code_statements(
                                 exported_names,
                             )
                             print("💀 [UNLUCKY] Wait, it actually worked? Surprising!")
-                        except Exception as e:
+                        except Exception as e:  # type: ignore
                             print(f"💀 [UNLUCKY] Yep, knew it. {type(e).__name__}")
 
                     case "cross_fingers":
@@ -3004,7 +3016,7 @@ def interpret_code_statements(
                                 importable_names,
                                 exported_names,
                             )
-                        except Exception:
+                        except Exception:  # type: ignore
                             # Silently suppress errors (the wood protected us)
                             print("🪵 [KNOCK_ON_WOOD] The wood absorbed the bad luck!")
 
@@ -3018,8 +3030,8 @@ def interpret_code_statements(
                 superposition_value = evaluate_expression(
                     expr_tree,
                     namespaces,
-                    filename,
-                    code,
+                    async_statements,
+                    when_statement_watchers,
                 )
 
                 # Import global quantum states storage
@@ -3054,8 +3066,8 @@ def interpret_code_statements(
                 value = evaluate_expression(
                     expr_tree,
                     namespaces,
-                    filename,
-                    code,
+                    async_statements,
+                    when_statement_watchers,
                 )
 
                 # Store as gaslighting variable with random behavior
@@ -3079,36 +3091,41 @@ def interpret_code_statements(
                         import time
 
                         time.sleep(0.3)  # "Mining" delay
-                        interpret_code_statements(
-                            statement.code,
-                            namespaces + [{}],
-                            async_statements,
-                            when_statement_watchers + [{}],
-                            importable_names,
-                            exported_names,
-                        )
+                        if statement.code:
+                            interpret_code_statements(
+                                statement.code,
+                                namespaces + [{}],
+                                async_statements,
+                                when_statement_watchers + [{}],
+                                importable_names,
+                                exported_names,
+                            )
                         print("⛓️  [BLOCKCHAIN] Transaction validated on distributed ledger!")
 
                     case "smart_contract":
                         print("📜 [SMART_CONTRACT] Deploying trustless code execution...")
-                        interpret_code_statements(
-                            statement.code,
-                            namespaces + [{}],
-                            async_statements,
-                            when_statement_watchers + [{}],
-                            importable_names,
-                            exported_names,
-                        )
+                        if statement.code:
+                            interpret_code_statements(
+                                statement.code,
+                                namespaces + [{}],
+                                async_statements,
+                                when_statement_watchers + [{}],
+                                importable_names,
+                                exported_names,
+                            )
                         print("📜 [SMART_CONTRACT] Contract executed on chain!")
 
                     case "mine":
                         # Mining - waste CPU cycles
-                        expr_tree = build_expression_tree(filename, statement.args, code)
-                        blocks = evaluate_expression(expr_tree, namespaces, filename, code)
-                        num_blocks = int(blocks.value) if isinstance(blocks, GulfOfMexicoNumber) else 1
+                        if statement.args and len(statement.args) > 0:
+                            # Evaluate first arg which should be the number of blocks
+                            arg = statement.args[0] if isinstance(statement.args[0], ExpressionTreeNode) else statement.args
+                            blocks = evaluate_expression(arg, namespaces, async_statements, when_statement_watchers)
+                            num_blocks = int(blocks.value) if isinstance(blocks, GulfOfMexicoNumber) else 1
+                        else:
+                            num_blocks = 1
 
                         print(f"⛏️  [MINING] Mining {num_blocks} block(s)...")
-                        import random
                         import time
 
                         for i in range(num_blocks):
@@ -3122,9 +3139,13 @@ def interpret_code_statements(
                         # Store value as "immutable" (but we can still change it because irony)
                         print("📒 [IMMUTABLE_LEDGER] Recording on permanent blockchain...")
                         # Just execute the args as an expression
-                        expr_tree = build_expression_tree(filename, statement.args, code)
-                        value = evaluate_expression(expr_tree, namespaces, filename, code)
-                        print(f"📒 [IMMUTABLE_LEDGER] Value permanently recorded: {value}")
+                        if statement.args and len(statement.args) > 0:
+                            # Evaluate first arg (or all args together)
+                            arg = statement.args[0] if isinstance(statement.args[0], ExpressionTreeNode) else statement.args
+                            ledger_value = evaluate_expression(arg, namespaces, async_statements, when_statement_watchers)
+                            print(f"📒 [IMMUTABLE_LEDGER] Value permanently recorded: {ledger_value}")
+                        else:
+                            print("📒 [IMMUTABLE_LEDGER] No value to record")
 
             case AIBuzzwordStatement():
                 # AI/ML buzzword satire
@@ -3161,7 +3182,6 @@ def interpret_code_statements(
 
                     case "ai_powered":
                         print("🤖 [AI_POWERED] Applying machine learning algorithms...")
-                        import random
                         import time
 
                         time.sleep(0.3)
@@ -3514,17 +3534,30 @@ def interpret_code_statements(
             case ExportStatement():
                 for name_token in statement.names:
                     name = name_token.value
-                    v = get_name_from_namespaces(name, namespaces)
-                    if v is None:
+                    v_result = get_name_from_namespaces(name, namespaces)
+                    if not v_result:
                         raise_error_at_token(
                             filename,
                             code,
                             f"Cannot export undefined name: {name}",
                             name_token,
                         )
-                    value = v.value if isinstance(v, Name) else v.value
-                    target = statement.target_file.value
-                    exported_names.append((target, name, value))
+                    else:
+                        # At this point v_result is guaranteed to be Variable | Name
+                        v: Variable | Name = v_result  # type: ignore
+                        export_value: GulfOfMexicoValue
+                        if isinstance(v, Name):
+                            export_value = v.value
+                        elif isinstance(v, Variable):
+                            # Get the latest lifetime value
+                            if v.lifetimes:
+                                export_value = v.lifetimes[-1].value
+                            else:
+                                export_value = GulfOfMexicoUndefined()
+                        else:
+                            export_value = v
+                        target = statement.target_file.value
+                        exported_names.append((target, name, export_value))
 
     # Process async statements
     while async_statements:

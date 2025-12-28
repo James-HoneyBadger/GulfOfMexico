@@ -1,0 +1,5 @@
+// Test 1: Single-line comment
+print "After single comment!"!
+
+// Test 2: Try a block comment on one line
+/* This comment is on one line */ print "After one-line block comment!"!

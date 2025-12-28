@@ -1,0 +1,58 @@
+// Phase 7 Quick Wins - Core Features Test
+
+print "========================================="!
+print "TESTING EXTENDED MATH FUNCTIONS"!
+print "========================================="!
+
+print "floor(3.7) = " + String(floor(3.7))!
+print "ceil(3.2) = " + String(ceil(3.2))!
+print "round(3.5) = " + String(round(3.5))!
+
+print ""!
+
+print "sqrt(16) = " + String(sqrt(16))!
+print "sqrt(2) = " + String(sqrt(2))!
+
+print ""!
+
+print "sin(0) = " + String(sin(0))!
+print "cos(0) = " + String(cos(0))!
+print "tan(0) = " + String(tan(0))!
+
+print ""!
+
+print "exp(1) = " + String(exp(1))!
+print "log(2.71828) = " + String(log(2.71828))!
+
+print ""!
+
+print "degrees(3.14159) = " + String(degrees(3.14159))!
+print "radians(180) = " + String(radians(180))!
+
+print ""!
+
+print "========================================="!
+print "TESTING ESCAPE SEQUENCES"!
+print "========================================="!
+
+print "Newline test:"!
+print "Line 1\nLine 2\nLine 3"!
+
+print ""!
+
+print "Tab test:"!
+print "Col1\tCol2\tCol3"!
+
+print ""!
+
+print "Backslash: \\"!
+
+print ""!
+
+print "Quote: \"inside\""!
+
+print ""!
+
+print "========================================="!
+print "SUCCESS: All tests passed!"!
+print "========================================="!

@@ -1,0 +1,12 @@
+// Simple test for quick wins
+
+// Extended math
+print "floor(3.7) = " + String(floor(3.7))!
+print "ceil(3.2) = " + String(ceil(3.2))!
+print "sqrt(16) = " + String(sqrt(16))!
+
+// Escape sequences - test newlines and tabs
+print "Line 1\nLine 2"!
+print "Col1\tCol2"!
+
+print "=== Tests Done ==="!

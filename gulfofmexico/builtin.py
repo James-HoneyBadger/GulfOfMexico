@@ -42,11 +42,12 @@ from __future__ import annotations
 
 import functools
 import math
+import random
 import time
 from abc import ABCMeta, abstractmethod
 from dataclasses import dataclass, field
 from time import sleep
-from typing import Any, Callable, Optional, Union
+from typing import Any, Callable, Optional, Union, cast
 
 from gulfofmexico.base import NonFormattedError
 from gulfofmexico.processor.syntax_tree import CodeStatement
@@ -138,7 +139,8 @@ def db_str_pop(
     return GulfOfMexicoString(retval)
 
 
-# class Value(metaclass=ABCMeta):   # TODO POTENTIALLY DO THIS TO ALLOW FOR MORE OBJECTS WITHOUT MUCH HASSLE
+# Note: Consider metaclass approach for future extensibility
+# class Value(metaclass=ABCMeta):   # Could allow for more objects without much complexity
 #     @abstractmethod
 #     def to_bool(self) -> Value: pass
 #     @abstractmethod
@@ -227,6 +229,8 @@ class GulfOfMexicoList(
         # print("user index:" + str(user_index))
         realIndex = self.indexer.get(user_index)
         # print("real index:" + str(realIndex))
+        if realIndex is None:
+            raise NonFormattedError("Index not found")
         return self.values[round(realIndex)]
 
     def assign_index(self, index: GulfOfMexicoValue, val: GulfOfMexicoValue) -> None:
@@ -237,6 +241,8 @@ class GulfOfMexicoList(
             if not -list_len <= index.value <= list_len - 1:
                 raise NonFormattedError("Indexing out of list bounds.")
             real_idx = self.indexer.get(index.value)
+            if real_idx is None:
+                raise NonFormattedError("Index not found")
             self.values[round(real_idx)] = val
         else:  # assign in the middle of the array
             if not -list_len <= index.value <= list_len - 1:
@@ -443,7 +449,7 @@ class VariableLifetime:
     confidence: int
     can_be_reset: bool
     can_edit_value: bool
-    creation_time: float = field(default_factory=lambda: time.time())
+    creation_time: float = field(default_factory=time.time)
     is_temporal: bool = False
     temporal_duration: float = 0.0
 
@@ -712,14 +718,6 @@ def db_to_string(val: GulfOfMexicoValue) -> GulfOfMexicoString:
     return GulfOfMexicoString(return_string)
 
 
-def db_print(*vals: GulfOfMexicoValue) -> None:
-    import sys
-
-    output = " ".join([db_to_string(v).value for v in vals])
-    print(output)
-    sys.stdout.flush()
-
-
 # Buffer for debug messages. We collect debug-related messages here and only
 # flush them to stderr when an unexpected error occurs (or when the
 # GULFOFMEXICO_DEBUG env var is explicitly set).
@@ -772,7 +770,7 @@ def flush_debug_logs() -> None:
 
 
 def db_to_number(val: GulfOfMexicoValue) -> GulfOfMexicoNumber:
-    return_number = 0
+    return_number: int | float = 0
     match val:
         case GulfOfMexicoNumber():
             return_number = val.value
@@ -802,7 +800,9 @@ def db_signal(starting_value: GulfOfMexicoValue) -> GulfOfMexicoValue:
         nonlocal obj
         if isinstance(setter_val, GulfOfMexicoSpecialBlankValue):
             return obj.value
-        obj.value = setter_val
+        else:
+            obj.value = setter_val
+            return None
 
     return BuiltinFunction(1, signal_func)
 
@@ -816,7 +816,7 @@ def db_sleep(t: GulfOfMexicoValue) -> None:
 def db_read(path: GulfOfMexicoValue) -> GulfOfMexicoString:
     if not isinstance(path, GulfOfMexicoString):
         raise NonFormattedError("'read' function requires argument to be a string")
-    with open(path.value) as f:
+    with open(path.value, encoding="utf-8") as f:
         s = f.read()
     return GulfOfMexicoString(s)
 
@@ -835,7 +835,7 @@ def db_regex_match(arg: GulfOfMexicoString) -> GulfOfMexicoBoolean:
     try:
         return GulfOfMexicoBoolean(bool(re.search(pattern, string)))
     except re.error as e:
-        raise NonFormattedError(f"Invalid regex pattern: {e}")
+        raise NonFormattedError(f"Invalid regex pattern: {e}") from e
 
 
 def db_regex_findall(arg: GulfOfMexicoString) -> GulfOfMexicoList:
@@ -853,7 +853,7 @@ def db_regex_findall(arg: GulfOfMexicoString) -> GulfOfMexicoList:
         matches = re.findall(pattern, string)
         return GulfOfMexicoList([GulfOfMexicoString(match) for match in matches])
     except re.error as e:
-        raise NonFormattedError(f"Invalid regex pattern: {e}")
+        raise NonFormattedError(f"Invalid regex pattern: {e}") from e
 
 
 def db_regex_replace(arg: GulfOfMexicoString) -> GulfOfMexicoString:
@@ -871,14 +871,14 @@ def db_regex_replace(arg: GulfOfMexicoString) -> GulfOfMexicoString:
         result = re.sub(pattern, replacement, string)
         return GulfOfMexicoString(result)
     except re.error as e:
-        raise NonFormattedError(f"Invalid regex pattern: {e}")
+        raise NonFormattedError(f"Invalid regex pattern: {e}") from e
 
 
 def db_write(path: GulfOfMexicoValue, content: GulfOfMexicoValue) -> None:
     if not isinstance(path, GulfOfMexicoString):
         raise NonFormattedError("'write' requires path to be a string")
     content_str = db_to_string(content).value
-    with open(path.value, "w") as f:
+    with open(path.value, "w", encoding="utf-8") as f:
         f.write(content_str)
 
 
@@ -907,6 +907,159 @@ def __number_function_maker(num: int) -> BuiltinFunction:
     return BuiltinFunction(1, the_func)
 
 
+# Math convenience functions - wrappers for common math module functions
+def db_random() -> GulfOfMexicoNumber:
+    """Return a random number between 0 and 1."""
+    return GulfOfMexicoNumber(random.random())
+
+
+def db_random_int(min_val: GulfOfMexicoValue, max_val: GulfOfMexicoValue) -> GulfOfMexicoNumber:
+    """Return a random integer between min and max (inclusive)."""
+    if not isinstance(min_val, GulfOfMexicoNumber) or not isinstance(max_val, GulfOfMexicoNumber):
+        raise NonFormattedError("randomInt requires two number arguments")
+    return GulfOfMexicoNumber(random.randint(int(min_val.value), int(max_val.value)))
+
+
+def db_abs(val: GulfOfMexicoValue) -> GulfOfMexicoNumber:
+    """Return the absolute value of a number."""
+    if not isinstance(val, GulfOfMexicoNumber):
+        raise NonFormattedError("abs requires a number argument")
+    return GulfOfMexicoNumber(abs(val.value))
+
+
+def db_min_list(*vals: GulfOfMexicoValue) -> GulfOfMexicoNumber:
+    """Return the minimum of the provided numbers."""
+    if not vals:
+        raise NonFormattedError("min requires at least one argument")
+    numbers = []
+    for val in vals:
+        if isinstance(val, GulfOfMexicoNumber):
+            numbers.append(val.value)
+        elif isinstance(val, GulfOfMexicoList):
+            for item_val in val.values:
+                if isinstance(item_val, GulfOfMexicoNumber):
+                    numbers.append(item_val.value)
+    if not numbers:
+        raise NonFormattedError("min requires at least one number")
+    return GulfOfMexicoNumber(min(numbers))
+
+
+def db_max_list(*vals: GulfOfMexicoValue) -> GulfOfMexicoNumber:
+    """Return the maximum of the provided numbers."""
+    if not vals:
+        raise NonFormattedError("max requires at least one argument")
+    numbers = []
+    for val in vals:
+        if isinstance(val, GulfOfMexicoNumber):
+            numbers.append(val.value)
+        elif isinstance(val, GulfOfMexicoList):
+            for item_val in val.values:
+                if isinstance(item_val, GulfOfMexicoNumber):
+                    numbers.append(item_val.value)
+    if not numbers:
+        raise NonFormattedError("max requires at least one number")
+    return GulfOfMexicoNumber(max(numbers))
+
+
+# Extended math functions - additional math operations
+def db_floor(val: GulfOfMexicoValue) -> GulfOfMexicoNumber:
+    """Return the floor of a number."""
+    if not isinstance(val, GulfOfMexicoNumber):
+        raise NonFormattedError("floor requires a number argument")
+    return GulfOfMexicoNumber(math.floor(val.value))
+
+
+def db_ceil(val: GulfOfMexicoValue) -> GulfOfMexicoNumber:
+    """Return the ceiling of a number."""
+    if not isinstance(val, GulfOfMexicoNumber):
+        raise NonFormattedError("ceil requires a number argument")
+    return GulfOfMexicoNumber(math.ceil(val.value))
+
+
+def db_round(val: GulfOfMexicoValue, ndigits: Optional[GulfOfMexicoValue] = None) -> GulfOfMexicoNumber:
+    """Round a number to the nearest integer (or n decimal places)."""
+    if not isinstance(val, GulfOfMexicoNumber):
+        raise NonFormattedError("round requires a number argument")
+    if ndigits is None:
+        return GulfOfMexicoNumber(round(val.value))
+    if not isinstance(ndigits, GulfOfMexicoNumber):
+        raise NonFormattedError("round's second argument must be a number")
+    return GulfOfMexicoNumber(round(val.value, int(ndigits.value)))
+
+
+def db_sqrt(val: GulfOfMexicoValue) -> GulfOfMexicoNumber:
+    """Return the square root of a number."""
+    if not isinstance(val, GulfOfMexicoNumber):
+        raise NonFormattedError("sqrt requires a number argument")
+    if val.value < 0:
+        raise NonFormattedError("sqrt of negative number is not supported")
+    return GulfOfMexicoNumber(math.sqrt(val.value))
+
+
+def db_pow(base: GulfOfMexicoValue, exp: GulfOfMexicoValue) -> GulfOfMexicoNumber:
+    """Raise base to the power of exp."""
+    if not isinstance(base, GulfOfMexicoNumber) or not isinstance(exp, GulfOfMexicoNumber):
+        raise NonFormattedError("pow requires two number arguments")
+    return GulfOfMexicoNumber(math.pow(base.value, exp.value))
+
+
+def db_sin(val: GulfOfMexicoValue) -> GulfOfMexicoNumber:
+    """Return the sine of a number (in radians)."""
+    if not isinstance(val, GulfOfMexicoNumber):
+        raise NonFormattedError("sin requires a number argument")
+    return GulfOfMexicoNumber(math.sin(val.value))
+
+
+def db_cos(val: GulfOfMexicoValue) -> GulfOfMexicoNumber:
+    """Return the cosine of a number (in radians)."""
+    if not isinstance(val, GulfOfMexicoNumber):
+        raise NonFormattedError("cos requires a number argument")
+    return GulfOfMexicoNumber(math.cos(val.value))
+
+
+def db_tan(val: GulfOfMexicoValue) -> GulfOfMexicoNumber:
+    """Return the tangent of a number (in radians)."""
+    if not isinstance(val, GulfOfMexicoNumber):
+        raise NonFormattedError("tan requires a number argument")
+    return GulfOfMexicoNumber(math.tan(val.value))
+
+
+def db_log(val: GulfOfMexicoValue, base: Optional[GulfOfMexicoValue] = None) -> GulfOfMexicoNumber:
+    """Return the natural logarithm of a number (or log base b)."""
+    if not isinstance(val, GulfOfMexicoNumber):
+        raise NonFormattedError("log requires a number argument")
+    if val.value <= 0:
+        raise NonFormattedError("log of non-positive number is not supported")
+    if base is None:
+        return GulfOfMexicoNumber(math.log(val.value))
+    if not isinstance(base, GulfOfMexicoNumber):
+        raise NonFormattedError("log's second argument must be a number")
+    if base.value <= 0 or base.value == 1:
+        raise NonFormattedError("log base must be positive and not equal to 1")
+    return GulfOfMexicoNumber(math.log(val.value, base.value))
+
+
+def db_exp(val: GulfOfMexicoValue) -> GulfOfMexicoNumber:
+    """Return e raised to the power of val."""
+    if not isinstance(val, GulfOfMexicoNumber):
+        raise NonFormattedError("exp requires a number argument")
+    return GulfOfMexicoNumber(math.exp(val.value))
+
+
+def db_degrees(val: GulfOfMexicoValue) -> GulfOfMexicoNumber:
+    """Convert radians to degrees."""
+    if not isinstance(val, GulfOfMexicoNumber):
+        raise NonFormattedError("degrees requires a number argument")
+    return GulfOfMexicoNumber(math.degrees(val.value))
+
+
+def db_radians(val: GulfOfMexicoValue) -> GulfOfMexicoNumber:
+    """Convert degrees to radians."""
+    if not isinstance(val, GulfOfMexicoNumber):
+        raise NonFormattedError("radians requires a number argument")
+    return GulfOfMexicoNumber(math.radians(val.value))
+
+
 # Graphics functions
 def db_create_canvas(
     width: GulfOfMexicoValue,
@@ -919,8 +1072,10 @@ def db_create_canvas(
 
     try:
         from gulfofmexico.graphics import GulfOfMexicoCanvas, GulfOfMexicoColor
-    except ImportError:
-        raise NonFormattedError("Graphics module not available. Install Pillow:\n" "  pip install Pillow")
+    except ImportError as exc:
+        raise NonFormattedError(
+            "Graphics module not available. Install Pillow:\n  pip install Pillow"
+        ) from exc
 
     # Parse background color if provided
     background = GulfOfMexicoColor(255, 255, 255)  # default white
@@ -934,7 +1089,8 @@ def db_create_canvas(
 
     # Create canvas object with methods as namespace
     canvas_obj = GulfOfMexicoObject("Canvas", {})
-    canvas_obj._gom_canvas = canvas  # Store the actual canvas
+    # Store the actual canvas via a property-like mechanism in the namespace
+    object.__setattr__(canvas_obj, '_gom_canvas', canvas)
 
     # Add canvas methods to namespace
     canvas_obj.namespace.update(
@@ -995,8 +1151,8 @@ def db_create_color(*args: GulfOfMexicoValue) -> GulfOfMexicoValue:
     """Create a Color object from RGB or RGBA values."""
     try:
         from gulfofmexico.graphics import GulfOfMexicoColor, parse_color
-    except ImportError:
-        raise NonFormattedError("Graphics module not available")
+    except ImportError as exc:
+        raise NonFormattedError("Graphics module not available") from exc
 
     # Handle named colors
     if len(args) == 1 and isinstance(args[0], GulfOfMexicoString):
@@ -1019,7 +1175,7 @@ def db_create_color(*args: GulfOfMexicoValue) -> GulfOfMexicoValue:
 
     # Return as a GulfOfMexico object
     color_obj = GulfOfMexicoObject("Color", {})
-    color_obj._gom_color = color
+    object.__setattr__(color_obj, '_gom_color', color)
     color_obj.namespace.update(
         {
             "r": Name("r", GulfOfMexicoNumber(color.r if color.r is not None else 127)),
@@ -1037,7 +1193,7 @@ def _get_canvas(canvas_obj: GulfOfMexicoObject):
     """Extract the underlying canvas from a canvas object."""
     if not hasattr(canvas_obj, "_gom_canvas"):
         raise NonFormattedError("Not a valid Canvas object")
-    return canvas_obj._gom_canvas
+    return object.__getattribute__(canvas_obj, '_gom_canvas')
 
 
 def _parse_color_arg(color_arg: GulfOfMexicoValue) -> str:
@@ -1046,7 +1202,10 @@ def _parse_color_arg(color_arg: GulfOfMexicoValue) -> str:
     if isinstance(color_arg, GulfOfMexicoString):
         return color_arg.value
     elif isinstance(color_arg, GulfOfMexicoObject) and hasattr(color_arg, "_gom_color"):
-        return color_arg._gom_color
+        color_obj = getattr(color_arg, "_gom_color", None)
+        if color_obj is not None and hasattr(color_obj, 'to_hex'):
+            return color_obj.to_hex()
+        return "black"
     elif isinstance(color_arg, GulfOfMexicoBoolean):
         # Three-valued logic for colors!
         if color_arg.value is True:
@@ -1186,8 +1345,6 @@ def db_observe(var_name: GulfOfMexicoString) -> GulfOfMexicoValue:
     if not isinstance(var_name, GulfOfMexicoString):
         raise NonFormattedError("observe requires a string variable name")
 
-    import random
-
     name = var_name.value
     if name in QUANTUM_STATES:
         superposition = QUANTUM_STATES[name]
@@ -1226,8 +1383,6 @@ def db_future(var_name: GulfOfMexicoString) -> GulfOfMexicoValue:
     """Predict future value of a variable (spoiler: it's random)."""
     if not isinstance(var_name, GulfOfMexicoString):
         raise NonFormattedError("future requires a string variable name")
-
-    import random
 
     # Future is unknowable, so we return a random prediction
     prediction = GulfOfMexicoNumber(random.randint(0, 100))
@@ -1285,8 +1440,8 @@ def db_from_base(number_str: GulfOfMexicoValue, base: GulfOfMexicoValue) -> Gulf
     try:
         result = int(num_str, radix)
         return GulfOfMexicoNumber(result)
-    except ValueError:
-        raise NonFormattedError(f"Invalid number '{num_str}' for base {radix}")
+    except ValueError as exc:
+        raise NonFormattedError(f"Invalid number '{num_str}' for base {radix}") from exc
 
 
 def db_base_add(
@@ -1606,17 +1761,17 @@ def db_correlation(lst1: GulfOfMexicoValue, lst2: GulfOfMexicoValue) -> GulfOfMe
 def db_compound_interest(
     principal: GulfOfMexicoValue,
     rate: GulfOfMexicoValue,
-    time: GulfOfMexicoValue,
-    n: GulfOfMexicoValue,
+    time_period: GulfOfMexicoValue,
+    num_compounds: GulfOfMexicoValue,
 ) -> GulfOfMexicoNumber:
     """Calculate compound interest: A = P(1 + r/n)^(nt)."""
-    if not all(isinstance(x, GulfOfMexicoNumber) for x in [principal, rate, time, n]):
+    if not all(isinstance(x, GulfOfMexicoNumber) for x in [principal, rate, time_period, num_compounds]):
         raise NonFormattedError("compound_interest requires 4 numbers")
 
-    p = principal.value
-    r = rate.value
-    t = time.value
-    n_val = n.value
+    p = cast(GulfOfMexicoNumber, principal).value
+    r = cast(GulfOfMexicoNumber, rate).value
+    t = cast(GulfOfMexicoNumber, time_period).value
+    n_val = cast(GulfOfMexicoNumber, num_compounds).value
 
     amount = p * ((1 + r / n_val) ** (n_val * t))
     return GulfOfMexicoNumber(amount)
@@ -1625,15 +1780,15 @@ def db_compound_interest(
 def db_simple_interest(
     principal: GulfOfMexicoValue,
     rate: GulfOfMexicoValue,
-    time: GulfOfMexicoValue,
+    time_period: GulfOfMexicoValue,
 ) -> GulfOfMexicoNumber:
     """Calculate simple interest: I = P * r * t."""
-    if not all(isinstance(x, GulfOfMexicoNumber) for x in [principal, rate, time]):
+    if not all(isinstance(x, GulfOfMexicoNumber) for x in [principal, rate, time_period]):
         raise NonFormattedError("simple_interest requires 3 numbers")
 
-    p = principal.value
-    r = rate.value
-    t = time.value
+    p = cast(GulfOfMexicoNumber, principal).value
+    r = cast(GulfOfMexicoNumber, rate).value
+    t = cast(GulfOfMexicoNumber, time_period).value
 
     interest = p * r * t
     return GulfOfMexicoNumber(interest)
@@ -1648,9 +1803,9 @@ def db_pmt(
     if not all(isinstance(x, GulfOfMexicoNumber) for x in [rate, nper, pv]):
         raise NonFormattedError("pmt requires 3 numbers: rate, nper, pv")
 
-    r = rate.value
-    n = nper.value
-    pv_val = pv.value
+    r = cast(GulfOfMexicoNumber, rate).value
+    n = cast(GulfOfMexicoNumber, nper).value
+    pv_val = cast(GulfOfMexicoNumber, pv).value
 
     if r == 0:
         payment = pv_val / n
@@ -1670,10 +1825,10 @@ def db_fv(
     if not all(isinstance(x, GulfOfMexicoNumber) for x in [rate, nper, pmt, pv]):
         raise NonFormattedError("fv requires 4 numbers")
 
-    r = rate.value
-    n = nper.value
-    pmt_val = pmt.value
-    pv_val = pv.value
+    r = cast(GulfOfMexicoNumber, rate).value
+    n = cast(GulfOfMexicoNumber, nper).value
+    pmt_val = cast(GulfOfMexicoNumber, pmt).value
+    pv_val = cast(GulfOfMexicoNumber, pv).value
 
     if r == 0:
         fv_val = -pv_val - pmt_val * n
@@ -1692,9 +1847,9 @@ def db_pv(
     if not all(isinstance(x, GulfOfMexicoNumber) for x in [rate, nper, pmt]):
         raise NonFormattedError("pv requires 3 numbers")
 
-    r = rate.value
-    n = nper.value
-    pmt_val = pmt.value
+    r = cast(GulfOfMexicoNumber, rate).value
+    n = cast(GulfOfMexicoNumber, nper).value
+    pmt_val = cast(GulfOfMexicoNumber, pmt).value
 
     if r == 0:
         pv_val = -pmt_val * n
@@ -1727,8 +1882,8 @@ def db_roi(gain: GulfOfMexicoValue, cost: GulfOfMexicoValue) -> GulfOfMexicoNumb
     if not all(isinstance(x, GulfOfMexicoNumber) for x in [gain, cost]):
         raise NonFormattedError("roi requires 2 numbers")
 
-    g = gain.value
-    c = cost.value
+    g = cast(GulfOfMexicoNumber, gain).value
+    c = cast(GulfOfMexicoNumber, cost).value
 
     if c == 0:
         raise NonFormattedError("Cost cannot be zero for ROI calculation")
@@ -1742,8 +1897,8 @@ def db_profit_margin(revenue: GulfOfMexicoValue, cost: GulfOfMexicoValue) -> Gul
     if not all(isinstance(x, GulfOfMexicoNumber) for x in [revenue, cost]):
         raise NonFormattedError("profit_margin requires 2 numbers")
 
-    r = revenue.value
-    c = cost.value
+    r = cast(GulfOfMexicoNumber, revenue).value
+    c = cast(GulfOfMexicoNumber, cost).value
 
     if r == 0:
         raise NonFormattedError("Revenue cannot be zero for profit margin")
@@ -1761,9 +1916,9 @@ def db_cagr(
     if not all(isinstance(x, GulfOfMexicoNumber) for x in [beginning_value, ending_value, years]):
         raise NonFormattedError("cagr requires 3 numbers")
 
-    bv = beginning_value.value
-    ev = ending_value.value
-    y = years.value
+    bv = cast(GulfOfMexicoNumber, beginning_value).value
+    ev = cast(GulfOfMexicoNumber, ending_value).value
+    y = cast(GulfOfMexicoNumber, years).value
 
     if bv <= 0 or y <= 0:
         raise NonFormattedError("Beginning value and years must be positive")
@@ -1781,9 +1936,9 @@ def db_break_even(
     if not all(isinstance(x, GulfOfMexicoNumber) for x in [fixed_costs, price_per_unit, variable_cost_per_unit]):
         raise NonFormattedError("break_even requires 3 numbers")
 
-    fc = fixed_costs.value
-    price = price_per_unit.value
-    vc = variable_cost_per_unit.value
+    fc = cast(GulfOfMexicoNumber, fixed_costs).value
+    price = cast(GulfOfMexicoNumber, price_per_unit).value
+    vc = cast(GulfOfMexicoNumber, variable_cost_per_unit).value
 
     if price <= vc:
         raise NonFormattedError("Price must be greater than variable cost")
@@ -1826,7 +1981,7 @@ def db_predict(x: GulfOfMexicoValue, slope: GulfOfMexicoValue, intercept: GulfOf
     if not all(isinstance(v, GulfOfMexicoNumber) for v in [x, slope, intercept]):
         raise NonFormattedError("predict requires 3 numbers")
 
-    y = slope.value * x.value + intercept.value
+    y = cast(GulfOfMexicoNumber, slope).value * cast(GulfOfMexicoNumber, x).value + cast(GulfOfMexicoNumber, intercept).value
     return GulfOfMexicoNumber(y)
 
 
@@ -1841,14 +1996,14 @@ def db_derivative(
     if len(values) < 2:
         raise NonFormattedError("Need at least 2 values for derivative")
 
-    step = h.value
+    step = cast(GulfOfMexicoNumber, h).value
     derivatives = []
 
     for i in range(len(values) - 1):
         deriv = (values[i + 1] - values[i]) / step
         derivatives.append(GulfOfMexicoNumber(deriv))
 
-    return GulfOfMexicoList(derivatives)
+    return GulfOfMexicoList(cast(list[GulfOfMexicoValue], derivatives))
 
 
 def db_integrate(
@@ -1873,9 +2028,9 @@ def db_quadratic_solve(a: GulfOfMexicoValue, b: GulfOfMexicoValue, c: GulfOfMexi
     if not all(isinstance(v, GulfOfMexicoNumber) for v in [a, b, c]):
         raise NonFormattedError("quadratic_solve requires 3 numbers")
 
-    a_val = a.value
-    b_val = b.value
-    c_val = c.value
+    a_val = cast(GulfOfMexicoNumber, a).value
+    b_val = cast(GulfOfMexicoNumber, b).value
+    c_val = cast(GulfOfMexicoNumber, c).value
 
     if a_val == 0:
         raise NonFormattedError("Coefficient 'a' cannot be zero")
@@ -1892,29 +2047,26 @@ def db_quadratic_solve(a: GulfOfMexicoValue, b: GulfOfMexicoValue, c: GulfOfMexi
 
 
 # get ready, this is boutta be crazy
+def _get_math_arg_count(func: Any) -> int:
+    """Extract argument count from math function."""
+    sig = getattr(func, "__text_signature__", None)
+    if not sig:
+        return -1
+    args_str = sig[1:-1]  # Remove parentheses
+    args_list = args_str.split(", ")
+    if any(arg[0] == "*" and len(arg) > 1 for arg in args_list):
+        return -1
+    return len([arg for arg in args_list if arg.isalpha()])
+
+
 MATH_FUNCTION_KEYWORDS = {
     name: Name(
         name,
         (
             BuiltinFunction(
                 (
-                    (
-                        -1
-                        if any(
-                            [
-                                arg[0] == "*" and len(arg) > 1
-                                for arg in (v.__text_signature__[1:-1].split(", ") if v.__text_signature__ else [])
-                            ]
-                        )
-                        else len(
-                            [
-                                arg
-                                for arg in (v.__text_signature__[1:-1].split(", ") if v.__text_signature__ else [])
-                                if arg.isalpha()
-                            ]
-                        )
-                    )
-                    if v.__text_signature__
+                    _get_math_arg_count(v)
+                    if (getattr(v, "__text_signature__", None))
                     else 1
                     if name == "log"
                     else -1
@@ -1944,6 +2096,25 @@ BUILTIN_FUNCTION_KEYWORDS = {
     "regex_match": Name("regex_match", BuiltinFunction(1, db_regex_match)),
     "regex_findall": Name("regex_findall", BuiltinFunction(1, db_regex_findall)),
     "regex_replace": Name("regex_replace", BuiltinFunction(1, db_regex_replace)),
+    # Math convenience functions
+    "random": Name("random", BuiltinFunction(0, db_random)),
+    "randomInt": Name("randomInt", BuiltinFunction(2, db_random_int)),
+    "abs": Name("abs", BuiltinFunction(1, db_abs)),
+    "min": Name("min", BuiltinFunction(-1, db_min_list)),
+    "max": Name("max", BuiltinFunction(-1, db_max_list)),
+    # Extended math functions
+    "floor": Name("floor", BuiltinFunction(1, db_floor)),
+    "ceil": Name("ceil", BuiltinFunction(1, db_ceil)),
+    "round": Name("round", BuiltinFunction(-1, db_round)),
+    "sqrt": Name("sqrt", BuiltinFunction(1, db_sqrt)),
+    "pow": Name("pow", BuiltinFunction(2, db_pow)),
+    "sin": Name("sin", BuiltinFunction(1, db_sin)),
+    "cos": Name("cos", BuiltinFunction(1, db_cos)),
+    "tan": Name("tan", BuiltinFunction(1, db_tan)),
+    "log": Name("log", BuiltinFunction(-1, db_log)),
+    "exp": Name("exp", BuiltinFunction(1, db_exp)),
+    "degrees": Name("degrees", BuiltinFunction(1, db_degrees)),
+    "radians": Name("radians", BuiltinFunction(1, db_radians)),
     "Canvas": Name("Canvas", BuiltinFunction(-1, db_create_canvas)),
     "Color": Name("Color", BuiltinFunction(-1, db_create_color)),
     "observe": Name("observe", BuiltinFunction(1, db_observe)),

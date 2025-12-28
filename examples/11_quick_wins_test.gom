@@ -1,0 +1,51 @@
+// Test file for Phase 6 quick wins
+// Tests: Extended math, escape sequences, and multi-line strings
+
+print "=== Extended Math Functions ==="!
+
+// Test floor and ceil
+print "floor(3.7) = " + String(floor(3.7))!
+print "ceil(3.2) = " + String(ceil(3.2))!
+print "round(3.5) = " + String(round(3.5))!
+
+// Test sqrt and pow
+print "sqrt(16) = " + String(sqrt(16))!
+print "pow(2, 8) = " + String(pow(2, 8))!
+
+// Test trig functions (in radians)
+print "sin(0) = " + String(sin(0))!
+print "cos(0) = " + String(cos(0))!
+print "tan(0) = " + String(tan(0))!
+
+// Test logarithm and exponential
+print "exp(1) = " + String(exp(1))!
+print "log(2.718) = " + String(log(2.718))!
+
+// Test angle conversion
+print "degrees(3.14159) = " + String(degrees(3.14159))!
+print "radians(180) = " + String(radians(180))!
+
+print ""!
+print "=== Escape Sequences ==="!
+
+// Test escape sequences
+print "Line 1\nLine 2"!
+print "Tabbed\there"!
+print "Quote: \"inside\""!
+print "Backslash: \\"!
+print "Single quote: '\''!"
+
+print ""!
+print "=== Multi-line Strings ==="!
+
+// Test multi-line strings
+var template = """
+This is a
+multi-line
+string!
+"""!
+
+print template!
+
+print ""!
+print "=== All Tests Complete ==="!
