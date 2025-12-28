@@ -8,31 +8,38 @@ from pathlib import Path
 
 def fix_file(filepath):
     """Fix function calls in a single file"""
-    with open(filepath, "r") as f:
+    with open(filepath, "r", encoding="utf-8") as f:
         content = f.read()
 
     original = content
 
-    # Pattern: function_name(args) where function_name is lowercase and not preceded by 'function' or 'fn' or 'async'
+    # Pattern: function_name(args) where function_name is lowercase
+    # and not preceded by 'function' or 'fn' or 'async'
     # Replace with: function_name args
 
     # Match: word(stuff) but not after 'function' or 'fn' or 'async'
     # We need to handle: add(3, 5) -> add 3, 5
     # But keep: function add(a, b) unchanged
 
-    # Find all function calls (name followed by parentheses with content)
-    # But NOT when preceded by keywords like 'function', 'fn', 'async', 'class'
+    # Find all function calls (name followed by parentheses with
+    # content) but NOT when preceded by keywords like 'function',
+    # 'fn', 'async', 'class'
 
-    # Remove parens from function calls - match word(content) but not after function/fn/async keywords
-    pattern = r"(?<!function\s)(?<!fn\s)(?<!async\s)(?<!class\s)(\b[a-z_][a-zA-Z0-9_]*)\(([^)]+)\)"
+    # Remove parens from function calls - match word(content) but
+    # not after function/fn/async keywords
+    pattern = (
+        r"(?<!function\s)(?<!fn\s)(?<!async\s)(?<!class\s)"
+        r"(\b[a-z_][a-zA-Z0-9_]*)\(([^)]+)\)"
+    )
 
     def replace_call(match):
         func_name = match.group(1)
         args = match.group(2)
-        # Check if this looks like a function definition context by looking backward
+        # Check if this looks like a function definition context
+        # by looking backward
         start = match.start()
         # Look at the 20 characters before this match
-        context = content[max(0, start - 20) : start]
+        context = content[max(0, start - 20):start]
 
         # If preceded by function/fn/async keywords, don't replace
         if re.search(r"\b(function|fn|async)\s*$", context):
@@ -45,12 +52,15 @@ def fix_file(filepath):
 
     # Also handle zero-argument calls: func() -> func
     # But again, not in function definitions
-    pattern_zero = r"(?<!function\s)(?<!fn\s)(?<!async\s)(\b[a-z_][a-zA-Z0-9_]*)\(\)"
+    pattern_zero = (
+        r"(?<!function\s)(?<!fn\s)(?<!async\s)"
+        r"(\b[a-z_][a-zA-Z0-9_]*)\(\)"
+    )
 
     def replace_zero_arg(match):
         func_name = match.group(1)
         start = match.start()
-        context = content[max(0, start - 20) : start]
+        context = content[max(0, start - 20):start]
 
         if re.search(r"\b(function|fn|async)\s*$", context):
             return match.group(0)  # Keep original
@@ -60,22 +70,23 @@ def fix_file(filepath):
     content = re.sub(pattern_zero, replace_zero_arg, content)
 
     if content != original:
-        with open(filepath, "w") as f:
+        with open(filepath, "w", encoding="utf-8") as f:
             f.write(content)
         return True
     return False
 
 
 def main():
+    """Fix function call syntax in GOM test files."""
     # Look for .gom files in tests/ and examples/ directories
     test_dirs = [Path("tests"), Path("examples")]
     found_dir = False
-    
+
     for test_dir in test_dirs:
         if test_dir.exists():
             found_dir = True
             break
-    
+
     if not found_dir:
         print("No test directories found (tests/ or examples/)")
         sys.exit(1)

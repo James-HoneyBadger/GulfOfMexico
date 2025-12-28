@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+"""Run GOM test files via REPL and report results."""
 import subprocess
 import sys
 from pathlib import Path
@@ -27,31 +28,37 @@ def run_via_repl(path: Path):
             stderr=subprocess.STDOUT,
             timeout=TIMEOUT,
             cwd=str(ROOT),
+            check=False,
         )
         code = proc.returncode
         out = proc.stdout.decode(errors="replace")
-        ok = code == 0 and "InterpretationError" not in out and "Traceback" not in out
+        has_error = (
+            "InterpretationError" in out or "Traceback" in out
+        )
+        ok = code == 0 and not has_error
         status = "PASS" if ok else "UNKNOWN"
-        # if no explicit PASS, still consider it PASS if exit code clean
+        # if no explicit PASS, still consider it PASS if exit clean
         if any(m in out for m in PASS_MARKERS):
             status = "PASS"
         return status, code, out
     except subprocess.TimeoutExpired as e:
         out = (e.stdout or b"").decode(errors="replace")
         return "TIMEOUT", 124, out
-    except Exception as e:
+    except (OSError, subprocess.SubprocessError) as e:
         return "ERROR", -1, str(e)
 
 
 def main():
+    """Run all GOM test files and report results."""
     files = []
     for test_dir in TEST_DIRS:
         if test_dir.exists():
             files.extend(sorted(test_dir.rglob("*.gom")))
     files = sorted(set(files))  # Remove duplicates
-    
+
     if not files:
-        print(f"No .gom files found in {[str(d) for d in TEST_DIRS]}", file=sys.stderr)
+        dirs_str = ", ".join(str(d) for d in TEST_DIRS)
+        print(f"No .gom files found in {dirs_str}", file=sys.stderr)
         sys.exit(1)
 
     results = []

@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+"""Run GOM programs and classify results."""
 import subprocess
 import sys
 from pathlib import Path
@@ -13,10 +14,12 @@ PASS_MARKERS = [
     "PASS:",
 ]
 
-# Files that intentionally may wait for when/after: use shorter head in preview later
+# Files that intentionally may wait for when/after:
+# use shorter head in preview later
 
 
 def run_file(path: Path):
+    """Execute a GOM file and return status and output."""
     cmd = [sys.executable, "-m", "gulfofmexico", str(path)]
     try:
         proc = subprocess.run(
@@ -25,30 +28,43 @@ def run_file(path: Path):
             stderr=subprocess.STDOUT,
             timeout=TIMEOUT,
             cwd=str(ROOT),
+            check=False,
         )
         code = proc.returncode
-        out = proc.stdout.decode(errors="replace") if isinstance(proc.stdout, bytes) else proc.stdout
-        status = "PASS" if any(m in out for m in PASS_MARKERS) or code in (0, 124, 130, 143) else "UNKNOWN"
+        out = (
+            proc.stdout.decode(errors="replace")
+            if isinstance(proc.stdout, bytes)
+            else proc.stdout
+        )
+        success = (
+            any(m in out for m in PASS_MARKERS)
+            or code in (0, 124, 130, 143)
+        )
+        status = "PASS" if success else "UNKNOWN"
         return status, code, out
     except subprocess.TimeoutExpired as e:
-        out = e.stdout or b""
-        if isinstance(out, bytes):
-            out = out.decode(errors="replace")
-        # Interpreter prints a completion hint and then waits; timeout here is expected
+        out_bytes: bytes = e.stdout or b""
+        if isinstance(out_bytes, bytes):
+            out = out_bytes.decode(errors="replace")
+        else:
+            out = str(out_bytes)
+        # Timeout is expected for interactive programs
         return "PASS-TIMEOUT", 124, out
-    except Exception as e:
+    except (OSError, subprocess.SubprocessError) as e:
         return "ERROR", -1, str(e)
 
 
 def main():
+    """Process all GOM test files and report results."""
     files = []
     for test_dir in TEST_DIRS:
         if test_dir.exists():
             files.extend(sorted(test_dir.rglob("*.gom")))
     files = sorted(set(files))  # Remove duplicates
-    
+
     if not files:
-        print(f"No .gom files found in {[str(d) for d in TEST_DIRS]}", file=sys.stderr)
+        dirs_str = ", ".join(str(d) for d in TEST_DIRS)
+        print(f"No .gom files found in {dirs_str}", file=sys.stderr)
         sys.exit(1)
 
     results = []
@@ -61,14 +77,23 @@ def main():
 
     print("\n=== Summary ===")
     total = len(results)
-    failures = [r for r in results if r[1] not in ("PASS", "PASS-TIMEOUT", "UNKNOWN")]
+    failures = [
+        r
+        for r in results
+        if r[1] not in ("PASS", "PASS-TIMEOUT", "UNKNOWN")
+    ]
     print(f"Total files: {total}")
     print(f"Failures:   {len(failures)}")
 
     # Show details for non-PASS statuses
     for f, status, code, preview in results:
         if status not in ("PASS", "PASS-TIMEOUT"):
-            print("\n---", f.relative_to(ROOT), f"[{status}/{code}]", "---")
+            print(
+                "\n---",
+                f.relative_to(ROOT),
+                f"[{status}/{code}]",
+                "---",
+            )
             print(preview)
 
 
