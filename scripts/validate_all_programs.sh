@@ -52,38 +52,14 @@ test_program() {
 }
 
 # Test all programs by category
-echo "Testing 01_basics..."
-for file in programs/01_basics/*.gom; do
+echo "Testing tests/..."
+for file in tests/*.gom; do
    [ -f "$file" ] && test_program "$file"
 done
 
 echo ""
-echo "Testing 02_features..."
-for file in programs/02_features/*.gom; do
-   [ -f "$file" ] && test_program "$file"
-done
-
-echo ""
-echo "Testing 03_graphics..."
-for file in programs/03_graphics/*.gom; do
-   [ -f "$file" ] && test_program "$file"
-done
-
-echo ""
-echo "Testing 04_satirical..."
-for file in programs/04_satirical/*.gom; do
-   [ -f "$file" ] && test_program "$file"
-done
-
-echo ""
-echo "Testing 05_analysis..."
-for file in programs/05_analysis/*.gom; do
-   [ -f "$file" ] && test_program "$file"
-done
-
-echo ""
-echo "Testing demos..."
-for file in programs/demos/*.gom; do
+echo "Testing examples/..."
+for file in examples/*.gom; do
    [ -f "$file" ] && test_program "$file"
 done
 

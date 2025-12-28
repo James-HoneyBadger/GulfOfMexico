@@ -67,16 +67,26 @@ def fix_file(filepath):
 
 
 def main():
-    programs_dir = Path("programs")
-    if not programs_dir.exists():
-        print("programs/ directory not found")
+    # Look for .gom files in tests/ and examples/ directories
+    test_dirs = [Path("tests"), Path("examples")]
+    found_dir = False
+    
+    for test_dir in test_dirs:
+        if test_dir.exists():
+            found_dir = True
+            break
+    
+    if not found_dir:
+        print("No test directories found (tests/ or examples/)")
         sys.exit(1)
 
     fixed_count = 0
-    for gom_file in programs_dir.rglob("*.gom"):
-        if fix_file(gom_file):
-            print(f"Fixed: {gom_file}")
-            fixed_count += 1
+    for test_dir in test_dirs:
+        if test_dir.exists():
+            for gom_file in test_dir.rglob("*.gom"):
+                if fix_file(gom_file):
+                    print(f"Fixed: {gom_file}")
+                    fixed_count += 1
 
     print(f"\nFixed {fixed_count} files")
 

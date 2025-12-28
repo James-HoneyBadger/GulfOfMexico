@@ -4,7 +4,8 @@ import sys
 from pathlib import Path
 
 ROOT = Path(__file__).parent.parent
-PROGRAMS = ROOT / "programs"
+# Look for .gom files in tests/ and examples/ directories
+TEST_DIRS = [ROOT / "tests", ROOT / "examples"]
 TIMEOUT = 8  # seconds per file
 
 PASS_MARKERS = [
@@ -43,9 +44,14 @@ def run_via_repl(path: Path):
 
 
 def main():
-    files = sorted(PROGRAMS.rglob("*.gom"))
+    files = []
+    for test_dir in TEST_DIRS:
+        if test_dir.exists():
+            files.extend(sorted(test_dir.rglob("*.gom")))
+    files = sorted(set(files))  # Remove duplicates
+    
     if not files:
-        print("No .gom files found under programs/", file=sys.stderr)
+        print(f"No .gom files found in {[str(d) for d in TEST_DIRS]}", file=sys.stderr)
         sys.exit(1)
 
     results = []

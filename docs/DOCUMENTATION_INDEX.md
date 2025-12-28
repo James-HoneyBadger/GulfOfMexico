@@ -70,17 +70,16 @@ gulfofmexico/
 ├── ide/                        # Interactive IDE
 └── plugins/                    # Built-in plugins
 
-tests/                          # Test suite
-programs/                       # Example programs by category
-examples/                       # Standalone GOM examples
+tests/                          # Test suite (unit and integration tests)
+examples/                       # Standalone GOM examples and reference programs
 scripts/                        # Development and utility scripts
 tools/                          # Maintenance and demo tools
 ```
 
 ## 🧪 Testing
 
-- [tests/README.md](tests/README.md) - Test suite documentation
 - Run tests with: `pytest tests/ -v`
+- Test files located in [tests/](tests/) directory
 
 ## 🛠️ Development
 
@@ -89,7 +88,7 @@ tools/                          # Maintenance and demo tools
 - [tools/gomconfig.py](tools/gomconfig.py) - Language configuration tool
 
 ### Code Quality
-- Configuration: [pylintrc](pylintrc), [ruff.toml](ruff.toml), [.flake8](.flake8)
+- Configuration: [config/pylintrc](config/pylintrc), [config/ruff.toml](config/ruff.toml), [config/.flake8](config/.flake8)
 - Style guide: Follow PEP 8 conventions
 - Type hints: Recommended throughout codebase
 

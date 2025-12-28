@@ -74,17 +74,23 @@ gulfofmexico/                  # Main interpreter package
 ├── plugins/                  # Built-in plugins
 └── ...
 
-docs/                          # Documentation
+config/                        # Configuration files
+├── pylintrc                  # Pylint configuration
+├── ruff.toml                 # Ruff linter configuration
+├── .flake8                   # Flake8 configuration
+├── .pre-commit-config.yaml   # Pre-commit hooks configuration
+└── *.yaml, *.json            # Language preset configurations
+
+docs/                         # Documentation
 ├── guides/                   # User guides
 ├── language/                 # Language documentation
 ├── reference/                # API reference
 └── archive/                  # Historical phase documents
 
-tests/                         # Test suite
-programs/                      # Example programs
-examples/                      # GOM code examples
-scripts/                       # Utility scripts
-compiler/                      # C++ compiler (experimental)
+tests/                        # Test suite (unit and integration tests)
+examples/                     # GOM code examples and reference programs
+scripts/                      # Utility scripts
+compiler/                     # C++ compiler (experimental)
 ```
 
 ## 🔧 Installation

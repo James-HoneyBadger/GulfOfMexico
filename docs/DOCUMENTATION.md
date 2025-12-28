@@ -149,21 +149,24 @@ GulfOfMexico/
 │   ├── interpreter.py               # Main interpreter
 │   └── ...                          # Other modules
 │
-├── examples/                         # Example programs
-│   └── configs/                     # Demo language configurations
-│       ├── demo_gulplisp.json      # Lisp-like language
-│       ├── demo_gulfturtle.json    # Turtle graphics language
-│       ├── demo_gulfql.json        # SQL-like language
-│       └── demo_gulfasm.json       # Assembly-like language
+├── examples/                         # Example GOM programs (teaching/reference)
+│   ├── 01_basics_hello_world.gom    # Basic syntax
+│   ├── 02_operators_arithmetic.gom  # Operators
+│   └── ...                          # More examples
 │
-├── programs/                        # Example GOM programs (user-facing)
-│   ├── examples/                   # Learning examples
-│   └── demos/                      # Feature demonstrations
-│
-├── configs/                         # Preset language configs
+├── config/                          # Preset language configurations
 │   ├── python_like.yaml            # Python-style preset
 │   ├── minimal.json                # Minimal teaching mode
-│   └── README.md                   # Preset documentation
+│   ├── spanish_professional.yaml   # Spanish variant
+│   ├── pylintrc                    # Pylint configuration
+│   ├── ruff.toml                   # Ruff linter configuration
+│   ├── .flake8                     # Flake8 configuration
+│   ├── .pre-commit-config.yaml     # Pre-commit hooks
+│   └── README.md                   # Configuration documentation
+│
+├── tests/                           # Test suite
+│   ├── test_*.gom                  # GOM test files
+│   └── test_*.py                   # Python test modules
 │
 ├── gomconfig.py                    # CLI configuration tool
 ├── demo_create_new_languages.py   # Language creation demos
@@ -173,29 +176,28 @@ GulfOfMexico/
 ## 🎓 Learning Paths
 
 ### Path 1: Complete Beginner
-1. [README.md](README.md) - Overview
+1. [README.md](../README.md) - Overview
 2. [Installation Guide](docs/guides/INSTALL_GUIDE.md) - Setup
 3. [User Guide](docs/guides/USER_GUIDE.md) - Learn the language
-4. Try examples in `programs/examples/01_hello_world.gom`
+4. Try examples in `examples/`
 5. Experiment with REPL: `python -m gulfofmexico`
 
 ### Path 2: Experienced Programmer
-1. [README.md](README.md) - Quick overview
+1. [README.md](../README.md) - Quick overview
 2. [Programming Guide](docs/guides/PROGRAMMING_GUIDE.md) - Language features
-3. [Built-in Functions](docs/reference/BUILTIN_FUNCTIONS.md) - Function reference
-4. Try demos in `programs/demos/`
+3. [Built-in Functions](reference/BUILTIN_FUNCTIONS.md) - Function reference
+4. Try examples in `examples/`
 
 ### Path 3: Language Designer
-1. [Language Construction Quickstart](docs/language/LANGUAGE_CONSTRUCTION_QUICKSTART.md)
-2. Run `python demo_create_new_languages.py`
-3. [Complete Guide](docs/language/LANGUAGE_CONSTRUCTION_SET.md)
-4. [Enhanced Features](docs/language/LANGUAGE_CONSTRUCTION_ENHANCED.md)
-5. Create your own language variant!
+1. [Language Construction Quickstart](language/LANGUAGE_CONSTRUCTION_QUICKSTART.md)
+2. [Complete Guide](language/LANGUAGE_CONSTRUCTION_SET.md)
+3. [Enhanced Features](language/LANGUAGE_CONSTRUCTION_ENHANCED.md)
+4. Create your own language variant!
 
 ### Path 4: Contributor/Developer
-1. [Technical Reference](docs/reference/TECHNICAL_REFERENCE.md)
-2. [Feature Parity](docs/reference/FEATURE_PARITY.md)
-3. [Compiler Experimental Status](compiler/EXPERIMENTAL_STATUS.md)
+1. [Technical Reference](reference/TECHNICAL_REFERENCE.md)
+2. [Feature Parity](reference/FEATURE_PARITY.md)
+3. [Compiler Experimental Status](../compiler/EXPERIMENTAL_STATUS.md)
 4. Review codebase in `gulfofmexico/`
 
 ## 🔧 Tools & Utilities
@@ -296,8 +298,8 @@ It does NOT affect the C++ compiler.
 - **Programming Language**: Gulf of Mexico
 - **Implementations**: Python interpreter (stable) + C++ compiler (experimental)
 - **Language Construction Set**: 5 comprehensive docs, CLI tool, demos
-- **Example Programs**: 50+ in `programs/`
-- **Demo Configurations**: 11 language variants in `examples/configs/`
+- **Example Programs**: 50+ in `examples/`
+- **Preset Configurations**: 3 language variants in `config/`
 - **Documentation Files**: 25+ organized docs
 - **Built-in Functions**: 35+ (interpreter), subset in compiler
 

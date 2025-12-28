@@ -29,7 +29,7 @@ Professional mode with Spanish keywords:
 
 **Example:**
 ```bash
-python -m gulfofmexico --config configs/spanish_professional.yaml programa.gom
+python -m gulfofmexico --config config/spanish_professional.yaml programa.gom
 ```
 
 ### `minimal.json`
@@ -44,7 +44,7 @@ Minimal feature set for teaching:
 
 **Example:**
 ```bash
-python -m gulfofmexico --config configs/minimal.json lesson1.gom
+python -m gulfofmexico --config config/minimal.json lesson1.gom
 ```
 
 ## 🛠️ Creating Your Own Configuration
@@ -53,7 +53,7 @@ python -m gulfofmexico --config configs/minimal.json lesson1.gom
 
 ```bash
 # Copy a preset and modify it
-cp configs/python_like.yaml my_config.yaml
+cp config/python_like.yaml my_config.yaml
 # Edit my_config.yaml in your favorite editor
 ```
 
@@ -76,7 +76,7 @@ from gulfofmexico.language_config import LanguageConfig
 config = LanguageConfig.from_preset("python_like")
 config.rename_keyword("class", "blueprint")
 config.add_function("log", arity=-1, description="Logging")
-config.save("configs/my_variant.yaml")
+config.save("config/my_variant.yaml")
 ```
 
 ## ▶️ Using Configurations
@@ -85,7 +85,7 @@ config.save("configs/my_variant.yaml")
 
 ```bash
 # Specific config file
-python -m gulfofmexico --config configs/python_like.yaml script.gom
+python -m gulfofmexico --config config/python_like.yaml script.gom
 
 # Use preset name
 python -m gulfofmexico --preset python_like script.gom
@@ -97,7 +97,7 @@ python -m gulfofmexico --serious-mode script.gom
 ### Environment Variable
 
 ```bash
-export GULFOFMEXICO_CONFIG=configs/spanish_professional.yaml
+export GULFOFMEXICO_CONFIG=config/spanish_professional.yaml
 python -m gulfofmexico programa.gom
 ```
 
@@ -121,27 +121,27 @@ keywords:
 
 ```bash
 # Validate a config file
-python gomconfig.py validate configs/python_like.yaml
+python gomconfig.py validate config/python_like.yaml
 
 # Show detailed info
-python gomconfig.py info configs/spanish_professional.yaml
+python gomconfig.py info config/spanish_professional.yaml
 ```
 
 ## 🔍 Comparing Configurations
 
 ```bash
 # See differences between two configs
-python gomconfig.py diff configs/python_like.yaml configs/minimal.json
+python gomconfig.py diff config/python_like.yaml config/minimal.json
 ```
 
 ## 📤 Exporting Documentation
 
 ```bash
 # Export mapping table as markdown
-python gomconfig.py export configs/python_like.yaml --format markdown
+python gomconfig.py export config/python_like.yaml --format markdown
 
 # Convert between formats
-python gomconfig.py convert configs/python_like.yaml --to json
+python gomconfig.py convert config/python_like.yaml --to json
 ```
 
 ## 📄 Configuration File Format
