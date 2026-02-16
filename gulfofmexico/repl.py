@@ -183,7 +183,7 @@ class GomRepl:
         # Support multi-file sections using ===== markers (same as run_file)
         code_lines = code.splitlines(keepends=True)
         files: list[tuple[Optional[str], str]] = []
-        matches = [re.match(r"=====.*", l) for l in code_lines]
+        matches = [re.match(r"=====.*", line) for line in code_lines]
         if any(matches):
             for i, match in reversed([*enumerate(matches)]):
                 if match is None:

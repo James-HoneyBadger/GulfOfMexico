@@ -10,11 +10,9 @@ from __future__ import annotations
 import pickle
 import random
 from pathlib import Path
-from typing import Union
 
 from gulfofmexico.builtin import (
     GulfOfMexicoValue,
-    Name,
     Variable,
     VariableLifetime,
 )

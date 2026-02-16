@@ -9,19 +9,16 @@ and ``interpret_code_statements`` (the recursive core loop), plus
 from __future__ import annotations
 
 import random
-import re
 import time as _time
-from typing import Optional, Union
+from typing import Optional
 
 from gulfofmexico.base import (
-    Token,
     raise_error_at_line,
     raise_error_at_token,
 )
 from gulfofmexico.builtin import (
     KEYWORDS,
     GulfOfMexicoFunction,
-    GulfOfMexicoMutable,
     GulfOfMexicoNumber,
     GulfOfMexicoObject,
     GulfOfMexicoString,
@@ -31,7 +28,6 @@ from gulfofmexico.builtin import (
     Variable,
     VariableLifetime,
     db_to_boolean,
-    db_to_string,
 )
 from gulfofmexico.processor.syntax_tree import (
     AfterStatement,

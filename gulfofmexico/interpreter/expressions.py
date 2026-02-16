@@ -13,9 +13,8 @@ Circular dependency note:
 
 from __future__ import annotations
 
-import random
 from copy import deepcopy
-from typing import Optional, Union
+from typing import Union
 
 from gulfofmexico.base import (
     OperatorType,
@@ -28,7 +27,6 @@ from gulfofmexico.base import (
 )
 from gulfofmexico.builtin import (
     BuiltinFunction,
-    GulfOfMexicoBoolean,
     GulfOfMexicoFunction,
     GulfOfMexicoIndexable,
     GulfOfMexicoKeyword,
@@ -73,7 +71,6 @@ from .context import (
 )
 from .helpers import gather_names_or_values, get_built_expression
 from .namespaces import (
-    determine_non_name_value,
     get_name_and_namespace_from_namespaces,
     get_name_from_namespaces,
     get_value_from_namespaces,
@@ -395,7 +392,6 @@ def _evaluate_expression_impl(
     """Core recursive expression evaluator."""
     # Late import to break circular dependency
     from .execution import execute_conditional  # noqa: PLC0415
-    from .helpers import get_modified_next_name  # noqa: PLC0415
 
     expr = get_built_expression(expr)
 

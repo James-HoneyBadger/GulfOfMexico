@@ -17,8 +17,6 @@ try:
         QFileDialog,
         QGuiApplication,
         QHBoxLayout,
-        QInputDialog,
-        QLabel,
         QMainWindow,
         QMenu,
         QMessageBox,

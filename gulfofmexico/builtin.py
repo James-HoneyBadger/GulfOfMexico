@@ -514,8 +514,8 @@ class Variable:
     def clear_outdated_lifetimes(self) -> None:
         remove_indeces = []
         current_time = time.time()
-        for i, l in enumerate(self.lifetimes):
-            if l.lines_left == 0 or (l.is_temporal and current_time - l.creation_time >= l.temporal_duration):
+        for i, lt in enumerate(self.lifetimes):
+            if lt.lines_left == 0 or (lt.is_temporal and current_time - lt.creation_time >= lt.temporal_duration):
                 remove_indeces.append(i)
         for i in reversed(remove_indeces):
             del self.lifetimes[i]

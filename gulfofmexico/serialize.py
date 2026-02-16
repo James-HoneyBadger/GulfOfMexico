@@ -29,15 +29,20 @@ import dataclasses
 from typing import Any, Callable, Type, Union, assert_never
 
 from gulfofmexico.base import NonFormattedError, Token, TokenType
-from gulfofmexico.builtin import *
 from gulfofmexico.builtin import (
     KEYWORDS,
     BuiltinFunction,
+    GulfOfMexicoList,
+    GulfOfMexicoNumber,
+    GulfOfMexicoString,
     GulfOfMexicoValue,
     Name,
     Variable,
+    db_list_pop,
+    db_list_push,
+    db_str_pop,
+    db_str_push,
 )
-from gulfofmexico.processor.syntax_tree import *
 from gulfofmexico.processor.syntax_tree import CodeStatement
 
 SerializedDict = dict[str, Union[str, dict, list]]

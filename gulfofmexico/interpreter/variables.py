@@ -11,7 +11,6 @@ from __future__ import annotations
 from typing import Union
 
 from gulfofmexico.base import (
-    Token,
     debug_print,
     raise_error_at_line,
     raise_error_at_token,
@@ -52,7 +51,6 @@ from .helpers import (
 )
 from .namespaces import (
     get_name_and_namespace_from_namespaces,
-    get_name_from_namespaces,
     get_value_from_namespaces,
 )
 from .persistence import save_local_immutable_constant

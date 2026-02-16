@@ -13,9 +13,6 @@ from typing import Optional
 
 from gulfofmexico.builtin import (
     GulfOfMexicoKeyword,
-    GulfOfMexicoValue,
-    Name,
-    Variable,
 )
 from gulfofmexico.processor.syntax_tree import (
     ClassDeclaration,

@@ -9,7 +9,7 @@ from __future__ import annotations
 
 from typing import Union
 
-from gulfofmexico.base import Token, TokenType
+from gulfofmexico.base import Token
 from gulfofmexico.processor.expression_tree import (
     ExpressionNode,
     ExpressionTreeNode,
