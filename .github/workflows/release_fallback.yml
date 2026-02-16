@@ -91,7 +91,7 @@ jobs:
             echo "Creating release ${TAG_NAME}"
             gh release create "${TAG_NAME}" dist/* \
               --title "GulfOfMexico ${TAG_NAME}" \
-              --notes-file CHANGELOG.md
+              --notes-file docs/CHANGELOG.md
           fi
 
       - name: Publish to PyPI (optional)

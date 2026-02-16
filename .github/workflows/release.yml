@@ -66,7 +66,7 @@ jobs:
         with:
           name: GulfOfMexico ${{ steps.resolve_tag.outputs.tag_name }}
           tag_name: ${{ steps.resolve_tag.outputs.tag_name }}
-          body_path: CHANGELOG.md
+          body_path: docs/CHANGELOG.md
           draft: false
           prerelease: false
           files: |
