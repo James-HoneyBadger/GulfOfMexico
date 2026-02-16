@@ -42,7 +42,6 @@ from gulfofmexico.base import (
 )
 from gulfofmexico.processor.expression_tree import (
     ExpressionTreeNode,
-    build_expression_tree,
 )
 
 __all__ = [
@@ -111,7 +110,7 @@ class ClassDeclaration(CodeStatement, CodeStatementKeywordable):
 
     # Compatibility init for experimental tests
 
-    def __init__(self, keyword=None, name=None, code=None, *args, **kwargs):
+    def __init__(self, keyword=None, name=None, code=None):
         self.keyword = keyword
         self.name = name
         self.code = code or []
@@ -307,7 +306,7 @@ class ImportStatement(CodeStatement, CodeStatementKeywordable, CodeStatementDebu
 
 # idea: create a class that evaluates at runtime what a statement is, so then execute it
 def split_into_statements(tokens: list[Token]) -> list[list[Token]]:
-    statements = [[]]
+    statements: list[list[Token]] = [[]]
     bracket_layers = 0
     square_bracket_layers = 0
     for token in tokens:
@@ -331,7 +330,8 @@ def split_into_statements(tokens: list[Token]) -> list[list[Token]]:
         elif token.type == TokenType.R_SQUARE:
             square_bracket_layers -= 1
 
-        if token.type in [TokenType.R_CURLY, TokenType.BANG, TokenType.QUESTION] and bracket_layers == 0 and square_bracket_layers == 0:
+        if (token.type in [TokenType.R_CURLY, TokenType.BANG, TokenType.QUESTION]
+                and bracket_layers == 0 and square_bracket_layers == 0):
             while statements[-1][-1].type == TokenType.NEWLINE:  # remove newlines at the end of a statement
                 statements[-1].pop()
             statements.append([])
@@ -357,7 +357,7 @@ def split_into_statements(tokens: list[Token]) -> list[list[Token]]:
 
 
 def extract_type_annotations(
-    filename: str, code: str, statements: list[list[Token]]
+    _filename: str, _code: str, statements: list[list[Token]]
 ) -> list[tuple[list[Token], Optional[list[Token]]]]:
     """Extract type annotations from statements before they are removed."""
     result = []
@@ -546,7 +546,7 @@ def create_scoped_code_statement(
     tokens: list[Token],
     without_whitespace: list[Token],
     code: str,
-    type_annotation: Optional[list[Token]] = None,
+    _type_annotation: Optional[list[Token]] = None,
 ) -> tuple[CodeStatement, ...]:
     # this means that a scope is detected in the statement
     ends_with_punc = tokens[-1].type in {TokenType.BANG, TokenType.QUESTION}
@@ -597,11 +597,11 @@ def create_scoped_code_statement(
         )
     )
 
-    # finally finally, check for the after or when statement -- this will have identical syntax to the conditional so there
-    # is no point in doing anything extra special
+    # finally, check for after/when statement -- identical syntax to conditional
+    # so no point doing anything extra special
 
     # this dude is separated to another function because the same code is reused in () => ... functions (no scope)
-    possibilities = []
+    possibilities: list[CodeStatement] = []
     if can_be_function:
         return create_function_definition(filename, without_whitespace, code, statements_inside_scope)
 

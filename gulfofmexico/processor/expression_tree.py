@@ -56,7 +56,6 @@ class ExpressionTreeNode(metaclass=ABCMeta):
     @abstractmethod
     def to_string(self, tabs: int = 0) -> str:
         """Convert node to indented string representation for debugging."""
-        pass
 
 
 class SingleOperatorNode(ExpressionTreeNode):
@@ -167,6 +166,7 @@ def get_expr_first_token(expr: ExpressionTreeNode) -> Optional[Token]:
             return expr.name_or_value
         case IndexNode():
             return get_expr_first_token(expr.value) or get_expr_first_token(expr.index)
+    return None
 
 
 def build_expression_tree(filename: str, tokens: list[Token], code: str) -> ExpressionTreeNode:
@@ -189,7 +189,9 @@ def build_expression_tree(filename: str, tokens: list[Token], code: str) -> Expr
             raise_error_at_token(
                 filename,
                 code,
-                "Due to the laws of significant whitespace, no newline characters are permitted in expressions. If your code is so long that it needs newlines, consider rewriting it :)",
+                "Due to the laws of significant whitespace, no newline characters are permitted"
+                " in expressions. If your code is so long that it needs newlines,"
+                " consider rewriting it :)",
                 token,
             )
 
@@ -209,7 +211,10 @@ def build_expression_tree(filename: str, tokens: list[Token], code: str) -> Expr
 
     # transform a list of tokens to include operators
     # find the operator with the maximum whitespace between it and other things
-    updated_list = [STR_TO_OPERATOR.get(token.value, token) if token.type != TokenType.STRING else token for token in tokens]
+    updated_list = [
+        STR_TO_OPERATOR.get(token.value, token) if token.type != TokenType.STRING else token
+        for token in tokens
+    ]
     max_width, max_index = -1, -1
     bracket_layers = 0
     for i in range(len(updated_list)):
@@ -425,7 +430,8 @@ def build_expression_tree(filename: str, tokens: list[Token], code: str) -> Expr
     if updated_list[max_index] == OperatorType.COM:
         # this means it is a function
         # we need to find every other comma as they become the arguments of the function
-        # additionally, there needs to be a spacing of equal length between the name of the function and the next argument
+        # additionally, there needs to be a spacing of equal length between
+        # the name of the function and the next argument
 
         if tokens_without_whitespace[0].type != TokenType.NAME or tokens_without_whitespace[1].type not in [
             TokenType.NAME,
@@ -435,7 +441,9 @@ def build_expression_tree(filename: str, tokens: list[Token], code: str) -> Expr
             raise_error_at_token(
                 filename,
                 code,
-                "Expected function call. This is likely an issue of whitespace, as Gulf of Mexico replaces parentheses with spaces and has significant whitespace.",
+                "Expected function call. This is likely an issue of whitespace,"
+                " as Gulf of Mexico replaces parentheses with spaces"
+                " and has significant whitespace.",
                 tokens_without_whitespace[0],
             )
 

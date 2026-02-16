@@ -25,7 +25,7 @@ from __future__ import annotations
 
 from typing import Optional
 
-from gulfofmexico.base import ALPH_NUMS, Token, TokenType, is_alph_num, raise_error_at_line
+from gulfofmexico.base import Token, TokenType, is_alph_num, raise_error_at_line
 
 
 def add_to_tokens(
@@ -115,12 +115,16 @@ def is_matching_pair(quote_value: str) -> bool:
 def get_string_token(code: str, curr: int, filename: str, error_line: int) -> tuple[int, str, int]:
     """
     Scans the code for the shortest possible string and returns it.
-    Returns as soon as a pair of quote groups is found that is equal in terms of quote count on both sides.
-    For example, "" (space) "" reads the two first double quotes, detects that there is a pair, and returns the empty string.
+    Returns as soon as a pair of quote groups is found that is equal in terms of
+    quote count on both sides.
+    For example, "" (space) "" reads the two first double quotes, detects that
+    there is a pair, and returns the empty string.
     To have more sequences of quotes, one can do the following:
         '""hello world"'"  <-- this is interpreted as the string "hello world"
-    Therefore, to avoid premature returns of quotes, simply preface your quotes with a single ' and the rest "
-    This guarantees that no pair of quotes will be found in the starting quote because it will have an odd number of quotes.
+    Therefore, to avoid premature returns of quotes, simply preface your quotes
+    with a single ' and the rest "
+    This guarantees that no pair of quotes will be found in the starting quote
+    because it will have an odd number of quotes.
     
     Also handles multi-line strings with triple quotes.
     Returns (end_position, string_value, newlines_encountered)
@@ -143,7 +147,7 @@ def get_string_token(code: str, curr: int, filename: str, error_line: int) -> tu
     while curr < len(code):
         if is_triple_quote:
             # For triple-quoted strings, look for matching triple quotes
-            if (code[curr:curr+3] == quote_value[0]*3):
+            if (code[curr:curr + 3] == quote_value[0] * 3):
                 return curr + 2, value, newlines
             if code[curr] == "\n":
                 newlines += 1
@@ -164,13 +168,12 @@ def get_string_token(code: str, curr: int, filename: str, error_line: int) -> tu
             if code[quote_start] == "\n":
                 newlines += 1
             curr += 1
-    else:  # type: ignore
-        raise_error_at_line(
-            filename,
-            code,
-            error_line,
-            "Invalid string. Starting quotes do not match opening quotes.",
-        )
+    raise_error_at_line(
+        filename,
+        code,
+        error_line,
+        "Invalid string. Starting quotes do not match opening quotes.",
+    )
 
 
 def tokenize(filename: str, code: str) -> list[Token]:

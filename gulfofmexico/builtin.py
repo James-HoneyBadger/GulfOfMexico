@@ -45,7 +45,7 @@ import time
 from abc import ABCMeta, abstractmethod
 from dataclasses import dataclass, field
 from time import sleep
-from typing import Any, Callable, Optional, Union, cast
+from typing import Callable, Optional, Union
 
 from gulfofmexico.base import NonFormattedError
 from gulfofmexico.processor.syntax_tree import CodeStatement
@@ -129,7 +129,7 @@ def db_str_pop(
         raise NonFormattedError("Indexing out of string bounds.")
     index_val = round(index.value) + 1
     retval = self.value[index_val]
-    self.value = self.value[:index_val] + self.value[index_val + 1 :]
+    self.value = self.value[:index_val] + self.value[index_val + 1:]
     return GulfOfMexicoString(retval)
 
 
@@ -279,7 +279,7 @@ class GulfOfMexicoNumber(GulfOfMexicoIndexable, GulfOfMexicoMutable, GulfOfMexic
         if self.value == 0:
             sign = 1
         else:
-            sign = self.value / abs(self.value)
+            sign = int(self.value / abs(self.value))
         if not isinstance(index, GulfOfMexicoNumber):
             raise NonFormattedError("Cannot index a number with a non-number value.")
         if not isinstance(val, GulfOfMexicoNumber) or not is_int(val.value) or not 0 <= val.value <= 9:
@@ -288,7 +288,7 @@ class GulfOfMexicoNumber(GulfOfMexicoIndexable, GulfOfMexicoMutable, GulfOfMexic
             if not -1 <= index.value <= len(self_val_str) - 2:
                 raise NonFormattedError("Indexing out of number bounds.")
             index_num = round(index.value) + 1
-            self.value = sign * int(self_val_str[:index_num] + str(round(val.value)) + self_val_str[index_num + 1 :])
+            self.value = sign * int(self_val_str[:index_num] + str(round(val.value)) + self_val_str[index_num + 1:])
         else:  # assign in the middle of the array
             index_num = round(max((index.value + 2) // 1, 0))
             self.value = sign * int(self_val_str[:index_num] + str(round(val.value)) + self_val_str[index_num:])
@@ -348,7 +348,7 @@ class GulfOfMexicoString(
             indexer_data = self.indexer[index.value]
             index_num = indexer_data[0] + 1
             excess_length = len(indexer_data[1])
-            self.value = self.value[:index_num] + val_str + self.value[index_num + excess_length + 1 :]
+            self.value = self.value[:index_num] + val_str + self.value[index_num + excess_length + 1:]
             if len(val_str) > 1:
                 indexer_data = (indexer_data[0], val_str[:-1])
             else:
@@ -539,45 +539,44 @@ def all_function_keywords() -> list[str]:
                         for i_ in range(2):
                             for o_ in range(2):
                                 for n2_ in range(2):
-                                    keywords.add(
-                                        "".join(
-                                            [
-                                                ch * flag
-                                                for ch, flag in zip(
-                                                    "function",
-                                                    [f_, u_, n_, c_, t_, i_, o_, n2_],
-                                                )
-                                            ]
-                                        )
-                                        or "fn"
-                                    )  # the `or` allows the empty string to not count
+                                    kw = "" .join(
+                                        [
+                                            ch * flag
+                                            for ch, flag in zip(
+                                                "function",
+                                                [f_, u_, n_, c_, t_, i_, o_, n2_],
+                                            )
+                                        ]
+                                    ) or "fn"
+                                    keywords.add(kw)
     return list(keywords)
 
 
 FUNCTION_KEYWORDS = all_function_keywords()
+_KEYWORD_LIST = [
+    "class",
+    "className",
+    "after",
+    "const",
+    "var",
+    "when",
+    "if",
+    "else",
+    "async",
+    "return",
+    "delete",
+    "await",
+    "previous",
+    "next",
+    "reverse",
+    "export",
+    "import",
+    "to",
+] + FUNCTION_KEYWORDS
+
 KEYWORDS = {
     kw: Name(kw, GulfOfMexicoKeyword(kw))
-    for kw in [
-        "class",
-        "className",
-        "after",
-        "const",
-        "var",
-        "when",
-        "if",
-        "else",
-        "async",
-        "return",
-        "delete",
-        "await",
-        "previous",
-        "next",
-        "reverse",
-        "export",
-        "import",
-        "to",
-    ]
-    + FUNCTION_KEYWORDS
+    for kw in _KEYWORD_LIST
 }
 
 
@@ -737,8 +736,8 @@ def db_to_number(val: GulfOfMexicoValue) -> GulfOfMexicoNumber:
         case GulfOfMexicoString():
             try:
                 return_number = float(val.value)
-            except ValueError:
-                raise NonFormattedError(f"Cannot convert string '{val.value}' to a number.")
+            except ValueError as exc:
+                raise NonFormattedError(f"Cannot convert string '{val.value}' to a number.") from exc
         case GulfOfMexicoUndefined():
             return_number = 0
         case GulfOfMexicoBoolean():
@@ -782,12 +781,12 @@ def db_read(path: GulfOfMexicoValue) -> GulfOfMexicoString:
     try:
         with open(path.value, encoding="utf-8") as f:
             s = f.read()
-    except FileNotFoundError:
-        raise NonFormattedError(f"File not found: '{path.value}'")
-    except PermissionError:
-        raise NonFormattedError(f"Permission denied: '{path.value}'")
-    except OSError as e:
-        raise NonFormattedError(f"Error reading file '{path.value}': {e}")
+    except FileNotFoundError as exc:
+        raise NonFormattedError(f"File not found: '{path.value}'") from exc
+    except PermissionError as exc:
+        raise NonFormattedError(f"Permission denied: '{path.value}'") from exc
+    except OSError as exc:
+        raise NonFormattedError(f"Error reading file '{path.value}': {exc}") from exc
     return GulfOfMexicoString(s)
 
 
@@ -851,10 +850,10 @@ def db_write(path: GulfOfMexicoValue, content: GulfOfMexicoValue) -> None:
     try:
         with open(path.value, "w", encoding="utf-8") as f:
             f.write(content_str)
-    except PermissionError:
-        raise NonFormattedError(f"Permission denied: '{path.value}'")
-    except OSError as e:
-        raise NonFormattedError(f"Error writing file '{path.value}': {e}")
+    except PermissionError as exc:
+        raise NonFormattedError(f"Permission denied: '{path.value}'") from exc
+    except OSError as exc:
+        raise NonFormattedError(f"Error writing file '{path.value}': {exc}") from exc
 
 
 def db_exit() -> None:
@@ -898,7 +897,6 @@ class DateObject:
 
     @classmethod
     def now(cls) -> GulfOfMexicoNumber:
-        import time
         return GulfOfMexicoNumber(int(time.time() * 1000) + int(cls._time_offset))
 
     @classmethod
@@ -964,7 +962,12 @@ BUILTIN_FUNCTION_KEYWORDS = {
     "min": Name("min", BuiltinFunction(2, lambda a, b: _math_binary(a, b, min))),
     "max": Name("max", BuiltinFunction(2, lambda a, b: _math_binary(a, b, max))),
     "random": Name("random", BuiltinFunction(0, lambda: GulfOfMexicoNumber(_random.random()))),
-    "randomInt": Name("randomInt", BuiltinFunction(2, lambda a, b: _math_binary(a, b, lambda x, y: _random.randint(int(x), int(y))))),
+    "randomInt": Name(
+        "randomInt",
+        BuiltinFunction(2, lambda a, b: _math_binary(
+            a, b, lambda x, y: _random.randint(int(x), int(y))
+        )),
+    ),
 }
 BUILTIN_VALUE_KEYWORDS = {
     "true": Name("true", GulfOfMexicoBoolean(True)),
@@ -1014,7 +1017,7 @@ NUMBER_NAME_KEYWORDS = {
     "million": Name("million", __number_function_maker_mult(1000000)),
     # Fraction names per spec ("Gulf of Mexico proudly supports fractions!")
     "half": Name("half", GulfOfMexicoNumber(0.5)),
-    "third": Name("third", GulfOfMexicoNumber(1/3)),
+    "third": Name("third", GulfOfMexicoNumber(1 / 3)),
     "quarter": Name("quarter", GulfOfMexicoNumber(0.25)),
 }  # this is so cursed
 

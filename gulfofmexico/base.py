@@ -52,8 +52,6 @@ ALPH_NUMS = _ASCII_ALPH_NUMS
 class NonFormattedError(Exception):
     """Internal error without source code formatting."""
 
-    pass
-
 
 class InterpretationError(Exception):
     """Gulf of Mexico runtime error with formatted message."""
@@ -144,7 +142,7 @@ class TokenType(Enum):
 
     WHITESPACE = "       "
     NAME = "abcaosdijawef"  # i'm losing my mind
-    STRING = "'''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''"  # iasddddakdjhnakjsndkjsbndfkijewbgf
+    STRING = "'''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''"
 
     NEWLINE = "\n"
     SINGLE_QUOTE = "'"  # this is ugly as hell
