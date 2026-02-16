@@ -109,26 +109,33 @@ def deserialize_python_obj(val: dict) -> Any:
             return tuple(deserialize_obj(x) for x in val["value"])
         case "dict":
             return {k: deserialize_obj(v) for k, v in val["value"].items()}
-        case "int" | "float" | "str":
-            return eval(val["python_obj_type"])(val["value"])  # RAISES ValueError
+        case "int":
+            return int(val["value"])
+        case "float":
+            return float(val["value"])
+        case "str":
+            return str(val["value"])
         case "NoneType":
             return None
         case "bool":
-            if val["value"] not in ["True", "False"]:
-                raise NonFormattedError("Invalid boolean detected in object deserialization.")
-            return eval(val["value"])
+            if val["value"] == "True":
+                return True
+            elif val["value"] == "False":
+                return False
+            raise NonFormattedError("Invalid boolean detected in object deserialization.")
         case "TokenType":
             if v := TokenType.from_val(val["value"]):
                 return v
             raise NonFormattedError("Invalid TokenType detected in object deserialization.")
         case "function":
-            if val["value"] in [
-                "db_list_pop",
-                "db_list_push",
-                "db_str_pop",
-                "db_str_push",
-            ]:
-                return eval(val["value"])  # trust me bro this is W code
+            _SAFE_FUNCTIONS = {
+                "db_list_pop": db_list_pop,
+                "db_list_push": db_list_push,
+                "db_str_pop": db_str_pop,
+                "db_str_push": db_str_push,
+            }
+            if val["value"] in _SAFE_FUNCTIONS:
+                return _SAFE_FUNCTIONS[val["value"]]
             if not (v := KEYWORDS.get(val["value"])) or not isinstance(v.value, BuiltinFunction):
                 raise NonFormattedError("Invalid builtin function detected in object deserialization.")
             return v.value.function
@@ -162,9 +169,25 @@ def deserialize_gulfofmexico_obj(val: dict) -> DataclassSerializations:
     ]:
         raise NonFormattedError("Invalid `gulfofmexico_obj_type` detected in deserialization.")
 
-    # beautiful, elegant, error-free, safe python code :D
+    # Safe type lookup instead of eval()
+    _SAFE_TYPES: dict[str, type] = {
+        "Name": Name,
+        "Variable": Variable,
+        "Token": Token,
+    }
+    # Add GulfOfMexico value subclasses
+    for cls in GulfOfMexicoValue.__subclasses__():
+        _SAFE_TYPES[cls.__name__] = cls
+    # Add CodeStatement subclasses
+    for cls in CodeStatement.__subclasses__():
+        _SAFE_TYPES[cls.__name__] = cls
+
+    type_name = val["gulfofmexico_obj_type"]
+    if type_name not in _SAFE_TYPES:
+        raise NonFormattedError(f"Unknown type '{type_name}' in deserialization.")
+
     attrs = {at["name"]: deserialize_obj(at["value"]) for at in val["attributes"]}
-    return eval(val["gulfofmexico_obj_type"])(**attrs)
+    return _SAFE_TYPES[type_name](**attrs)
 
 
 if __name__ == "__main__":

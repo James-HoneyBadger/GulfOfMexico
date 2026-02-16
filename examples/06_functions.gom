@@ -1,0 +1,60 @@
+// Functions: definition, calling conventions, higher-order patterns.
+
+print "=== FUNCTION BASICS ==="!
+print ""!
+
+// Simple function — single arg can use space syntax
+function greet(name) => {
+   print "Hello, ${name}!"!
+}!
+
+greet "World"!
+greet("GOM")!
+print ""!
+
+// Return values
+function add(a, b) => {
+   return a + b!
+}!
+
+function square(n) => {
+   return n * n!
+}!
+
+print "add(3, 7) = ${add(3, 7)}"!
+print "square(9) = ${square(9)}"!
+print ""!
+
+// Multi-param functions must use parenthesized calls
+const r1 = add(10, 20)!
+print "add(10, 20) = ${r1}"!
+print ""!
+
+// Higher-order: passing functions as arguments
+function applyTwice(f, x) => {
+   return f(f(x))!
+}!
+
+function double(n) => {
+   return n * 2!
+}!
+
+print "applyTwice(double, 3) = ${applyTwice(double, 3)}"!
+print ""!
+
+// Recursive map over an array
+function mapArray(arr, transformer, idx) => {
+   if idx >= arr.length - 1 {
+      return []!
+   }
+   const head = [transformer(arr[idx])]!
+   const tail = mapArray(arr, transformer, idx + 1)!
+   return head + tail!
+}!
+
+const nums = [1, 2, 3, 4, 5]!
+const doubled = mapArray(nums, double, -1)!
+const squared = mapArray(nums, square, -1)!
+print "Original: ${nums}"!
+print "Doubled:  ${doubled}"!
+print "Squared:  ${squared}"!

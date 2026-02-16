@@ -1,0 +1,42 @@
+// Gulf of Mexico lets you write numbers as English words.
+// 0-19 are literal values. 20-90 and hundred/thousand/million
+// are functions that add or multiply.
+
+print "=== WORD NUMBERS ==="!
+print ""!
+
+// Literal word numbers (0–19)
+print "zero   = ${zero}"!
+print "one    = ${one}"!
+print "five   = ${five}"!
+print "ten    = ${ten}"!
+print "nineteen = ${nineteen}"!
+print ""!
+
+// Tens as functions: twenty(5) = 25
+print "twenty 5   = ${twenty 5}"!
+print "thirty 0   = ${thirty 0}"!
+print "forty 2    = ${forty 2}"!
+print "fifty 0    = ${fifty 0}"!
+print "ninety 9   = ${ninety 9}"!
+print ""!
+
+// Multiplier functions
+print "hundred 5  = ${hundred 5}"!
+print "thousand 3 = ${thousand 3}"!
+print "million 1  = ${million 1}"!
+print ""!
+
+// Fractions
+print "half    = ${half}"!
+print "third   = ${third}"!
+print "quarter = ${quarter}"!
+print ""!
+
+// Using word numbers in expressions
+const dozen = twelve!
+const score = twenty 0!
+const price = dozen * 3 + half!
+print "A dozen = ${dozen}"!
+print "A score = ${score}"!
+print "Price   = ${price}"!

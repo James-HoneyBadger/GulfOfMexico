@@ -1,13 +1,13 @@
 [tool.poetry]
 name = "gulfofmexico"
-version = "0.1.6"
+version = "0.2.0"
 description = "Experimental interpreter based on Lu Wilson's (TodePond) Gulf of Mexico conceptual design - featuring probabilistic variables, negative indexing, and temporal lifetimes"
 readme = "README.md"
 authors = ["James Temple <james@honey-badger.org>"]
 license = "MIT"
 repository = "https://github.com/James-HoneyBadger/GulfOfMexico"
 homepage = "https://github.com/James-HoneyBadger/GulfOfMexico"
-documentation = "https://github.com/James-HoneyBadger/GulfOfMexico/blob/main/DOCUMENTATION.md"
+documentation = "https://github.com/James-HoneyBadger/GulfOfMexico/blob/main/docs/LANGUAGE_REFERENCE.md"
 keywords = ["interpreter", "esoteric", "programming-language", "language-construction", "dsl"]
 classifiers = [
     "Development Status :: 3 - Alpha",
@@ -25,7 +25,7 @@ classifiers = [
 ]
 
 [tool.poetry.dependencies]
-python = ">=3.10,<3.14"
+python = ">=3.10,<3.15"
 pynput = {version = "^1.7.7", optional = true}
 pygithub = {version = "^2.5.0", optional = true}
 PySide6 = {version = "^6.6", optional = true}

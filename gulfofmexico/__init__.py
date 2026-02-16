@@ -31,33 +31,19 @@ from typing import Optional, Union
 
 from gulfofmexico.builtin import KEYWORDS, GulfOfMexicoValue, Name, Variable
 from gulfofmexico.interpreter import (
+    InterpreterContext,
     interpret_code_statements_main_wrapper,
+)
+from gulfofmexico.interpreter.persistence import (
     load_global_gulfofmexico_variables,
     load_globals,
     load_public_global_variables,
 )
 from gulfofmexico.processor.lexer import tokenize
 from gulfofmexico.processor.syntax_tree import generate_syntax_tree
-from gulfofmexico.interpreter_phase5 import (
-    get_optimized_context,
-    enable_profiling,
-    disable_profiling,
-    enable_debugging,
-    disable_debugging,
-    get_execution_stats,
-    print_execution_report,
-)
 
 __all__ = [
     "run_file",
-    # Phase 5 optimization tools
-    "get_optimized_context",
-    "enable_profiling",
-    "disable_profiling",
-    "enable_debugging",
-    "disable_debugging",
-    "get_execution_stats",
-    "print_execution_report",
 ]
 
 __REPL_FILENAME = "__repl__"
@@ -94,16 +80,12 @@ def run_file(main_filename: str) -> None:
     importable_names: dict[str, dict[str, GulfOfMexicoValue]] = {}
     for filename, code in files:
         filename = filename or "__unnamed_file__"
-        # Set global variables for interpreter
-        import gulfofmexico.interpreter as interpreter  # pylint: disable=import-outside-toplevel
 
-        interpreter.filename = filename
-        interpreter.code = code
+        ctx = InterpreterContext(filename=filename, code=code)
         tokens = tokenize(filename, code)
         statements = generate_syntax_tree(filename, tokens, code)
 
         # load variables and run the code
-        # Use Name objects directly for keywords
         namespaces: list[dict[str, Union[Variable, Name]]] = [
             KEYWORDS.copy()  # type: ignore
         ]
@@ -119,7 +101,9 @@ def run_file(main_filename: str) -> None:
         load_global_gulfofmexico_variables(namespaces)
         load_public_global_variables(namespaces)
         try:
-            interpret_code_statements_main_wrapper(statements, namespaces, [], [{}], importable_names, exported_names)
+            interpret_code_statements_main_wrapper(
+                statements, namespaces, [], [{}], importable_names, exported_names, ctx,
+            )
         except Exception:  # pylint: disable=broad-exception-caught
             # Flush any buffered debug logs so debugging information is available
             # when a program errors out. Re-raise after flushing to preserve

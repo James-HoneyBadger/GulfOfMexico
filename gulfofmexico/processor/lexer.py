@@ -25,7 +25,7 @@ from __future__ import annotations
 
 from typing import Optional
 
-from gulfofmexico.base import ALPH_NUMS, Token, TokenType, raise_error_at_line
+from gulfofmexico.base import ALPH_NUMS, Token, TokenType, is_alph_num, raise_error_at_line
 
 
 def add_to_tokens(
@@ -181,9 +181,9 @@ def tokenize(filename: str, code: str) -> list[Token]:
     while curr < len(code):
         match code[curr]:
             case "\n":
+                add_to_tokens(tokens, line_count, curr - start, TokenType.NEWLINE)
                 line_count += 1
                 start = curr  # at the new line to get col number
-                add_to_tokens(tokens, line_count, curr - start, TokenType.NEWLINE)
             case "}":
                 add_to_tokens(tokens, line_count, curr - start, TokenType.R_CURLY)
             case "{":
@@ -266,6 +266,13 @@ def tokenize(filename: str, code: str) -> list[Token]:
                     value += "!"
                     curr += 1
                 add_to_tokens(tokens, line_count, curr - start, TokenType.BANG, value)
+            case "¡":
+                # Inverted exclamation mark — negative priority per spec
+                value = "¡"
+                while curr + 1 < len(code) and code[curr + 1] == "¡":
+                    value += "¡"
+                    curr += 1
+                add_to_tokens(tokens, line_count, curr - start, TokenType.BANG, value)
             case "?":
                 value = "?"
                 while code[curr + 1] == "?":
@@ -308,7 +315,7 @@ def tokenize(filename: str, code: str) -> list[Token]:
                     add_to_tokens(tokens, line_count, curr - start, TokenType.WHITESPACE, value)
             case c:
                 value = c
-                while code[curr + 1] in ALPH_NUMS:
+                while is_alph_num(code[curr + 1]):
                     curr += 1
                     value += code[curr]
                 add_to_tokens(tokens, line_count, curr - start, TokenType.NAME, value)

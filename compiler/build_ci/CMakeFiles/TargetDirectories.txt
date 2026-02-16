@@ -1,7 +1,0 @@
-/home/james/GulfOfMexico/compiler/build_ci/CMakeFiles/gomcc.dir
-/home/james/GulfOfMexico/compiler/build_ci/CMakeFiles/edit_cache.dir
-/home/james/GulfOfMexico/compiler/build_ci/CMakeFiles/rebuild_cache.dir
-/home/james/GulfOfMexico/compiler/build_ci/CMakeFiles/list_install_components.dir
-/home/james/GulfOfMexico/compiler/build_ci/CMakeFiles/install.dir
-/home/james/GulfOfMexico/compiler/build_ci/CMakeFiles/install/local.dir
-/home/james/GulfOfMexico/compiler/build_ci/CMakeFiles/install/strip.dir

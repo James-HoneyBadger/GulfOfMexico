@@ -59,20 +59,6 @@ __all__ = [
     "AfterStatement",
     "ExportStatement",
     "ImportStatement",
-    "TryWhateverStatement",
-    "ProcrastinationStatement",
-    "CorporateSpeakStatement",
-    "EmotionalStatement",
-    "SuperstitiousStatement",
-    "QuantumStatement",
-    "TimeTravelStatement",
-    "GaslightingStatement",
-    "BlockchainStatement",
-    "AIBuzzwordStatement",
-    "AgileStatement",
-    "SecurityTheaterStatement",
-    "DevOpsStatement",
-    "StartupStatement",
 ]
 
 
@@ -153,6 +139,7 @@ class VariableDeclaration(CodeStatement, CodeStatementDebuggable):
     expression: Union[list[Token], ExpressionTreeNode]
     debug: int  # 0-4 (number of ? marks)
     confidence: int  # 1-3 (number of ! marks)
+    destructure_names: Optional[list[Token]]  # For [a, b] = expr! destructuring
 
     # Compatibility init for experimental tests
     def __init__(
@@ -164,6 +151,7 @@ class VariableDeclaration(CodeStatement, CodeStatementDebuggable):
         expression=None,
         debug=0,
         confidence=0,
+        destructure_names=None,
     ):
         self.name = name
         self.modifiers = modifiers or []
@@ -172,6 +160,7 @@ class VariableDeclaration(CodeStatement, CodeStatementDebuggable):
         self.expression = expression
         self.debug = debug
         self.confidence = confidence
+        self.destructure_names = destructure_names
 
 
 @dataclass
@@ -205,20 +194,6 @@ class Conditional(CodeStatement, CodeStatementKeywordable):
     keyword: Token
     expression: Union[list[Token], ExpressionTreeNode]
     code: list[tuple[CodeStatement, ...]]
-
-
-# Backward-compat shim for tests expecting ConditionalStatement with arbitrary args
-class ConditionalStatement(Conditional):
-    """Compatibility subclass to satisfy experimental tests.
-
-    Accepts arbitrary constructor args without enforcing dataclass fields.
-    """
-
-    def __init__(self, *args, **kwargs):
-        # Minimal defaults; handlers only type-check this in tests
-        self.keyword = None
-        self.expression = None
-        self.code = []
 
 
 # name expression !?
@@ -280,12 +255,6 @@ class WhenStatement(CodeStatement, CodeStatementKeywordable):
     expression: Union[list[Token], ExpressionTreeNode]
     code: list[tuple[CodeStatement, ...]]
 
-    # Relaxed init to support experimental tests constructing with extra args
-    def __init__(self, *args, **kwargs):
-        self.keyword = None
-        self.expression = None
-        self.code = []
-
 
 # name "string" expression!
 @dataclass
@@ -293,12 +262,6 @@ class AfterStatement(CodeStatement, CodeStatementKeywordable):
     keyword: Token
     expression: Union[list[Token], ExpressionTreeNode]
     code: list[tuple[CodeStatement, ...]]
-
-    # Relaxed init to support experimental tests constructing with extra args
-    def __init__(self, *args, **kwargs):
-        self.keyword = None
-        self.expression = None
-        self.code = []
 
 
 # name name (, name)* name string!
@@ -342,277 +305,11 @@ class ImportStatement(CodeStatement, CodeStatementKeywordable, CodeStatementDebu
         self.debug = debug
 
 
-@dataclass
-class TryWhateverStatement(CodeStatement, CodeStatementKeywordable):
-    """Try/whatever passive-aggressive error handling.
-
-    Executes try block, but handles errors dismissively with whatever block.
-
-    Examples:
-        try { risky_operation()! } whatever { print "meh, didn't work"! }
-    """
-
-    keyword: Token  # 'try'
-    try_code: list[tuple[CodeStatement, ...]]
-    whatever_code: list[tuple[CodeStatement, ...]]
-
-
-@dataclass
-class ProcrastinationStatement(CodeStatement, CodeStatementKeywordable):
-    """Procrastination keywords: later, eventually, whenever.
-
-    Defers code execution with varying probability:
-    - later: 50% chance to execute
-    - eventually: 75% chance to execute
-    - whenever: 90% chance to execute
-
-    Examples:
-        later { do_homework()! }
-        eventually { clean_room()! }
-        whenever { reply_to_email()! }
-    """
-
-    keyword: Token  # 'later', 'eventually', or 'whenever'
-    code: list[tuple[CodeStatement, ...]]
-
-
-@dataclass
-class CorporateSpeakStatement(CodeStatement, CodeStatementKeywordable):
-    """Corporate speak keywords with satirical implementations.
-
-    Keywords:
-    - synergize: combine two values
-    - leverage: multiply value by 2
-    - paradigm_shift: negate value
-    - circle_back: defer execution (like later)
-    - touch_base: print status update
-
-    Examples:
-        synergize x, y!
-        leverage revenue!
-        paradigm_shift thinking!
-    """
-
-    keyword: Token
-    args: list[ExpressionTreeNode]
-
-
-@dataclass
-class EmotionalStatement(CodeStatement, CodeStatementKeywordable):
-    """Emotional programming: execute code based on program mood.
-
-    Keywords:
-    - happy: executes when program is happy (no recent errors)
-    - sad: executes when program is sad (recent errors)
-    - angry: executes when program is angry (many errors)
-    - excited: executes randomly with high energy
-    - tired: executes slowly (adds delay)
-
-    Examples:
-        happy { print "Everything is great!"! }
-        sad { print "Something went wrong..."! }
-        angry { print "THIS IS UNACCEPTABLE!"! }
-    """
-
-    keyword: Token  # 'happy', 'sad', 'angry', 'excited', 'tired'
-    code: list[tuple[CodeStatement, ...]]
-
-
-@dataclass
-class SuperstitiousStatement(CodeStatement, CodeStatementKeywordable):
-    """Superstitious programming: luck-based execution.
-
-    Keywords:
-    - lucky: higher chance of success (doubles success rate)
-    - unlucky: higher chance of failure (doubles error rate)
-    - cross_fingers: hope for the best (random outcome)
-    - knock_on_wood: prevent bad luck (error suppression)
-
-    Examples:
-        lucky { risky_operation()! }
-        cross_fingers { deploy_to_production()! }
-        knock_on_wood { critical_update()! }
-    """
-
-    keyword: Token
-    code: list[tuple[CodeStatement, ...]]
-
-
-@dataclass
-class QuantumStatement(CodeStatement, CodeStatementKeywordable):
-    """Quantum programming: variables in superposition.
-
-    The quantum keyword creates variables that exist in multiple states
-    simultaneously until observed. Observation collapses the superposition
-    to a single value.
-
-    Examples:
-        quantum x [1, 2, 3]!        // x is in superposition
-        const y observe(x)!          // collapse to single value
-        quantum result maybe!        // quantum uncertainty
-    """
-
-    keyword: Token  # 'quantum'
-    name: Token
-    value: list[Token]  # Expression tokens for the superposition value
-    debug: int
-
-
-@dataclass
-class TimeTravelStatement(CodeStatement, CodeStatementKeywordable):
-    """Time travel: access past/future variable states.
-
-    Functions:
-    - past(var, n): Access variable value from n executions ago
-    - future(var): Predict future value (spoiler: it's random)
-
-    Examples:
-        const old_value past(x, 3)!     // value from 3 iterations ago
-        const prediction future(x)!      // predicted future value
-    """
-
-    keyword: Token  # 'past' or 'future'
-    args: list[ExpressionTreeNode]
-
-
-@dataclass
-class GaslightingStatement(CodeStatement, CodeStatementKeywordable):
-    """Gaslighting variables: variables that deny their existence.
-
-    The definitely_not keyword creates variables that:
-    - Claim they were never set
-    - Return random values when accessed
-    - Deny any changes made to them
-
-    Examples:
-        definitely_not x 42!           // Creates gaslighting variable
-        print x!                        // "I don't know what you're talking about"
-    """
-
-    keyword: Token  # 'definitely_not'
-    name: Token
-    value: list[Token]
-    debug: int
-
-
-@dataclass
-class BlockchainStatement(CodeStatement, CodeStatementKeywordable):
-    """Blockchain buzzword satire.
-
-    Keywords:
-    - blockchain: Wrap code in unnecessary blockchain technology
-    - immutable_ledger: Make values "immutable" (but not really)
-    - smart_contract: Execute code with "smart contract" logic
-    - mine: Mine for cryptocurrency (actually just wastes CPU)
-
-    Examples:
-        blockchain { deploy_code()! }
-        mine 10!                       // Mine 10 blocks
-    """
-
-    keyword: Token
-    code: Optional[list[tuple[CodeStatement, ...]]]
-    args: Optional[list[ExpressionTreeNode]]
-
-
-@dataclass
-class AIBuzzwordStatement(CodeStatement, CodeStatementKeywordable):
-    """AI/ML buzzword satire.
-
-    Keywords:
-    - deep_learning: Apply "deep learning" (adds random noise)
-    - neural_network: Process with "neural network" (does nothing)
-    - ai_powered: Make code "AI-powered" (adds thinking delays)
-
-    Examples:
-        deep_learning { process_data()! }
-        ai_powered result = calculate()!
-    """
-
-    keyword: Token
-    code: list[tuple[CodeStatement, ...]]
-
-
-@dataclass
-class AgileStatement(CodeStatement, CodeStatementKeywordable):
-    """Agile/Scrum methodology satire.
-
-    Keywords:
-    - sprint: Execute code in a "sprint" (with velocity tracking)
-    - standup: Daily standup meeting (prints status updates)
-    - retro: Retrospective meeting (reflects on what happened)
-    - burndown: Track burndown chart (counts down unnecessarily)
-
-    Examples:
-        sprint { implement_feature()! }
-        standup { report_status()! }
-    """
-
-    keyword: Token
-    code: list[tuple[CodeStatement, ...]]
-
-
-@dataclass
-class SecurityTheaterStatement(CodeStatement, CodeStatementKeywordable):
-    """Security theater satire.
-
-    Keywords:
-    - encrypt: "Encrypt" data (ROT13)
-    - two_factor: Require two-factor authentication (asks twice)
-    - penetration_test: Run penetration test (knocks on door)
-    - zero_trust: Apply zero-trust architecture (trusts nothing, does nothing)
-
-    Examples:
-        encrypt { store_data()! }
-        two_factor { login()! }
-    """
-
-    keyword: Token
-    code: list[tuple[CodeStatement, ...]]
-
-
-@dataclass
-class DevOpsStatement(CodeStatement, CodeStatementKeywordable):
-    """DevOps cargo cult satire.
-
-    Keywords:
-    - containerize: Put code in a "container"
-    - orchestrate: Orchestrate containers (adds complexity)
-    - microservice: Convert to microservice (adds latency)
-    - kubernetes: Deploy to Kubernetes (YAML hell)
-
-    Examples:
-        containerize { run_app()! }
-        microservice { handle_request()! }
-    """
-
-    keyword: Token
-    code: list[tuple[CodeStatement, ...]]
-
-
-@dataclass
-class StartupStatement(CodeStatement, CodeStatementKeywordable):
-    """Startup culture satire.
-
-    Keywords:
-    - pivot: Pivot the business model (changes direction)
-    - disrupt: Disrupt the industry (breaks things)
-    - unicorn: Become a unicorn (multiplies values by imaginary numbers)
-    - hockey_stick: Achieve hockey stick growth (exponential delays)
-
-    Examples:
-        pivot { change_strategy()! }
-        disrupt { innovate()! }
-    """
-
-    keyword: Token
-    code: list[tuple[CodeStatement, ...]]
-
-
 # idea: create a class that evaluates at runtime what a statement is, so then execute it
 def split_into_statements(tokens: list[Token]) -> list[list[Token]]:
     statements = [[]]
     bracket_layers = 0
+    square_bracket_layers = 0
     for token in tokens:
         # check for expression-ending newlines
         if (
@@ -624,13 +321,17 @@ def split_into_statements(tokens: list[Token]) -> list[list[Token]]:
         else:
             statements[-1].append(token)
 
-        # this is the start of a new scope, we don't care about those for rn in terms of starting a new statement
+        # Track both curly and square bracket layers
         if token.type == TokenType.L_CURLY:
             bracket_layers += 1
         elif token.type == TokenType.R_CURLY:
             bracket_layers -= 1
+        elif token.type == TokenType.L_SQUARE:
+            square_bracket_layers += 1
+        elif token.type == TokenType.R_SQUARE:
+            square_bracket_layers -= 1
 
-        if token.type in [TokenType.R_CURLY, TokenType.BANG, TokenType.QUESTION] and bracket_layers == 0:
+        if token.type in [TokenType.R_CURLY, TokenType.BANG, TokenType.QUESTION] and bracket_layers == 0 and square_bracket_layers == 0:
             while statements[-1][-1].type == TokenType.NEWLINE:  # remove newlines at the end of a statement
                 statements[-1].pop()
             statements.append([])
@@ -917,154 +618,6 @@ def create_scoped_code_statement(
             )
         )
 
-    # Check for try/whatever statement (two scopes required)
-    if without_whitespace[0].value == "try":
-        # Look for 'whatever' keyword followed by second scope
-        # Find the end of first scope
-        first_scope_end = scope_open_index
-        bracket_count = 0
-        for i, token in enumerate(tokens[scope_open_index:], scope_open_index):
-            if token.type == TokenType.L_CURLY:
-                bracket_count += 1
-            elif token.type == TokenType.R_CURLY:
-                bracket_count -= 1
-                if bracket_count == 0:
-                    first_scope_end = i
-                    break
-
-        # Look for 'whatever' keyword after first scope
-        whatever_index = -1
-        for i in range(first_scope_end + 1, len(without_whitespace)):
-            if without_whitespace[i].value == "whatever":
-                whatever_index = i
-                break
-
-        if whatever_index != -1:
-            # Find second scope opening
-            second_scope_start = -1
-            for i, token in enumerate(tokens):
-                if token.type == TokenType.NAME and token.value == "whatever":
-                    # Find the { after whatever
-                    for j in range(i + 1, len(tokens)):
-                        if tokens[j].type == TokenType.L_CURLY:
-                            second_scope_start = j
-                            break
-                    break
-
-            if second_scope_start != -1:
-                # Extract whatever block code
-                whatever_code_tokens = tokens[second_scope_start + 1 : len(tokens) - ends_with_punc - 1]
-                whatever_statements = generate_syntax_tree(filename, whatever_code_tokens, code)
-
-                return (
-                    TryWhateverStatement(
-                        keyword=without_whitespace[0],
-                        try_code=statements_inside_scope,
-                        whatever_code=whatever_statements,
-                    ),
-                )
-
-    # Check for procrastination keywords: later, eventually, whenever
-    if without_whitespace[0].value in ["later", "eventually", "whenever"]:
-        return (
-            ProcrastinationStatement(
-                keyword=without_whitespace[0],
-                code=statements_inside_scope,
-            ),
-        )
-
-    # Check for emotional programming keywords
-    if without_whitespace[0].value in ["happy", "sad", "angry", "excited", "tired"]:
-        return (
-            EmotionalStatement(
-                keyword=without_whitespace[0],
-                code=statements_inside_scope,
-            ),
-        )
-
-    # Check for superstitious programming keywords
-    if without_whitespace[0].value in [
-        "lucky",
-        "unlucky",
-        "cross_fingers",
-        "knock_on_wood",
-    ]:
-        return (
-            SuperstitiousStatement(
-                keyword=without_whitespace[0],
-                code=statements_inside_scope,
-            ),
-        )
-
-    # Check for blockchain keywords
-    if without_whitespace[0].value in ["blockchain", "smart_contract"]:
-        return (
-            BlockchainStatement(
-                keyword=without_whitespace[0],
-                code=statements_inside_scope,
-                args=None,
-            ),
-        )
-
-    # Check for AI buzzword keywords
-    if without_whitespace[0].value in [
-        "deep_learning",
-        "neural_network",
-        "ai_powered",
-    ]:
-        return (
-            AIBuzzwordStatement(
-                keyword=without_whitespace[0],
-                code=statements_inside_scope,
-            ),
-        )
-
-    # Check for Agile/Scrum keywords
-    if without_whitespace[0].value in ["sprint", "standup", "retro", "burndown"]:
-        return (
-            AgileStatement(
-                keyword=without_whitespace[0],
-                code=statements_inside_scope,
-            ),
-        )
-
-    # Check for Security Theater keywords
-    if without_whitespace[0].value in [
-        "encrypt",
-        "two_factor",
-        "penetration_test",
-        "zero_trust",
-    ]:
-        return (
-            SecurityTheaterStatement(
-                keyword=without_whitespace[0],
-                code=statements_inside_scope,
-            ),
-        )
-
-    # Check for DevOps keywords
-    if without_whitespace[0].value in [
-        "containerize",
-        "orchestrate",
-        "microservice",
-        "kubernetes",
-    ]:
-        return (
-            DevOpsStatement(
-                keyword=without_whitespace[0],
-                code=statements_inside_scope,
-            ),
-        )
-
-    # Check for Startup keywords
-    if without_whitespace[0].value in ["pivot", "disrupt", "unicorn", "hockey_stick"]:
-        return (
-            StartupStatement(
-                keyword=without_whitespace[0],
-                code=statements_inside_scope,
-            ),
-        )
-
     possibilities.extend(
         [
             Conditional(
@@ -1113,41 +666,20 @@ def create_unscoped_code_statement(
     """
 
     is_debug = tokens[-1].type == TokenType.QUESTION
-    confidence = 0 if is_debug else len(tokens[-1].value)
+    # Calculate confidence: ! = positive priority, ¡ = negative priority
+    if is_debug:
+        confidence = 0
+    elif tokens[-1].type == TokenType.BANG:
+        bang_val = tokens[-1].value
+        if "¡" in bang_val:
+            confidence = -len(bang_val)  # negative priority
+        else:
+            confidence = len(bang_val)  # positive priority
+    else:
+        confidence = 0
     debug_level = 0 if not is_debug else len(tokens[-1].value)
 
     tokens_no_ws = [t for t in tokens if t.type != TokenType.WHITESPACE]
-
-    # Check for corporate speak keywords
-    corporate_keywords = [
-        "synergize",
-        "leverage",
-        "paradigm_shift",
-        "circle_back",
-        "touch_base",
-    ]
-    if without_whitespace[0].type == TokenType.NAME and without_whitespace[0].value in corporate_keywords:
-        # Parse arguments (everything between keyword and !)
-        args_tokens = tokens[int(tokens[0].type == TokenType.WHITESPACE) + 1 : -1]
-        # Split by comma to get individual arguments
-        args = []
-        current_arg = []
-        for token in args_tokens:
-            if token.type == TokenType.COMMA:
-                if current_arg:
-                    args.append(build_expression_tree(filename, current_arg, code))
-                    current_arg = []
-            elif token.type != TokenType.WHITESPACE:
-                current_arg.append(token)
-        if current_arg:
-            args.append(build_expression_tree(filename, current_arg, code))
-
-        return (
-            CorporateSpeakStatement(
-                keyword=without_whitespace[0],
-                args=args,
-            ),
-        )
 
     # it's a function!!!!!!!!!!!!!!!!!
     has_func_point = [t.type == TokenType.FUNC_POINT for t in tokens]
@@ -1233,6 +765,8 @@ def create_unscoped_code_statement(
     # checking modifiers and lifetime for varianle declaration
     names_in_row: list[Token] = []
     looking_for_lifetime, lifetime = False, None
+    lifetime_parts: list[str] = []
+    destructure_names: Optional[list[Token]] = None
     for t in without_whitespace:
         if (
             not can_be_var_declaration or can_be_var_assignment
@@ -1242,48 +776,33 @@ def create_unscoped_code_statement(
             if t.type != TokenType.NAME:
                 if t.type == TokenType.LESS_THAN:
                     looking_for_lifetime = True
+                    lifetime_parts = []
                     continue
+                elif t.type == TokenType.L_SQUARE and len(names_in_row) >= 2:
+                    # Destructuring pattern: const var [a, b] = expr!
+                    idx = without_whitespace.index(t)
+                    destructure_names = []
+                    j = idx + 1
+                    while j < len(without_whitespace) and without_whitespace[j].type != TokenType.R_SQUARE:
+                        if without_whitespace[j].type == TokenType.NAME:
+                            destructure_names.append(without_whitespace[j])
+                        j += 1
+                    if destructure_names:
+                        # Use first destructured name as the primary name
+                        names_in_row.append(destructure_names[0])
+                    break
                 else:
                     break
             names_in_row.append(t)
         else:
             if t.type == TokenType.GREATER_THAN or not 3 <= len(names_in_row) <= 4 or not can_be_var_declaration:
+                # Combine all parts into lifetime string
+                if lifetime_parts and not lifetime:
+                    lifetime = "<" + "".join(lifetime_parts) + ">"
                 break
-            if not lifetime:
-                lifetime = t.value
+            lifetime_parts.append(t.value)
 
     can_be_var_declaration &= 2 <= len(names_in_row) <= 4
-
-    # Check for quantum statement: quantum x [1,2,3]!
-    can_be_quantum = (
-        len(without_whitespace) >= 4
-        and without_whitespace[0].type == TokenType.NAME
-        and without_whitespace[0].value == "quantum"
-        and without_whitespace[1].type == TokenType.NAME
-    )
-
-    # Check for gaslighting statement: definitely_not x 42!
-    can_be_gaslighting = (
-        len(without_whitespace) >= 4
-        and without_whitespace[0].type == TokenType.NAME
-        and without_whitespace[0].value == "definitely_not"
-        and without_whitespace[1].type == TokenType.NAME
-    )
-
-    # Check for blockchain mine statement: mine 10!
-    can_be_mine = (
-        len(without_whitespace) >= 2
-        and without_whitespace[0].type == TokenType.NAME
-        and without_whitespace[0].value == "mine"
-    )
-
-    # Check for immutable_ledger statement: immutable_ledger x 100!
-    can_be_immutable_ledger = (
-        len(without_whitespace) >= 4
-        and without_whitespace[0].type == TokenType.NAME
-        and without_whitespace[0].value == "immutable_ledger"
-        and without_whitespace[1].type == TokenType.NAME
-    )
 
     # make a list of all possible things, starting with plain expression
     possibilities: list[CodeStatement] = [ExpressionStatement(tokens[:-1], debug_level)]
@@ -1298,6 +817,19 @@ def create_unscoped_code_statement(
             ReverseStatement(
                 keyword=tokens_no_ws[0],  # candidate keyword (should resolve to 'reverse')
                 name=tokens_no_ws[1],
+                debug=debug_level,
+            )
+        )
+    # Also accept standalone 'reverse!' (2 tokens: keyword + bang)
+    if (
+        len(tokens_no_ws) == 2
+        and tokens_no_ws[0].type == TokenType.NAME
+        and tokens_no_ws[1].type in {TokenType.BANG, TokenType.QUESTION}
+    ):
+        possibilities.append(
+            ReverseStatement(
+                keyword=tokens_no_ws[0],
+                name=tokens_no_ws[0],  # name same as keyword (dummy)
                 debug=debug_level,
             )
         )
@@ -1335,64 +867,6 @@ def create_unscoped_code_statement(
                 debug=debug_level,
             )
         )
-    if can_be_quantum:
-        # Find where the variable name ends in tokens (need to skip whitespace)
-        var_name_token = without_whitespace[1]
-        value_start_index = 0
-        for i, t in enumerate(tokens):
-            if t == var_name_token:
-                value_start_index = i + 1
-                break
-
-        possibilities.append(
-            QuantumStatement(
-                keyword=without_whitespace[0],
-                name=without_whitespace[1],
-                value=tokens[value_start_index:-1],  # After variable name until punctuation
-                debug=debug_level,
-            )
-        )
-    if can_be_gaslighting:
-        # Similar to quantum - find where variable name ends
-        var_name_token = without_whitespace[1]
-        value_start_index = 0
-        for i, t in enumerate(tokens):
-            if t == var_name_token:
-                value_start_index = i + 1
-                break
-
-        possibilities.append(
-            GaslightingStatement(
-                keyword=without_whitespace[0],
-                name=without_whitespace[1],
-                value=tokens[value_start_index:-1],
-                debug=debug_level,
-            )
-        )
-    if can_be_immutable_ledger:
-        # Similar structure to gaslighting
-        var_name_token = without_whitespace[1]
-        value_start_index = 0
-        for i, t in enumerate(tokens):
-            if t == var_name_token:
-                value_start_index = i + 1
-                break
-
-        possibilities.append(
-            BlockchainStatement(
-                keyword=without_whitespace[0],
-                code=None,
-                args=tokens[value_start_index:-1],
-            )
-        )
-    if can_be_mine:
-        possibilities.append(
-            BlockchainStatement(
-                keyword=without_whitespace[0],
-                code=None,
-                args=tokens[1:-1],  # Everything after 'mine' until punctuation
-            )
-        )
     if can_be_var_declaration:
         possibilities.append(
             VariableDeclaration(
@@ -1403,6 +877,7 @@ def create_unscoped_code_statement(
                 confidence=confidence,
                 debug=debug_level,
                 type_annotation=type_annotation,
+                destructure_names=destructure_names,
             )
         )
     if can_be_var_assignment:

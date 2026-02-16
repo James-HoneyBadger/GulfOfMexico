@@ -1,212 +1,324 @@
-# Gulf of Mexico Interpreter - Project Overview
+# Gulf of Mexico
 
-Welcome to the **Gulf of Mexico** programming language interpreter! This is an esoteric programming language based on Lu Wilson (TodePond)'s conceptual design, featuring unique characteristics like probabilistic variables, negative indexing, and temporal lifetimes.
+An esoteric programming language interpreter based on [Lu Wilson (TodePond)](https://todepond.com)'s conceptual design. Gulf of Mexico features -1 based indexing, three-valued booleans, significant whitespace for operator binding, tiered equality, temporal variable lifetimes, and statement terminators with confidence levels.
 
-## 📚 Quick Navigation
+## Quick Start
 
-### Getting Started
-- **[Installation Guide](docs/guides/INSTALL_GUIDE.md)** - Set up the interpreter
-- **[User Guide](docs/guides/USER_GUIDE.md)** - Learn how to use GOM
-- **[Programming Guide](docs/guides/PROGRAMMING_GUIDE.md)** - Language features and syntax
-
-### Running Programs
 ```bash
-# Run a GOM program
-python -m gulfofmexico program.gom
+# Clone and install
+git clone https://github.com/James-HoneyBadger/GulfOfMexico.git
+cd GulfOfMexico
+pip install -e .
 
-# Start interactive REPL
+# Run a program
+python -m gulfofmexico examples/01_hello_world.gom
+
+# Start the REPL
 python -m gulfofmexico
 
-# Launch graphical IDE
+# Launch the graphical IDE (requires PySide6)
+pip install -e ".[ide]"
 python -m gulfofmexico.ide
 ```
 
-### Documentation
-- **[Complete Documentation Index](DOCUMENTATION.md)** - All docs and guides
-- **[Latest Changes](CHANGELOG.md)** - What's new
-- **[Language Features](docs/language/LANGUAGE_CONSTRUCTION_QUICKSTART.md)** - Create custom language variants
+Or use the convenience scripts at the project root:
 
-## 🎯 Current Status
-
-### Production Ready
-- ✅ **Python Interpreter** - Full-featured with REPL and IDE
-- ✅ **Handler Architecture** - Modular statement processing (Phase 4)
-- ✅ **Performance Optimized** - 70% faster dispatch (Phase 5)
-- ✅ **Plugin System** - Production-ready extensibility (Phase 5)
-- ✅ **Profiling Tools** - Complete observability (Phase 5)
-
-### Experimental
-- ⚠️ **C++ Compiler** - Research project, not production-ready
-
-## 🚀 Phase 5: Performance & Extensibility
-
-Latest major release with comprehensive optimizations:
-
-### Key Improvements
-- **70% Faster Handler Dispatch** - O(1) caching, 0.15ms per statement
-- **Production Plugin System** - Full extensibility with dependencies
-- **Enhanced Profiling** - Frame-based tracing with detailed metrics
-- **Benchmarking Suite** - Automated performance analysis
-- **100% Backward Compatible** - All existing code works unchanged
-
-### Documentation
-- [Phase 5 Complete Guide](PHASE_5_COMPLETE.md)
-- [Phase 5 Summary](PHASE_5_SUMMARY.md)
-- [Phase 5 Quick Start](PHASE_5_README.md)
-
-## 📁 Project Structure
-
-```
-gulfofmexico/                  # Main interpreter package
-├── interpreter.py            # Core execution engine
-├── handler_dispatch.py        # Optimized handler dispatcher (Phase 5)
-├── profiling.py              # Performance profiling tools (Phase 5)
-├── plugin_manager.py         # Plugin system (Phase 5)
-├── interpreter_phase5.py     # Integration layer (Phase 5)
-├── benchmarking.py           # Benchmarking suite (Phase 5)
-├── handlers.py               # Handler base classes
-├── handler_registry.py       # Handler registration
-├── handlers_impl/            # Handler implementations
-├── processor/                # Lexer and parser
-├── engine/                   # Experimental handler engine
-├── graphics/                 # Graphics support
-├── ide/                      # Interactive IDE
-├── plugins/                  # Built-in plugins
-└── ...
-
-config/                        # Configuration files
-├── pylintrc                  # Pylint configuration
-├── ruff.toml                 # Ruff linter configuration
-├── .flake8                   # Flake8 configuration
-├── .pre-commit-config.yaml   # Pre-commit hooks configuration
-└── *.yaml, *.json            # Language preset configurations
-
-docs/                         # Documentation
-├── guides/                   # User guides
-├── language/                 # Language documentation
-├── reference/                # API reference
-└── archive/                  # Historical phase documents
-
-tests/                        # Test suite (unit and integration tests)
-examples/                     # GOM code examples and reference programs
-scripts/                      # Utility scripts
-compiler/                     # C++ compiler (experimental)
-```
-
-## 🔧 Installation
-
-### Quick Install
 ```bash
-# Clone repository
-git clone https://github.com/James-HoneyBadger/GulfOfMexico.git
-cd GulfOfMexico
-
-# Install Python interpreter
-pip install -e .
-
-# Verify installation
-python -m gulfofmexico --version
+./run_cli.sh           # Start the REPL
+./run_ide.sh           # Launch the IDE
 ```
 
-See [Installation Guide](docs/guides/INSTALL_GUIDE.md) for detailed instructions.
+## Language Overview
 
-## 💡 Quick Examples
+Every statement ends with `!` (the "confidence terminator"). More `!` marks indicate higher confidence.
 
-### Hello World
-```gom
-"Hello, Gulf of Mexico!"
+```
+print "Hello, World!"!
+print "Definitely prints"!!!
 ```
 
 ### Variables
-```gom
-x is 42
-y is "text"
-z is [1, 2, 3]
+
+```
+const name = "GOM"!        // immutable
+var counter = 0!            // mutable
+var counter = counter + 1!  // reassign
+```
+
+### Types
+
+| Type | Examples |
+|------|---------|
+| Number | `42`, `3.14`, `-7` |
+| String | `"hello"`, `'world'` |
+| Boolean | `true`, `false`, `maybe` |
+| List | `[1, 2, 3]` |
+| Map | `Map()` |
+| Undefined | `undefined` |
+
+### -1 Based Indexing
+
+Arrays, strings, and numbers all start at index `-1`:
+
+```
+const arr = [10, 20, 30]!
+print arr[-1]!   // 10 (first element)
+print arr[0]!    // 20 (second element)
+print arr[1]!    // 30 (third element)
+```
+
+### Three-Valued Booleans
+
+```
+const a = true!
+const b = false!
+const c = maybe!           // evaluates probabilistically
+Boolean(0)    // false
+Boolean(1)    // true
+Boolean(0.3)  // maybe (fractional -> maybe)
 ```
 
 ### Functions
-```gom
-double is function(x) [
-    x times 2
-]
+
+Functions are declared with `function` (or `fn`, `func`, `f`) and use `=>` with curly braces:
+
+```
+function add(a, b) => {
+   return a + b!
+}!
+
+function greet(name) => {
+   print "Hello, ${name}!"!
+}!
+
+// Single-arg functions can be called with space syntax
+greet "World"!
+
+// Multi-arg functions use parenthesized calls
+const sum = add(3, 7)!
 ```
 
-### Conditionals
-```gom
-if x > 10 [
-    print("Big number")
-]
+### Control Flow
+
+```
+// Conditionals
+if x > 10 {
+   print "big"!
+}
+
+// Recursion (no traditional loops)
+function countdown(n) => {
+   if n > 0 {
+      print n!
+      const next = n - 1!
+      countdown(next)!
+   }
+}!
 ```
 
-See [Programming Guide](docs/guides/PROGRAMMING_GUIDE.md) for more examples.
+### Significant Whitespace
 
-## 🧪 Testing
+Whitespace controls operator binding — tight binding groups operands:
 
-Run the test suite:
+```
+const a = 2 * 1+3!   // 2 * (1+3) = 8
+const b = 2*1 + 3!   // (2*1) + 3 = 5
+```
+
+### Tiered Equality
+
+Four levels of precision in equality checks:
+
+| Operator | Meaning | `10 = 11` | `10 == 11` | `10 === 10` |
+|----------|---------|-----------|------------|-------------|
+| `=` | Approximate (within 10) | `true` | — | — |
+| `==` | Exact value | — | `false` | `true` |
+| `===` | Value + type | — | — | `true` |
+| `====` | Reference identity | — | — | — |
+
+### Classes
+
+GOM enforces single-instance-per-class:
+
+```
+class Counter {
+   var count = 0!
+   function increment() => {
+      count = count + 1!
+   }!
+}!
+
+const c = new Counter!
+c.increment()!
+print c.count!    // 1
+```
+
+### String Interpolation
+
+Multiple currency symbols work as interpolation prefixes:
+
+```
+const val = 42!
+print "${val}"!     // Dollar
+print "£{val}"!     // Pound
+print "¥{val}"!     // Yen
+```
+
+### Special Features
+
+| Feature | Syntax | Description |
+|---------|--------|-------------|
+| Variable lifetimes | `var x <5> = "temp"!` | Variable expires after 5 statements |
+| Previous values | `previous x` | Access the prior value of a variable |
+| When watchers | `when x > 5 { ... }` | Execute block when condition becomes true |
+| Next promises | `const f = next x!` | Capture the next value of a variable |
+| Reverse replay | `reverse!` | Replay prior statements in reverse order |
+| Delete | `delete x!` | Remove a variable from scope |
+| Word numbers | `five`, `nineteen`, `hundred(3)` | English word number literals |
+| Named fractions | `half`, `quarter`, `third` | Fraction literals |
+| Signals | `const sig = use 0!` | Reactive signal (getter/setter) |
+| Type annotations | `var x: Int = 10!` | Optional type hints |
+| Noop | `noop!` | Do nothing |
+
+### Math Functions
+
+17 built-in math functions: `abs`, `floor`, `ceil`, `round`, `sqrt`, `sin`, `cos`, `tan`, `log`, `exp`, `degrees`, `radians`, `pow`, `min`, `max`, `random`, `randomInt`.
+
+```
+print abs(-5)!        // 5
+print sqrt(16)!       // 4.0
+print min(3, 7)!      // 3
+print randomInt(1, 6)! // random integer 1-6
+```
+
+## CLI Usage
+
+```
+python -m gulfofmexico                   # REPL
+python -m gulfofmexico script.gom        # Run file
+python -m gulfofmexico -c "print 42!"    # Inline code
+python -m gulfofmexico -s script.gom     # Show Python traceback on error
+python -m gulfofmexico --debug script.gom  # Show internal debug messages
+```
+
+## REPL Commands
+
+| Command | Description |
+|---------|-------------|
+| `:help` | Show help |
+| `:quit` | Exit REPL |
+| `:reset` | Clear state |
+| `:load <file>` | Load and execute a file |
+| `:vars` | Show all variables |
+| `:history` | Show command history |
+| `:save <file>` | Save history to file |
+
+## Project Structure
+
+```
+gulfofmexico/               # Main interpreter package
+├── __init__.py             # Entry point (run_file)
+├── __main__.py             # CLI interface
+├── base.py                 # Token, TokenType, OperatorType, error formatting
+├── builtin.py              # Value types, built-in functions, keywords
+├── repl.py                 # Interactive REPL
+├── serialize.py            # Value serialization for persistence
+├── interpreter/            # Interpreter core (11 modules)
+│   ├── context.py          # Shared state, type aliases, ReturnSentinel
+│   ├── helpers.py          # Utility functions
+│   ├── operators.py        # Tiered equality, comparison, arithmetic
+│   ├── namespaces.py       # Scope lookup, literal resolution
+│   ├── persistence.py      # Variable storage (file I/O)
+│   ├── expressions.py      # Expression evaluation engine
+│   ├── variables.py        # Variable declaration and assignment
+│   ├── watchers.py         # When-statements, next/previous tracking
+│   ├── dispatch.py         # Statement type determination
+│   └── execution.py        # Main interpretation loop
+├── processor/              # Front-end pipeline
+│   ├── lexer.py            # Tokenizer
+│   ├── syntax_tree.py      # Parser / statement generation
+│   └── expression_tree.py  # Expression tree builder
+└── ide/                    # Graphical IDE (PySide6)
+    ├── app.py              # Main application window
+    ├── editor.py           # Code editor widget
+    ├── highlighter.py      # Syntax highlighting
+    ├── runner.py           # Program execution
+    └── qt_compat.py        # Qt compatibility layer
+
+examples/                   # 21 example programs
+tests/                      # Spec compliance and regression tests
+docs/                       # Documentation
+```
+
+## Examples
+
+21 example programs covering all language features, from hello world to sorting algorithms:
+
+| # | Program | Concepts |
+|---|---------|----------|
+| 01 | Hello World | Print, confidence levels |
+| 02 | Variables & Types | const/var, booleans, type conversion |
+| 03 | Operators | Arithmetic, comparison, logical, string ops |
+| 04 | Tiered Equality | `=`, `==`, `===`, `====` |
+| 05 | Control Flow | if blocks, recursion |
+| 06 | Functions | Definition, higher-order, recursion |
+| 07 | Lists | Indexing, push/pop, concatenation |
+| 08 | Strings | Interpolation, escape sequences, reversal |
+| 09 | Three-Valued Logic | maybe, probabilistic execution |
+| 10 | Classes | OOP, single-instance enforcement |
+| 11 | Word Numbers | English number literals, fractions |
+| 12 | Delete | Deleting variables and values |
+| 13 | Maps | Key-value data structures |
+| 14 | Algorithms | Recursive algorithms (factorial, fibonacci) |
+| 15 | Debug & Confidence | `?` debug output, `!`/`!!`/`!!!` |
+| 16 | Lifetimes | Temporal variable expiration |
+| 17 | Multiple Returns | Returning lists as multiple values |
+| 18 | Number Indexing | Indexing individual digits |
+| 19 | Currency Interpolation | `${}`, `£{}`, `¥{}` |
+| 20 | Bank Simulation | Full application with classes |
+| 21 | Sorting | Insertion sort, functional style |
+
+Run all examples:
+
 ```bash
-pytest tests/ -v
+for f in examples/*.gom; do
+  echo "--- $(basename "$f") ---"
+  python -m gulfofmexico "$f"
+done
 ```
 
-Test categories:
-- **Unit Tests** - Individual module tests
-- **Integration Tests** - Multi-module interaction
-- **Program Tests** - Complete program execution
-- **Performance Tests** - Benchmarking
+## Installation Options
 
-## 🔌 Plugin System (Phase 5)
-
-Extend the interpreter with custom functionality:
-
-```python
-from gulfofmexico.plugin_manager import ProductionPlugin, PluginMetadata
-
-class MyPlugin(ProductionPlugin):
-    @property
-    def metadata(self):
-        return PluginMetadata(
-            name="my_plugin",
-            version="1.0.0"
-        )
-    
-    def get_statement_handlers(self):
-        return [MyCustomHandler()]
+```bash
+pip install -e .              # Core interpreter only
+pip install -e ".[ide]"       # + Graphical IDE (PySide6)
+pip install -e ".[all]"       # All optional dependencies
 ```
 
-## 📊 Performance (Phase 5)
+Optional extras:
+- `ide` — PySide6 graphical IDE
+- `input` — pynput keyboard input
+- `graphics` — Pillow image support
+- `yaml` — YAML configuration files
+- `globals` — GitHub-based public variable sharing
 
-| Metric | Value |
-|--------|-------|
-| Handler dispatch | 0.15ms/statement (70% faster) |
-| Cache hit rate | 95%+ |
-| Memory overhead | <1% |
-| Startup time | <50ms |
+## Testing
 
-## 🤝 Contributing
+```bash
+# Run spec compliance test
+python -m gulfofmexico tests/spec_compliance.gom
 
-Contributions are welcome! Areas for contribution:
-- Bug fixes and performance improvements
-- Plugin development
-- Documentation and examples
-- Tool development
+# Run all example programs
+for f in examples/*.gom; do
+  timeout 15 python -m gulfofmexico -s "$f"
+done
+```
 
-## 📝 License
+## License
 
-MIT License - See [LICENSE](LICENSE) for details.
+MIT License — see [LICENSE](LICENSE) for details.
 
-## 🙏 Credits
+## Credits
 
-- **Original Design**: Lu Wilson (TodePond)
-- **Python Implementation**: James Temple
-- **Contributors**: See GitHub for full list
-
-## 📞 Support
-
-For issues, questions, or suggestions:
-1. Check [DOCUMENTATION.md](DOCUMENTATION.md) for comprehensive guides
-2. Review [Installation Guide](docs/guides/INSTALL_GUIDE.md)
-3. Check existing issues on GitHub
-4. Create a new issue with details
-
----
-
-**The Gulf of Mexico: Where programming meets creativity!** 🌊
+- **Original Design**: [Lu Wilson (TodePond)](https://todepond.com)
+- **Implementation**: James Temple

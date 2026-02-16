@@ -1,0 +1,46 @@
+// A small banking simulation using classes.
+// Properties are mutated externally via dot assignment.
+
+print "=== BANK SIMULATION ==="!
+print ""!
+
+class Account {
+   var owner = "Anonymous"!
+   var balance = 0!
+   var txCount = 0!
+}!
+
+const acct = new Account!
+acct.owner = "Alice"!
+
+// Deposit function
+function deposit(account, amount) => {
+   account.balance = account.balance + amount!
+   account.txCount = account.txCount + 1!
+   print "${account.owner}: deposited ${amount}, balance = ${account.balance}"!
+}!
+
+// Withdraw function
+function withdraw(account, amount) => {
+   if amount > account.balance {
+      print "${account.owner}: insufficient funds (need ${amount}, have ${account.balance})"!
+      return!
+   }
+   account.balance = account.balance - amount!
+   account.txCount = account.txCount + 1!
+   print "${account.owner}: withdrew ${amount}, balance = ${account.balance}"!
+}!
+
+function statement(account) => {
+   print "--- Statement for ${account.owner} ---"!
+   print "  Balance: ${account.balance}"!
+   print "  Transactions: ${account.txCount}"!
+}!
+
+deposit(acct, 1000)!
+deposit(acct, 500)!
+withdraw(acct, 200)!
+withdraw(acct, 50)!
+withdraw(acct, 9999)!
+print ""!
+statement(acct)!

@@ -1,0 +1,22 @@
+// Debug output with ? terminators and confidence levels with !.
+
+print "=== DEBUG AND CONFIDENCE ==="!
+print ""!
+
+// Statements ending with ? produce debug output to stderr
+print "Normal output (ends with !)"!
+
+// ? shows the value being assigned
+const debugMe = 42?
+print ""!
+print "Assigned debugMe = 42 with ? (check stderr for debug trace)"!
+print ""!
+
+// Confidence levels
+const sure = "I'm sure"!
+const vSure = "I'm very sure"!!
+const absSure = "I'm absolutely sure"!!!
+
+print "${sure}"!
+print "${vSure}"!
+print "${absSure}"!

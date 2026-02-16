@@ -179,7 +179,7 @@ def build_expression_tree(filename: str, tokens: list[Token], code: str) -> Expr
 
     if not tokens:
         # Empty expression returns undefined
-        return ValueNode(Token(TokenType.NAME, "undefined", 0, 0))
+        return ValueNode(Token(TokenType.NAME, "undefined", 1, 0))
 
     # tabs at the beginning or end do not matter
     for token in tokens[1:-1]:
@@ -195,6 +195,9 @@ def build_expression_tree(filename: str, tokens: list[Token], code: str) -> Expr
 
     # create a new list consisting and tokens and a brand new type: the list
     tokens_without_whitespace = [token for token in tokens if token.type != TokenType.WHITESPACE]
+    if not tokens_without_whitespace:
+        # All whitespace — return undefined
+        return ValueNode(Token(TokenType.NAME, "undefined", tokens[0].line if tokens else 1, 0))
     if (
         len(tokens_without_whitespace) == 2
         and tokens_without_whitespace[0].type == TokenType.L_SQUARE
@@ -206,7 +209,7 @@ def build_expression_tree(filename: str, tokens: list[Token], code: str) -> Expr
 
     # transform a list of tokens to include operators
     # find the operator with the maximum whitespace between it and other things
-    updated_list = [STR_TO_OPERATOR.get(token.value, token) for token in tokens]
+    updated_list = [STR_TO_OPERATOR.get(token.value, token) if token.type != TokenType.STRING else token for token in tokens]
     max_width, max_index = -1, -1
     bracket_layers = 0
     for i in range(len(updated_list)):
@@ -238,7 +241,7 @@ def build_expression_tree(filename: str, tokens: list[Token], code: str) -> Expr
                         "Whitespace must be equal on either side of an operator.",
                         tokens[i],
                     )
-                if r_len >= max_width:
+                if r_len > max_width:
                     max_width = r_len
                     max_index = i
 

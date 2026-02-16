@@ -1,0 +1,47 @@
+// Three-valued logic: true, false, and maybe.
+// 'maybe' is GOM's unique third boolean — conditions with maybe
+// execute with 50% probability each time.
+
+print "=== THREE-VALUED LOGIC ==="!
+print ""!
+
+// Truth tables for AND
+print "AND truth table:"!
+print "  T & T = ${true & true}"!
+print "  T & F = ${true & false}"!
+print "  T & M = ${true & maybe}"!
+print "  F & T = ${false & true}"!
+print "  F & F = ${false & false}"!
+print "  F & M = ${false & maybe}"!
+print "  M & T = ${maybe & true}"!
+print "  M & F = ${maybe & false}"!
+print "  M & M = ${maybe & maybe}"!
+print ""!
+
+// Truth tables for OR
+print "OR truth table:"!
+print "  T | T = ${true | true}"!
+print "  T | F = ${true | false}"!
+print "  T | M = ${true | maybe}"!
+print "  F | T = ${false | true}"!
+print "  F | F = ${false | false}"!
+print "  F | M = ${false | maybe}"!
+print "  M | T = ${maybe | true}"!
+print "  M | F = ${maybe | false}"!
+print "  M | M = ${maybe | maybe}"!
+print ""!
+
+// NOT
+print "NOT:"!
+print "  ;true  = ${;true}"!
+print "  ;false = ${;false}"!
+print "  ;maybe = ${;maybe}"!
+print ""!
+
+// Boolean conversions — how different types become booleans
+print "BOOLEAN CONVERSIONS:"!
+print "  Boolean(1)     = ${Boolean 1}"!
+print "  Boolean(0)     = ${Boolean 0}"!
+print "  Boolean(0.5)   = ${Boolean 0.5}"!
+print "  Boolean(\"hi\")  = ${Boolean "hi"}"!
+print "  Boolean(\"\")    = ${Boolean ""}"!

@@ -1,0 +1,56 @@
+// Strings: interpolation, escape sequences, operations.
+
+print "=== STRING FEATURES ==="!
+print ""!
+
+const name = "Gulf of Mexico"!
+print "Name: ${name}"!
+print "Length: ${name.length}"!
+print ""!
+
+// Interpolation with different currency symbols
+const x = 42!
+print "Dollar: ${x}"!
+print "Pound:  £{x}"!
+print "Yen:    ¥{x}"!
+print ""!
+
+// Escape sequences
+print "ESCAPE SEQUENCES:"!
+print "Tab:\there"!
+print "Newline splits\nthis line"!
+print ""!
+
+// String concatenation
+const greeting = "Hello" + ", " + name!
+print "Concatenated: ${greeting}"!
+print ""!
+
+// String comparison
+const a = "apple"!
+const b = "apple"!
+const c = "banana"!
+print "apple == apple:  ${a == b}"!
+print "apple == banana: ${a == c}"!
+print ""!
+
+// Reversing a string with unary minus
+const word = "STRESSED"!
+const rev = -word!
+print "STRESSED reversed = ${rev}"!
+print ""!
+
+// Building strings recursively
+function repeat(s, n) => {
+   if n <= 0 {
+      return ""!
+   }
+   const prev = n - 1!
+   const rest = repeat(s, prev)!
+   return s + rest!
+}!
+
+const hashes = repeat("#", 10)!
+print "Hashes: ${hashes}"!
+const dots = repeat(".", 5)!
+print "Dots:   ${dots}"!

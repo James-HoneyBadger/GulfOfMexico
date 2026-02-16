@@ -1,0 +1,40 @@
+// Maps: key-value data structures.
+
+print "=== MAPS ==="!
+print ""!
+
+// Create a map
+var scores = Map()!
+
+// Set values with bracket notation
+scores["Alice"] = 95!
+scores["Bob"] = 87!
+scores["Carol"] = 92!
+
+// Read values using variable keys (no nested quotes in interpolation)
+const alice = scores["Alice"]!
+const bob = scores["Bob"]!
+const carol = scores["Carol"]!
+print "Alice: ${alice}"!
+print "Bob:   ${bob}"!
+print "Carol: ${carol}"!
+print ""!
+
+// Numeric keys work too
+var lookup = Map()!
+lookup[1] = "one"!
+lookup[2] = "two"!
+lookup[3] = "three"!
+
+const v1 = lookup[1]!
+const v2 = lookup[2]!
+const v3 = lookup[3]!
+print "lookup[1] = ${v1}"!
+print "lookup[2] = ${v2}"!
+print "lookup[3] = ${v3}"!
+print ""!
+
+// Update a value
+scores["Bob"] = 91!
+const newBob = scores["Bob"]!
+print "Bob updated score: ${newBob}"!

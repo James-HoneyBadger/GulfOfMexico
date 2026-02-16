@@ -1,73 +1,62 @@
 # Changelog
 
-All notable changes to this project will be documented in this file.
+## 2026-02-15 (v0.2.0)
 
-The format is simple date-based entries. Dates use ISO-8601 (YYYY-MM-DD).
+### Major refactor and spec compliance
+
+- **Architecture**: Split monolithic `interpreter.py` into 11 focused modules in `gulfofmexico/interpreter/` package: context, helpers, operators, namespaces, persistence, expressions, variables, watchers, dispatch, execution
+- **Spec compliance**: Comprehensive 94-rule audit with 11 bugs found and fixed
+- **Codebase cleanup**: Removed ~12,500 lines of non-spec features (handler dispatch, plugin system, profiling, benchmarking, engine, handlers_impl, language_config, watcher_manager, etc.)
+- **Documentation**: Complete rewrite of all documentation to match current codebase
+
+### Bug fixes
+
+- **-1 based indexing**: Implemented across lists, numbers, and strings per spec (index -1 = first element)
+- **Operator chars in strings**: Fixed crash when string literals contain operator characters (`+`, `-`, `*`, etc.)
+- **Type annotations**: Fixed crash from wrong function signature in type annotation checker
+- **When statement**: Fixed condition evaluation to use current variable values instead of stale copies from registration time
+- **Next promise**: Fixed watcher key mismatch and added actual promise value resolution
+- **use() signal**: Fixed getter mode to support variadic calling (0 args = get, 1 arg = set)
+- **Math functions**: Added 17 built-in math functions (abs, floor, ceil, round, sqrt, sin, cos, tan, log, exp, degrees, radians, pow, min, max, random, randomInt)
+- **Reverse statement**: Added parser support for standalone `reverse!` (no variable name)
+- **If-block return propagation**: Created ReturnSentinel pattern to distinguish explicit returns from implicit expression results, preventing top-level if blocks from killing subsequent execution
+
+### Examples
+
+- 21 example programs created and verified passing
+- 5 examples updated for -1 based indexing
+- Spec compliance test expanded with regression tests for all fixed bugs
+
+## 2025-12-03 (v0.1.6)
+
+### Normalization and bugfixes
+
+- Normalized example files to canonical no-paren calling style
+- Fixed zero-argument dotted method invocations
 
 ## 2025-11-18 (v0.1.5)
 
 ### Documentation standardization
-- Unified look and feel across all documentation files
-- Standardized titles to "Gulf of Mexico — <Topic>" format
-- Added concise one-line introductions to all docs
-- Created comprehensive docs style guide in DOCUMENTATION.md
-- Added table of contents to DOCUMENTATION.md for easier navigation
-- Normalized headings, links, and formatting across 20+ documentation files
-- Updated LICENSE to MIT License with Honey Badger Universe copyright
-- Reformatted CODE_OF_CONDUCT.md with clear headings and professional tone
-- Added "Community & Policies" section to README and DOCUMENTATION
-- Created docs/guides/README.md index for user guides
-- Fixed example paths to use programs/examples/ and programs/demos/
-- Updated .markdownlint.json to align with new documentation style
-- Comprehensive updates to:
-  - All reference docs (TECHNICAL_REFERENCE, FEATURE_PARITY, BUILTIN_FUNCTIONS, etc.)
-  - All guide docs (INSTALL_GUIDE, USER_GUIDE, PROGRAMMING_GUIDE)
-  - All compiler docs (README, EXPERIMENTAL_STATUS, CONSOLIDATION_*)
-  - Central docs (README, DOCUMENTATION, CODE_OF_CONDUCT, configs/README)
+
+- Unified look and feel across documentation files
+- Updated LICENSE to MIT License
 
 ## 2025-11-17 (v0.1.4)
 
 ### Release pipeline hardening
-- Workflow now checks out the exact tag and supports manual dispatch (workflow_dispatch)
-- Re-run friendly: you can manually run release for a given tag in Actions
-- Improves reliability for GitHub Release creation and PyPI publish
+
+- Workflow now checks out the exact tag and supports manual dispatch
 
 ## 2025-11-17 (v0.1.3)
 
-### PyPI Publication
-- First official release to PyPI (https://pypi.org/project/gulfofmexico/)
-- Automated GitHub Release + PyPI publish via GitHub Actions
-- Package installable via `pip install gulfofmexico`
+### PyPI publication
+
+- First official release to PyPI (`pip install gulfofmexico`)
 
 ## 2025-11-17 (v0.1.2)
 
 ### First GitHub Release automation
-- Added GitHub Actions workflow to build wheels/sdist on version tags and create a GitHub Release with attached artifacts
-- Release body sourced from `CHANGELOG.md`
-- Optional PyPI publish via `pypa/gh-action-pypi-publish` using `PYPI_API_TOKEN` secret
+
+- Added GitHub Actions workflow for builds and releases
 - Console scripts wired: `gulfofmexico`, `gom`, `gom-ide`, `gomconfig`
-### Repository cleanup and docs alignment
-- Removed internal GOM test programs used for designing/debugging the language:
-  - Deleted `programs/tests/` and `programs/06_compiler_tests/`
-  - Removed stray root-level scratch files: `drawing_test.gom`, `gradient_test.gom`, `simple_graphics_test.gom`, `mandelbrot_art.gom`, `mandelbrot_final.gom`
-  - Removed misplaced `executables/mandelbrot.gom`
-- Updated runnable scripts:
-  - `validate_all_programs.sh` no longer scans internal test directories
-  - `organize_and_validate.sh` no longer creates/copies compiler test programs
-- Updated active documentation to reflect user-facing program layout:
-  - `README.md`, `DOCUMENTATION.md`, `docs/guides/PROGRAMMING_GUIDE.md`
-  - `docs/reference/TECHNICAL_REFERENCE.md`, `SPEC_PARITY_STATUS.md`, `ASYNC_SCHEDULER_STATUS.md`
-- Marked historical documents as archived (pre-cleanup structure):
-  - Banners added to files under `docs/archive/` and `README_OLD.md`
-- Clarified current user-facing directories:
-  - `programs/examples/`, `programs/demos/` for examples
-  - `compiler/examples/` for compiler-specific samples
-  - Python unit tests live in `tests/`
-
-## 2025-12-03 (v0.1.6)
-
-### No-paren normalization sweep & bugfixes
-- Normalized many example and program source files to the canonical "no-paren" calling style.
-- Fixed a subtle but important edge case: dotted zero-argument method invocations like `obj.method !` return the method object and do not invoke it; such occurrences were converted to `obj.method()!` to execute the method body.
-- Added a detection script and tests to prevent future regressions: `scripts/check_zeroarg_calls.py`, `tests/test_no_zeroarg_dotted_calls.py`.
-- Added a CI step and pre-commit hooks to detect (and optionally fix) zero-argument dotted method occurrences.
+- Repository cleanup

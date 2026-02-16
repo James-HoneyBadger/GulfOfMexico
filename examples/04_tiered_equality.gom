@@ -1,0 +1,46 @@
+// Gulf of Mexico has FOUR levels of equality comparison.
+
+print "=== TIERED EQUALITY ==="!
+print ""!
+
+// = (single equals in expression) is APPROXIMATE equality
+// Numbers: within 10% of each other
+// Strings: 70% similar (fuzzy match)
+const x = 100!
+const y = 105!
+const approx = x = y!
+print "100 = 105 (approx, within 10%): ${approx}"!
+
+const s1 = "hello"!
+const s2 = "hallo"!
+const fuzzy = s1 = s2!
+print "\"hello\" = \"hallo\" (fuzzy): ${fuzzy}"!
+print ""!
+
+// == is standard equality (exact values)
+const eq1 = 100 == 100!
+const eq2 = 100 == 105!
+print "100 == 100 (exact): ${eq1}"!
+print "100 == 105 (exact): ${eq2}"!
+print ""!
+
+// === is reference equality for mutables
+var list1 = [1, 2, 3]!
+var list2 = [1, 2, 3]!
+var list3 = list1!
+const ref1 = list1 === list2!
+const ref2 = list1 === list3!
+print "[1,2,3] === [1,2,3] (different refs): ${ref1}"!
+print "list1 === list3 (same ref): ${ref2}"!
+print ""!
+
+// ==== is Python `is` identity
+const id1 = 42 ==== 42!
+print "42 ==== 42 (identity): ${id1}"!
+print ""!
+
+// Negated forms: ;= ;== ;===
+const ne1 = 10 ;= 20!
+const ne2 = list1 ;== list2!
+print "10 ;= 20: ${ne1}"!
+print "list1 ;== list2: ${ne2}"!

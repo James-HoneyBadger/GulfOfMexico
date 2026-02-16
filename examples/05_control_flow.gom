@@ -1,0 +1,65 @@
+// Control flow: if blocks and recursion (no loops!).
+// In GOM, if blocks propagate return values at top level,
+// so we use functions to encapsulate branching logic.
+
+print "=== CONDITIONALS ==="!
+print ""!
+
+function describeTemp(t) => {
+   if t > 30 {
+      return "hot"!
+   }
+   if t > 15 {
+      return "pleasant"!
+   }
+   return "cold"!
+}!
+
+const temp = 22!
+const desc = describeTemp(temp)!
+print "Temperature: ${temp}C -> ${desc}"!
+
+function classify(n) => {
+   if n > 0 {
+      return "positive"!
+   }
+   if n < 0 {
+      return "negative"!
+   }
+   return "zero"!
+}!
+
+print "classify(7)  = ${classify(7)}"!
+print "classify(-3) = ${classify(-3)}"!
+print "classify(0)  = ${classify(0)}"!
+print ""!
+
+// Recursion is the only way to loop in GOM.
+// Note: expressions in function call args must use temp variables.
+print "=== RECURSION ==="!
+print ""!
+
+function countdown(n) => {
+   if n > 0 {
+      print "  ${n}..."!
+      const next = n - 1!
+      countdown(next)!
+   }
+}!
+
+countdown(5)!
+print "  Liftoff!"!
+print ""!
+
+// Recursive sum
+function sumTo(n) => {
+   if n <= 0 {
+      return 0!
+   }
+   const prev = n - 1!
+   const rest = sumTo(prev)!
+   return n + rest!
+}!
+
+const total = sumTo(10)!
+print "Sum of 1..10 = ${total}"!

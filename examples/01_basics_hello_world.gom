@@ -1,7 +1,0 @@
-// ============================================================================
-// CATEGORY: 01 - BASICS
-// EXAMPLE: 01_hello_world.gom
-// PURPOSE: Simple hello world program demonstrating basic print
-// ============================================================================
-
-print "Hello, Gulf of Mexico!"!

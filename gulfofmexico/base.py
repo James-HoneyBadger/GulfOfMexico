@@ -27,11 +27,26 @@ Color Codes:
 
 from __future__ import annotations
 
+import unicodedata
 from dataclasses import dataclass, field
 from enum import Enum
 from typing import NoReturn, Optional
 
-ALPH_NUMS = set("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789_.")
+# ASCII fast-path set for performance
+_ASCII_ALPH_NUMS = set("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789_.")
+
+
+def is_alph_num(c: str) -> bool:
+    """Check if a character is valid in a name (supports Unicode letters/digits per spec)."""
+    if c in _ASCII_ALPH_NUMS:
+        return True
+    cat = unicodedata.category(c)
+    # L* = letters, N* = numbers, Pc = connector punctuation (e.g. _)
+    return cat[0] in ("L", "N") or cat == "Pc"
+
+
+# Keep ALPH_NUMS as alias for backward compatibility in imports
+ALPH_NUMS = _ASCII_ALPH_NUMS
 
 
 class NonFormattedError(Exception):
@@ -53,7 +68,7 @@ def debug_print(filename: str, code: str, message: str, token: Token) -> None:
     Used by ? and ?? debug modifiers.
     """
     if not code:  # adjust for repl-called code
-        print(f"\n\033[33m{message}\033[39\n", sep="")
+        print(f"\n\033[33m{message}\033[39m\n", sep="")
         return
     line = token.line
     num_carrots, num_spaces = len(token.value), token.col - len(token.value) + 1

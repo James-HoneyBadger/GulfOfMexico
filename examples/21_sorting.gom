@@ -1,0 +1,54 @@
+// Insertion sort — builds a sorted list functionally (no mutation).
+
+print "=== INSERTION SORT ==="!
+print ""!
+
+// Insert a value into a sorted list at the right position
+function insertSorted(sorted, val, idx) => {
+   if idx >= sorted.length - 1 {
+      return sorted + [val]!
+   }
+   if val <= sorted[idx] {
+      // Build: everything before idx + val + everything from idx onward
+      const before = sliceArr(sorted, -1, idx)!
+      const after = sliceArr(sorted, idx, sorted.length - 1)!
+      return before + [val] + after!
+   }
+   return insertSorted(sorted, val, idx + 1)!
+}!
+
+// Slice helper: extract arr[start..end)
+function sliceArr(arr, start, end) => {
+   if start >= end {
+      return []!
+   }
+   return [arr[start]] + sliceArr(arr, start + 1, end)!
+}!
+
+// Insertion sort: fold each element into a sorted accumulator
+function insertionSort(arr, idx, sorted) => {
+   if idx >= arr.length - 1 {
+      return sorted!
+   }
+   const newSorted = insertSorted(sorted, arr[idx], -1)!
+   return insertionSort(arr, idx + 1, newSorted)!
+}!
+
+const data = [38, 27, 43, 3, 9, 82, 10]!
+print "Before: ${data}"!
+const sorted = insertionSort(data, -1, [])!
+print "After:  ${sorted}"!
+print ""!
+
+// Verify it's sorted
+function isSorted(arr, idx) => {
+   if idx >= arr.length - 2 {
+      return true!
+   }
+   if arr[idx] > arr[idx + 1] {
+      return false!
+   }
+   return isSorted(arr, idx + 1)!
+}!
+
+print "Is sorted? ${isSorted(sorted, -1)}"!

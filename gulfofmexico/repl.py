@@ -21,7 +21,16 @@ from pathlib import Path
 from typing import Optional, Union
 
 import gulfofmexico.builtin as builtin
-import gulfofmexico.interpreter as interpreter
+from gulfofmexico.interpreter import (
+    InterpreterContext,
+    interpret_code_statements_main_wrapper,
+)
+from gulfofmexico.interpreter.context import AsyncStatements, WhenStatementWatchers
+from gulfofmexico.interpreter.persistence import (
+    load_global_gulfofmexico_variables,
+    load_globals,
+    load_public_global_variables,
+)
 from gulfofmexico.base import InterpretationError
 from gulfofmexico.builtin import (
     KEYWORDS,
@@ -43,38 +52,32 @@ class GomRepl:
 
     def __init__(self) -> None:
         # Shared state across inputs
-        # Namespaces: first element is a copy of keyword namespace
         self.namespaces: list[dict[str, Union[Variable, Name]]] = [
             KEYWORDS.copy()  # type: ignore
         ]
-        # When/after support with proper types from interpreter
-        self.async_statements: interpreter.AsyncStatements = []
-        self.when_statement_watchers: interpreter.WhenStatementWatchers = [{}]
-        # Export/import map across pseudo-files
+        self.async_statements: AsyncStatements = []
+        self.when_statement_watchers: WhenStatementWatchers = [{}]
         self.importable_names: dict[str, dict[str, GulfOfMexicoValue]] = {}
-        # History of successfully executed code blocks
         self.history: list[str] = []
-        # Optional prefilled buffer to seed the next input block
         self.prefill_lines: list[str] = []
 
-        # Basic interpreter environment setup
+        # Interpreter context for the REPL session
+        self.ctx = InterpreterContext(filename=REPL_FILENAME, code="")
+
         sys.setrecursionlimit(100000)
 
         # Load global, public, and runtime globals into namespaces
-        # We use an empty code block for initialization
-        interpreter.filename = REPL_FILENAME
-        interpreter.code = ""
         exported_names: list[tuple[str, str, GulfOfMexicoValue]] = []
-        interpreter.load_globals(
-            interpreter.filename,
-            interpreter.code,
+        load_globals(
+            REPL_FILENAME,
+            "",
             {},
             set(),
             exported_names,
-            self.importable_names.get(interpreter.filename, {}),
+            self.importable_names.get(REPL_FILENAME, {}),
         )
-        interpreter.load_global_gulfofmexico_variables(self.namespaces)
-        interpreter.load_public_global_variables(self.namespaces)
+        load_global_gulfofmexico_variables(self.namespaces)
+        load_public_global_variables(self.namespaces)
 
     def banner(self) -> str:
         return "Gulf of Mexico REPL (production interpreter)\n" "Type :help for commands, :quit to exit."
@@ -109,11 +112,9 @@ class GomRepl:
 
             # Try parsing to determine completeness
             try:
-                interpreter.filename = REPL_FILENAME
-                interpreter.code = candidate
-                tokens = tokenize(interpreter.filename, candidate)
+                tokens = tokenize(REPL_FILENAME, candidate)
                 _ = generate_syntax_tree(
-                    interpreter.filename,
+                    REPL_FILENAME,
                     tokens,
                     candidate,
                 )
@@ -201,20 +202,19 @@ class GomRepl:
             fname = section_name or "__unnamed_file__"
             exported_names: list[tuple[str, str, GulfOfMexicoValue]] = []
 
-            # Prepare interpreter module state for this section
-            interpreter.filename = fname
-            interpreter.code = section_code
+            ctx = InterpreterContext(filename=fname, code=section_code)
 
             try:
                 tokens = tokenize(fname, section_code)
                 statements = generate_syntax_tree(fname, tokens, section_code)
-                interpreter.interpret_code_statements_main_wrapper(
+                interpret_code_statements_main_wrapper(
                     statements,
                     self.namespaces,
                     self.async_statements,
                     self.when_statement_watchers,
                     self.importable_names,
                     exported_names,
+                    ctx,
                 )
             except InterpretationError as e:
                 print(f"\x1b[31m{e}\x1b[0m")
@@ -373,22 +373,21 @@ class GomRepl:
         fname = filename or REPL_FILENAME
         exported_names: list[tuple[str, str, GulfOfMexicoValue]] = []
 
-        # Prepare interpreter module state
-        interpreter.filename = fname
-        interpreter.code = code
+        ctx = InterpreterContext(filename=fname, code=code)
 
         tokens = tokenize(fname, code)
         statements = generate_syntax_tree(fname, tokens, code)
 
         # Execute
         try:
-            result = interpreter.interpret_code_statements_main_wrapper(
+            result = interpret_code_statements_main_wrapper(
                 statements,
-                self.namespaces,  # preserve across inputs
+                self.namespaces,
                 self.async_statements,
                 self.when_statement_watchers,
                 self.importable_names,
                 exported_names,
+                ctx,
             )
         except InterpretationError as e:
             # Flush any buffered debug logs to assist troubleshooting

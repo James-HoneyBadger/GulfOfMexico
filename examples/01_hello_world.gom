@@ -1,0 +1,11 @@
+// The classic first program in Gulf of Mexico.
+// Statements end with ! instead of semicolons.
+
+print "Hello, World!"!
+print "Welcome to the Gulf of Mexico programming language."!
+print ""!
+
+// Multiple ! marks indicate confidence level (1–3)
+print "I am fairly sure this prints."!
+print "I am VERY sure this prints."!!
+print "I am ABSOLUTELY sure this prints."!!!

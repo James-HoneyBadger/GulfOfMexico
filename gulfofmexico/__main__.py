@@ -54,7 +54,15 @@ def _run_inline(code: str, show_tb: bool) -> int:
     """
     from typing import Union  # pylint: disable=import-outside-toplevel
 
-    import gulfofmexico.interpreter as interpreter  # pylint: disable=import-outside-toplevel
+    from gulfofmexico.interpreter import (  # pylint: disable=import-outside-toplevel
+        InterpreterContext,
+        interpret_code_statements_main_wrapper,
+    )
+    from gulfofmexico.interpreter.persistence import (  # pylint: disable=import-outside-toplevel
+        load_global_gulfofmexico_variables,
+        load_globals,
+        load_public_global_variables,
+    )
     from gulfofmexico.builtin import (  # pylint: disable=import-outside-toplevel
         KEYWORDS,
         GulfOfMexicoValue,
@@ -68,8 +76,7 @@ def _run_inline(code: str, show_tb: bool) -> int:
 
     try:
         filename = "__inline__"
-        interpreter.filename = filename
-        interpreter.code = code
+        ctx = InterpreterContext(filename=filename, code=code)
 
         tokens = tokenize(filename, code)
         statements = generate_syntax_tree(filename, tokens, code)
@@ -80,7 +87,7 @@ def _run_inline(code: str, show_tb: bool) -> int:
         exported_names: list[tuple[str, str, GulfOfMexicoValue]] = []
         importable_names: dict[str, dict[str, GulfOfMexicoValue]] = {}
 
-        interpreter.load_globals(
+        load_globals(
             filename,
             code,
             {},
@@ -88,16 +95,17 @@ def _run_inline(code: str, show_tb: bool) -> int:
             exported_names,
             importable_names.get(filename, {}),
         )
-        interpreter.load_global_gulfofmexico_variables(namespaces)
-        interpreter.load_public_global_variables(namespaces)
+        load_global_gulfofmexico_variables(namespaces)
+        load_public_global_variables(namespaces)
 
-        interpreter.interpret_code_statements_main_wrapper(
+        interpret_code_statements_main_wrapper(
             statements,
             namespaces,
             [],
             [{}],
             importable_names,
             exported_names,
+            ctx,
         )
         return 0
     except Exception:  # pylint: disable=broad-exception-caught
