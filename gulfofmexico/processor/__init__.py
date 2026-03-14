@@ -11,8 +11,10 @@ Modules:
 
 from .lexer import tokenize
 from .syntax_tree import generate_syntax_tree
+from .expression_tree import build_expression_tree
 
 __all__ = [
     "tokenize",
     "generate_syntax_tree",
+    "build_expression_tree",
 ]

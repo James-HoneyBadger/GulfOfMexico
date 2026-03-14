@@ -1,0 +1,20 @@
+// ╔═══════════════════════════════════════════════════════════════╗
+// ║  11 — Maps: Key-Value Storage                                ║
+// ╚═══════════════════════════════════════════════════════════════╝
+//
+// Maps are created with Map() and accessed via bracket notation.
+
+// ── Creating and populating a map ───────────────────────────────
+var var scores = Map()!
+scores["alice"] = 95!
+scores["bob"] = 87!
+scores["carol"] = 92!
+
+// ── Reading values ──────────────────────────────────────────────
+print scores["alice"]!
+print scores["bob"]!
+print scores["carol"]!
+
+// ── Updating values ─────────────────────────────────────────────
+scores["bob"] = 91!
+print scores["bob"]!

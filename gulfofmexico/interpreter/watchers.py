@@ -135,10 +135,7 @@ def register_when_statement(
         captured_ns = deepcopy(namespaces)
         when_statement_watchers[-1][name].append((built_condition, statements_inside_scope, captured_ns))
 
-    try:
-        condition_value = evaluate_expression(built_condition, namespaces, async_statements, when_statement_watchers, ctx)
-    except Exception:  # type: ignore  # noqa: BLE001
-        raise
+    condition_value = evaluate_expression(built_condition, namespaces, async_statements, when_statement_watchers, ctx)
 
     execute_conditional(
         condition_value, statements_inside_scope, namespaces,

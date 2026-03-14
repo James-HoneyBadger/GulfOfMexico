@@ -260,7 +260,7 @@ def build_expression_tree(filename: str, tokens: list[Token], code: str) -> Expr
 
     # detecting single argument function
     # this doesn't seem to adhere to my standards 100%, so its not a bug, its a feature
-    starts_with_operator = int(tokens_without_whitespace[0].type in {TokenType.SEMICOLON, TokenType.SUBTRACT})
+    starts_with_operator = int(tokens_without_whitespace[0].type in {TokenType.SEMICOLON, TokenType.SUBTRACT, TokenType.INCREMENT, TokenType.DECREMENT})
     first_name_index = int(starts_with_whitespace) + int(starts_with_operator)
     if (
         len(tokens) >= 3 + first_name_index
@@ -273,6 +273,8 @@ def build_expression_tree(filename: str, tokens: list[Token], code: str) -> Expr
             TokenType.STRING,
             TokenType.SUBTRACT,
             TokenType.SEMICOLON,
+            TokenType.INCREMENT,
+            TokenType.DECREMENT,
         ]
         and len(tokens[first_name_index + 1].value) > max_width
     ):

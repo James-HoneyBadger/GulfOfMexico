@@ -1,101 +1,67 @@
 # Gulf of Mexico — Example Programs
 
-21 programs demonstrating every language feature, from basic output to sorting algorithms.
+A comprehensive demo suite covering every feature of the GOM language. Each program runs independently and exits cleanly.
 
----
-
-## Running Examples
-
+Run any example:
 ```bash
-# Run a single example
-gom examples/01_hello_world.gom
-
-# Run all examples sequentially
-for f in examples/*.gom; do
-  echo "=== $(basename "$f") ==="
-  gom "$f"
-  echo
-done
+python -m gulfofmexico examples/01_hello_world.gom
 ```
 
-All examples are also run automatically by the test suite (`python -m pytest`).
+## Programs
 
----
+| # | File | Features Covered |
+|---|------|-----------------|
+| 01 | `01_hello_world.gom` | `print`, statement terminators (`!`, `!!`, `!!!`) |
+| 02 | `02_variables.gom` | `const`, `var`, reassignment, `previous`, type annotations |
+| 03 | `03_types.gom` | Numbers, strings, booleans, lists, `undefined`, type conversion |
+| 04 | `04_operators.gom` | Arithmetic, significant whitespace precedence, unary minus, `++`/`--` |
+| 05 | `05_tiered_equality.gom` | `=`/`==`/`===`/`====`, `;=` (inequality), `~=`/`~==`/`~===` (AEMI/ABI/AQMI) |
+| 06 | `06_comparison_and_logic.gom` | `>`/`<`/`>=`/`<=`, `&` (AND), `\|` (OR), `;` (NOT), three-valued logic |
+| 07 | `07_control_flow.gom` | `if` blocks, recursion (no loops), sequential conditionals |
+| 08 | `08_functions.gom` | `function`/`fn`, space call syntax, higher-order, multiple returns |
+| 09 | `09_strings.gom` | String interpolation (`$`/`£`/`¥`), `.length`, reversal, indexing |
+| 10 | `10_lists.gom` | -1-based indexing, `.push()`/`.pop()`/`.length`, concatenation, reversal |
+| 11 | `11_maps.gom` | `Map()`, bracket notation, read/update |
+| 12 | `12_classes.gom` | `class`, `new`, single-instance rule, properties, methods |
+| 13 | `13_word_numbers.gom` | `zero`–`nineteen`, `twenty()`–`million()`, `half`/`third`/`quarter` |
+| 14 | `14_number_indexing.gom` | Digit indexing on numbers with -1-based indices |
+| 15 | `15_lifetimes.gom` | `<N>` variable lifetimes, `<-N>` negative lifetime hoisting |
+| 16 | `16_delete_and_confidence.gom` | `delete`, confidence overloading (`!`/`!!`/`!!!`), `?` debug |
+| 17 | `17_compound_assignment.gom` | `+=`, `-=`, `*=`, `/=`, `^=` |
+| 18 | `18_emoji_identifiers.gom` | Emoji variable names, emoji function names |
+| 19 | `19_reactive.gom` | `when` watchers, `reverse`, `use` signals |
+| 20 | `20_math_builtins.gom` | `abs`, `floor`, `ceil`, `round`, `sqrt`, `sin`/`cos`/`tan`, `log`, `exp`, `pow`, `min`/`max`, `degrees`/`radians` |
+| 21 | `21_negative_indentation.gom` | Cosmetic leading `}` (DreamBerd spec) |
+| 22 | `22_async_and_redefinition.gom` | `async` functions, number literal redefinition |
+| 23 | `23_algorithms.gom` | Fibonacci, recursive power, list sum, GCD |
+| 24 | `24_comments.gom` | `//` single-line, `/* */` block comments |
+| 25 | `25_regex.gom` | `regex_match`, `regex_findall`, `regex_replace` |
+| 26 | `26_noop_and_misc.gom` | `noop`, empty value `()`, string multiply, boolean conversion |
 
-## Program Index
+## Feature Coverage
 
-### Fundamentals
-
-These examples cover the core syntax and basic concepts needed to write GOM programs.
-
-| # | File | Concepts Demonstrated |
-|---|------|----------------------|
-| 01 | [01_hello_world.gom](01_hello_world.gom) | `print` statements, `!` / `!!` / `!!!` confidence levels, `?` debug terminator |
-| 02 | [02_variables_and_types.gom](02_variables_and_types.gom) | `const` / `var` declarations, booleans, `undefined`, type conversions with `String()`, `Number()`, `Boolean()` |
-| 03 | [03_operators.gom](03_operators.gom) | Arithmetic (`+`, `-`, `*`, `/`, `^`), comparison (`>`, `<`), logical (`&&`, `||`, `;`), string operations, **significant whitespace** binding |
-| 04 | [04_tiered_equality.gom](04_tiered_equality.gom) | Four equality levels: `=` (approximate), `==` (exact), `===` (type-strict), `====` (reference identity) |
-| 05 | [05_control_flow.gom](05_control_flow.gom) | `if` blocks, recursion as the only loop mechanism, function-based branching |
-
-### Functions and Data Structures
-
-These examples explore function definitions, calling conventions, and data types.
-
-| # | File | Concepts Demonstrated |
-|---|------|----------------------|
-| 06 | [06_functions.gom](06_functions.gom) | `function` / `fn` / `func` / `f` definition, space vs parenthesized calling, higher-order functions, recursion |
-| 07 | [07_lists.gom](07_lists.gom) | List creation, **-1-based indexing**, `push` / `pop`, `length`, list concatenation (`+`), list reversal (`-`), recursive list algorithms |
-| 08 | [08_strings.gom](08_strings.gom) | String interpolation (`${}`, `£{}`, `¥{}`), escape sequences (`\n`, `\t`, etc.), `length`, string reversal, character indexing |
-| 09 | [09_three_valued_logic.gom](09_three_valued_logic.gom) | `true`, `false`, `maybe`; probabilistic execution; AND/OR/NOT truth tables; `;` (semicolon NOT) |
-| 10 | [10_classes.gom](10_classes.gom) | Class declaration, `new` instantiation, single-instance-per-class rule, dot-access properties, methods |
-
-### Advanced Features
-
-These examples cover GOM's more unusual language features.
-
-| # | File | Concepts Demonstrated |
-|---|------|----------------------|
-| 11 | [11_word_numbers.gom](11_word_numbers.gom) | `zero`–`nineteen` literals, `twenty(n)`–`ninety(n)` functions, `hundred(n)`, `thousand(n)`, `million(n)`, named fractions (`half`, `quarter`, `third`) |
-| 12 | [12_delete.gom](12_delete.gom) | `delete` keyword — removing variables, values, and even built-in language keywords from scope |
-| 13 | [13_maps.gom](13_maps.gom) | `Map()` creation, bracket-notation set/get, iteration patterns |
-| 14 | [14_algorithms.gom](14_algorithms.gom) | Factorial, Fibonacci, array searching — all implemented via recursion (no loops) |
-| 15 | [15_debug_and_confidence.gom](15_debug_and_confidence.gom) | `?` debug terminator output, `!` / `!!` / `!!!` confidence levels, `noop` statement |
-
-### Specialized Features
-
-These examples demonstrate features unique to Gulf of Mexico.
-
-| # | File | Concepts Demonstrated |
-|---|------|----------------------|
-| 16 | [16_lifetimes.gom](16_lifetimes.gom) | `var x <N> = val!` — variables that automatically expire after N statements |
-| 17 | [17_multiple_returns.gom](17_multiple_returns.gom) | Returning lists as multiple return values, destructuring at the call site |
-| 18 | [18_number_indexing.gom](18_number_indexing.gom) | Indexing individual digits of numbers using -1-based indexing |
-| 19 | [19_string_interpolation_currencies.gom](19_string_interpolation_currencies.gom) | All currency interpolation prefixes: `${}`, `£{}`, `¥{}` |
-
-### Applications
-
-These examples combine multiple features into more complete programs.
-
-| # | File | Concepts Demonstrated |
-|---|------|----------------------|
-| 20 | [20_bank_simulation.gom](20_bank_simulation.gom) | Full banking application: classes, methods, control flow, string interpolation, state management |
-| 21 | [21_sorting.gom](21_sorting.gom) | Insertion sort — functional style with no mutation, recursive list building |
-
----
-
-## Key Language Rules by Example
-
-| Concept | Best Example | Quick Explanation |
-|---------|-------------|-------------------|
-| -1-based indexing | [07](07_lists.gom), [18](18_number_indexing.gom) | `arr[-1]` is the first element |
-| Significant whitespace | [03](03_operators.gom) | `2 * 1+3` ≠ `2*1 + 3` |
-| Three-valued booleans | [09](09_three_valued_logic.gom) | `maybe` is true ~50% of the time |
-| Tiered equality | [04](04_tiered_equality.gom) | `=` ≠ `==` ≠ `===` ≠ `====` |
-| No loops | [05](05_control_flow.gom), [14](14_algorithms.gom) | All iteration via recursion |
-| Single-instance classes | [10](10_classes.gom) | One object per class at a time |
-| Variable lifetimes | [16](16_lifetimes.gom) | Variables can auto-expire |
-| Word numbers | [11](11_word_numbers.gom) | `five` = 5, `hundred(3)` = 300 |
-| Currency interpolation | [19](19_string_interpolation_currencies.gom) | `${}`, `£{}`, `¥{}` in strings |
-
----
-
-*For the complete language specification, see [docs/LANGUAGE_REFERENCE.md](../docs/LANGUAGE_REFERENCE.md).*
+These 26 programs collectively demonstrate:
+- All 4 statement terminators
+- All 8 data types
+- All arithmetic, comparison, and logical operators
+- Tiered equality (4 levels + 3 tilde variants)
+- Significant whitespace operator precedence
+- Three-valued boolean logic
+- -1-based indexing (lists, strings, numbers)
+- Variable lifetimes and negative lifetime hoisting
+- Variable confidence overloading
+- Compound assignment operators
+- Emoji identifiers
+- Negative indentation
+- Async functions and number redefinition
+- Recursive algorithms (no loops)
+- Classes with single-instance rule
+- Reactive primitives (when, reverse, use)
+- Word numbers and named fractions
+- String interpolation with 3 currency symbols
+- 17 math built-in functions
+- Regular expressions
+- Comments (single-line and block)
+- Type conversions
+- Delete
+- Noop and empty value

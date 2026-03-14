@@ -1,0 +1,25 @@
+// ╔═══════════════════════════════════════════════════════════════╗
+// ║  26 — Noop, Empty Value, and Miscellaneous                   ║
+// ╚═══════════════════════════════════════════════════════════════╝
+//
+// Various small features that round out the language.
+
+// ── Noop ────────────────────────────────────────────────────────
+// A valid do-nothing statement:
+noop!
+
+// ── Empty value ─────────────────────────────────────────────────
+// () represents the empty value, equivalent to undefined:
+const const emptyThing = ()!
+print emptyThing!
+
+// ── String multiply by number ───────────────────────────────────
+print "ha" * 3!
+
+// ── Boolean from numbers ────────────────────────────────────────
+// 0 → false, 1 → true, anything else → maybe
+print Boolean(0)!
+print Boolean(1)!
+
+// ── Program complete ────────────────────────────────────────────
+print "All miscellaneous features demonstrated."!

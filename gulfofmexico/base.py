@@ -37,12 +37,13 @@ _ASCII_ALPH_NUMS = set("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123
 
 
 def is_alph_num(c: str) -> bool:
-    """Check if a character is valid in a name (supports Unicode letters/digits per spec)."""
+    """Check if a character is valid in a name (supports Unicode letters/digits/emoji per spec)."""
     if c in _ASCII_ALPH_NUMS:
         return True
     cat = unicodedata.category(c)
-    # L* = letters, N* = numbers, Pc = connector punctuation (e.g. _)
-    return cat[0] in ("L", "N") or cat == "Pc"
+    # L* = letters, N* = numbers, Pc = connector punctuation (e.g. _),
+    # So = Symbol other (emoji) per DreamBerd spec
+    return cat[0] in ("L", "N") or cat in ("Pc", "So")
 
 
 # Keep ALPH_NUMS as alias for backward compatibility in imports
@@ -139,6 +140,7 @@ class TokenType(Enum):
     NOT_EQUAL = ";="  # !@# !@# !@#
     PIPE = "|"
     AND = "&"
+    COMPOUND_ASSIGN = "compound_assign"  # +=, -=, *=, /=, ^=
 
     WHITESPACE = "       "
     NAME = "abcaosdijawef"  # i'm losing my mind
@@ -173,6 +175,9 @@ class OperatorType(Enum):
     NE = ";="
     NEE = ";=="
     NEEE = ";==="
+    TE = "~="
+    TEE = "~=="
+    TEEE = "~==="
 
 
 STR_TO_OPERATOR = {op.value: op for op in OperatorType}

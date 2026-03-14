@@ -1,0 +1,61 @@
+// ╔═══════════════════════════════════════════════════════════════╗
+// ║  08 — Functions: Definition, Calling, Higher-Order           ║
+// ╚═══════════════════════════════════════════════════════════════╝
+//
+// Functions use `function` (or `fn`, `func`, `f`) with => { body }.
+// Two call syntaxes:
+//   funcName(arg1, arg2)   — parenthesized (multi-arg)
+//   funcName "arg"         — space syntax (single-arg)
+//
+// Multi-arg calls must be stored in a variable before printing.
+
+// ── Basic function (multi-arg) ──────────────────────────────────
+function add(a, b) => {
+   return a + b!
+}!
+
+const r1 = add(3, 7)!
+print r1!
+
+// ── Shortened keywords ──────────────────────────────────────────
+// `fn`, `func`, and `f` are all aliases for `function`:
+fn double(n) => {
+   return n * 2!
+}!
+
+print double(5)!
+
+// ── Space call syntax ───────────────────────────────────────────
+// For single-argument functions, a single space means "call":
+function greet(name) => {
+   print "Hello, ${name}!"!
+}!
+
+greet "World"!
+greet "GOM"!
+
+// ── Functions returning values ──────────────────────────────────
+function square(n) => {
+   return n * n!
+}!
+
+const const result = square(8)!
+print result!
+
+// ── Higher-order functions ──────────────────────────────────────
+// Functions are first-class — pass them as arguments:
+function applyTwice(f, x) => {
+   const step1 = f(x)!
+   return f(step1)!
+}!
+
+const r2 = applyTwice(double, 3)!
+print r2!
+
+// ── Multiple return values (via lists) ──────────────────────────
+function swap(a, b) => {
+   return [b, a]!
+}!
+
+const const pair = swap(1, 2)!
+print pair!

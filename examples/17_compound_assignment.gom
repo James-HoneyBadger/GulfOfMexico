@@ -1,0 +1,34 @@
+// ╔═══════════════════════════════════════════════════════════════╗
+// ║  17 — Compound Assignment Operators (+=, -=, *=, /=, ^=)     ║
+// ╚═══════════════════════════════════════════════════════════════╝
+//
+// Shorthand operators for modifying mutable variables.
+
+var var x = 10!
+
+// ── Addition assignment ─────────────────────────────────────────
+x += 5!
+print x!
+
+// ── Subtraction assignment ──────────────────────────────────────
+x -= 3!
+print x!
+
+// ── Multiplication assignment ───────────────────────────────────
+x *= 2!
+print x!
+
+// ── Division assignment ─────────────────────────────────────────
+x /= 4!
+print x!
+
+// ── Exponentiation assignment ───────────────────────────────────
+var var base = 2!
+base ^= 3!
+print base!
+
+// ── Compound with expressions ───────────────────────────────────
+var var total = 100!
+var var bonus = 25!
+total += bonus!
+print total!

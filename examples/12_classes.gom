@@ -1,0 +1,38 @@
+// ╔═══════════════════════════════════════════════════════════════╗
+// ║  12 — Classes & Objects                                      ║
+// ╚═══════════════════════════════════════════════════════════════╝
+//
+// Classes define blueprints. Instances are created with `new`.
+// GOM enforces a SINGLE-INSTANCE RULE: only one instance of each
+// class can exist at a time. Delete the old one before creating
+// another.
+
+// ── Defining a class ────────────────────────────────────────────
+class Dog {
+   var name = "unnamed"!
+   var breed = "unknown"!
+
+   function bark() => {
+      print "${name} says WOOF!"!
+   }!
+
+   function describe() => {
+      print "${name} is a ${breed}."!
+   }!
+}!
+
+// ── Creating an instance ────────────────────────────────────────
+var rex = new Dog!
+rex.name = "Rex"!
+rex.breed = "German Shepherd"!
+rex.bark()!
+rex.describe()!
+
+// ── Single-instance rule ────────────────────────────────────────
+// Must delete current instance before creating another:
+delete rex!
+
+var fido = new Dog!
+fido.name = "Fido"!
+fido.breed = "Labrador"!
+fido.describe()!

@@ -122,9 +122,13 @@ def load_globals(
     _arg4: object,
     _exported_names: list[tuple[str, str, GulfOfMexicoValue]],
     _importable_names: dict[str, GulfOfMexicoValue],
+    namespaces: list[Namespace] | None = None,
 ) -> None:
     """Load global variables — called before interpretation begins.
 
-    Currently a no-op; global loading is handled separately via
-    ``load_global_gulfofmexico_variables`` and ``load_public_global_variables``.
+    Delegates to ``load_global_gulfofmexico_variables`` and
+    ``load_public_global_variables`` when *namespaces* is provided.
     """
+    if namespaces is not None:
+        load_global_gulfofmexico_variables(namespaces)
+        load_public_global_variables(namespaces)

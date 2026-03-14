@@ -1,0 +1,22 @@
+// ╔═══════════════════════════════════════════════════════════════╗
+// ║  18 — Emoji Identifiers                                      ║
+// ╚═══════════════════════════════════════════════════════════════╝
+//
+// GOM supports emoji characters in variable and function names.
+// Emojis can be standalone names or mixed with alphanumeric chars.
+
+// ── Standalone emoji variable ───────────────────────────────────
+const const 👍 = "thumbs up"!
+print 👍!
+
+// ── Mixed emoji + alpha ─────────────────────────────────────────
+var var 🎯score = 0!
+🎯score += 100!
+print 🎯score!
+
+// ── Emoji in functions ──────────────────────────────────────────
+function 🎉celebrate(msg) => {
+   print "🎉 ${msg} 🎉"!
+}!
+
+🎉celebrate("GOM supports emojis")!

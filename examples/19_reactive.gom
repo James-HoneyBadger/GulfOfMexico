@@ -1,0 +1,32 @@
+// ╔═══════════════════════════════════════════════════════════════╗
+// ║  19 — Reactive Features: When, Reverse, Signals              ║
+// ╚═══════════════════════════════════════════════════════════════╝
+//
+// GOM has built-in reactive primitives:
+//   - `when` watchers: fire when a condition becomes true
+//   - `reverse`: replay all prior statements in reverse
+//   - `use`: reactive signals with getter/setter
+
+// ── When watchers ───────────────────────────────────────────────
+// Register a watcher that fires when the condition is met:
+var var temperature = 20!
+
+when temperature > 30 {
+   print "It's getting hot!"!
+}
+
+// This assignment triggers the watcher:
+temperature = 35!
+
+// ── Reverse ─────────────────────────────────────────────────────
+// Replay prior statements in reverse order:
+print "A"!
+print "B"!
+print "C"!
+reverse!
+
+// ── Signals (use) ───────────────────────────────────────────────
+// Create a reactive signal with an initial value:
+const const sig = use 0!
+sig 42!
+print sig()!

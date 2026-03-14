@@ -1,0 +1,22 @@
+// ╔═══════════════════════════════════════════════════════════════╗
+// ║  21 — Negative Indentation (Cosmetic Leading Braces)         ║
+// ╚═══════════════════════════════════════════════════════════════╝
+//
+// Per the DreamBerd spec, leading `}` at the start of a line
+// (when not closing a real block) is treated as cosmetic and
+// stripped by the lexer. This lets you write "negatively indented"
+// code for stylistic purposes.
+
+// Normal code:
+print "Normal line"!
+
+// Cosmetic leading brace — stripped silently:
+}print "Negatively indented"!
+
+// Double cosmetic braces:
+}}print "Double negative"!
+
+// Real braces inside blocks still work correctly:
+if (true) {
+   print "Inside a real block"!
+}

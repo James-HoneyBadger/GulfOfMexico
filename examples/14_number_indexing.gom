@@ -1,0 +1,21 @@
+// ╔═══════════════════════════════════════════════════════════════╗
+// ║  14 — Number Digit Indexing                                  ║
+// ╚═══════════════════════════════════════════════════════════════╝
+//
+// Numbers are indexable by digit position using -1-based indexing.
+//   n[-1] → first digit
+//   n[0]  → second digit
+//   n[1]  → third digit
+//   ...
+
+const const n = 12345!
+print n[-1]!
+print n[0]!
+print n[1]!
+print n[2]!
+print n[3]!
+
+// Works with any number:
+const const pi = 31415!
+print pi[-1]!
+print pi[3]!

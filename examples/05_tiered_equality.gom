@@ -1,0 +1,59 @@
+// ╔═══════════════════════════════════════════════════════════════╗
+// ║  05 — Tiered Equality (=, ==, ===, ====)                     ║
+// ╚═══════════════════════════════════════════════════════════════╝
+//
+// GOM provides FOUR levels of equality precision:
+//
+//   =     Approximate: numbers within ~10%, strings ~70% similar
+//   ==    Exact value: standard value equality
+//   ===   Type-strict: same value AND same type
+//   ====  Reference identity: exact same object
+//
+// Inequality uses ;= (NOT !=).
+
+// ── Single = (approximate) ──────────────────────────────────────
+// Numbers close together are "approximately equal":
+const r1 = 10 = 11!
+print r1!
+
+const r2 = 10 = 100!
+print r2!
+
+// ── Double == (exact value) ─────────────────────────────────────
+const r3 = 10 == 10!
+print r3!
+
+const r4 = 10 == 11!
+print r4!
+
+// ── Triple === (type-strict) ────────────────────────────────────
+const r5 = 10 === 10!
+print r5!
+
+// ── Inequality (;= operator) ───────────────────────────────────
+// Semicolon-equals is GOM's inequality operator:
+const r6 = 10 ;= 5!
+print r6!
+
+const r7 = 10 ;= 10!
+print r7!
+
+// ── Tilde equality (AEMI / ABI / AQMI) ─────────────────────────
+// These are "approximate match" operators:
+//
+//   ~=    AEMI: same type → true, different type → maybe
+//   ~==   ABI:  case-insensitive, cross-type coercion
+//   ~===  AQMI: numbers within 1%, strings with whitespace normalized
+
+// AEMI — Are Even Meaningfully Identical?
+print  5 ~= 10!
+print  5 ~= "hello"!
+
+// ABI — Are Basically Identical?
+print  "Hello" ~== "hello"!
+print  5 ~== "5"!
+
+// AQMI — Are Quite Meaningfully Identical?
+print  100 ~=== 100.5!
+print  100 ~=== 200!
+print  "hello  world" ~=== "hello world"!

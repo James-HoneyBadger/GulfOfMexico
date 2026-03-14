@@ -1,11 +1,29 @@
-// The classic first program in Gulf of Mexico.
-// Statements end with ! instead of semicolons.
+// ╔═══════════════════════════════════════════════════════════════╗
+// ║  01 — Hello World & Statement Terminators                    ║
+// ╚═══════════════════════════════════════════════════════════════╝
+//
+// Every statement in GOM ends with a confidence terminator:
+//   !    normal confidence
+//   !!   high confidence
+//   !!!  absolute confidence
+//   ?    debug terminator (prints debug info to stderr)
+//
+// All confidence levels execute — they express intent, not behavior.
 
-print "Hello, World!"!
-print "Welcome to the Gulf of Mexico programming language."!
-print ""!
+// The simplest GOM program:
+print "Hello, Gulf of Mexico!"!
 
-// Multiple ! marks indicate confidence level (1–3)
-print "I am fairly sure this prints."!
-print "I am VERY sure this prints."!!
-print "I am ABSOLUTELY sure this prints."!!!
+// Higher confidence terminators work identically:
+print "I am fairly sure about this."!!
+print "I am ABSOLUTELY sure about this."!!!
+
+// Multiple prints on separate lines:
+print "Welcome to GOM"!
+print "An experimental language"!
+print "with unique features."!
+
+// Numbers work too:
+print 42!
+
+// Floating point:
+print 3.14159!

@@ -1,0 +1,37 @@
+// ╔═══════════════════════════════════════════════════════════════╗
+// ║  16 — Delete, Confidence, Debug Terminator                   ║
+// ╚═══════════════════════════════════════════════════════════════╝
+//
+// - `delete` removes a variable from scope.
+// - `~N~` confidence level controls variable overloading priority.
+// - `?` debug terminator prints extra info to stderr.
+// - `!` `!!` `!!!` — higher confidence overrides lower.
+
+// ── Delete ──────────────────────────────────────────────────────
+var var toDelete = "here now"!
+print toDelete!
+delete toDelete!
+// toDelete no longer exists — using it would be an error.
+
+// ── Variable overloading via confidence ─────────────────────────
+// When the same name is declared multiple times, the one with
+// higher confidence (more !'s) wins:
+const const name = "Luke"!
+const const name = "Sigma"!!
+print name!
+
+// A later ! won't override an earlier !!:
+const const hero = "Alpha"!!
+const const hero = "Beta"!
+print hero!
+
+// !!! overrides everything:
+const const winner = "First"!
+const const winner = "Second"!!
+const const winner = "Third"!!!
+print winner!
+
+// ── Debug terminator ────────────────────────────────────────────
+// `?` executes the statement AND prints debug info to stderr:
+const const debugVal = 99?
+print debugVal!

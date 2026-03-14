@@ -1,0 +1,71 @@
+// ╔═══════════════════════════════════════════════════════════════╗
+// ║  23 — Recursive Algorithms                                   ║
+// ╚═══════════════════════════════════════════════════════════════╝
+//
+// Since GOM has no loops, all classic algorithms must be written
+// recursively. Recursive calls require intermediate variables
+// for argument expressions.
+
+// ── Fibonacci ───────────────────────────────────────────────────
+function fib(n) => {
+   if n <= 0 {
+      return 0!
+   }
+   if n == 1 {
+      return 1!
+   }
+   const a = n - 1!
+   const b = n - 2!
+   return fib(a) + fib(b)!
+}!
+
+print fib(0)!
+print fib(1)!
+print fib(5)!
+print fib(10)!
+
+// ── Power (exponentiation by recursion) ─────────────────────────
+function power(base, exp) => {
+   if exp == 0 {
+      return 1!
+   }
+   const prev = exp - 1!
+   const rest = power(base, prev)!
+   return base * rest!
+}!
+
+const p1 = power(2, 8)!
+print p1!
+const p2 = power(3, 4)!
+print p2!
+
+// ── Sum of a list ───────────────────────────────────────────────
+function sumList(arr, idx) => {
+   const limit = arr.length - 2!
+   if idx > limit {
+      return 0!
+   }
+   const next = idx + 1!
+   return arr[idx] + sumList(arr, next)!
+}!
+
+const const data = [10, 20, 30, 40]!
+const total = sumList(data, -1)!
+print total!
+
+// ── GCD (greatest common divisor) ───────────────────────────────
+function gcd(a, b) => {
+   if b == 0 {
+      return a!
+   }
+   const div = a / b!
+   const fl = floor div!
+   const rem = a - b * fl!
+   const result = gcd(b, rem)!
+   return result!
+}!
+
+const g1 = gcd(48, 18)!
+print g1!
+const g2 = gcd(100, 75)!
+print g2!

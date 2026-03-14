@@ -1,0 +1,44 @@
+// ╔═══════════════════════════════════════════════════════════════╗
+// ║  20 — Math Functions & Type Conversions                      ║
+// ╚═══════════════════════════════════════════════════════════════╝
+//
+// GOM provides 17 built-in math functions plus type conversion.
+// Single-arg builtins use space syntax: `print floor 3.7!`
+// Multi-arg builtins need an intermediate variable.
+
+// ── Rounding ────────────────────────────────────────────────────
+print abs -42!
+print floor 3.7!
+print ceil 3.2!
+print round 3.5!
+
+// ── Powers & roots ──────────────────────────────────────────────
+print sqrt 16!
+const p = pow(2, 10)!
+print p!
+
+// ── Trigonometry ────────────────────────────────────────────────
+print sin 0!
+print cos 0!
+print tan 0!
+
+// ── Exponential & logarithmic ───────────────────────────────────
+print exp 0!
+print log 1!
+
+// ── Min / Max ───────────────────────────────────────────────────
+const lo = min(3, 7)!
+print lo!
+
+const hi = max(3, 7)!
+print hi!
+
+// ── Angle conversion ────────────────────────────────────────────
+print degrees 0!
+print radians 0!
+
+// ── Type conversion ─────────────────────────────────────────────
+print Number "42"!
+print String 42!
+print Boolean 1!
+print Boolean 0!

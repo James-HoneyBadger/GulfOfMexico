@@ -1,136 +1,164 @@
+"""
+Syntax highlighter for the Gulf of Mexico IDE.
+
+Uses the production tokenizer and classifies tokens by ``TokenType``.
+Accepts a theme dict to allow live theme switching.
+"""
+
 from __future__ import annotations
 
-try:
-    from PySide6.QtGui import (
-        QColor,
-        QFont,
-        QSyntaxHighlighter,
-        QTextCharFormat,
-    )
-except ImportError:
-    from PyQt5.QtGui import (
-        QColor,
-        QFont,
-        QSyntaxHighlighter,
-        QTextCharFormat,
-    )
+from gulfofmexico.ide.qt_compat import (
+    QColor,
+    QFont,
+    QSyntaxHighlighter,
+    QTextCharFormat,
+)
 
+from gulfofmexico.base import TokenType
 from gulfofmexico.processor.lexer import tokenize
+
+import re as _re
+
+# ── Token classification sets ─────────────────────────────────────────
+
+_KEYWORDS = {
+    "class", "className", "after", "const", "var", "when", "if", "else",
+    "async", "return", "delete", "await", "previous", "next", "reverse",
+    "export", "import", "to", "new", "current",
+}
+
+_FUNC_KW_PATTERN = _re.compile(r"^f?u?n?c?t?i?o?n?$")
+
+_BUILTINS = {
+    "print", "read", "readfile", "write", "exit", "sleep", "use",
+    "Number", "String", "Boolean", "Map",
+    "abs", "floor", "ceil", "round", "sqrt", "sin", "cos", "tan",
+    "log", "exp", "degrees", "radians", "pow", "min", "max",
+    "random", "randomInt",
+    "regex_match", "regex_findall", "regex_replace",
+}
+
+_CONSTANTS = {"true", "false", "maybe", "undefined", "noop"}
+
+_OPERATOR_TYPES = {
+    TokenType.ADD, TokenType.SUBTRACT, TokenType.MULTIPLY, TokenType.DIVIDE,
+    TokenType.CARROT, TokenType.EQUAL, TokenType.FUNC_POINT,
+    TokenType.LESS_THAN, TokenType.GREATER_THAN, TokenType.LESS_EQUAL,
+    TokenType.GREATER_EQUAL, TokenType.NOT_EQUAL, TokenType.PIPE, TokenType.AND,
+    TokenType.INCREMENT, TokenType.DECREMENT, TokenType.COMPOUND_ASSIGN,
+}
+
+_PUNCT_TYPES = {
+    TokenType.L_CURLY, TokenType.R_CURLY, TokenType.L_SQUARE, TokenType.R_SQUARE,
+    TokenType.COMMA, TokenType.COLON, TokenType.SEMICOLON, TokenType.DOT,
+}
+
+
+# ── Default One Dark palette ─────────────────────────────────────────
+
+_DEFAULT_SYNTAX = {
+    "syn_keyword":  "#c678dd",
+    "syn_builtin":  "#61afef",
+    "syn_string":   "#98c379",
+    "syn_number":   "#d19a66",
+    "syn_constant": "#d19a66",
+    "syn_operator": "#56b6c2",
+    "syn_comment":  "#5c6370",
+    "syn_bang":     "#e06c75",
+    "syn_name":     "#e5c07b",
+    "syn_punct":    "#abb2bf",
+    "syn_func_kw":  "#c678dd",
+}
 
 
 class GomHighlighter(QSyntaxHighlighter):
-    """Syntax highlighter using the production tokenizer.
+    """Syntax highlighter with live-switchable theme colours."""
 
-    This performs whole-document tokenization on rehighlight. It's simple but
-    effective for medium-sized files. Future optimization could cache lines.
-    """
-
-    def __init__(self, document):
+    def __init__(self, document, *, theme: dict | None = None) -> None:
         super().__init__(document)
-        self._fmt_keyword = self._fmt(color="# C678DD", bold=True)
-        self._fmt_name = self._fmt(color="# E5C07B")
-        self._fmt_number = self._fmt(color="# D19A66")
-        self._fmt_string = self._fmt(color="# 98C379")
-        self._fmt_op = self._fmt(color="# 61AFEF")
-        self._fmt_punct = self._fmt(color="# ABB2BF")
+        self._theme = theme or dict(_DEFAULT_SYNTAX)
+        self._rebuild_formats()
 
-    def _fmt(self, *, color: str, bold: bool = False) -> QTextCharFormat:
+    # ── Theme switching ───────────────────────────────────────────────
+
+    def set_theme(self, theme: dict) -> None:
+        self._theme = dict(theme)
+        self._rebuild_formats()
+        self.rehighlight()
+
+    def _rebuild_formats(self) -> None:
+        t = self._theme
+        self._fmt_keyword   = self._mkfmt(color=t.get("syn_keyword",  "#c678dd"), bold=True)
+        self._fmt_builtin   = self._mkfmt(color=t.get("syn_builtin",  "#61afef"))
+        self._fmt_constant  = self._mkfmt(color=t.get("syn_constant", "#d19a66"), bold=True)
+        self._fmt_func_kw   = self._mkfmt(color=t.get("syn_func_kw",  "#c678dd"), bold=True)
+        self._fmt_name      = self._mkfmt(color=t.get("syn_name",     "#e5c07b"))
+        self._fmt_number    = self._mkfmt(color=t.get("syn_number",   "#d19a66"))
+        self._fmt_string    = self._mkfmt(color=t.get("syn_string",   "#98c379"))
+        self._fmt_op        = self._mkfmt(color=t.get("syn_operator", "#56b6c2"))
+        self._fmt_punct     = self._mkfmt(color=t.get("syn_punct",    "#abb2bf"))
+        self._fmt_bang      = self._mkfmt(color=t.get("syn_bang",     "#e06c75"), bold=True)
+        self._fmt_comment   = self._mkfmt(color=t.get("syn_comment",  "#5c6370"), italic=True)
+
+    @staticmethod
+    def _mkfmt(*, color: str, bold: bool = False, italic: bool = False) -> QTextCharFormat:
         fmt = QTextCharFormat()
         fmt.setForeground(QColor(color))
         if bold:
             fmt.setFontWeight(QFont.Weight.Bold)
+        if italic:
+            fmt.setFontItalic(True)
         return fmt
 
-    def highlightBlock(self, _: str) -> None:  # noqa: N802
-        # We rely on whole-document pass in rehighlight. Here we do nothing
-        # per-line; the work occurs in rehighlight() below.
-        return
+    # ── Per-block highlighting ────────────────────────────────────────
 
-    def rehighlight(self) -> None:  # noqa: D401
-        """Retokenize entire document and apply formats."""
-        super().rehighlight()
-        doc = self.document()
-        code = doc.toPlainText()
-        # Use a dummy filename for tokenizer
-        filename = "__ide_buffer__"
-        try:
-            tokens = tokenize(filename, code)
-        except (ValueError, TypeError, IndexError, RuntimeError):
+    def highlightBlock(self, text: str) -> None:  # noqa: N802
+        """Tokenize a single block and apply syntax formats."""
+        if not text.strip():
             return
-
-        # Build positions per token (start/end in chars)
-        # Token has attributes: value, line, column; we need to map to offsets
-        # We'll precompute line start offsets
-        lines = code.splitlines(keepends=True)
-        line_starts = []
-        pos = 0
-        for s in lines:
-            line_starts.append(pos)
-            pos += len(s)
-
-        # Apply formats
+        try:
+            tokens = tokenize("__ide_buffer__", text)
+        except Exception:
+            return
         for tok in tokens:
             try:
-                line = getattr(tok, "line", 1) - 1
-                col = getattr(tok, "column", 0)
+                col = getattr(tok, "column", None) or getattr(tok, "col", 0)
                 val = getattr(tok, "value", "")
-                start_base = line_starts[line] if 0 <= line < len(line_starts) else 0
-                start = start_base + col
+                tok_type = getattr(tok, "type", None)
                 length = len(val)
-                if length <= 0:
+                if length <= 0 or col < 0:
                     continue
-                # Determine format category
-                fmt = self._classify(tok)
+                fmt = self._classify(tok_type, val)
                 if fmt is None:
                     continue
-                block = self.document().findBlock(start)
-                if not block.isValid():
-                    continue
-                layout = block.layout()
-                if layout is None:
-                    continue
-                # Set format on the block range
-                self.setFormat(start, length, fmt)
-            except (ValueError, TypeError, IndexError, RuntimeError):
+                self.setFormat(col, length, fmt)
+            except Exception:
                 continue
 
-    def _classify(self, tok):
-        # Heuristic classification based on token value
-        v = getattr(tok, "value", "")
-        if isinstance(v, str):
-            if v in {
-                "var",
-                "const",
-                "if",
-                "else",
-                "when",
-                "after",
-                "class",
-                "return",
-                "import",
-                "export",
-            }:
+    def _classify(self, tt: TokenType | None, value: str) -> QTextCharFormat | None:
+        if tt is None or tt in (TokenType.WHITESPACE, TokenType.NEWLINE):
+            return None
+        if tt == TokenType.STRING:
+            return self._fmt_string
+        if tt in _OPERATOR_TYPES:
+            return self._fmt_op
+        if tt in (TokenType.BANG, TokenType.QUESTION):
+            return self._fmt_bang
+        if tt in _PUNCT_TYPES:
+            return self._fmt_punct
+        if tt == TokenType.NAME:
+            if value in _KEYWORDS:
                 return self._fmt_keyword
-            if v.startswith('"') or v.startswith("'"):
-                return self._fmt_string
-            if v.isdigit():
+            if value in _BUILTINS:
+                return self._fmt_builtin
+            if value in _CONSTANTS:
+                return self._fmt_constant
+            if len(value) <= 8 and value and _FUNC_KW_PATTERN.match(value):
+                return self._fmt_func_kw
+            try:
+                float(value)
                 return self._fmt_number
-            if v in {"+", "-", "*", "/", "^", "=", "==", ";=", "=>"}:
-                return self._fmt_op
-            if v in {
-                "{",
-                "}",
-                "(",
-                ")",
-                "[",
-                "]",
-                ",",
-                ":",
-                ";",
-                ".",
-                "!",
-                "?",
-            }:
-                return self._fmt_punct
+            except (ValueError, TypeError):
+                pass
             return self._fmt_name
-        return None
+        return self._fmt_name

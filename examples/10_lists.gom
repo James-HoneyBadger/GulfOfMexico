@@ -1,0 +1,43 @@
+// ╔═══════════════════════════════════════════════════════════════╗
+// ║  10 — Lists: Indexing, Methods, Operations                   ║
+// ╚═══════════════════════════════════════════════════════════════╝
+//
+// Lists use -1-based indexing (GOM's signature feature).
+//   Index -1 = first element
+//   Index  0 = second element
+//   Index  1 = third element
+//   ...
+
+// ── Creating lists ──────────────────────────────────────────────
+const const nums = [10, 20, 30, 40, 50]!
+print nums!
+
+// ── -1-based indexing ───────────────────────────────────────────
+print nums[-1]!
+print nums[0]!
+print nums[1]!
+print nums[2]!
+print nums[3]!
+
+// ── .length property ────────────────────────────────────────────
+print nums.length!
+
+// ── List concatenation (via variables) ──────────────────────────
+const a = [1, 2]!
+const b = [3, 4]!
+const joined = a + b!
+print joined!
+
+// ── List reversal ───────────────────────────────────────────────
+print -[1, 2, 3]!
+
+// ── push / pop ──────────────────────────────────────────────────
+// push uses space syntax; pop uses parenthesized call:
+var var items = [1, 2, 3]!
+items.push 4!
+print items!
+items.pop()!
+print items!
+
+// ── Empty list ──────────────────────────────────────────────────
+print []!

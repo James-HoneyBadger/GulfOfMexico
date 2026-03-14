@@ -46,13 +46,11 @@ from .execution import (
 )
 
 # --- Backward-compatible module-level mutable state ---
-# Consumers (repl.py, __init__.py, __main__.py) set ``interpreter.filename``
-# and ``interpreter.code`` directly.  We provide a module-level default
-# InterpreterContext and expose its attributes for this purpose.
-_default_ctx = InterpreterContext()
-
-filename: str = _default_ctx.filename
-code: str = _default_ctx.code
+# Legacy consumers may set ``interpreter.filename`` and ``interpreter.code``
+# directly.  These are simple module-level strings for backward compatibility;
+# new code should use InterpreterContext instead.
+filename: str = ""
+code: str = ""
 
 __all__ = [
     # Types

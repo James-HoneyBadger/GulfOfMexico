@@ -1,0 +1,19 @@
+// ╔═══════════════════════════════════════════════════════════════╗
+// ║  24 — Comments                                               ║
+// ╚═══════════════════════════════════════════════════════════════╝
+//
+// GOM supports two kinds of comments:
+//   // single-line (everything after // is ignored)
+//   /* block comments spanning multiple lines */
+
+// This is a single-line comment.
+print "before block comment"!
+
+/* This is a
+   block comment
+   spanning three lines */
+
+print "after block comment"!
+
+// Comments can appear after code:
+print "inline"!   // this part is ignored

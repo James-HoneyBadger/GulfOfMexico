@@ -1,0 +1,41 @@
+// ╔═══════════════════════════════════════════════════════════════╗
+// ║  02 — Variables: const, var, reassignment, previous          ║
+// ╚═══════════════════════════════════════════════════════════════╝
+//
+// GOM has three declaration styles:
+//   const const   — immutable (cannot reassign)
+//   var var       — mutable (can reassign)
+//   const/var     — also valid (single keyword)
+
+// Immutable declaration:
+const const greeting = "Hello"!
+print greeting!
+
+// Mutable declaration:
+var var counter = 0!
+print counter!
+
+// Reassignment (no keyword, just name = value):
+counter = 1!
+print counter!
+
+counter = 2!
+print counter!
+
+counter = counter + 1!
+print counter!
+
+// ── Previous values ─────────────────────────────────────────────
+// Access the prior value of a variable with `previous`:
+var var score = 100!
+score = 200!
+print score!
+print previous score!
+
+// ── Type annotations ────────────────────────────────────────────
+// Optional type hints at declaration time:
+var x: Int = 42!
+print x!
+
+var s: String = "typed"!
+print s!

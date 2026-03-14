@@ -57,23 +57,10 @@ from .persistence import save_local_immutable_constant
 
 
 # ---------------------------------------------------------------------------
-# When-watcher helpers (used in this module)
+# When-watcher helpers (re-exported from watchers module)
 # ---------------------------------------------------------------------------
 
-def remove_from_when_statement_watchers(
-    name_or_id: Union[str, int],
-    watcher: tuple[ExpressionTreeNode, list[tuple[CodeStatement, ...]], list[dict[str, Variable | Name]]],
-    when_statement_watchers: WhenStatementWatchers,
-) -> None:
-    """Remove a specific watcher entry from all watcher dicts."""
-    for watcher_dict in when_statement_watchers:
-        if vals := watcher_dict.get(name_or_id):
-            remove = None
-            for i, v in enumerate(vals):
-                if v == watcher:
-                    remove = i
-            if remove is not None:
-                del vals[remove]
+from .watchers import remove_from_when_statement_watchers  # noqa: E402
 
 
 # ---------------------------------------------------------------------------
@@ -87,8 +74,12 @@ def declare_new_variable(
     async_statements: AsyncStatements,
     when_statement_watchers: WhenStatementWatchers,
     ctx: InterpreterContext,
-) -> None:
-    """Create a new variable based on a ``VariableDeclaration`` statement."""
+) -> int:
+    """Create a new variable based on a ``VariableDeclaration`` statement.
+
+    Returns the number of lines to hoist (0 for normal declarations,
+    >0 when a negative lifetime like ``<-1>`` is specified).
+    """
     # Late import to break circular dependency
     from .execution import execute_conditional  # noqa: PLC0415
 
@@ -103,6 +94,7 @@ def declare_new_variable(
     duration = 100_000_000_000
     is_temporal = False
     temporal_duration = 0.0
+    hoist_lines = 0  # negative lifetime → hoist this many lines backward
     if lifetime:
         try:
             if lifetime.startswith("<") and lifetime.endswith(">"):
@@ -116,7 +108,11 @@ def declare_new_variable(
                 else:
                     val = float(inner)
                     if val < 0:
-                        duration = abs(int(val))
+                        # Negative lifetime: variable hoisting per spec.
+                        # Variable exists for abs(val) lines *before* its
+                        # declaration line, then disappears after declaration.
+                        hoist_lines = abs(int(val))
+                        duration = 1  # expires after the declaration statement itself
                     else:
                         temporal_duration = val
                         duration = 100_000_000_000
@@ -130,12 +126,18 @@ def declare_new_variable(
                 statement.name,
             )
 
-    var = Variable(name, [], [])
+    # Per spec: re-declaring a variable adds a new lifetime to the existing
+    # Variable rather than replacing it, so that !-priority overloading works.
+    existing = namespaces[-1].get(name)
+    if isinstance(existing, Variable):
+        var = existing
+    else:
+        var = Variable(name, [], [])
+        namespaces[-1][name] = var
     var.add_lifetime(
         value, confidence, duration, can_be_reset, can_edit_value,
         is_temporal=is_temporal, temporal_duration=temporal_duration,
     )
-    namespaces[-1][name] = var
 
     if statement.type_annotation:
         check_type_annotation(statement.type_annotation)
@@ -169,6 +171,8 @@ def declare_new_variable(
             )
             namespaces[-1][destr_name_token.value] = destr_var
 
+    return hoist_lines
+
 
 # ---------------------------------------------------------------------------
 # Variable assignment
@@ -194,7 +198,11 @@ def assign_variable(
     # Special case: Date.now = <value> per spec (settable clock)
     if name == "Date.now":
         if isinstance(new_value, GulfOfMexicoNumber):
-            DateObject.set_time(new_value.value)
+            # Compute offset from current real time so Date.now() returns the requested value
+            import time as _time
+            desired_ms = new_value.value
+            current_ms = int(_time.time() * 1000)
+            DateObject.set_offset(float(desired_ms - current_ms))
         return
 
     var, _ns = get_name_and_namespace_from_namespaces(name, namespaces)

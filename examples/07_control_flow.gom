@@ -1,0 +1,56 @@
+// ╔═══════════════════════════════════════════════════════════════╗
+// ║  07 — Control Flow: Conditionals & Recursion                 ║
+// ╚═══════════════════════════════════════════════════════════════╝
+//
+// GOM has NO loops (for, while, do). All iteration is recursion.
+// Conditionals use `if` blocks. There is no `else` keyword —
+// use sequential if blocks instead.
+
+// ── Basic if ────────────────────────────────────────────────────
+if true {
+   print "This always executes."!
+}
+
+if false {
+   print "This never executes."!
+}
+
+// ── Sequential ifs (acting like if/else) ────────────────────────
+function classify(n) => {
+   if n > 0 {
+      return "positive"!
+   }
+   if n < 0 {
+      return "negative"!
+   }
+   return "zero"!
+}!
+
+print classify(42)!
+print classify(-7)!
+print classify(0)!
+
+// ── Recursion replaces loops ────────────────────────────────────
+// Recursive calls require intermediate variables for expressions:
+function factorial(n) => {
+   if n <= 1 {
+      return 1!
+   }
+   const prev = n - 1!
+   return n * factorial(prev)!
+}!
+
+print factorial(1)!
+print factorial(5)!
+print factorial(10)!
+
+// Countdown:
+function countdown(n) => {
+   if n > 0 {
+      print n!
+      const prev = n - 1!
+      countdown(prev)!
+   }
+}!
+countdown(5)!
+print "Liftoff!"!

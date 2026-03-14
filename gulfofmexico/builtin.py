@@ -96,7 +96,7 @@ def db_list_pop(
         return retval
     elif not isinstance(index, GulfOfMexicoNumber) or not is_int(index.value):
         raise NonFormattedError("Expected integer for list popping.")
-    elif not -1 <= index.value <= len(self.values) - 1:
+    elif not -1 <= index.value <= len(self.values) - 2:
         raise NonFormattedError("Indexing out of list bounds.")
     retval = self.values.pop(round(index.value) + 1)
     self.create_namespace()
@@ -494,22 +494,27 @@ class Variable:
         is_temporal: bool = False,
         temporal_duration: float = 0.0,
     ) -> None:
-        for i in range(len(self.lifetimes) + 1):
-            if i == len(self.lifetimes) or self.lifetimes[i].confidence >= confidence:
-                if i == 0 and self.lifetimes:
+        # Insert sorted by *descending* confidence so lifetimes[0] is the
+        # highest-priority value (more !'s = higher priority per spec).
+        new_lt = VariableLifetime(
+            value,
+            duration,
+            confidence,
+            can_be_reset,
+            can_edit_value,
+            is_temporal=is_temporal,
+            temporal_duration=temporal_duration,
+        )
+        inserted = False
+        for i in range(len(self.lifetimes)):
+            if confidence >= self.lifetimes[i].confidence:
+                if i == 0:
                     self.prev_values.append(self.value)
-                self.lifetimes[i:i] = [
-                    VariableLifetime(
-                        value,
-                        duration,
-                        confidence,
-                        can_be_reset,
-                        can_edit_value,
-                        is_temporal=is_temporal,
-                        temporal_duration=temporal_duration,
-                    )
-                ]
+                self.lifetimes.insert(i, new_lt)
+                inserted = True
                 break
+        if not inserted:
+            self.lifetimes.append(new_lt)
 
     def clear_outdated_lifetimes(self) -> None:
         remove_indeces = []
@@ -775,9 +780,21 @@ def db_sleep(t: GulfOfMexicoValue) -> None:
     sleep(t.value)
 
 
-def db_read(path: GulfOfMexicoValue) -> GulfOfMexicoString:
-    if not isinstance(path, GulfOfMexicoString):
+def db_read(prompt: GulfOfMexicoValue) -> GulfOfMexicoString:
+    """Read a line from stdin with an optional prompt per spec."""
+    if not isinstance(prompt, GulfOfMexicoString):
         raise NonFormattedError("'read' function requires argument to be a string")
+    try:
+        result = input(prompt.value)
+    except EOFError:
+        result = ""
+    return GulfOfMexicoString(result)
+
+
+def db_readfile(path: GulfOfMexicoValue) -> GulfOfMexicoString:
+    """Read contents of a file and return as a string."""
+    if not isinstance(path, GulfOfMexicoString):
+        raise NonFormattedError("'readfile' function requires argument to be a string")
     try:
         with open(path.value, encoding="utf-8") as f:
             s = f.read()
@@ -857,18 +874,8 @@ def db_write(path: GulfOfMexicoValue, content: GulfOfMexicoValue) -> None:
 
 
 def db_exit() -> None:
-    exit()
-
-
-def __math_function_decorator(func: Callable):
-    @functools.wraps(func)
-    def inner(*args) -> GulfOfMexicoNumber:  # no kwargs
-        for arg in args:
-            if not isinstance(arg, GulfOfMexicoNumber):
-                raise NonFormattedError("Cannot pass in a non-number value into a math function.")
-        return GulfOfMexicoNumber(func(*[arg.value for arg in args]))
-
-    return inner
+    import sys as _sys  # pylint: disable=import-outside-toplevel
+    _sys.exit()
 
 
 def __number_function_maker(num: int) -> BuiltinFunction:
@@ -941,6 +948,7 @@ BUILTIN_FUNCTION_KEYWORDS = {
     "use": Name("use", BuiltinFunction(1, db_signal)),
     "sleep": Name("sleep", BuiltinFunction(1, db_sleep)),
     "read": Name("read", BuiltinFunction(-1, db_read)),
+    "readfile": Name("readfile", BuiltinFunction(1, db_readfile)),
     "write": Name("write", BuiltinFunction(-1, db_write)),
     "regex_match": Name("regex_match", BuiltinFunction(1, db_regex_match)),
     "regex_findall": Name("regex_findall", BuiltinFunction(1, db_regex_findall)),

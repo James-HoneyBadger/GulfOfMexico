@@ -208,6 +208,102 @@ def is_really_really_equal(left: GulfOfMexicoValue, right: GulfOfMexicoValue) ->
     return GulfOfMexicoBoolean(left is right)
 
 
+# ---------------------------------------------------------------------------
+# Tilde-equality: AEMI / ABI / AQMI  (per DreamBerd spec)
+# ---------------------------------------------------------------------------
+
+def is_aemi_equal(left: GulfOfMexicoValue, right: GulfOfMexicoValue) -> GulfOfMexicoBoolean:
+    """~= AEMI (Assume Equal if Missing Information).
+
+    Returns true unless there is clear evidence the values differ.
+    Mismatched types => maybe (None).
+    """
+    if not isinstance(left, type(right)):
+        # Different types — not enough info to decide
+        return GulfOfMexicoBoolean(None)
+
+    match left:
+        case GulfOfMexicoNumber():
+            assert isinstance(right, GulfOfMexicoNumber)
+            if left.value == right.value:
+                return GulfOfMexicoBoolean(True)
+            # If either is zero and the other isn't, still "maybe"
+            if left.value == 0 or right.value == 0:
+                return GulfOfMexicoBoolean(None)
+            return GulfOfMexicoBoolean(True)
+
+        case GulfOfMexicoString():
+            assert isinstance(right, GulfOfMexicoString)
+            if left.value == right.value:
+                return GulfOfMexicoBoolean(True)
+            # If one is a substring of the other — maybe
+            if left.value in right.value or right.value in left.value:
+                return GulfOfMexicoBoolean(None)
+            return GulfOfMexicoBoolean(True)
+
+        case GulfOfMexicoBoolean():
+            assert isinstance(right, GulfOfMexicoBoolean)
+            if left.value is None or right.value is None:
+                return GulfOfMexicoBoolean(None)
+            return GulfOfMexicoBoolean(left.value == right.value)
+
+        case _:
+            return GulfOfMexicoBoolean(True)
+
+
+def is_abi_equal(left: GulfOfMexicoValue, right: GulfOfMexicoValue) -> GulfOfMexicoBoolean:
+    """~== ABI (Assume Better Interpretation).
+
+    Coerces both values to the same type with the most favorable
+    interpretation, then compares.
+    """
+    # Same types — use normal equality
+    if isinstance(left, type(right)):
+        # For strings, use case-insensitive comparison
+        if isinstance(left, GulfOfMexicoString) and isinstance(right, GulfOfMexicoString):
+            return GulfOfMexicoBoolean(left.value.lower() == right.value.lower())
+        return is_equal(left, right)
+
+    # Cross-type: coerce both to strings and compare case-insensitively
+    left_str = db_to_string(left).value
+    right_str = db_to_string(right).value
+    return GulfOfMexicoBoolean(left_str.lower() == right_str.lower())
+
+
+def is_aqmi_equal(left: GulfOfMexicoValue, right: GulfOfMexicoValue) -> GulfOfMexicoBoolean:
+    """~=== AQMI (Assume Quantitative Match if Insignificant).
+
+    For numbers: close enough (within 1% or 0.001 absolute).
+    For strings: case-insensitive + whitespace-normalized exact match.
+    Otherwise: strict equality.
+    """
+    if isinstance(left, GulfOfMexicoNumber) and isinstance(right, GulfOfMexicoNumber):
+        if left.value == right.value:
+            return GulfOfMexicoBoolean(True)
+        diff = abs(left.value - right.value)
+        # Absolute tolerance for small numbers
+        if diff <= 0.001:
+            return GulfOfMexicoBoolean(True)
+        # Relative tolerance (1%)
+        denom = max(abs(left.value), abs(right.value))
+        if denom > 0 and diff / denom <= 0.01:
+            return GulfOfMexicoBoolean(True)
+        return GulfOfMexicoBoolean(False)
+
+    if isinstance(left, GulfOfMexicoString) and isinstance(right, GulfOfMexicoString):
+        return GulfOfMexicoBoolean(
+            " ".join(left.value.lower().split()) == " ".join(right.value.lower().split())
+        )
+
+    # Fallback: coerce to numbers if possible, else strict equal
+    try:
+        left_n = db_to_number(left)
+        right_n = db_to_number(right)
+        return is_aqmi_equal(left_n, right_n)
+    except Exception:
+        return is_equal(left, right)
+
+
 def is_less_than(left: GulfOfMexicoValue, right: GulfOfMexicoValue) -> GulfOfMexicoBoolean:
     """Less-than comparison."""
     if not isinstance(left, type(right)):
@@ -328,6 +424,15 @@ def perform_two_value_operation(
                 return is_really_really_equal(left, right)
             return db_not(is_really_really_equal(left, right))
 
+        case OperatorType.TE:
+            return is_aemi_equal(left, right)
+
+        case OperatorType.TEE:
+            return is_abi_equal(left, right)
+
+        case OperatorType.TEEE:
+            return is_aqmi_equal(left, right)
+
         case OperatorType.GT | OperatorType.LE:
             is_eq = is_really_equal(left, right)
             is_less = is_less_than(left, right)
@@ -377,5 +482,25 @@ def perform_single_value_operation(
         case TokenType.SEMICOLON:
             val_bool = db_to_boolean(val)
             return db_not(val_bool)
+        case TokenType.INCREMENT:
+            match val:
+                case GulfOfMexicoNumber():
+                    return GulfOfMexicoNumber(val.value + 1)
+                case _:
+                    raise_error_at_token(
+                        ctx.filename, ctx.code,
+                        f"Cannot increment a value of type {type(val).__name__}",
+                        operator_token,
+                    )
+        case TokenType.DECREMENT:
+            match val:
+                case GulfOfMexicoNumber():
+                    return GulfOfMexicoNumber(val.value - 1)
+                case _:
+                    raise_error_at_token(
+                        ctx.filename, ctx.code,
+                        f"Cannot decrement a value of type {type(val).__name__}",
+                        operator_token,
+                    )
 
     raise_error_at_token(ctx.filename, ctx.code, "Something went wrong. My bad.", operator_token)

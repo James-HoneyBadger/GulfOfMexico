@@ -1,0 +1,40 @@
+// ╔═══════════════════════════════════════════════════════════════╗
+// ║  13 — Word Numbers & Fractions                               ║
+// ╚═══════════════════════════════════════════════════════════════╝
+//
+// English words 0–19 are built-in number literals.
+// Tens/hundreds/thousands/millions are functions.
+// Named fractions: half, third, quarter.
+
+// ── Word literals (0–19) ────────────────────────────────────────
+print zero!
+print one!
+print five!
+print ten!
+print thirteen!
+print nineteen!
+
+// ── Tens functions ──────────────────────────────────────────────
+// twenty(n) → 20 + n, thirty(n) → 30 + n, ...
+print twenty(1)!
+print thirty(5)!
+print forty(0)!
+print fifty(0)!
+
+// ── Hundreds / thousands / millions ─────────────────────────────
+// hundred(n)  → n * 100
+// thousand(n) → n * 1000
+// million(n)  → n * 1000000
+print hundred(3)!
+print thousand(2)!
+print million(1)!
+
+// ── Named fractions ─────────────────────────────────────────────
+print half!
+print third!
+print quarter!
+
+// ── Using word numbers in expressions ───────────────────────────
+print  five + three!
+print  ten * two!
+print  hundred(1) + fifty(0) + seven!

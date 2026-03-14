@@ -1,0 +1,55 @@
+// ╔═══════════════════════════════════════════════════════════════╗
+// ║  06 — Comparison & Three-Valued Logic                        ║
+// ╚═══════════════════════════════════════════════════════════════╝
+//
+// Comparisons: >, <, >=, <=
+// Logical: & (AND), | (OR), ; (NOT prefix)
+//
+// GOM uses three-valued logic: true, false, maybe.
+// `maybe` propagates through logical operations probabilistically.
+
+// ── Comparison operators ────────────────────────────────────────
+const r1 = 5 > 3!
+print r1!
+
+const r2 = 3 > 5!
+print r2!
+
+const r3 = 5 >= 5!
+print r3!
+
+const r4 = 3 <= 5!
+print r4!
+
+// ── Logical AND (&) ────────────────────────────────────────────
+//   true & true   → true
+//   true & false  → false
+const r5 = true & true!
+print r5!
+
+const r6 = true & false!
+print r6!
+
+// ── Logical OR (|) ─────────────────────────────────────────────
+//   false | true  → true
+//   false | false → false
+const r7 = false | true!
+print r7!
+
+const r8 = false | false!
+print r8!
+
+// ── Logical NOT (semicolon prefix) ──────────────────────────────
+//   ;true  → false
+//   ;false → true
+print ;true!
+print ;false!
+
+// ── Complex conditions ──────────────────────────────────────────
+const const x = 10!
+const const y = 20!
+const r9 = x > 5 & y > 15!
+print r9!
+
+const r10 = x > 15 | y > 15!
+print r10!

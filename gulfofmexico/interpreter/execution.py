@@ -123,6 +123,20 @@ def interpret_code_statements_main_wrapper(
 # Core execution loop
 # ---------------------------------------------------------------------------
 
+def _is_negative_lifetime(lifetime: Optional[str]) -> int:
+    """Return N if the lifetime is ``<-N>`` (negative/hoisting), else 0."""
+    if not lifetime or not lifetime.startswith("<") or not lifetime.endswith(">"):
+        return 0
+    inner = lifetime[1:-1]
+    try:
+        val = float(inner)
+        if val < 0:
+            return abs(int(val))
+    except ValueError:
+        pass
+    return 0
+
+
 def interpret_code_statements(
     statements: list[tuple[CodeStatement, ...]],
     namespaces: list[Namespace],
@@ -134,6 +148,32 @@ def interpret_code_statements(
 ) -> Optional[GulfOfMexicoValue]:
     """Interpret a list of statement tuples sequentially."""
     result = None
+
+    # ---- Pre-scan for negative lifetimes (variable hoisting per spec) ----
+    # Variables with <-N> should exist N lines before their declaration.
+    # We pre-declare them so earlier statements can see them.
+    for stmt_idx, statement_tuple in enumerate(statements):
+        for candidate in statement_tuple:
+            if isinstance(candidate, VariableDeclaration) and candidate.lifetime:
+                hoist_n = _is_negative_lifetime(candidate.lifetime)
+                if hoist_n > 0:
+                    # Evaluate the expression and pre-declare the variable
+                    try:
+                        pre_val = evaluate_expression(
+                            candidate.expression, namespaces,
+                            async_statements, when_statement_watchers, ctx,
+                        )
+                    except Exception:
+                        continue  # can't pre-evaluate — skip hoisting
+                    pre_var = Variable(candidate.name.value, [], [])
+                    # Lifespan: hoist_n lines before + 1 for the decl line itself
+                    pre_var.add_lifetime(
+                        pre_val, candidate.confidence, hoist_n + 1,
+                        "var" in [m.value for m in candidate.modifiers],
+                        "const" not in [m.value for m in candidate.modifiers],
+                    )
+                    namespaces[-1][candidate.name.value] = pre_var
+                    break  # only one candidate per statement_tuple matters
 
     for statement_tuple in statements:
         statement = determine_statement_type(statement_tuple, namespaces, ctx)
@@ -251,9 +291,26 @@ def interpret_code_statements(
                     var, ns = get_name_and_namespace_from_namespaces(name, namespaces)
                     if var:
                         if isinstance(var, Variable) and var.lifetimes:
-                            ctx.deleted_values.add(var.lifetimes[0].value)
+                            deleted_val = var.lifetimes[0].value
+                            try:
+                                ctx.deleted_values.add(deleted_val)
+                            except TypeError:
+                                pass  # unhashable values (e.g. GulfOfMexicoObject) are skipped
+                            # Decrement class instance count so re-instantiation is allowed
+                            if isinstance(deleted_val, GulfOfMexicoObject) and deleted_val.class_name:
+                                count = ctx.class_instance_counts.get(deleted_val.class_name, 0)
+                                if count > 0:
+                                    ctx.class_instance_counts[deleted_val.class_name] = count - 1
                         elif isinstance(var, Name):
-                            ctx.deleted_values.add(var.value)
+                            try:
+                                ctx.deleted_values.add(var.value)
+                            except TypeError:
+                                pass  # unhashable values are skipped
+                            # Decrement class instance count so re-instantiation is allowed
+                            if isinstance(var.value, GulfOfMexicoObject) and var.value.class_name:
+                                count = ctx.class_instance_counts.get(var.value.class_name, 0)
+                                if count > 0:
+                                    ctx.class_instance_counts[var.value.class_name] = count - 1
                         if ns:
                             del ns[name]
                     else:
@@ -281,18 +338,22 @@ def interpret_code_statements(
                 return result
 
             case ImportStatement():
-                _time.sleep(0.025)  # 25% tariff per spec
+                _time.sleep(0.025)  # 25ms tariff per spec
                 for name_token in statement.names:
                     name = name_token.value
                     found = False
                     for file_dict in importable_names.values():
                         if name in file_dict:
                             imported_val = file_dict[name]
-                            if isinstance(imported_val, GulfOfMexicoFunction):
-                                tariffed_code = [
-                                    stmt for stmt in imported_val.code
-                                    if random.random() > 0.25
-                                ]
+                            if isinstance(imported_val, GulfOfMexicoFunction) and imported_val.code:
+                                # Per spec: "may randomly remove one statement"
+                                # Remove exactly one random statement with 75% probability
+                                if random.random() < 0.75:
+                                    tariffed_code = list(imported_val.code)
+                                    idx_to_remove = random.randrange(len(tariffed_code))
+                                    tariffed_code.pop(idx_to_remove)
+                                else:
+                                    tariffed_code = list(imported_val.code)
                                 imported_val = GulfOfMexicoFunction(
                                     imported_val.args, tariffed_code, imported_val.is_async,
                                 )
@@ -329,7 +390,26 @@ def interpret_code_statements(
                             lt.lines_left -= 1
                     entry.clear_outdated_lifetimes()
 
-    # Process async statements
+        # Per spec: async functions take turns with the caller line-by-line.
+        # After each synchronous statement, execute one statement from each
+        # queued async function (round-robin interleaving).
+        if async_statements:
+            next_round: AsyncStatements = []
+            while async_statements:
+                async_stmt = async_statements.pop(0)
+                statements_list, async_namespaces, current_index, direction = async_stmt
+                if current_index < len(statements_list):
+                    interpret_code_statements(
+                        [statements_list[current_index]],
+                        async_namespaces, next_round,
+                        when_statement_watchers, importable_names, exported_names, ctx,
+                    )
+                    new_index = current_index + (1 if direction == 1 else -1)
+                    if 0 <= new_index < len(statements_list):
+                        next_round.append((statements_list, async_namespaces, new_index, direction))
+            async_statements.extend(next_round)
+
+    # Drain any remaining async statements after the main loop finishes
     while async_statements:
         async_stmt = async_statements.pop(0)
         statements_list, async_namespaces, current_index, direction = async_stmt

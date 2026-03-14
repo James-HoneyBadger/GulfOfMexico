@@ -1,0 +1,41 @@
+// ╔═══════════════════════════════════════════════════════════════╗
+// ║  09 — Strings: Interpolation, Escapes, Indexing              ║
+// ╚═══════════════════════════════════════════════════════════════╝
+//
+// Strings support:
+//   - $ £ ¥ interpolation (prefix)
+//   - € interpolation (postfix)
+//   - Escape sequences (\n, \t, \\, etc.)
+//   - -1-based character indexing
+//   - Reversal with unary minus
+//   - .length property
+//   - Concatenation with +
+
+// ── String interpolation ────────────────────────────────────────
+// Three currency symbols as interpolation prefix:
+const const x = 42!
+print "Dollar: ${x}"!
+print "Pound: £{x}"!
+print "Yen: ¥{x}"!
+
+// Expressions inside braces:
+print "Result: ${x + 8}"!
+
+// ── String length ───────────────────────────────────────────────
+const const msg = "Gulf of Mexico"!
+print msg.length!
+
+// ── String concatenation ────────────────────────────────────────
+print "Hello" + " " + "World"!
+
+// ── String reversal ─────────────────────────────────────────────
+print -"stressed"!
+
+// ── -1-based character indexing ─────────────────────────────────
+// Index -1 is the FIRST character (not the last!):
+const const word = "abcde"!
+print word[-1]!
+print word[0]!
+print word[1]!
+print word[2]!
+print word[3]!

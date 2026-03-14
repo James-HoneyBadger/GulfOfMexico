@@ -709,6 +709,42 @@ def create_unscoped_code_statement(
         and without_whitespace[1].type == TokenType.NAME
     )
 
+    # -- Compound assignment desugaring (+=, -=, *=, /=, ^=) --
+    # Desugar ``name OP= expr!`` into a VariableAssignment where the
+    # expression is ``name OP expr``.
+    compound_token_idx = next(
+        (i for i, t in enumerate(tokens) if t.type == TokenType.COMPOUND_ASSIGN), -1
+    )
+    if compound_token_idx != -1:
+        compound_tok = tokens[compound_token_idx]
+        # Map compound operator value to the bare-operator token type
+        _COMPOUND_TO_OP: dict[str, TokenType] = {
+            "+=": TokenType.ADD,
+            "-=": TokenType.SUBTRACT,
+            "*=": TokenType.MULTIPLY,
+            "/=": TokenType.DIVIDE,
+            "^=": TokenType.CARROT,
+        }
+        op_type = _COMPOUND_TO_OP[compound_tok.value]
+        op_char = compound_tok.value[0]
+        name_tok = without_whitespace[0]
+        # Build synthetic expression tokens: <name> <SPACE> <OP> <SPACE> <rhs_tokens...>
+        rhs_tokens = tokens[compound_token_idx + 1 : -1]  # everything between OP= and terminator
+        synthetic_expr: list[Token] = [
+            Token(TokenType.NAME, name_tok.value, name_tok.line, name_tok.col),
+            Token(TokenType.WHITESPACE, " ", compound_tok.line, compound_tok.col),
+            Token(op_type, op_char, compound_tok.line, compound_tok.col),
+        ] + rhs_tokens
+        return (
+            VariableAssignment(
+                name=name_tok,
+                expression=synthetic_expr,
+                debug=debug_level,
+                indexes=[],
+                confidence=confidence,
+            ),
+        )
+
     # export statement: export name, name, name to string/name!
     can_be_export = (
         all(t.type in {TokenType.STRING, TokenType.NAME, TokenType.COMMA} for t in without_whitespace[:-1])

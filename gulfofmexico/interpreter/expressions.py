@@ -144,7 +144,9 @@ def evaluate_normal_function(
                 expr.name,
             )
         max_arg_count = func.arg_count if func.arg_count >= 0 else len(args)
-        result = func.function(*args[:max_arg_count]) or GulfOfMexicoUndefined()
+        result = func.function(*args[:max_arg_count])
+        if result is None:
+            result = GulfOfMexicoUndefined()
 
         # Handle pending init for constructors
         if isinstance(result, GulfOfMexicoPendingInit):
@@ -339,23 +341,6 @@ def interpret_formatted_string(
 
 
 # ---------------------------------------------------------------------------
-# Escape sequences
-# ---------------------------------------------------------------------------
-
-def evaluate_escape_sequences(string_value: GulfOfMexicoString) -> GulfOfMexicoString:
-    """Process backslash escape sequences in a GulfOfMexicoString."""
-    escaped = string_value.value
-    escaped = escaped.replace("\\\\", "\x00ESCAPED_BACKSLASH\x00")
-    escaped = escaped.replace("\\n", "\n")
-    escaped = escaped.replace("\\t", "\t")
-    escaped = escaped.replace("\\r", "\r")
-    escaped = escaped.replace('\\"', '"')
-    escaped = escaped.replace("\\'", "'")
-    escaped = escaped.replace("\x00ESCAPED_BACKSLASH\x00", "\\")
-    return GulfOfMexicoString(escaped)
-
-
-# ---------------------------------------------------------------------------
 # Main expression evaluator
 # ---------------------------------------------------------------------------
 
@@ -527,8 +512,8 @@ def _evaluate_expression_impl(
         case ValueNode():
             if expr.name_or_value.type == TokenType.STRING:
                 retval = interpret_formatted_string(expr.name_or_value, namespaces, async_statements, when_statement_watchers, ctx)
-                if not ignore_string_escape_sequences:
-                    return evaluate_escape_sequences(retval)
+                # Escape sequences are already processed by the lexer's
+                # process_escape_sequences(); no second pass needed.
                 return retval
             return get_value_from_namespaces(expr.name_or_value, namespaces, ctx)
 

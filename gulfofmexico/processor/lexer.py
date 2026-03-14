@@ -100,8 +100,8 @@ def process_escape_sequences(value: str) -> str:
 
 def is_matching_pair(quote_value: str) -> bool:
     """
-    Finds a pair of quote groups that have the same count of quotes.
-    Returns an integer index where the second group begins if found, else -1.
+    Check whether a string's opening and closing quote groups have equal counts.
+    Returns True if a balanced split point exists, False otherwise.
     """
     total_sum = get_quote_count(quote_value)
     if total_sum % 2:
@@ -181,6 +181,7 @@ def tokenize(filename: str, code: str) -> list[Token]:
     line_count = 1
     tokens: list[Token] = []
     curr, start = 0, 0
+    _bracket_depth = 0  # track { } nesting for negative indentation detection
     while curr < len(code):
         match code[curr]:
             case "\n":
@@ -188,8 +189,20 @@ def tokenize(filename: str, code: str) -> list[Token]:
                 line_count += 1
                 start = curr  # at the new line to get col number
             case "}":
-                add_to_tokens(tokens, line_count, curr - start, TokenType.R_CURLY)
+                # Per DreamBerd spec: leading } on a line = negative indentation (cosmetic, skip).
+                # Only cosmetic if bracket_depth == 0 (no open blocks to close) AND at line start.
+                _at_line_start = (
+                    not tokens
+                    or tokens[-1].type == TokenType.NEWLINE
+                    or (tokens[-1].type == TokenType.WHITESPACE and len(tokens) >= 2 and tokens[-2].type == TokenType.NEWLINE)
+                )
+                if _at_line_start and _bracket_depth == 0:
+                    pass  # discard cosmetic negative-indent brace
+                else:
+                    _bracket_depth -= 1
+                    add_to_tokens(tokens, line_count, curr - start, TokenType.R_CURLY)
             case "{":
+                _bracket_depth += 1
                 add_to_tokens(tokens, line_count, curr - start, TokenType.L_CURLY)
             case "[":
                 add_to_tokens(tokens, line_count, curr - start, TokenType.L_SQUARE)
@@ -218,16 +231,26 @@ def tokenize(filename: str, code: str) -> list[Token]:
                 if code[curr + 1] == "+":
                     add_to_tokens(tokens, line_count, curr - start, TokenType.INCREMENT)
                     curr += 1
+                elif code[curr + 1] == "=":
+                    add_to_tokens(tokens, line_count, curr - start, TokenType.COMPOUND_ASSIGN, "+=")
+                    curr += 1
                 else:
-                    add_to_tokens(tokens, line_count, curr - start, TokenType.ADD)  # YOU NEVER SAID I HAD TO DO +=
+                    add_to_tokens(tokens, line_count, curr - start, TokenType.ADD)
             case "-":
                 if code[curr + 1] == "-":
                     add_to_tokens(tokens, line_count, curr - start, TokenType.DECREMENT)
                     curr += 1
+                elif code[curr + 1] == "=":
+                    add_to_tokens(tokens, line_count, curr - start, TokenType.COMPOUND_ASSIGN, "-=")
+                    curr += 1
                 else:
                     add_to_tokens(tokens, line_count, curr - start, TokenType.SUBTRACT)
             case "*":
-                add_to_tokens(tokens, line_count, curr - start, TokenType.MULTIPLY)
+                if code[curr + 1] == "=":
+                    add_to_tokens(tokens, line_count, curr - start, TokenType.COMPOUND_ASSIGN, "*=")
+                    curr += 1
+                else:
+                    add_to_tokens(tokens, line_count, curr - start, TokenType.MULTIPLY)
             case "/":
                 if code[curr + 1] == "/":
                     # Skip single-line comment until end of line
@@ -247,10 +270,17 @@ def tokenize(filename: str, code: str) -> list[Token]:
                             start = curr + 1  # Set start to char after newline for correct column tracking
                         curr += 1
                     continue
+                elif code[curr + 1] == "=":
+                    add_to_tokens(tokens, line_count, curr - start, TokenType.COMPOUND_ASSIGN, "/=")
+                    curr += 1
                 else:
                     add_to_tokens(tokens, line_count, curr - start, TokenType.DIVIDE)
             case "^":
-                add_to_tokens(tokens, line_count, curr - start, TokenType.CARROT)
+                if code[curr + 1] == "=":
+                    add_to_tokens(tokens, line_count, curr - start, TokenType.COMPOUND_ASSIGN, "^=")
+                    curr += 1
+                else:
+                    add_to_tokens(tokens, line_count, curr - start, TokenType.CARROT)
             case ">":
                 if code[curr + 1] == "=":
                     add_to_tokens(tokens, line_count, curr - start, TokenType.GREATER_EQUAL)
@@ -289,6 +319,18 @@ def tokenize(filename: str, code: str) -> list[Token]:
                         "User is too confused. Aborting due to trust issues.",
                     )  # heheheheheheh
                 add_to_tokens(tokens, line_count, curr - start, TokenType.QUESTION, value)
+            case "~":
+                # Tilde-equality operators: ~=, ~==, ~===
+                value = "~"
+                if code[curr + 1] == "=":
+                    value += "="
+                    curr += 1
+                    while code[curr + 1] == "=":
+                        value += "="
+                        curr += 1
+                    add_to_tokens(tokens, line_count, curr - start, TokenType.EQUAL, value)
+                else:
+                    add_to_tokens(tokens, line_count, curr - start, TokenType.NAME, value)
             case "=":
                 value = "="
                 if code[curr + 1] == ">":

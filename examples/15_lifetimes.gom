@@ -1,0 +1,20 @@
+// ╔═══════════════════════════════════════════════════════════════╗
+// ║  15 — Variable Lifetimes & Negative Lifetime Hoisting        ║
+// ╚═══════════════════════════════════════════════════════════════╝
+//
+// Variables can be given a lifetime <N> — they expire after N
+// statements. When N is negative, the variable is "hoisted"
+// backward: it becomes available N lines BEFORE its declaration.
+
+// ── Negative lifetime hoisting ──────────────────────────────────
+// The variable `name` is used BEFORE it's declared,
+// because its <-1> lifetime hoists it one line upward:
+print name!
+const const name<-1> = "Luke"!
+
+// ── Positive lifetime ───────────────────────────────────────────
+// This variable lasts exactly 3 statements:
+var x <3> = 10!
+print x!
+print x!
+print x!

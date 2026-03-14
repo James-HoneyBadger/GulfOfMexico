@@ -1,0 +1,45 @@
+// ╔═══════════════════════════════════════════════════════════════╗
+// ║  03 — Data Types                                             ║
+// ╚═══════════════════════════════════════════════════════════════╝
+//
+// GOM supports: Number, String, Boolean, List, Map, Function,
+//               Object (class instances), and Undefined.
+
+// ── Numbers ─────────────────────────────────────────────────────
+const const intVal = 42!
+const const floatVal = 3.14!
+const const negative = -7!
+print intVal!
+print floatVal!
+print negative!
+
+// ── Strings ─────────────────────────────────────────────────────
+// Double or single quotes — they're interchangeable:
+const const a = "double quotes"!
+const const b = 'single quotes'!
+print a!
+print b!
+
+// ── Booleans (three-valued) ─────────────────────────────────────
+// GOM has THREE boolean values: true, false, and maybe.
+// `maybe` resolves to true ~50% of the time — it's probabilistic.
+print true!
+print false!
+
+// ── Lists ───────────────────────────────────────────────────────
+const const colors = ["red", "green", "blue"]!
+print colors!
+
+const const empty = []!
+print empty!
+
+// ── Undefined ───────────────────────────────────────────────────
+const const nothing = undefined!
+print nothing!
+
+// ── Type conversion ─────────────────────────────────────────────
+// Explicit conversion functions:
+print String(42)!
+print Number("7")!
+print Boolean(1)!
+print Boolean(0)!

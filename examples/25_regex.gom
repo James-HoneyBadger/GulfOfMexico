@@ -1,0 +1,21 @@
+// ╔═══════════════════════════════════════════════════════════════╗
+// ║  25 — Regular Expressions                                    ║
+// ╚═══════════════════════════════════════════════════════════════╝
+//
+// GOM provides three built-in regex functions.
+// Each takes a SINGLE string argument with comma-separated parts:
+//   regex_match "pattern,string"        → first match or undefined
+//   regex_findall "pattern,string"      → list of all matches
+//   regex_replace "pattern,repl,string" → new string
+
+// ── Match ───────────────────────────────────────────────────────
+const const found = regex_match "\\d+,abc123def"!
+print found!
+
+// ── Find all ────────────────────────────────────────────────────
+const const all = regex_findall "\\d+,a1b22c333"!
+print all!
+
+// ── Replace ─────────────────────────────────────────────────────
+const const cleaned = regex_replace "\\d,X,a1b2c3"!
+print cleaned!
