@@ -29,11 +29,15 @@ print "I am ABSOLUTELY sure this prints."!!!
 | **Three-valued booleans** | `maybe` evaluates probabilistically — `if maybe { ... }` runs ~50% of the time. |
 | **Significant whitespace** | `2 * 1+3` = `8` but `2*1 + 3` = `5`. Tighter spacing binds harder. |
 | **Tiered equality** | `=` (approximate), `==` (exact), `===` (strict), `====` (identity). |
+| **Tilde equality** | `~=` (AEMI), `~==` (ABI), `~===` (AQMI) — approximate match operators. |
 | **Temporal lifetimes** | `var x <5> = "temp"!` — variable expires after 5 statements. |
+| **Negative hoisting** | `const x<-1> = 42!` — variable available one line *before* declaration. |
 | **Word numbers** | `five`, `nineteen`, `hundred(3)`, `half`, `quarter` — write numbers as English. |
 | **Confidence terminators** | Statements end with `!`, `!!`, or `!!!` to indicate confidence. `?` for debug. |
 | **No loops** | Recursion is the only iteration mechanism. |
 | **Single-instance classes** | Each class can have at most one instance at a time. |
+| **Emoji identifiers** | `const 🎉 = 42!` — use emoji as variable and function names. |
+| **Compound assignment** | `+=`, `-=`, `*=`, `/=`, `^=` — modify-in-place operators. |
 | **Currency interpolation** | `"${x}"`, `"£{x}"`, `"¥{x}"` — three currency symbols for string interpolation. |
 
 ## Quick Start
@@ -109,10 +113,20 @@ const c = maybe!      // true ~50% of the time
 ### Tiered Equality
 
 ```
-10 = 11       // true   — approximate (within 10)
+10 = 11       // true   — approximate (within ~10%)
 10 == 11      // false  — exact value
 10 == 10      // true
 10 === 10     // true   — value + type
+10 ;= 5       // true   — inequality (semicolon-equals)
+```
+
+### Tilde Equality
+
+```
+5 ~= 10           // true   — AEMI: same type → true
+5 ~= "hello"      // maybe  — different type → maybe
+"Hello" ~== "hello"  // true — ABI: case-insensitive
+100 ~=== 100.5    // true   — AQMI: within 1%
 ```
 
 ### Functions
@@ -137,7 +151,8 @@ const sum = add(3, 7)!    // parenthesized call
 function countdown(n) => {
    if n > 0 {
       print n!
-      countdown(n - 1)!
+      const prev = n - 1!
+      countdown(prev)!
    }
 }!
 countdown(5)!
@@ -206,7 +221,7 @@ The `python -m gulfofmexico` invocation works identically to `gom`.
 
 ## Examples
 
-21 example programs are included in [`examples/`](examples/), covering everything from hello world to sorting algorithms. See [examples/README.md](examples/README.md) for the full program index.
+26 example programs are included in [`examples/`](examples/), covering every feature of the language from hello world to recursive algorithms. See [examples/README.md](examples/README.md) for the full program index.
 
 ```bash
 # Run a single example
@@ -228,7 +243,7 @@ done
 | **[Installation Guide](docs/INSTALLATION.md)** | Platform-specific setup, virtual environments, extras |
 | **[Contributing Guide](CONTRIBUTING.md)** | How to contribute, coding standards, and testing workflow |
 | **[Changelog](docs/CHANGELOG.md)** | Version history and release notes |
-| **[Examples Index](examples/README.md)** | Annotated guide to all 21 example programs |
+| **[Examples Index](examples/README.md)** | Annotated guide to all 26 example programs |
 | **[Code of Conduct](CODE_OF_CONDUCT.md)** | Community standards |
 
 ## Project Structure
@@ -263,15 +278,15 @@ gulfofmexico/                   # Main package
     ├── runner.py               #   Background execution
     └── qt_compat.py            #   PySide6 / PyQt5 compatibility
 
-examples/                       # 21 example programs (.gom)
-tests/                          # Spec compliance and regression tests
+examples/                       # 26 example programs (.gom)
+tests/                          # 170 unit + integration tests
 docs/                           # Language reference, architecture, guides
 ```
 
 ## Testing
 
 ```bash
-# Run the full test suite
+# Run the full test suite (170 tests)
 python -m pytest
 
 # Run spec compliance directly
@@ -290,7 +305,7 @@ pip install gulfofmexico[all]       # All optional extras
 
 | Extra | Package | Feature |
 |-------|---------|---------|
-| `ide` | PySide6 | Graphical IDE with multi-tab editor, console, and syntax highlighting |
+| `ide` | PySide6 | Graphical IDE with 5 themes, settings dialog, toolbar, and syntax highlighting |
 | `input` | pynput | Keyboard input support |
 | `graphics` | Pillow | Image processing |
 | `yaml` | PyYAML | YAML configuration files |

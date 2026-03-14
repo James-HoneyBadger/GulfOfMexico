@@ -159,12 +159,14 @@ python -m pytest -x
 
 | File | Purpose |
 |------|---------|
+| `tests/test_interpreter.py` | 141 unit tests covering all language features via Python API |
 | `tests/test_examples.py` | Runs all `.gom` example programs and test files via subprocess |
 | `tests/spec_compliance.gom` | Comprehensive GOM-language test (25+ rules) |
 | `tests/test_comments.gom` | Comment syntax test |
 
 ### What the tests verify
 
+- **`test_interpreter.py`** — 141 unit tests exercising every language feature: variables, types, arithmetic, equality (tiered and tilde), control flow, functions, classes, lifetimes, maps, string interpolation, word numbers, regex, confidence terminators, compound assignment, emoji identifiers, negative indentation, async interleaving, and more.
 - **`test_example_runs_successfully`** — Every `.gom` file in `examples/` must exit with code 0.
 - **`test_gom_test_file`** — Every `.gom` file in `tests/` (except `spec_compliance.gom`) must exit with code 0.
 - **`test_spec_compliance_output`** — `spec_compliance.gom` must print `ALL TESTS COMPLETE` in its output.
@@ -177,7 +179,7 @@ For language-level tests, add assertions in `tests/spec_compliance.gom` or creat
 2. Use `print` to output results for verification.
 3. Not rely on interactive input (`read`).
 
-For Python-level tests, add functions in `tests/test_examples.py` or create new `test_*.py` files in `tests/`.
+For Python-level tests, add functions in `tests/test_interpreter.py` for unit tests or `tests/test_examples.py` for subprocess-based tests, or create new `test_*.py` files in `tests/`.
 
 ---
 
@@ -301,7 +303,7 @@ examples/
 ├── 01_hello_world.gom
 ├── 02_variables_and_types.gom
 ├── ...
-└── 21_sorting.gom
+└── 26_noop_and_misc.gom
 ```
 
 ### Guidelines for examples

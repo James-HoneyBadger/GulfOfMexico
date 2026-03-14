@@ -1,6 +1,6 @@
 # Gulf of Mexico — Language Reference
 
-Complete syntax and semantics reference for the Gulf of Mexico programming language (v0.2.0).
+Complete syntax and semantics reference for the Gulf of Mexico programming language (v0.3.0).
 
 > **Notation**: Code examples use `// comment` to annotate expected output or behavior. The arrow `→` indicates the result of an expression.
 
@@ -22,8 +22,9 @@ Complete syntax and semantics reference for the Gulf of Mexico programming langu
 12. [I/O](#12-io)
 13. [Multi-File Programs](#13-multi-file-programs)
 14. [Miscellaneous](#14-miscellaneous)
-15. [Environment Variables](#15-environment-variables)
-16. [Grammar Summary](#16-grammar-summary)
+15. [DreamBerd Extensions](#15-dreamberd-extensions)
+16. [Environment Variables](#16-environment-variables)
+17. [Grammar Summary](#17-grammar-summary)
 
 ---
 
@@ -239,7 +240,7 @@ For a list of length N, valid indices are `-1` through `N - 2`.
 
 ```
 var list = [1, 2, 3]!
-list.push(4)!            // append → [1, 2, 3, 4]
+list.push 4!             // append → [1, 2, 3, 4]  (space syntax)
 list.pop()!              // remove last → [1, 2, 3], returns 4
 list.length              // → 3  (property, not method)
 ```
@@ -412,40 +413,83 @@ GOM provides **four levels** of equality precision:
 | `===` | Type-strict | Same value **and** same type. Mutable objects: same reference. |
 | `====` | Reference identity | Exact same object in memory. |
 
-Inequality counterparts: `!=`, `!==`, `!===`.
+Inequality counterpart: `;=` (semicolon-equals, not `!=`).
 
 ```
-10 = 15       // → true   (within 10)
-10 = 25       // → false  (not within 10)
+10 = 15       // → true   (within ~10%)
+10 = 25       // → false  (not within ~10%)
 10 == 10      // → true   (exact match)
 10 == 10.0    // → true   (same numeric value)
 10 === 10     // → true   (same type)
 "hi" === 42   // → false  (different types)
+10 ;= 5       // → true   (not approximately equal)
+10 ;= 10      // → false  (approximately equal)
 ```
 
-### 4.4 Logical Operators
+### 4.4 Tilde Equality (Approximate Match Operators)
+
+GOM also provides three **tilde equality** operators for fuzzy comparison:
+
+| Operator | Name | Behavior |
+|----------|------|----------|
+| `~=` | AEMI (Are Even Meaningfully Identical?) | Same type → `true`, different type → `maybe` |
+| `~==` | ABI (Are Basically Identical?) | Case-insensitive string comparison, cross-type coercion |
+| `~===` | AQMI (Are Quite Meaningfully Identical?) | Numbers within 1%, strings with normalized whitespace |
+
+```
+5 ~= 10              // → true   (same type)
+5 ~= "hello"         // → maybe  (different types)
+"Hello" ~== "hello"  // → true   (case-insensitive)
+5 ~== "5"            // → true   (cross-type coercion)
+100 ~=== 100.5       // → true   (within 1%)
+100 ~=== 200         // → false  (not within 1%)
+"hello  world" ~=== "hello world"  // → true (whitespace normalized)
+```
+
+> **Note**: Tilde equality expressions require double-space before the left operand when used with `print`: `print  5 ~= 10!`
+
+### 4.5 Logical Operators
 
 | Operator | Meaning | Notes |
 |----------|---------|-------|
-| `&&` | Logical AND | Short-circuits. `maybe && maybe` → probabilistic |
-| `\|\|` | Logical OR | Short-circuits. `maybe \|\| false` → probabilistic |
+| `&` | Logical AND | Short-circuits. `maybe & maybe` → probabilistic |
+| `\|` | Logical OR | Short-circuits. `maybe \| false` → probabilistic |
 | `;` (prefix) | Logical NOT | `;true` → `false`, `;maybe` → `maybe` |
 
 Three-valued logic truth tables:
 
-**AND (`&&`)**:
+**AND (`&`)**:
 | | true | maybe | false |
 |---|---|---|---|
 | **true** | true | maybe | false |
 | **maybe** | maybe | maybe | false |
 | **false** | false | false | false |
 
-**OR (`||`)**:
+**OR (`|`)**:
 | | true | maybe | false |
 |---|---|---|---|
 | **true** | true | true | true |
 | **maybe** | true | maybe | maybe |
 | **false** | true | maybe | false |
+
+### 4.6 Compound Assignment
+
+Modify-in-place operators (requires `var var` for reassignment):
+
+| Operator | Equivalent |
+|----------|------------|
+| `x += 5!` | `x = x + 5!` |
+| `x -= 3!` | `x = x - 3!` |
+| `x *= 2!` | `x = x * 2!` |
+| `x /= 4!` | `x = x / 4!` |
+| `x ^= 2!` | `x = x ^ 2!` |
+
+```
+var var score = 100!
+score += 50!
+score -= 20!
+print score!     // → 130
+```
 
 ---
 
@@ -552,14 +596,17 @@ function classify(n) => {
 
 ### 6.2 Recursion (No Loops)
 
-GOM has **no loop constructs** (`for`, `while`, `do`). All iteration is done via recursion:
+GOM has **no loop constructs** (`for`, `while`, `do`). All iteration is done via recursion.
+
+> **Important**: Recursive calls with computed arguments require intermediate variables. `factorial(n - 1)` will cause infinite recursion — use `const prev = n - 1!` then `factorial(prev)!` instead.
 
 ```
 function factorial(n) => {
    if n <= 1 {
       return 1!
    }
-   return n * factorial(n - 1)!
+   const prev = n - 1!
+   return n * factorial(prev)!
 }!
 
 print factorial(5)!    // → 120
@@ -567,9 +614,11 @@ print factorial(5)!    // → 120
 
 ```
 function forEach(list, fn, idx) => {
-   if idx < list.length - 1 {
+   const limit = list.length - 1!
+   if idx < limit {
       fn(list[idx])!
-      forEach(list, fn, idx + 1)!
+      const next = idx + 1!
+      forEach(list, fn, next)!
    }
 }!
 ```
@@ -602,15 +651,15 @@ d.bark()!              // → "Rex says woof!"
 
 ### 7.3 Single-Instance Rule
 
-GOM enforces **one instance per class**. Creating a second instance of the same class overwrites the first:
+GOM enforces **one instance per class**. To create a second instance, `delete` the first:
 
 ```
-const a = new Dog!
+var a = new Dog!
 a.name = "Rex"!
 
-const b = new Dog!     // replaces the previous Dog
+delete a!              // free the instance slot
+var b = new Dog!
 b.name = "Fido"!
-print a.name!          // → "Fido" (same object)
 ```
 
 ### 7.4 Property Access
@@ -832,12 +881,17 @@ noop!
 
 ### 14.2 Regex
 
-Built-in regex functions for string matching:
+Built-in regex functions for string matching. Each takes a **single string argument** with comma-separated parts:
 
 ```
-const result = regex_match("\\d+", "abc123def")!
-const all = regex_findall("\\d+", "a1b2c3")!
-const replaced = regex_replace("\\d", "X", "a1b2")!
+// regex_match "pattern,string" → first match or undefined
+const result = regex_match "\\d+,abc123def"!
+
+// regex_findall "pattern,string" → list of all matches
+const all = regex_findall "\\d+,a1b2c3"!
+
+// regex_replace "pattern,replacement,string" → new string
+const replaced = regex_replace "\\d,X,a1b2"!
 ```
 
 ### 14.3 Empty Value
@@ -850,7 +904,72 @@ const replaced = regex_replace("\\d", "X", "a1b2")!
 
 ---
 
-## 15. Environment Variables
+## 15. DreamBerd Extensions
+
+These features align GOM with the [DreamBerd](https://github.com/TodePond/DreamBerd) specification.
+
+### 15.1 Emoji Identifiers
+
+Emoji characters are valid in variable and function names:
+
+```
+const 🎉 = 42!
+print 🎉!              // → 42
+
+function 🚀(n) => {
+   return n * 2!
+}!
+print 🚀(5)!           // → 10
+```
+
+### 15.2 Negative Lifetime Hoisting
+
+A variable with a negative lifetime `<-N>` is **hoisted** — it becomes available N lines *before* its declaration:
+
+```
+print name!                    // Works! — hoisted from below
+const const name<-1> = "Luke"!
+```
+
+### 15.3 Number Literal Redefinition
+
+You can redefine what a number literal evaluates to:
+
+```
+const const 5 = 4!
+print 2 + 5!           // → 6  (because 5 is now worth 4)
+```
+
+### 15.4 Negative Indentation
+
+Leading `}` characters are cosmetic and ignored by the parser. This allows so-called "negative indentation":
+
+```
+}}}if true {
+   print "deeply outdented"!
+}
+```
+
+### 15.5 Async Interleaving
+
+Functions declared with `async` queue their bodies for deferred execution:
+
+```
+async function later() => {
+   print "second"!
+}!
+later()!
+print "first"!
+// Output: first, second
+```
+
+### 15.6 Variable Overloading
+
+Declaring a variable that already exists with `const`/`var` creates a new binding that shadows the previous one. The value from `previous` still accesses the old value.
+
+---
+
+## 16. Environment Variables
 
 | Variable | Effect |
 |----------|--------|
@@ -859,7 +978,7 @@ const replaced = regex_replace("\\d", "X", "a1b2")!
 
 ---
 
-## 16. Grammar Summary
+## 17. Grammar Summary
 
 This is a simplified description of GOM's grammar. The actual parser handles many edge cases described above.
 
@@ -878,6 +997,7 @@ declaration    := ("const" | "var") name ("<" lifetime ">")? ("~" confidence "~"
 assignment     := name "=" expression
                |  name "[" expression "]" "=" expression
                |  name "." name "=" expression
+               |  name ("+=" | "-=" | "*=" | "/=" | "^=") expression
 conditional    := "if" expression "{" statement* "}"
 function_def   := ("function"|"fn"|"func"|"f") name "(" params? ")" "=>" "{" statement* "}"
 class_decl     := "class" name "{" (declaration | function_def)* "}"
@@ -893,4 +1013,4 @@ expression     := ... (see expression_tree.py for the full expression grammar)
 
 ---
 
-*This reference describes Gulf of Mexico v0.2.0. For architectural details, see [ARCHITECTURE.md](ARCHITECTURE.md). For installation instructions, see [INSTALLATION.md](INSTALLATION.md).*
+*This reference describes Gulf of Mexico v0.3.0. For architectural details, see [ARCHITECTURE.md](ARCHITECTURE.md). For installation instructions, see [INSTALLATION.md](INSTALLATION.md).*

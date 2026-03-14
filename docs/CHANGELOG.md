@@ -4,6 +4,58 @@ All notable changes to the Gulf of Mexico interpreter are documented here.
 
 ---
 
+## v0.3.0 — 2026-03-13
+
+### DreamBerd spec alignment, new example suite, and IDE overhaul
+
+#### New language features
+
+- **Tilde equality operators**: `~=` (AEMI), `~==` (ABI), `~===` (AQMI) — three levels of approximate matching.
+- **Compound assignment**: `+=`, `-=`, `*=`, `/=`, `^=` operators for modify-in-place.
+- **Emoji identifiers**: Variable and function names can use emoji characters (🎉, 🚀, etc.).
+- **Negative lifetime hoisting**: `<-N>` makes a variable available N lines before its declaration.
+- **Negative indentation**: Leading `}` characters are cosmetic and ignored by the parser.
+- **Async interleaving**: `async function` bodies queue for deferred execution.
+- **Variable overloading**: Re-declaring an existing name shadows it; `previous` still accesses the old value.
+- **Number literal redefinition**: `const const 5 = 4!` redefines what `5` evaluates to.
+
+#### IDE overhaul
+
+- Rewrote all 4 IDE modules (`qt_compat.py`, `editor.py`, `highlighter.py`, `app.py`).
+- **5 built-in themes**: Gulf Dark, Gulf Light, Solarized Dark, Monokai, Nord.
+- **Settings dialog** (Ctrl+,) for theme selection.
+- **Toolbar** with Run, Stop, New, Open, Save buttons.
+- **Bracket matching** with visual highlights in the editor.
+- Block-based syntax highlighter that adapts to the active theme.
+
+#### Examples
+
+- Deleted all 21 old example programs.
+- Created 26 new comprehensive demos covering every GOM feature.
+- New `examples/README.md` with feature coverage table.
+
+#### Bug fixes
+
+- Fixed operator documentation: GOM uses `&`/`|` (not `&&`/`||`) and `;=` (not `!=`).
+- Fixed regex built-in functions to document single-arg comma-delimited syntax.
+- Fixed recursion examples to use intermediate variables (prevents infinite recursion from argument expression parsing).
+- Fixed class single-instance rule: must `delete` before creating a second instance.
+- Fixed `list.push` to use space syntax (`arr.push 4!` not `arr.push(4)!`).
+- Fixed variable reassignment regression from overloading feature.
+
+#### Tests
+
+- Added `tests/test_interpreter.py` with 141 unit tests covering all language features.
+- Total test count: **170** (141 interpreter + 29 example/compliance tests), all passing.
+
+#### Documentation
+
+- Updated all documentation files to reflect v0.3.0 changes.
+- Added DreamBerd Extensions section to Language Reference.
+- Fixed logical operator (`&`/`|`), inequality (`;=`), and regex syntax across all docs.
+
+---
+
 ## v0.2.0 — 2026-02-15
 
 ### Major refactor and spec compliance

@@ -114,7 +114,7 @@ pip install -e ".[all]"
 
 | Extra | Package | Feature |
 |-------|---------|---------|
-| `ide` | PySide6 (≥6.6) | Graphical IDE with multi-tab editor, console, and syntax highlighting |
+| `ide` | PySide6 (≥6.6) | Graphical IDE with 5 themes, settings dialog, toolbar, bracket matching, and syntax highlighting |
 | `input` | pynput (≥1.7.7) | Keyboard input support |
 | `graphics` | Pillow (≥11.0) | Image processing |
 | `yaml` | PyYAML (≥6.0) | YAML configuration files |
@@ -139,9 +139,13 @@ python -m gulfofmexico.ide
 
 ### IDE Features
 
-- Multi-tab code editor with syntax highlighting
+- **5 built-in themes**: Gulf Dark, Gulf Light, Solarized Dark, Monokai, Nord
+- **Settings dialog** (Ctrl+,) for theme selection
+- **Toolbar** with Run, Stop, New, Open, Save buttons
+- **Bracket matching** with visual highlights
+- Multi-tab code editor with block-based syntax highlighting
 - Console output panel
-- Run / Stop buttons (Ctrl+R / Ctrl+.)
+- Run / Stop (Ctrl+R / Ctrl+.)
 - File operations: New (Ctrl+N), Open (Ctrl+O), Save (Ctrl+S)
 - Recent files tracking
 - Session persistence (remembers window size, position, and open tabs)
@@ -279,7 +283,7 @@ Type `print "it works!"!` and press Enter. Type `:quit` to exit.
 python -m pytest
 ```
 
-All 24 tests should pass.
+All 170 tests should pass.
 
 ### Run the spec compliance test
 

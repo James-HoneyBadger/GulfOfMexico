@@ -219,9 +219,12 @@ Implements all GOM operators on GOM value types.
 
 Key features:
 - **Four-tiered equality**: `is_approx_equal()`, `is_equal()`, `is_really_equal()`, `is_really_really_equal()`
+- **Three tilde-equality operators**: `~=` (AEMI), `~==` (ABI), `~===` (AQMI)
 - Approximate equality uses `SequenceMatcher` for strings and numeric tolerance for numbers
 - Three-valued logical operators (`maybe` handled probabilistically via `random()`)
+- Compound assignment operators (`+=`, `-=`, `*=`, `/=`, `^=`)
 - Unary minus: negates numbers, reverses strings and lists
+- Logical AND (`&`) and OR (`|`) (single characters, not doubled)
 - Logical NOT via `;`: `;true` → `false`, `;maybe` → `maybe`
 
 ### `namespaces.py` — Scope Lookup
@@ -344,9 +347,12 @@ Optional graphical IDE built on PySide6 (with PyQt5 fallback).
 `MainWindow(QMainWindow)` with:
 - Multi-tab code editor
 - Console output dock
-- Menus: File (new/open/save/recent), Edit, Run (run/stop)
-- Keyboard shortcuts (Ctrl+N, Ctrl+O, Ctrl+S, Ctrl+R, etc.)
-- Session persistence (window geometry, open files)
+- Toolbar with Run, Stop, New, Open, Save buttons
+- Settings dialog with theme selection
+- 5 built-in themes: Gulf Dark, Gulf Light, Solarized Dark, Monokai, Nord
+- Menus: File (new/open/save/recent), Edit, Run (run/stop), Settings
+- Keyboard shortcuts (Ctrl+N, Ctrl+O, Ctrl+S, Ctrl+R, Ctrl+comma for settings, etc.)
+- Session persistence (window geometry, open files, active theme)
 - Threaded code execution via `Worker(QObject)` to keep UI responsive
 
 ### `editor.py` — Code Editor
@@ -354,17 +360,21 @@ Optional graphical IDE built on PySide6 (with PyQt5 fallback).
 `CodeEditor(QPlainTextEdit)` with:
 - Line number gutter (`LineNumberArea`)
 - Current-line highlighting
+- Bracket matching with visual highlight
 - Tab-width configuration (3 spaces per GOM spec)
 
 ### `highlighter.py` — Syntax Highlighting
 
-Uses the production `lexer.tokenize()` function to tokenize each line, then applies One Dark-style colors:
-- Keywords → purple
-- Names → red
+Block-based syntax highlighter using the production `lexer.tokenize()` function. Applies theme-aware colors:
+- Keywords → purple/magenta
+- Names → red/coral
 - Numbers → orange
 - Strings → green
 - Operators → cyan
 - Punctuation → yellow
+- Comments → gray/italic
+
+All colors adapt to the currently selected theme.
 
 ### `runner.py` — Execution
 
@@ -497,4 +507,4 @@ Arrays, strings, and numbers all start indexing at `-1` instead of `0` or `1`. T
 
 ---
 
-*This architecture guide describes Gulf of Mexico v0.2.0. For the full language specification, see [LANGUAGE_REFERENCE.md](LANGUAGE_REFERENCE.md).*
+*This architecture guide describes Gulf of Mexico v0.3.0. For the full language specification, see [LANGUAGE_REFERENCE.md](LANGUAGE_REFERENCE.md).*
