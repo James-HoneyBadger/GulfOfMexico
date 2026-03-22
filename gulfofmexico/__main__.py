@@ -23,7 +23,6 @@ Usage Modes:
        $ python -m gulfofmexico --verbose script.gom
 
 All modes use the production interpreter in gulfofmexico/interpreter.py.
-The experimental gulfofmexico/engine/ is never used.
 
 Execution Path:
     - File mode: run_file() from gulfofmexico/__init__.py

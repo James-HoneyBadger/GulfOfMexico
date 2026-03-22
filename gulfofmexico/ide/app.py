@@ -1845,33 +1845,33 @@ if PYSIDE_AVAILABLE:
                 show_line_numbers=bool(s.get("show_line_numbers", True)),
             )
             GomHighlighter(editor.document(), theme=self._theme)
-            if content:
-                editor.setPlainText(content)
-            tab_name = Path(path).name if path else "untitled.gom"
-            idx = self.tabs.addTab(editor, tab_name)
-            self.tabs.setCurrentIndex(idx)
-            editor.setProperty("path", path or "")
-            self._connect_editor(editor)
-            if bool(s.get("auto_complete", True)):
-                self._setup_completer(editor)
-            return editor
-
-        def _setup_completer(self, editor: CodeEditor) -> None:
-            completer = QCompleter(_COMPLETION_WORDS, editor)
-            completer.setCaseSensitivity(Qt.CaseSensitivity.CaseInsensitive)
-            completer.setCompletionMode(QCompleter.CompletionMode.PopupCompletion)
-            completer.setWidget(editor)
-            popup = completer.popup()
-            popup.setStyleSheet(
-                f"QListView {{ background: {self._theme['bg_darker']}; "
-                f"color: {self._theme['fg']}; border: 1px solid {self._theme['border_light']}; "
-                f"border-radius: 6px; font-family: monospace; padding: 2px; }}"
+            welcome = (
+                "//                                                         \n"
+                "//                                                         \n"
+                "//\n"
+                "// Gulf of Mexico: a production-ready esoteric language featuring:\n"
+                "//    2 -1 based indexing\n"
+                "//    2 Three-valued booleans (true / false / maybe)\n"
+                "//    2 Significant whitespace for operator precedence\n"
+                "//    2 No loops  c recursion only\n"
+                "//    2 Statement terminators: !  !!  !!!  ?\n"
+                "//    2 Emoji identifiers   c\n"
+                "//\n"
+                "// Shortcuts:\n"
+                "//   F5          Run code\n"
+                "//   Ctrl+N      New file\n"
+                "//   Ctrl+O      Open file\n"
+                "//   Ctrl+S      Save\n"
+                "//   Ctrl+,      Settings\n"
+                "//   Ctrl+=/-    Zoom in/out\n"
+                "//   Ctrl+F      Find\n"
+                "//   Ctrl+H      Find & Replace\n"
+                "//   Ctrl+/      Toggle comment\n"
+                "//\n"
+                f"// Theme: {t}\n"
+                "//\n\n"
+                'print "Hello, Gulf of Mexico"!\n'
             )
-            editor.setProperty("_completer", completer)
-
-            def _on_text():
-                cursor = editor.textCursor()
-                cursor.movePosition(cursor.MoveOperation.StartOfWord,
                                     cursor.MoveMode.KeepAnchor)
                 prefix = cursor.selectedText()
                 if len(prefix) < 2:

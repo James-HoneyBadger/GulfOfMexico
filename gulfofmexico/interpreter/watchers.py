@@ -321,14 +321,14 @@ def adjust_for_normal_nexts(
     for name, old_len in zip(async_nexts, old_async_vals):
         v, ns = get_name_and_namespace_from_namespaces(name, namespaces)
         if not v or not ns or (old_len is not None and not isinstance(v, Variable)):
-            raise_error_at_line(ctx.filename, ctx.code, ctx.current_line, "Something went wrong with accessing the next value of a variable.")
+            raise_error_at_line(ctx.filename, ctx.code, ctx.current_line, "Failed to access the next value: variable is undefined, not a Variable, or namespace is missing.")
         mod_name = get_modified_next_name(name, id(ns))
         match old_len:
             case None:
                 new_namespace[mod_name] = Name(mod_name, v.value if isinstance(v, Name) else v.prev_values[0])
             case i:
                 if not isinstance(v, Variable):
-                    raise_error_at_line(ctx.filename, ctx.code, ctx.current_line, "Something went wrong.")
+                    raise_error_at_line(ctx.filename, ctx.code, ctx.current_line, "Failed to access previous value: not a Variable instance.")
                 new_namespace[mod_name] = Name(mod_name, v.prev_values[i])
 
     # Adjust for normal nexts that may have already resolved
@@ -343,7 +343,7 @@ def adjust_for_normal_nexts(
                 new_namespace[mod_name] = Name(mod_name, v.value if isinstance(v, Name) else v.prev_values[0])
             case i:
                 if not isinstance(v, Variable):
-                    raise_error_at_line(ctx.filename, ctx.code, ctx.current_line, "Something went wrong.")
+                    raise_error_at_line(ctx.filename, ctx.code, ctx.current_line, "Failed to access previous value: not a Variable instance.")
                 new_namespace[mod_name] = Name(mod_name, v.prev_values[i])
 
     # Set up watchers for remaining normal nexts

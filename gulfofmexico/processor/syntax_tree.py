@@ -108,7 +108,7 @@ class ClassDeclaration(CodeStatement, CodeStatementKeywordable):
     name: Token
     code: list[tuple[CodeStatement, ...]]
 
-    # Compatibility init for experimental tests
+    # Compatibility init for legacy tests
 
     def __init__(self, keyword=None, name=None, code=None):
         self.keyword = keyword
@@ -140,7 +140,7 @@ class VariableDeclaration(CodeStatement, CodeStatementDebuggable):
     confidence: int  # 1-3 (number of ! marks)
     destructure_names: Optional[list[Token]]  # For [a, b] = expr! destructuring
 
-    # Compatibility init for experimental tests
+    # Compatibility init for legacy tests
     def __init__(
         self,
         name=None,
@@ -202,7 +202,7 @@ class ReturnStatement(CodeStatement, CodeStatementDebuggable):
     expression: Union[list[Token], ExpressionTreeNode]
     debug: int
 
-    # Compatibility init for experimental tests constructing with minimal args
+    # Compatibility init for legacy tests constructing with minimal args
 
     def __init__(self, keyword=None, expression=None, debug=0):
         self.keyword = keyword
@@ -217,7 +217,7 @@ class DeleteStatement(CodeStatement, CodeStatementKeywordable, CodeStatementDebu
     name: Token
     debug: int
 
-    # Compatibility init for experimental tests
+    # Compatibility init for legacy tests
 
     def __init__(self, keyword=None, name=None, debug=0):
         self.keyword = keyword
@@ -232,7 +232,7 @@ class ReverseStatement(CodeStatement, CodeStatementKeywordable, CodeStatementDeb
     name: Token  # The variable to reverse
     debug: int
 
-    # Compatibility init for experimental tests
+    # Compatibility init for legacy tests
 
     def __init__(self, keyword=None, name=None, debug=0):
         self.keyword = keyword
@@ -272,7 +272,7 @@ class ExportStatement(CodeStatement, CodeStatementDebuggable):
     target_file: Token
     debug: int
 
-    # Compatibility init for experimental tests
+    # Compatibility init for legacy tests
 
     def __init__(
         self,
@@ -296,7 +296,7 @@ class ImportStatement(CodeStatement, CodeStatementKeywordable, CodeStatementDebu
     names: list[Token]
     debug: int
 
-    # Compatibility init for experimental tests
+    # Compatibility init for legacy tests
 
     def __init__(self, keyword=None, names=None, debug=0):
         self.keyword = keyword

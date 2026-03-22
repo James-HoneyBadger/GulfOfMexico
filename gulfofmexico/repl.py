@@ -9,8 +9,7 @@ Features:
 - Commands: :help, :quit, :reset, :load <file>, :vars, :history,
     :save <file> [all|last|<n>], :open <file>, :run <n>, :clip [last|<n>]
 
-This REPL intentionally avoids the experimental engine; it uses the
-monolithic production interpreter in gulfofmexico/interpreter.py.
+This REPL uses the production interpreter in gulfofmexico/interpreter.py.
 """
 
 from __future__ import annotations
