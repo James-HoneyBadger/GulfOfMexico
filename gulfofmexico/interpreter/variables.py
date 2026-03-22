@@ -8,8 +8,6 @@ variable assignment with indexed / dotted access.
 
 from __future__ import annotations
 
-from typing import Union
-
 from gulfofmexico.base import (
     debug_print,
     raise_error_at_line,

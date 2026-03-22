@@ -38,7 +38,6 @@ Built-in Functions:
 
 from __future__ import annotations
 
-import functools
 import math as _math
 import random as _random
 import time
@@ -105,13 +104,12 @@ def db_list_pop(
 
 def db_str_push(self: GulfOfMexicoString, val: GulfOfMexicoValue) -> None:
     val_str = db_to_string(val).value
-    max_user_index = max(self.indexer.keys())
+    max_user_index = max(self.indexer.keys()) if self.indexer else -2
     if len(val_str) > 1:
         self.indexer[max_user_index + 1] = (len(self.value) - 1, val_str[1:])
     else:
         self.indexer[max_user_index + 1] = (len(self.value) - 1, "")
     self.value += val_str
-    # print(max(self.indexer.keys())+1)
     self.create_namespace()  # update the length
 
 
@@ -120,6 +118,8 @@ def db_str_pop(
     index: Union[GulfOfMexicoNumber, GulfOfMexicoSpecialBlankValue],
 ) -> GulfOfMexicoValue:
     if isinstance(index, GulfOfMexicoSpecialBlankValue):
+        if not self.value:
+            raise NonFormattedError("Cannot pop from an empty string.")
         retval = self.value[-1]
         self.value = self.value[:-1]
         return GulfOfMexicoString(retval)
@@ -221,9 +221,7 @@ class GulfOfMexicoList(
         elif index.value not in self.indexer:
             raise NonFormattedError("No value assigned to that index")  # if inbounds index doesnt have assigned val
         user_index = index.value
-        # print("user index:" + str(user_index))
         realIndex = self.indexer.get(user_index)
-        # print("real index:" + str(realIndex))
         if realIndex is None:
             raise NonFormattedError("Index not found")
         return self.values[round(realIndex)]
@@ -249,8 +247,7 @@ class GulfOfMexicoList(
             self.indexer[index.value] = nearest_int_down
             self.create_namespace()
             # all real indexes after the inserted item need 1 to be added to them
-            user_indicies = self.indexer.keys()
-            for user_index in user_indicies:
+            for user_index in list(self.indexer.keys()):
                 if user_index > index.value:
                     self.indexer[user_index] += 1
 
@@ -354,12 +351,12 @@ class GulfOfMexicoString(
             else:
                 indexer_data = (indexer_data[0], "")
             self.indexer[index.value] = indexer_data
-            user_indicies = self.indexer.keys()
-            for user_index in user_indicies:
+            # Net shift = len(val_str) - (excess_length + 1); subsequent real indices must reflect this.
+            adjustment = len(val_str) - excess_length - 1
+            for user_index in list(self.indexer.keys()):
                 if user_index > index.value:
                     indexer_data = self.indexer[user_index]
-                    indexer_data = (indexer_data[0] - excess_length, indexer_data[1])
-                    self.indexer[user_index] = indexer_data
+                    self.indexer[user_index] = (indexer_data[0] + adjustment, indexer_data[1])
             self.create_namespace()
 
         else:  # assign in the middle of the array
@@ -372,13 +369,10 @@ class GulfOfMexicoString(
             else:
                 indexer_data = (index_num - 1, "")
             self.indexer[index.value] = indexer_data
-            user_indicies = self.indexer.keys()
-            for user_index in user_indicies:
+            for user_index in list(self.indexer.keys()):
                 if user_index > index.value:
-                    # print(f"updating user index {user_index},{self.indexer[user_index]}")
                     indexer_data = self.indexer[user_index]
-                    indexer_data = (indexer_data[0] + len(val_str), indexer_data[1])
-                    self.indexer[user_index] = indexer_data
+                    self.indexer[user_index] = (indexer_data[0] + len(val_str), indexer_data[1])
             self.create_namespace()
 
 
@@ -780,12 +774,16 @@ def db_sleep(t: GulfOfMexicoValue) -> None:
     sleep(t.value)
 
 
-def db_read(prompt: GulfOfMexicoValue) -> GulfOfMexicoString:
+def db_read(prompt: GulfOfMexicoValue = None) -> GulfOfMexicoString:
     """Read a line from stdin with an optional prompt per spec."""
-    if not isinstance(prompt, GulfOfMexicoString):
+    if prompt is None or isinstance(prompt, GulfOfMexicoSpecialBlankValue):
+        prompt_str = ""
+    elif not isinstance(prompt, GulfOfMexicoString):
         raise NonFormattedError("'read' function requires argument to be a string")
+    else:
+        prompt_str = prompt.value
     try:
-        result = input(prompt.value)
+        result = input(prompt_str)
     except EOFError:
         result = ""
     return GulfOfMexicoString(result)
@@ -949,7 +947,7 @@ BUILTIN_FUNCTION_KEYWORDS = {
     "sleep": Name("sleep", BuiltinFunction(1, db_sleep)),
     "read": Name("read", BuiltinFunction(-1, db_read)),
     "readfile": Name("readfile", BuiltinFunction(1, db_readfile)),
-    "write": Name("write", BuiltinFunction(-1, db_write)),
+    "write": Name("write", BuiltinFunction(2, db_write)),
     "regex_match": Name("regex_match", BuiltinFunction(1, db_regex_match)),
     "regex_findall": Name("regex_findall", BuiltinFunction(1, db_regex_findall)),
     "regex_replace": Name("regex_replace", BuiltinFunction(1, db_regex_replace)),

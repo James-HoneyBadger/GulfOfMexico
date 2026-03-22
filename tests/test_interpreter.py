@@ -12,8 +12,6 @@ import sys
 import tempfile
 from pathlib import Path
 
-import pytest
-
 ROOT = Path(__file__).resolve().parent.parent
 TIMEOUT = 15  # seconds per test
 
@@ -223,9 +221,11 @@ class TestComparison:
         assert_output("const r = 10 == 11! print r!", "false")
 
     def test_approx_equality(self):
-        """Single = is approximate (~10% ratio threshold)."""
-        assert_output("const r = 10 = 11! print r!", "true")
-        assert_output("const r = 10 = 100! print r!", "false")
+        """Single = is approximate (absolute difference ≤ 10 threshold per spec)."""
+        assert_output("const r = 10 = 11! print r!", "true")   # |11-10|=1 ≤ 10
+        assert_output("const r = 10 = 15! print r!", "true")   # |15-10|=5 ≤ 10
+        assert_output("const r = 10 = 100! print r!", "false")  # |100-10|=90 > 10
+        assert_output("const r = 10 = 25! print r!", "false")  # |25-10|=15 > 10
 
     def test_strict_equality(self):
         assert_output("const r = 10 === 10! print r!", "true")
@@ -800,7 +800,6 @@ class TestOperatorEdgeCases:
 class TestImportTariff:
     def test_import_removes_at_most_one_statement(self):
         """Import tariff should remove at most one statement."""
-        from gulfofmexico.interpreter.execution import interpret_code_statements
         # This is a statistical test; we just verify the logic path exists
         # and doesn't crash. Full behavior is probabilistic.
         from gulfofmexico.builtin import BUILTIN_FUNCTION_KEYWORDS

@@ -2,22 +2,26 @@
 Gulf of Mexico IDE — Main Application
 
 A polished, configurable IDE for the GOM language featuring:
-    - Multiple colour themes (One Dark, Dracula, Nord, Solarized Dark, GitHub Light)
+    - 7 built-in colour themes (One Dark, Dracula, Nord, Solarized Dark, GitHub Light, Monokai, Catppuccin Mocha)
     - Settings dialog (Editor, Appearance, Execution)
-    - Toolbar with Run / Stop / New / Open / Save / Settings
+    - Toolbar with Run / Stop / New / Open / Save / Console-toggle / Variables-toggle; movable to any edge
+    - Closable, floatable, nestable dock panels (Console, Variable Inspector)
+    - Dock layout persistence via QMainWindow.saveState() / restoreState()
     - Multi-tab editor with syntax highlighting
     - Find/Replace bar (Ctrl+F / Ctrl+H)
+    - Go to Line dialog (Ctrl+G)
+    - Duplicate line (Ctrl+D), move line up/down (Alt+↑↓)
     - Toggle comment (Ctrl+/)
-    - Code auto-completion
+    - Word wrap and line-number gutter toggles
     - Bracket matching & indent guides
     - Font zoom (Ctrl+= / Ctrl+-)
-    - Line/column status indicator
+    - Line/column/selection status indicator
     - Variable inspector dock
-    - Console output with error highlighting
+    - Console output with timestamps and optional clear-on-run
     - Breakpoint gutter (click line numbers)
     - Welcome tab for new users
     - Drag-and-drop .gom file opening
-    - Session persistence (geometry, open tabs, settings)
+    - Session persistence (geometry, open tabs, dock layout, settings)
     - Recent files menu
     - Subprocess-based execution with reliable Stop
 """
@@ -26,22 +30,25 @@ from __future__ import annotations
 
 import json
 import os
+import re as _re
 import subprocess
 import sys
 import tempfile
+from datetime import datetime
 from functools import partial
 from html import escape as _html_escape
 from pathlib import Path
 
 try:
     from gulfofmexico.ide.qt_compat import (
-        QAction, QApplication, QCheckBox, QColor, QComboBox, QCompleter,
-        QDialog, QDialogButtonBox, QDockWidget, QFileDialog, QFont,
+        QAction, QApplication, QByteArray, QCheckBox, QComboBox, QCompleter,
+        QDialog, QDir, QDockWidget, QFileDialog, QFileSystemModel, QFont,
         QFontDatabase, QFormLayout, QFrame, QGuiApplication,
-        QHBoxLayout, QHeaderView, QLabel, QLineEdit, QMainWindow,
-        QMenu, QMessageBox, QObject, QPushButton, QShortcut, QSizePolicy,
-        QSpinBox, QSplitter, Qt, QTabWidget, QTextEdit, QThread,
-        QTimer, QToolBar, QToolButton, QTreeWidget, QTreeWidgetItem,
+        QHBoxLayout, QHeaderView, QLabel, QLineEdit, QListWidget,
+        QListWidgetItem, QMainWindow,
+        QMenu, QMessageBox, QModelIndex, QObject, QPushButton,
+        QSortFilterProxyModel, QSpinBox, Qt, QTabWidget, QTextBrowser, QTextEdit, QThread,
+        QTimer, QToolButton, QTreeView, QTreeWidget, QTreeWidgetItem,
         QVBoxLayout, QWidget, Signal,
     )
     PYSIDE_AVAILABLE = True
@@ -167,6 +174,50 @@ THEMES: dict[str, dict[str, str]] = {
         "syn_name":     "#6f42c1",  "syn_punct":    "#24292e",
         "syn_func_kw":  "#d73a49",
     },
+    "Monokai": {
+        "bg":           "#272822",  "bg_darker":    "#1e1f1c",
+        "bg_lighter":   "#3e3d32",  "bg_highlight": "#49483e",
+        "fg":           "#f8f8f2",  "fg_dim":       "#75715e",
+        "fg_bright":    "#ffffff",
+        "accent":       "#66d9e8",  "accent2":      "#ae81ff",
+        "border":       "#1a1a16",  "border_light": "#49483e",
+        "selection":    "#49483e",
+        "error":        "#f92672",  "warning":      "#fd971f",
+        "success":      "#a6e22e",  "info":         "#66d9e8",
+        "gutter_bg":    "#272822",  "gutter_fg":    "#75715e",
+        "gutter_active":"#f8f8f2",  "line_highlight":"#3e3d32",
+        "scrollbar_bg": "#1e1f1c",  "scrollbar_fg": "#49483e",
+        "scrollbar_hover":"#75715e",
+        "indent_guide": "#49483e",  "bracket_match":"#66d9e8",
+        "syn_keyword":  "#f92672",  "syn_builtin":  "#66d9e8",
+        "syn_string":   "#e6db74",  "syn_number":   "#ae81ff",
+        "syn_constant": "#ae81ff",  "syn_operator": "#f92672",
+        "syn_comment":  "#75715e",  "syn_bang":     "#f92672",
+        "syn_name":     "#a6e22e",  "syn_punct":    "#f8f8f2",
+        "syn_func_kw":  "#f92672",
+    },
+    "Catppuccin Mocha": {
+        "bg":           "#1e1e2e",  "bg_darker":    "#181825",
+        "bg_lighter":   "#313244",  "bg_highlight": "#45475a",
+        "fg":           "#cdd6f4",  "fg_dim":       "#6c7086",
+        "fg_bright":    "#cdd6f4",
+        "accent":       "#89b4fa",  "accent2":      "#cba6f7",
+        "border":       "#11111b",  "border_light": "#45475a",
+        "selection":    "#45475a",
+        "error":        "#f38ba8",  "warning":      "#fab387",
+        "success":      "#a6e3a1",  "info":         "#89dceb",
+        "gutter_bg":    "#1e1e2e",  "gutter_fg":    "#6c7086",
+        "gutter_active":"#cdd6f4",  "line_highlight":"#313244",
+        "scrollbar_bg": "#181825",  "scrollbar_fg": "#45475a",
+        "scrollbar_hover":"#6c7086",
+        "indent_guide": "#45475a",  "bracket_match":"#89b4fa",
+        "syn_keyword":  "#cba6f7",  "syn_builtin":  "#89b4fa",
+        "syn_string":   "#a6e3a1",  "syn_number":   "#fab387",
+        "syn_constant": "#f5c2e7",  "syn_operator": "#89dceb",
+        "syn_comment":  "#6c7086",  "syn_bang":     "#f38ba8",
+        "syn_name":     "#f9e2af",  "syn_punct":    "#cdd6f4",
+        "syn_func_kw":  "#cba6f7",
+    },
 }
 
 DEFAULT_THEME = "One Dark"
@@ -187,6 +238,7 @@ _DEFAULT_SETTINGS: dict[str, object] = {
     "show_line_numbers":  True,
     "run_timeout":        30,
     "show_traceback":     False,
+    "clear_console_on_run": True,
 }
 
 
@@ -197,26 +249,57 @@ _DEFAULT_SETTINGS: dict[str, object] = {
 def _generate_stylesheet(t: dict[str, str]) -> str:
     """Build the full application QSS from a theme dict."""
     return f"""
-/* ── Window ────────────────────────────────────────────────────── */
+/* ═══════════════════════════════════════════════════════════════════
+   Gulf of Mexico IDE — Application Stylesheet
+   ═══════════════════════════════════════════════════════════════════ */
+
+/* ── Window ─────────────────────────────────────────────────────── */
 QMainWindow {{
     background-color: {t['bg_darker']};
 }}
 
-/* ── Menu bar ──────────────────────────────────────────────────── */
+/* ── Dock-area separators (the drag handles between panels) ──────── */
+QMainWindow::separator {{
+    background: {t['border_light']};
+    width: 5px;
+    height: 5px;
+    border: none;
+}}
+QMainWindow::separator:hover {{
+    background: {t['accent']};
+}}
+
+/* ── Splitter handles ────────────────────────────────────────────── */
+QSplitter::handle {{
+    background: {t['border_light']};
+    border: none;
+}}
+QSplitter::handle:horizontal {{
+    width: 5px;
+}}
+QSplitter::handle:vertical {{
+    height: 5px;
+}}
+QSplitter::handle:hover {{
+    background: {t['accent']};
+}}
+
+/* ── Menu bar ────────────────────────────────────────────────────── */
 QMenuBar {{
     background-color: {t['bg_darker']};
     color: {t['fg']};
     border-bottom: 1px solid {t['border']};
-    padding: 2px 0;
+    padding: 1px 0;
     font-size: 13px;
 }}
 QMenuBar::item {{
-    padding: 5px 12px;
+    padding: 5px 14px;
     border-radius: 4px;
     margin: 1px 2px;
 }}
 QMenuBar::item:selected {{
     background-color: {t['bg_lighter']};
+    color: {t['fg_bright']};
 }}
 QMenu {{
     background-color: {t['bg_darker']};
@@ -226,7 +309,7 @@ QMenu {{
     padding: 6px 0;
 }}
 QMenu::item {{
-    padding: 6px 30px 6px 20px;
+    padding: 6px 32px 6px 20px;
     border-radius: 4px;
     margin: 1px 6px;
 }}
@@ -239,8 +322,12 @@ QMenu::separator {{
     background: {t['border_light']};
     margin: 4px 14px;
 }}
+QMenu::indicator {{
+    width: 14px;
+    height: 14px;
+}}
 
-/* ── Tab bar ───────────────────────────────────────────────────── */
+/* ── Tab bar ─────────────────────────────────────────────────────── */
 QTabWidget::pane {{
     border: none;
     background: {t['bg']};
@@ -252,28 +339,60 @@ QTabBar {{
 QTabBar::tab {{
     background: {t['bg_darker']};
     color: {t['fg_dim']};
-    padding: 8px 22px;
+    padding: 8px 18px 8px 18px;
     border: none;
     border-bottom: 2px solid transparent;
-    min-width: 100px;
+    min-width: 90px;
     font-size: 12px;
 }}
 QTabBar::tab:selected {{
     background: {t['bg']};
-    color: {t['fg']};
+    color: {t['fg_bright']};
     border-bottom: 2px solid {t['accent']};
+    font-weight: bold;
 }}
 QTabBar::tab:hover:!selected {{
     background: {t['bg_lighter']};
     color: {t['fg']};
+    border-bottom: 2px solid {t['border_light']};
 }}
 QTabBar::close-button {{
-    image: none;
     subcontrol-position: right;
-    padding: 4px;
+    padding: 2px;
+    border-radius: 3px;
+    margin: 2px 4px 2px 0;
+}}
+QTabBar::close-button:hover {{
+    background: {t['error']};
 }}
 
-/* ── Buttons ───────────────────────────────────────────────────── */
+/* ── Dock widgets ────────────────────────────────────────────────── */
+QDockWidget {{
+    color: {t['fg']};
+    font-size: 12px;
+}}
+QDockWidget::title {{
+    background: qlineargradient(x1:0, y1:0, x2:0, y2:1,
+        stop:0 {t['bg_lighter']}, stop:1 {t['bg_darker']});
+    padding: 7px 10px;
+    border-bottom: 1px solid {t['border']};
+    border-left: 3px solid {t['accent']};
+    font-size: 10px;
+    font-weight: bold;
+    letter-spacing: 1px;
+    color: {t['fg_dim']};
+    text-transform: uppercase;
+}}
+QDockWidget::float-button, QDockWidget::close-button {{
+    border: none;
+    padding: 2px;
+    border-radius: 3px;
+}}
+QDockWidget::float-button:hover, QDockWidget::close-button:hover {{
+    background: {t['bg_highlight']};
+}}
+
+/* ── Buttons ─────────────────────────────────────────────────────── */
 QPushButton {{
     background-color: {t['bg_lighter']};
     color: {t['fg']};
@@ -286,9 +405,15 @@ QPushButton {{
 QPushButton:hover {{
     background-color: {t['bg_highlight']};
     border-color: {t['accent']};
+    color: {t['fg_bright']};
 }}
 QPushButton:pressed {{
     background-color: {t['selection']};
+    border-color: {t['accent']};
+}}
+QPushButton:default {{
+    border-color: {t['accent']};
+    background: {t['bg_highlight']};
 }}
 QPushButton:disabled {{
     color: {t['fg_dim']};
@@ -296,76 +421,119 @@ QPushButton:disabled {{
     border-color: {t['border']};
 }}
 
-/* ── Text areas ────────────────────────────────────────────────── */
+/* ── Text areas ──────────────────────────────────────────────────── */
 QTextEdit, QPlainTextEdit {{
     background-color: {t['bg']};
     color: {t['fg']};
     border: none;
     selection-background-color: {t['selection']};
+    selection-color: {t['fg_bright']};
 }}
 
-/* ── Line edit ─────────────────────────────────────────────────── */
+/* ── Line edit ───────────────────────────────────────────────────── */
 QLineEdit {{
-    background-color: {t['bg']};
+    background-color: {t['bg_lighter']};
     color: {t['fg']};
     border: 1px solid {t['border_light']};
     border-radius: 6px;
-    padding: 6px 10px;
+    padding: 5px 10px;
     font-size: 12px;
 }}
 QLineEdit:focus {{
-    border-color: {t['accent']};
+    border: 2px solid {t['accent']};
+    padding: 4px 9px;
+    background-color: {t['bg']};
+}}
+QLineEdit:hover:!focus {{
+    border-color: {t['fg_dim']};
 }}
 
-/* ── Dock widgets ──────────────────────────────────────────────── */
-QDockWidget {{
-    color: {t['fg']};
-    font-size: 12px;
-    titlebar-close-icon: none;
-    titlebar-normal-icon: none;
-}}
-QDockWidget::title {{
-    background: {t['bg_darker']};
-    padding: 8px 12px;
-    border-bottom: 1px solid {t['border']};
-    font-size: 11px;
-    font-weight: bold;
-}}
-
-/* ── Status bar ────────────────────────────────────────────────── */
+/* ── Status bar ──────────────────────────────────────────────────── */
 QStatusBar {{
     background: {t['bg_darker']};
     color: {t['fg_dim']};
     border-top: 1px solid {t['border']};
     font-size: 12px;
-    padding: 2px 0;
-    min-height: 24px;
-}}
-QStatusBar QLabel {{
-    padding: 0 8px;
-    font-size: 12px;
+    min-height: 26px;
 }}
 QStatusBar::item {{
     border: none;
 }}
+QStatusBar QLabel {{
+    padding: 2px 10px;
+    color: {t['fg_dim']};
+    font-size: 12px;
+    border-radius: 3px;
+}}
+QStatusBar QLabel:hover {{
+    color: {t['fg']};
+    background: {t['bg_lighter']};
+}}
 
-/* ── Tree widget ───────────────────────────────────────────────── */
-QTreeWidget {{
+/* ── Tree view (file explorer) ───────────────────────────────────── */
+QTreeView {{
     background-color: {t['bg']};
     color: {t['fg']};
     border: none;
     outline: none;
     font-size: 12px;
 }}
+QTreeView::item {{
+    padding: 3px 2px;
+    border-radius: 3px;
+    min-height: 20px;
+}}
+QTreeView::item:selected {{
+    background-color: {t['selection']};
+    color: {t['fg_bright']};
+}}
+QTreeView::item:hover:!selected {{
+    background-color: {t['bg_highlight']};
+}}
+QTreeView::branch {{
+    background: {t['bg']};
+}}
+
+/* ── List widget (outline / command palette) ─────────────────────── */
+QListWidget {{
+    background-color: {t['bg']};
+    color: {t['fg']};
+    border: none;
+    outline: none;
+    font-size: 12px;
+}}
+QListWidget::item {{
+    padding: 4px 8px;
+    border-radius: 3px;
+}}
+QListWidget::item:selected {{
+    background-color: {t['selection']};
+    color: {t['fg_bright']};
+}}
+QListWidget::item:hover:!selected {{
+    background-color: {t['bg_highlight']};
+}}
+
+/* ── Tree widget ─────────────────────────────────────────────────── */
+QTreeWidget {{
+    background-color: {t['bg']};
+    color: {t['fg']};
+    border: none;
+    outline: none;
+    font-size: 12px;
+    alternate-background-color: {t['bg_lighter']};
+}}
 QTreeWidget::item {{
     padding: 4px 2px;
     border-radius: 4px;
+    min-height: 22px;
 }}
 QTreeWidget::item:selected {{
     background-color: {t['selection']};
+    color: {t['fg_bright']};
 }}
-QTreeWidget::item:hover {{
-    background-color: {t['bg_lighter']};
+QTreeWidget::item:hover:!selected {{
+    background-color: {t['bg_highlight']};
 }}
 QHeaderView::section {{
     background-color: {t['bg_darker']};
@@ -376,30 +544,29 @@ QHeaderView::section {{
     padding: 6px 8px;
     font-weight: bold;
     font-size: 11px;
+    letter-spacing: 0.5px;
+    text-transform: uppercase;
 }}
 
-/* ── Splitter ──────────────────────────────────────────────────── */
-QSplitter::handle {{
-    background-color: {t['border']};
-    width: 1px;
-    height: 1px;
-}}
-
-/* ── Scrollbars ────────────────────────────────────────────────── */
+/* ── Scrollbars ──────────────────────────────────────────────────── */
 QScrollBar:vertical {{
     background: {t['scrollbar_bg']};
     width: 10px;
     border: none;
     border-radius: 5px;
+    margin: 0;
 }}
 QScrollBar::handle:vertical {{
     background: {t['scrollbar_fg']};
     min-height: 30px;
-    border-radius: 5px;
-    margin: 2px;
+    border-radius: 4px;
+    margin: 1px;
 }}
 QScrollBar::handle:vertical:hover {{
     background: {t['scrollbar_hover']};
+}}
+QScrollBar::handle:vertical:pressed {{
+    background: {t['accent']};
 }}
 QScrollBar::add-line:vertical, QScrollBar::sub-line:vertical {{
     height: 0;
@@ -412,15 +579,19 @@ QScrollBar:horizontal {{
     height: 10px;
     border: none;
     border-radius: 5px;
+    margin: 0;
 }}
 QScrollBar::handle:horizontal {{
     background: {t['scrollbar_fg']};
     min-width: 30px;
-    border-radius: 5px;
-    margin: 2px;
+    border-radius: 4px;
+    margin: 1px;
 }}
 QScrollBar::handle:horizontal:hover {{
     background: {t['scrollbar_hover']};
+}}
+QScrollBar::handle:horizontal:pressed {{
+    background: {t['accent']};
 }}
 QScrollBar::add-line:horizontal, QScrollBar::sub-line:horizontal {{
     width: 0;
@@ -429,12 +600,12 @@ QScrollBar::add-page:horizontal, QScrollBar::sub-page:horizontal {{
     background: none;
 }}
 
-/* ── Labels ────────────────────────────────────────────────────── */
+/* ── Labels ──────────────────────────────────────────────────────── */
 QLabel {{
     color: {t['fg']};
 }}
 
-/* ── Autocomplete popup ────────────────────────────────────────── */
+/* ── Autocomplete popup ──────────────────────────────────────────── */
 QCompleter QAbstractItemView {{
     background-color: {t['bg_darker']};
     color: {t['fg']};
@@ -446,46 +617,57 @@ QCompleter QAbstractItemView {{
     outline: none;
 }}
 
-/* ── Toolbar ───────────────────────────────────────────────────── */
+/* ── Toolbar ─────────────────────────────────────────────────────── */
 QToolBar {{
     background: {t['bg_darker']};
     border-bottom: 1px solid {t['border']};
-    padding: 4px 8px;
-    spacing: 2px;
+    padding: 3px 6px;
+    spacing: 1px;
+    min-height: 42px;
 }}
 QToolBar::separator {{
     width: 1px;
     background: {t['border_light']};
-    margin: 4px 6px;
+    margin: 6px 4px;
 }}
 QToolButton {{
     background: transparent;
     color: {t['fg']};
     border: 1px solid transparent;
     border-radius: 6px;
-    padding: 6px 12px;
+    padding: 5px 10px;
     font-size: 12px;
-    min-width: 28px;
+    min-width: 24px;
 }}
 QToolButton:hover {{
     background: {t['bg_lighter']};
     border-color: {t['border_light']};
+    color: {t['fg_bright']};
 }}
 QToolButton:pressed {{
     background: {t['selection']};
+    border-color: {t['accent']};
+}}
+QToolButton:checked {{
+    background: {t['bg_highlight']};
+    border-color: {t['accent']};
+    color: {t['accent']};
+}}
+QToolButton:checked:hover {{
+    background: {t['selection']};
 }}
 
-/* ── Tooltips ──────────────────────────────────────────────────── */
+/* ── Tooltips ────────────────────────────────────────────────────── */
 QToolTip {{
     background-color: {t['bg_lighter']};
-    color: {t['fg']};
-    border: 1px solid {t['border_light']};
+    color: {t['fg_bright']};
+    border: 1px solid {t['accent']};
     border-radius: 6px;
     padding: 6px 10px;
     font-size: 12px;
 }}
 
-/* ── Dialog ────────────────────────────────────────────────────── */
+/* ── Dialog ──────────────────────────────────────────────────────── */
 QDialog {{
     background-color: {t['bg_darker']};
 }}
@@ -493,8 +675,8 @@ QGroupBox {{
     color: {t['fg']};
     border: 1px solid {t['border_light']};
     border-radius: 8px;
-    margin-top: 14px;
-    padding: 18px 12px 10px 12px;
+    margin-top: 16px;
+    padding: 18px 12px 12px 12px;
     font-weight: bold;
     font-size: 12px;
 }}
@@ -502,6 +684,7 @@ QGroupBox::title {{
     subcontrol-origin: margin;
     left: 14px;
     padding: 0 8px;
+    color: {t['accent']};
 }}
 QCheckBox {{
     color: {t['fg']};
@@ -509,30 +692,36 @@ QCheckBox {{
     font-size: 12px;
 }}
 QCheckBox::indicator {{
-    width: 18px;
-    height: 18px;
+    width: 16px;
+    height: 16px;
     border: 2px solid {t['border_light']};
     border-radius: 4px;
     background: {t['bg']};
 }}
 QCheckBox::indicator:hover {{
     border-color: {t['accent']};
+    background: {t['bg_lighter']};
 }}
 QCheckBox::indicator:checked {{
     background: {t['accent']};
     border-color: {t['accent']};
 }}
 QComboBox {{
-    background-color: {t['bg']};
+    background-color: {t['bg_lighter']};
     color: {t['fg']};
     border: 1px solid {t['border_light']};
     border-radius: 6px;
-    padding: 6px 10px;
+    padding: 5px 10px;
     min-width: 160px;
     font-size: 12px;
 }}
 QComboBox:hover {{
     border-color: {t['accent']};
+    color: {t['fg_bright']};
+}}
+QComboBox:focus {{
+    border: 2px solid {t['accent']};
+    padding: 4px 9px;
 }}
 QComboBox::drop-down {{
     border: none;
@@ -546,9 +735,10 @@ QComboBox QAbstractItemView {{
     border: 1px solid {t['border_light']};
     border-radius: 6px;
     outline: none;
+    padding: 4px;
 }}
 QSpinBox {{
-    background-color: {t['bg']};
+    background-color: {t['bg_lighter']};
     color: {t['fg']};
     border: 1px solid {t['border_light']};
     border-radius: 6px;
@@ -559,35 +749,70 @@ QSpinBox {{
 QSpinBox:hover {{
     border-color: {t['accent']};
 }}
+QSpinBox:focus {{
+    border: 2px solid {t['accent']};
+    padding: 3px 7px;
+}}
 QSpinBox::up-button, QSpinBox::down-button {{
     border: none;
-    width: 16px;
+    width: 18px;
+    border-radius: 3px;
+    background: transparent;
+}}
+QSpinBox::up-button:hover, QSpinBox::down-button:hover {{
+    background: {t['bg_highlight']};
 }}
 QDialogButtonBox QPushButton {{
     min-width: 90px;
 }}
-QFormLayout {{
-    margin: 16px;
+
+/* ── Tab widget in settings ──────────────────────────────────────── */
+QTabWidget#settingsTabs::pane {{
+    border: 1px solid {t['border_light']};
+    border-radius: 0 6px 6px 6px;
+    background: {t['bg_darker']};
+}}
+QTabWidget#settingsTabs QTabBar::tab {{
+    min-width: 80px;
+    border-radius: 6px 6px 0 0;
+    border-bottom: none;
+    background: {t['bg_lighter']};
+    margin-right: 2px;
+}}
+QTabWidget#settingsTabs QTabBar::tab:selected {{
+    background: {t['bg_darker']};
+    border-bottom: none;
+    border: 1px solid {t['border_light']};
+    border-bottom: none;
+    color: {t['fg_bright']};
 }}
 
-/* ── Find bar (custom styling) ─────────────────────────────────── */
+/* ── Find bar ────────────────────────────────────────────────────── */
 QWidget#findBar {{
     background: {t['bg_darker']};
     border-bottom: 1px solid {t['border']};
+    border-top: 1px solid {t['accent']};
 }}
 QWidget#findBar QLineEdit {{
     min-width: 200px;
     padding: 5px 10px;
 }}
 QWidget#findBar QPushButton {{
-    min-width: 44px;
-    padding: 5px 10px;
+    min-width: 40px;
+    padding: 4px 10px;
     font-size: 11px;
 }}
 QWidget#findBar QLabel {{
-    font-size: 11px;
-    color: {t['fg_dim']};
+    font-size: 10px;
+    color: {t['accent']};
     font-weight: bold;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+}}
+
+/* ── Frame separators ────────────────────────────────────────────── */
+QFrame[frameShape="4"], QFrame[frameShape="5"] {{
+    color: {t['border_light']};
 }}
 """
 
@@ -598,16 +823,26 @@ QWidget#findBar QLabel {{
 
 def _format_error_html(err: str, theme: dict[str, str]) -> str:
     color = theme.get("error", "#e06c75")
+    link_color = theme.get("info", "#56b6c2")
+    escaped = _html_escape(err)
+    # Make "line N" patterns into clickable links so the user can jump to the error
+    linked = _re.sub(
+        r"\bline (\d+)\b",
+        lambda m: (
+            f'<a href="goto:{m.group(1)}" style="color:{link_color};">'
+            f"line {m.group(1)}</a>"
+        ),
+        escaped,
+    )
     return (
         f"<pre style='color:{color}; font-family:monospace; "
-        f"white-space: pre-wrap; margin: 4px 0;'>{_html_escape(err)}</pre>"
+        f"white-space: pre-wrap; margin: 4px 0;'>{linked}</pre>"
     )
 
 
 def _monospace_fonts() -> list[str]:
     """Return a sorted list of available monospace font families."""
     try:
-        db = QFontDatabase()
         all_fams = QFontDatabase.families()
         monospace = []
         for fam in all_fams:
@@ -714,6 +949,9 @@ if PYSIDE_AVAILABLE:
             self.autocomplete = QCheckBox("Show code completions")
             ef.addRow("Auto-Complete", self.autocomplete)
 
+            self.show_line_numbers = QCheckBox("Show line numbers")
+            ef.addRow("Line Numbers", self.show_line_numbers)
+
             tabs.addTab(editor_page, "  Editor  ")
 
             # ── Appearance tab ─────────────────────────────────
@@ -752,6 +990,9 @@ if PYSIDE_AVAILABLE:
             self.show_traceback = QCheckBox("Show Python traceback on error")
             xf.addRow("Traceback", self.show_traceback)
 
+            self.clear_console_on_run = QCheckBox("Clear console before each run")
+            xf.addRow("Console", self.clear_console_on_run)
+
             tabs.addTab(exec_page, "  Execution  ")
 
             # ── Button box ─────────────────────────────────────
@@ -787,6 +1028,7 @@ if PYSIDE_AVAILABLE:
             self.indent_guides.setChecked(bool(s.get("show_indent_guides", True)))
             self.bracket_match.setChecked(bool(s.get("bracket_matching", True)))
             self.autocomplete.setChecked(bool(s.get("auto_complete", True)))
+            self.show_line_numbers.setChecked(bool(s.get("show_line_numbers", True)))
             idx = self.theme_combo.findText(str(s.get("theme", DEFAULT_THEME)))
             if idx >= 0:
                 self.theme_combo.setCurrentIndex(idx)
@@ -794,6 +1036,7 @@ if PYSIDE_AVAILABLE:
             self.show_toolbar.setChecked(bool(s.get("show_toolbar", True)))
             self.run_timeout.setValue(int(s.get("run_timeout", 30)))
             self.show_traceback.setChecked(bool(s.get("show_traceback", False)))
+            self.clear_console_on_run.setChecked(bool(s.get("clear_console_on_run", True)))
 
         def result_settings(self) -> dict:
             return {
@@ -804,11 +1047,13 @@ if PYSIDE_AVAILABLE:
                 "show_indent_guides": self.indent_guides.isChecked(),
                 "bracket_matching":   self.bracket_match.isChecked(),
                 "auto_complete":      self.autocomplete.isChecked(),
+                "show_line_numbers":  self.show_line_numbers.isChecked(),
                 "theme":              self.theme_combo.currentText(),
                 "console_font_size":  self.console_font_size.value(),
                 "show_toolbar":       self.show_toolbar.isChecked(),
                 "run_timeout":        self.run_timeout.value(),
                 "show_traceback":     self.show_traceback.isChecked(),
+                "clear_console_on_run": self.clear_console_on_run.isChecked(),
             }
 
     # ──────────────────────────────────────────────────────────────
@@ -919,8 +1164,10 @@ if PYSIDE_AVAILABLE:
             ed = self._editor()
             if not ed:
                 return
-            if ed.textCursor().selectedText() == self.find_input.text():
-                ed.textCursor().insertText(self.replace_input.text())
+            cursor = ed.textCursor()
+            if cursor.selectedText() == self.find_input.text():
+                cursor.insertText(self.replace_input.text())
+                ed.setTextCursor(cursor)
             self._find_next()
 
         def _replace_all(self) -> None:
@@ -931,10 +1178,16 @@ if PYSIDE_AVAILABLE:
             repl = self.replace_input.text()
             if not text:
                 return
-            content = ed.toPlainText()
-            new = content.replace(text, repl)
-            if new != content:
-                ed.setPlainText(new)
+            # Single edit block → entire replace-all is one undo step
+            cursor = ed.textCursor()
+            cursor.beginEditBlock()
+            cursor.movePosition(cursor.MoveOperation.Start)
+            ed.setTextCursor(cursor)
+            while ed.find(text):
+                c = ed.textCursor()
+                c.insertText(repl)
+                ed.setTextCursor(c)
+            cursor.endEditBlock()
 
     # ──────────────────────────────────────────────────────────────
     # Worker — subprocess execution
@@ -998,6 +1251,7 @@ if PYSIDE_AVAILABLE:
             self.setFeatures(
                 QDockWidget.DockWidgetFeature.DockWidgetMovable
                 | QDockWidget.DockWidgetFeature.DockWidgetFloatable
+                | QDockWidget.DockWidgetFeature.DockWidgetClosable
             )
             self.tree = QTreeWidget()
             self.tree.setHeaderLabels(["Name", "Type", "Value"])
@@ -1045,14 +1299,19 @@ if PYSIDE_AVAILABLE:
     # ──────────────────────────────────────────────────────────────
     # Console widget (output panel)
     # ──────────────────────────────────────────────────────────────
-    class ConsoleOutput(QTextEdit):
-        """Read-only console with configurable font size and monospace font."""
+    class ConsoleOutput(QTextBrowser):
+        """Read-only console with configurable font size, monospace font,
+        and clickable 'line N' links in error output."""
+
+        line_jump = Signal(int)  # Emits 1-based line number when user clicks a link
 
         def __init__(self, parent=None, *, font_size: int = 11) -> None:
             super().__init__(parent)
             self.setReadOnly(True)
+            self.setOpenLinks(False)
             self._font_size = font_size
             self._apply_font()
+            self.anchorClicked.connect(self._on_anchor)
 
         def set_font_size(self, size: int) -> None:
             self._font_size = size
@@ -1067,6 +1326,267 @@ if PYSIDE_AVAILABLE:
                     break
             self.setFont(font)
 
+        def _on_anchor(self, url) -> None:
+            try:
+                s = url.toString() if hasattr(url, "toString") else str(url)
+                if s.startswith("goto:"):
+                    line_no = int(s[5:])
+                    self.line_jump.emit(line_no)
+            except (ValueError, AttributeError):
+                pass
+
+    # ──────────────────────────────────────────────────────────────
+    # File explorer dock
+    # ──────────────────────────────────────────────────────────────
+    class FileExplorerDock(QDockWidget):
+        """Dock panel showing the filesystem tree for navigating .gom files."""
+
+        file_activated = Signal(str)  # Emitted with the file path on activation
+
+        def __init__(self, root_path: str = "", parent=None) -> None:
+            super().__init__("  Explorer", parent)
+            self.setObjectName("explorer_dock")
+            self.setFeatures(
+                QDockWidget.DockWidgetFeature.DockWidgetMovable
+                | QDockWidget.DockWidgetFeature.DockWidgetFloatable
+                | QDockWidget.DockWidgetFeature.DockWidgetClosable
+            )
+            self._current_root = root_path or os.getcwd()
+
+            container = QWidget()
+            layout = QVBoxLayout(container)
+            layout.setContentsMargins(0, 0, 0, 0)
+            layout.setSpacing(0)
+
+            # Path label + navigation buttons
+            hdr = QWidget()
+            hdr_l = QHBoxLayout(hdr)
+            hdr_l.setContentsMargins(6, 3, 4, 3)
+            hdr_l.setSpacing(2)
+
+            self._path_label = QLabel()
+            self._path_label.setStyleSheet("font-size: 11px;")
+
+            btn_up = QToolButton()
+            btn_up.setText("↑")
+            btn_up.setToolTip("Go up one directory")
+            btn_up.setFixedSize(22, 22)
+            btn_up.setStyleSheet("border: none;")
+            btn_up.clicked.connect(self._go_up)
+
+            btn_home = QToolButton()
+            btn_home.setText("⌂")
+            btn_home.setToolTip("Go to working directory")
+            btn_home.setFixedSize(22, 22)
+            btn_home.setStyleSheet("border: none;")
+            btn_home.clicked.connect(lambda: self._set_root(os.getcwd()))
+
+            hdr_l.addWidget(self._path_label, 1)
+            hdr_l.addWidget(btn_up)
+            hdr_l.addWidget(btn_home)
+
+            hdr_sep = QFrame()
+            hdr_sep.setFrameShape(QFrame.Shape.HLine)
+
+            self._model = QFileSystemModel()
+            try:
+                _ff = QDir.Filter.AllDirs | QDir.Filter.Files | QDir.Filter.NoDotAndDotDot
+            except AttributeError:  # PyQt5 uses old-style flags
+                _ff = QDir.AllDirs | QDir.Files | QDir.NoDotAndDotDot  # type: ignore[attr-defined]
+            self._model.setFilter(_ff)
+            self._model.setNameFilters(["*.gom", "*.txt", "*.md"])
+            self._model.setNameFilterDisables(True)  # show non-matching files dimmed
+
+            self._tree = QTreeView()
+            self._tree.setModel(self._model)
+            self._tree.setHeaderHidden(True)
+            self._tree.hideColumn(1)  # Size
+            self._tree.hideColumn(2)  # Type
+            self._tree.hideColumn(3)  # Date Modified
+            self._tree.setAnimated(True)
+            self._tree.setIndentation(14)
+            self._tree.setUniformRowHeights(True)
+            self._tree.doubleClicked.connect(self._on_activated)
+            self._tree.setContextMenuPolicy(Qt.ContextMenuPolicy.CustomContextMenu)
+            self._tree.customContextMenuRequested.connect(self._ctx_menu)
+
+            layout.addWidget(hdr)
+            layout.addWidget(hdr_sep)
+            layout.addWidget(self._tree, 1)
+            self.setWidget(container)
+
+            self._set_root(self._current_root)
+
+        def _set_root(self, path: str) -> None:
+            self._current_root = path
+            root_index = self._model.setRootPath(path)
+            self._tree.setRootIndex(root_index)
+            base = os.path.basename(path) or path
+            self._path_label.setText(base)
+            self._path_label.setToolTip(path)
+
+        def _go_up(self) -> None:
+            parent = os.path.dirname(self._current_root)
+            if parent and parent != self._current_root:
+                self._set_root(parent)
+
+        def _on_activated(self, index) -> None:
+            if self._model.isDir(index):
+                if self._model.canFetchMore(index):
+                    self._model.fetchMore(index)
+                if self._tree.isExpanded(index):
+                    self._tree.collapse(index)
+                else:
+                    self._tree.expand(index)
+            else:
+                self.file_activated.emit(self._model.filePath(index))
+
+        def _ctx_menu(self, pos) -> None:
+            index = self._tree.indexAt(pos)
+            if not index.isValid():
+                return
+            path = self._model.filePath(index)
+            menu = QMenu(self._tree)
+            if self._model.isDir(index):
+                act = QAction("Open as Root", menu)
+                act.triggered.connect(lambda: self._set_root(path))
+                menu.addAction(act)
+            else:
+                act_open = QAction("Open in Editor", menu)
+                act_open.triggered.connect(lambda: self.file_activated.emit(path))
+                menu.addAction(act_open)
+            menu.addSeparator()
+            act_copy = QAction("Copy Path", menu)
+            act_copy.triggered.connect(lambda: QGuiApplication.clipboard().setText(path))
+            menu.addAction(act_copy)
+            menu.exec(self._tree.mapToGlobal(pos))
+
+    # ──────────────────────────────────────────────────────────────
+    # Code outline dock
+    # ──────────────────────────────────────────────────────────────
+    class OutlineDock(QDockWidget):
+        """Dock panel showing functions and classes in the current editor."""
+
+        symbol_activated = Signal(int)  # Emits 1-based line number
+
+        _FN_RE = _re.compile(r"^\s*(?:function|fn|func)\s+([\w]+)", _re.MULTILINE)
+        _CLASS_RE = _re.compile(r"^\s*class\s+([\w]+)", _re.MULTILINE)
+
+        def __init__(self, parent=None) -> None:
+            super().__init__("  Outline", parent)
+            self.setObjectName("outline_dock")
+            self.setFeatures(
+                QDockWidget.DockWidgetFeature.DockWidgetMovable
+                | QDockWidget.DockWidgetFeature.DockWidgetFloatable
+                | QDockWidget.DockWidgetFeature.DockWidgetClosable
+            )
+            self._list = QListWidget()
+            self._list.setStyleSheet("border: none; font-size: 12px;")
+            self._list.itemActivated.connect(self._on_item)
+            self.setWidget(self._list)
+
+        def update_outline(self, text: str) -> None:
+            self._list.clear()
+            symbols: list[tuple[int, str, str]] = []
+            for m in self._FN_RE.finditer(text):
+                line = text[: m.start()].count("\n") + 1
+                symbols.append((line, "fn", m.group(1)))
+            for m in self._CLASS_RE.finditer(text):
+                line = text[: m.start()].count("\n") + 1
+                symbols.append((line, "cls", m.group(1)))
+            symbols.sort(key=lambda x: x[0])
+            for line, kind, name in symbols:
+                label = f"⚡ {name}()" if kind == "fn" else f"◈ {name}"
+                item = QListWidgetItem(label)
+                item.setData(Qt.ItemDataRole.UserRole, line)
+                item.setToolTip(f"Go to line {line}")
+                self._list.addItem(item)
+
+        def _on_item(self, item: "QListWidgetItem") -> None:
+            line = item.data(Qt.ItemDataRole.UserRole)
+            if isinstance(line, int):
+                self.symbol_activated.emit(line)
+
+    # ──────────────────────────────────────────────────────────────
+    # Command palette  (Ctrl+Shift+P)
+    # ──────────────────────────────────────────────────────────────
+    class CommandPalette(QDialog):
+        """Quick-access command palette with fuzzy search over all IDE actions."""
+
+        def __init__(self, commands: list[tuple[str, str, object]], parent=None) -> None:
+            super().__init__(parent)
+            self.setWindowFlags(Qt.WindowType.FramelessWindowHint | Qt.WindowType.Dialog)
+            self.setModal(True)
+            self.setMinimumWidth(540)
+            self._commands = commands
+
+            layout = QVBoxLayout(self)
+            layout.setContentsMargins(1, 1, 1, 1)
+            layout.setSpacing(0)
+
+            self._input = QLineEdit()
+            self._input.setPlaceholderText("  Type to search commands…")
+            self._input.setStyleSheet(
+                "QLineEdit { font-size: 14px; padding: 10px 14px; "
+                "border: none; border-bottom: 1px solid palette(mid); border-radius: 0; }"
+            )
+            self._input.textChanged.connect(self._filter)
+            layout.addWidget(self._input)
+
+            self._list = QListWidget()
+            self._list.setStyleSheet(
+                "QListWidget { border: none; font-size: 13px; }"
+                "QListWidget::item { padding: 6px 14px; }"
+            )
+            self._list.itemActivated.connect(self._execute)
+            layout.addWidget(self._list, 1)
+
+            self._filter("")
+
+        def _filter(self, text: str) -> None:
+            self._list.clear()
+            query = text.lower().strip()
+            for name, shortcut, slot in self._commands:
+                if not query or query in name.lower():
+                    display = f"{name}   {shortcut}" if shortcut else name
+                    item = QListWidgetItem(display)
+                    item.setData(Qt.ItemDataRole.UserRole, slot)
+                    self._list.addItem(item)
+            if self._list.count():
+                self._list.setCurrentRow(0)
+            visible = min(self._list.count(), 12)
+            self._list.setFixedHeight(max(visible, 1) * 34 + 4)
+            self.adjustSize()
+
+        def _execute(self, item: "QListWidgetItem") -> None:
+            slot = item.data(Qt.ItemDataRole.UserRole)
+            self.accept()
+            if callable(slot):
+                slot()
+
+        def keyPressEvent(self, event) -> None:
+            try:
+                k_down, k_up = Qt.Key.Key_Down, Qt.Key.Key_Up
+                k_ret, k_ent = Qt.Key.Key_Return, Qt.Key.Key_Enter
+                k_esc = Qt.Key.Key_Escape
+            except AttributeError:  # PyQt5
+                k_down, k_up = Qt.Key_Down, Qt.Key_Up  # type: ignore[attr-defined]
+                k_ret, k_ent = Qt.Key_Return, Qt.Key_Enter  # type: ignore[attr-defined]
+                k_esc = Qt.Key_Escape  # type: ignore[attr-defined]
+            key = event.key()
+            if key == k_down:
+                self._list.setCurrentRow(min(self._list.currentRow() + 1, self._list.count() - 1))
+            elif key == k_up:
+                self._list.setCurrentRow(max(self._list.currentRow() - 1, 0))
+            elif key in (k_ret, k_ent):
+                item = self._list.currentItem()
+                if item:
+                    self._execute(item)
+            elif key == k_esc:
+                self.reject()
+            else:
+                super().keyPressEvent(event)
+
     # ──────────────────────────────────────────────────────────────
     # Main window
     # ──────────────────────────────────────────────────────────────
@@ -1079,6 +1599,10 @@ if PYSIDE_AVAILABLE:
             self.session = ExecutionSession()
             self.thread: QThread | None = None
             self.worker: Worker | None = None
+
+            # Enable dock features
+            self.setDockNestingEnabled(True)
+            self.setAnimated(True)
 
             # ── Settings ───────────────────────────────────────
             self._settings_path = Path.home() / ".config" / "gom-ide" / "settings.json"
@@ -1097,6 +1621,8 @@ if PYSIDE_AVAILABLE:
             self.tabs.setDocumentMode(True)
             self.tabs.tabCloseRequested.connect(self._close_tab)
             self.tabs.currentChanged.connect(self._on_tab_changed)
+            self.tabs.tabBar().setContextMenuPolicy(Qt.ContextMenuPolicy.CustomContextMenu)
+            self.tabs.tabBar().customContextMenuRequested.connect(self._tab_context_menu)
 
             self.find_bar = FindReplaceBar(self)
 
@@ -1114,17 +1640,37 @@ if PYSIDE_AVAILABLE:
             )
             self.console.setContextMenuPolicy(Qt.ContextMenuPolicy.CustomContextMenu)
             self.console.customContextMenuRequested.connect(self._console_ctx_menu)
-            self._console_dock = QDockWidget("  Console", self)
+            self._console_dock = QDockWidget("Console", self)
+            self._console_dock.setObjectName("console_dock")
             self._console_dock.setFeatures(
                 QDockWidget.DockWidgetFeature.DockWidgetMovable
                 | QDockWidget.DockWidgetFeature.DockWidgetFloatable
+                | QDockWidget.DockWidgetFeature.DockWidgetClosable
             )
             self._console_dock.setWidget(self.console)
             self.addDockWidget(Qt.DockWidgetArea.BottomDockWidgetArea, self._console_dock)
 
             # ── Variable inspector dock ────────────────────────
             self.var_inspector = VariableInspector(self)
+            self.var_inspector.setObjectName("vars_dock")
             self.addDockWidget(Qt.DockWidgetArea.RightDockWidgetArea, self.var_inspector)
+
+            # ── Outline dock ───────────────────────────────────
+            self.outline_dock = OutlineDock(self)
+            self.outline_dock.setObjectName("outline_dock")
+            self.addDockWidget(Qt.DockWidgetArea.RightDockWidgetArea, self.outline_dock)
+            self.tabifyDockWidget(self.var_inspector, self.outline_dock)
+            self.var_inspector.raise_()
+            self.outline_dock.symbol_activated.connect(self._goto_line_number)
+
+            # ── File explorer dock ─────────────────────────────
+            self.explorer_dock = FileExplorerDock(os.getcwd(), self)
+            self.explorer_dock.setObjectName("explorer_dock")
+            self.addDockWidget(Qt.DockWidgetArea.LeftDockWidgetArea, self.explorer_dock)
+            self.explorer_dock.file_activated.connect(self.open_file)
+
+            # ── Console line-jump ──────────────────────────────
+            self.console.line_jump.connect(self._goto_line_number)
 
             # ── Status bar ─────────────────────────────────────
             self._status_pos = QLabel("Ln 1, Col 1")
@@ -1151,13 +1697,18 @@ if PYSIDE_AVAILABLE:
 
             # ── Toolbar ────────────────────────────────────────
             self._toolbar = self.addToolBar("Main")
-            self._toolbar.setMovable(False)
-            self._toolbar.setFloatable(False)
+            self._toolbar.setObjectName("main_toolbar")
+            self._toolbar.setMovable(True)
+            self._toolbar.setFloatable(True)
             self._build_toolbar()
 
             # ── Menus ──────────────────────────────────────────
             self._open_recent_menu: QMenu | None = None
             self._build_menus()
+
+            # ── Runtime state ───────────────────────────────────
+            self.worker: Worker | None = None
+            self.thread: QThread | None = None
 
             # ── Initial tab ────────────────────────────────────
             self._new_tab()
@@ -1215,7 +1766,6 @@ if PYSIDE_AVAILABLE:
             dlg = SettingsDialog(self._settings, self)
             if dlg.exec() == QDialog.DialogCode.Accepted:
                 new = dlg.result_settings()
-                old_theme = self._settings.get("theme")
                 self._settings.update(new)
                 self._current_theme_name = str(new.get("theme", DEFAULT_THEME))
                 self._theme = THEMES.get(self._current_theme_name, THEMES[DEFAULT_THEME])
@@ -1234,6 +1784,8 @@ if PYSIDE_AVAILABLE:
                         font_size=int(s.get("font_size", 12)),
                         show_indent_guides=bool(s.get("show_indent_guides", True)),
                         bracket_matching=bool(s.get("bracket_matching", True)),
+                        word_wrap=bool(s.get("word_wrap", False)),
+                        show_line_numbers=bool(s.get("show_line_numbers", True)),
                     )
                     hl = ed.document().findChild(GomHighlighter)
                     if hl:
@@ -1289,8 +1841,10 @@ if PYSIDE_AVAILABLE:
                 font_size=int(s.get("font_size", 12)),
                 show_indent_guides=bool(s.get("show_indent_guides", True)),
                 bracket_matching=bool(s.get("bracket_matching", True)),
+                word_wrap=bool(s.get("word_wrap", False)),
+                show_line_numbers=bool(s.get("show_line_numbers", True)),
             )
-            hl = GomHighlighter(editor.document(), theme=self._theme)
+            GomHighlighter(editor.document(), theme=self._theme)
             if content:
                 editor.setPlainText(content)
             tab_name = Path(path).name if path else "untitled.gom"
@@ -1351,6 +1905,10 @@ if PYSIDE_AVAILABLE:
             editor.cursorPositionChanged.connect(
                 lambda: self._update_cursor_pos(editor)
             )
+            editor.selectionChanged.connect(
+                lambda: self._update_cursor_pos(editor)
+            )
+            editor.textChanged.connect(self._update_outline)
 
         def _current_editor(self) -> CodeEditor | None:
             w = self.tabs.currentWidget()
@@ -1361,12 +1919,17 @@ if PYSIDE_AVAILABLE:
             if ed:
                 self._update_cursor_pos(ed)
                 self._update_zoom_label(ed)
+                self._update_outline()
 
         def _update_cursor_pos(self, ed: CodeEditor) -> None:
             if ed != self._current_editor():
                 return
             c = ed.textCursor()
-            self._status_pos.setText(f"Ln {c.blockNumber()+1}, Col {c.columnNumber()+1}")
+            sel_len = len(c.selectedText())
+            pos_text = f"Ln {c.blockNumber()+1}, Col {c.columnNumber()+1}"
+            if sel_len:
+                pos_text += f"  ({sel_len} sel)"
+            self._status_pos.setText(pos_text)
 
         def _update_zoom_label(self, ed: CodeEditor) -> None:
             pct = round(ed.current_font_size / 12 * 100)
@@ -1379,6 +1942,61 @@ if PYSIDE_AVAILABLE:
             self.tabs.removeTab(index)
             if self.tabs.count() == 0:
                 self._new_tab()
+
+        def _tab_context_menu(self, pos) -> None:
+            tab_bar = self.tabs.tabBar()
+            idx = tab_bar.tabAt(pos)
+            if idx < 0:
+                return
+            menu = QMenu(self)
+            self._add_action(menu, "Close",            "", lambda: self._close_tab(idx))
+            self._add_action(menu, "Close Others",     "", lambda: self._close_other_tabs(idx))
+            self._add_action(menu, "Close All",        "", self._close_all_tabs)
+            menu.addSeparator()
+            self._add_action(menu, "Duplicate Tab",    "", lambda: self._duplicate_tab(idx))
+            menu.addSeparator()
+            w = self.tabs.widget(idx)
+            if isinstance(w, CodeEditor):
+                path = w.property("path") or ""
+                if path:
+                    self._add_action(menu, "Copy File Path", "", lambda: QGuiApplication.clipboard().setText(path))
+            menu.exec(tab_bar.mapToGlobal(pos))
+
+        def _close_other_tabs(self, keep_index: int) -> None:
+            # Close all tabs except the one at keep_index
+            i = self.tabs.count() - 1
+            while i >= 0:
+                if i != keep_index:
+                    w = self.tabs.widget(i)
+                    if isinstance(w, CodeEditor) and not self._maybe_save(w):
+                        i -= 1
+                        continue
+                    self.tabs.removeTab(i)
+                    if keep_index > i:
+                        keep_index -= 1
+                i -= 1
+            if self.tabs.count() == 0:
+                self._new_tab()
+
+        def _close_all_tabs(self) -> None:
+            i = self.tabs.count() - 1
+            while i >= 0:
+                w = self.tabs.widget(i)
+                if isinstance(w, CodeEditor) and not self._maybe_save(w):
+                    i -= 1
+                    continue
+                self.tabs.removeTab(i)
+                i -= 1
+            if self.tabs.count() == 0:
+                self._new_tab()
+
+        def _duplicate_tab(self, index: int) -> None:
+            w = self.tabs.widget(index)
+            if not isinstance(w, CodeEditor):
+                return
+            path = w.property("path") or None
+            content = w.toPlainText()
+            self._new_tab(path, content)
 
         # ── File operations ───────────────────────────────────
 
@@ -1402,6 +2020,19 @@ if PYSIDE_AVAILABLE:
             self._add_recent(path)
 
         def open_file(self, path: str, content: str | None = None) -> None:
+            # Switch to existing tab if the file is already open
+            resolved = str(Path(path).resolve()) if path else path
+            for i in range(self.tabs.count()):
+                w = self.tabs.widget(i)
+                if isinstance(w, CodeEditor):
+                    existing = w.property("path") or ""
+                    try:
+                        existing = str(Path(existing).resolve())
+                    except (OSError, ValueError):
+                        pass
+                    if existing == resolved:
+                        self.tabs.setCurrentIndex(i)
+                        return
             if content is None:
                 try:
                     content = Path(path).read_text(encoding="utf-8")
@@ -1451,7 +2082,8 @@ if PYSIDE_AVAILABLE:
             code = ed.toPlainText()
             path = ed.property("path") or "__ide_buffer__"
             timeout = int(self._settings.get("run_timeout", 30))
-            self.console.clear()
+            if bool(self._settings.get("clear_console_on_run", True)):
+                self.console.clear()
             self.thread = QThread(self)
             self.worker = Worker(code, str(path), timeout=timeout)
             self.worker.moveToThread(self.thread)
@@ -1464,12 +2096,22 @@ if PYSIDE_AVAILABLE:
             self.thread.start()
 
         def _run_done(self, out: str, err: str) -> None:
+            t = self._theme
+            ts = datetime.now().strftime("%H:%M:%S")
+            header_color = t.get("fg_dim", "#636d83")
+            self.console.append(
+                f"<span style='color:{header_color}; font-size:10px;'>"
+                f"── Run {ts} ──────────────────</span>"
+            )
             if out:
-                self.console.append(out.rstrip("\n"))
+                safe_out = _html_escape(out.rstrip("\n"))
+                self.console.append(
+                    f"<pre style='margin:0; white-space:pre-wrap; "
+                    f"font-family:monospace;'>{safe_out}</pre>"
+                )
             if err:
                 self.console.append(_format_error_html(err, self._theme))
             self.statusBar().showMessage("✓ Ready")
-            self.var_inspector.update_variables(self.session)
 
         def _stop_current(self) -> None:
             if self.worker:
@@ -1528,6 +2170,43 @@ if PYSIDE_AVAILABLE:
             tb.addSeparator()
             tb.addWidget(_tb_btn("  ⚙ Settings  ", "Settings  (Ctrl+,)", self._open_settings))
 
+            tb.addSeparator()
+            self._btn_console = QToolButton()
+            self._btn_console.setText("⬇ Console")
+            self._btn_console.setToolTip("Toggle Console Panel")
+            self._btn_console.setCheckable(True)
+            self._btn_console.setChecked(True)
+            self._btn_console.setToolButtonStyle(Qt.ToolButtonStyle.ToolButtonTextOnly)
+            self._btn_console.clicked.connect(lambda v: self._console_dock.setVisible(v))
+            tb.addWidget(self._btn_console)
+
+            self._btn_vars = QToolButton()
+            self._btn_vars.setText("⊞ Variables")
+            self._btn_vars.setToolTip("Toggle Variables Panel")
+            self._btn_vars.setCheckable(True)
+            self._btn_vars.setChecked(True)
+            self._btn_vars.setToolButtonStyle(Qt.ToolButtonStyle.ToolButtonTextOnly)
+            self._btn_vars.clicked.connect(lambda v: self.var_inspector.setVisible(v))
+            tb.addWidget(self._btn_vars)
+
+            self._btn_explorer = QToolButton()
+            self._btn_explorer.setText("📁 Explorer")
+            self._btn_explorer.setToolTip("Toggle File Explorer")
+            self._btn_explorer.setCheckable(True)
+            self._btn_explorer.setChecked(True)
+            self._btn_explorer.setToolButtonStyle(Qt.ToolButtonStyle.ToolButtonTextOnly)
+            self._btn_explorer.clicked.connect(lambda v: self.explorer_dock.setVisible(v))
+            tb.addWidget(self._btn_explorer)
+
+            self._btn_outline = QToolButton()
+            self._btn_outline.setText("§ Outline")
+            self._btn_outline.setToolTip("Toggle Code Outline")
+            self._btn_outline.setCheckable(True)
+            self._btn_outline.setChecked(True)
+            self._btn_outline.setToolButtonStyle(Qt.ToolButtonStyle.ToolButtonTextOnly)
+            self._btn_outline.clicked.connect(lambda v: self.outline_dock.setVisible(v))
+            tb.addWidget(self._btn_outline)
+
         # ── Menu construction ─────────────────────────────────
 
         def _build_menus(self) -> None:
@@ -1562,6 +2241,11 @@ if PYSIDE_AVAILABLE:
             self._add_action(em, "Replace…",       "Ctrl+H",       self.find_bar.show_replace)
             em.addSeparator()
             self._add_action(em, "Toggle Comment", "Ctrl+/",       self._toggle_comment)
+            self._add_action(em, "Duplicate Line",  "Ctrl+D",       self._duplicate_line)
+            em.addSeparator()
+            self._add_action(em, "Go to Line…",    "Ctrl+G",       self._goto_line)
+            em.addSeparator()
+            self._add_action(em, "Command Palette…", "Ctrl+Shift+P", self._open_command_palette)
 
             # ── View ──
             vm = mb.addMenu("View")
@@ -1574,16 +2258,32 @@ if PYSIDE_AVAILABLE:
             act_tb.setChecked(self._toolbar.isVisible())
             act_tb.triggered.connect(lambda v: self._toolbar.setVisible(v))
             vm.addAction(act_tb)
-            act_console = QAction("Console", self)
-            act_console.setCheckable(True)
-            act_console.setChecked(True)
-            act_console.triggered.connect(lambda v: self._console_dock.setVisible(v))
-            vm.addAction(act_console)
-            act_vars = QAction("Variables", self)
-            act_vars.setCheckable(True)
-            act_vars.setChecked(True)
-            act_vars.triggered.connect(lambda v: self.var_inspector.setVisible(v))
-            vm.addAction(act_vars)
+            self._view_act_console = QAction("Console", self)
+            self._view_act_console.setCheckable(True)
+            self._view_act_console.setChecked(True)
+            self._view_act_console.triggered.connect(lambda v: self._console_dock.setVisible(v))
+            vm.addAction(self._view_act_console)
+            self._view_act_vars = QAction("Variables", self)
+            self._view_act_vars.setCheckable(True)
+            self._view_act_vars.setChecked(True)
+            self._view_act_vars.triggered.connect(lambda v: self.var_inspector.setVisible(v))
+            vm.addAction(self._view_act_vars)
+            self._view_act_explorer = QAction("Explorer", self)
+            self._view_act_explorer.setCheckable(True)
+            self._view_act_explorer.setChecked(True)
+            self._view_act_explorer.triggered.connect(lambda v: self.explorer_dock.setVisible(v))
+            vm.addAction(self._view_act_explorer)
+            self._view_act_outline = QAction("Outline", self)
+            self._view_act_outline.setCheckable(True)
+            self._view_act_outline.setChecked(True)
+            self._view_act_outline.triggered.connect(lambda v: self.outline_dock.setVisible(v))
+            vm.addAction(self._view_act_outline)
+
+            # Sync dock visibility → toolbar buttons + menu actions
+            self._console_dock.visibilityChanged.connect(self._on_console_visibility)
+            self.var_inspector.visibilityChanged.connect(self._on_vars_visibility)
+            self.explorer_dock.visibilityChanged.connect(self._on_explorer_visibility)
+            self.outline_dock.visibilityChanged.connect(self._on_outline_visibility)
 
             # ── Run ──
             rm = mb.addMenu("Run")
@@ -1605,35 +2305,162 @@ if PYSIDE_AVAILABLE:
             menu.addAction(act)
             return act
 
+        def _on_console_visibility(self, visible: bool) -> None:
+            if hasattr(self, "_btn_console"):
+                self._btn_console.setChecked(visible)
+            if hasattr(self, "_view_act_console"):
+                self._view_act_console.setChecked(visible)
+
+        def _on_vars_visibility(self, visible: bool) -> None:
+            if hasattr(self, "_btn_vars"):
+                self._btn_vars.setChecked(visible)
+            if hasattr(self, "_view_act_vars"):
+                self._view_act_vars.setChecked(visible)
+
+        def _on_explorer_visibility(self, visible: bool) -> None:
+            if hasattr(self, "_btn_explorer"):
+                self._btn_explorer.setChecked(visible)
+            if hasattr(self, "_view_act_explorer"):
+                self._view_act_explorer.setChecked(visible)
+
+        def _on_outline_visibility(self, visible: bool) -> None:
+            if hasattr(self, "_btn_outline"):
+                self._btn_outline.setChecked(visible)
+            if hasattr(self, "_view_act_outline"):
+                self._view_act_outline.setChecked(visible)
+
         # ── Edit actions ──────────────────────────────────────
 
         def _undo(self):
             ed = self._current_editor()
-            if ed: ed.undo()
+            if ed:
+                ed.undo()
 
         def _redo(self):
             ed = self._current_editor()
-            if ed: ed.redo()
+            if ed:
+                ed.redo()
 
         def _cut(self):
             ed = self._current_editor()
-            if ed: ed.cut()
+            if ed:
+                ed.cut()
 
         def _copy(self):
             ed = self._current_editor()
-            if ed: ed.copy()
+            if ed:
+                ed.copy()
 
         def _paste(self):
             ed = self._current_editor()
-            if ed: ed.paste()
+            if ed:
+                ed.paste()
 
         def _select_all(self):
             ed = self._current_editor()
-            if ed: ed.selectAll()
+            if ed:
+                ed.selectAll()
 
         def _toggle_comment(self):
             ed = self._current_editor()
-            if ed: ed.toggle_comment()
+            if ed:
+                ed.toggle_comment()
+
+        def _duplicate_line(self):
+            ed = self._current_editor()
+            if ed:
+                ed.duplicate_line()
+
+        def _goto_line(self) -> None:
+            ed = self._current_editor()
+            if not ed:
+                return
+            max_line = ed.blockCount()
+            dlg = QDialog(self)
+            dlg.setWindowTitle("Go to Line")
+            dlg.setFixedWidth(300)
+            vbox = QVBoxLayout(dlg)
+            vbox.setContentsMargins(16, 16, 16, 12)
+            vbox.setSpacing(10)
+            lbl = QLabel(f"Line number (1–{max_line}):")
+            spin = QSpinBox()
+            spin.setRange(1, max_line)
+            spin.setValue(ed.textCursor().blockNumber() + 1)
+            spin.selectAll()
+            btn_row = QHBoxLayout()
+            btn_ok = QPushButton("Go")
+            btn_ok.setDefault(True)
+            btn_cancel = QPushButton("Cancel")
+            btn_ok.clicked.connect(dlg.accept)
+            btn_cancel.clicked.connect(dlg.reject)
+            btn_row.addStretch()
+            btn_row.addWidget(btn_cancel)
+            btn_row.addWidget(btn_ok)
+            vbox.addWidget(lbl)
+            vbox.addWidget(spin)
+            vbox.addLayout(btn_row)
+            if dlg.exec() == QDialog.DialogCode.Accepted:
+                line = spin.value()
+                block = ed.document().findBlockByNumber(line - 1)
+                if block.isValid():
+                    cursor = ed.textCursor()
+                    cursor.setPosition(block.position())
+                    ed.setTextCursor(cursor)
+                    ed.centerCursor()
+
+        def _goto_line_number(self, line_no: int) -> None:
+            """Jump the current editor to the given 1-based line number."""
+            ed = self._current_editor()
+            if not ed:
+                return
+            block = ed.document().findBlockByNumber(line_no - 1)
+            if block.isValid():
+                cursor = ed.textCursor()
+                cursor.setPosition(block.position())
+                ed.setTextCursor(cursor)
+                ed.centerCursor()
+                ed.setFocus()
+
+        def _update_outline(self) -> None:
+            ed = self._current_editor()
+            if ed and hasattr(self, "outline_dock"):
+                self.outline_dock.update_outline(ed.toPlainText())
+
+        def _open_command_palette(self) -> None:
+            commands = [
+                ("Run Code",             "F5",           self._run_current),
+                ("Stop Execution",       "Shift+F5",     self._stop_current),
+                ("New File",             "Ctrl+N",       lambda: self._new_tab()),
+                ("Open File…",           "Ctrl+O",       self._open_file),
+                ("Save",                 "Ctrl+S",       self._save_file),
+                ("Save As…",             "Ctrl+Shift+S", self._save_file_as),
+                ("Find…",                "Ctrl+F",       self.find_bar.show_find),
+                ("Find & Replace…",      "Ctrl+H",       self.find_bar.show_replace),
+                ("Go to Line…",          "Ctrl+G",       self._goto_line),
+                ("Toggle Comment",       "Ctrl+/",       self._toggle_comment),
+                ("Duplicate Line",       "Ctrl+D",       self._duplicate_line),
+                ("Zoom In",              "Ctrl+=",       self._zoom_in),
+                ("Zoom Out",             "Ctrl+-",       self._zoom_out),
+                ("Reset Zoom",           "Ctrl+0",       self._zoom_reset),
+                ("Clear Console",        "Ctrl+L",       self._clear_console),
+                ("Settings…",            "Ctrl+,",       self._open_settings),
+                ("Toggle Explorer",      "",             lambda: self.explorer_dock.setVisible(not self.explorer_dock.isVisible())),
+                ("Toggle Outline",       "",             lambda: self.outline_dock.setVisible(not self.outline_dock.isVisible())),
+                ("Toggle Console",       "",             lambda: self._console_dock.setVisible(not self._console_dock.isVisible())),
+                ("Toggle Variables",     "",             lambda: self.var_inspector.setVisible(not self.var_inspector.isVisible())),
+                ("Keyboard Shortcuts",   "",             self._show_shortcuts),
+                ("About",                "",             self._show_about),
+                ("Quit",                 "Ctrl+Q",       self.close),
+            ]
+            palette = CommandPalette(commands, self)
+            # Position the palette near the top-center of the window
+            geo = self.geometry()
+            pw = palette.sizeHint().width()
+            palette.move(
+                geo.x() + (geo.width() - pw) // 2,
+                geo.y() + 60,
+            )
+            palette.exec()
 
         # ── Zoom ──────────────────────────────────────────────
 
@@ -1795,6 +2622,10 @@ if PYSIDE_AVAILABLE:
                 "<tr><td><b>Ctrl+F</b></td><td>Find</td></tr>"
                 "<tr><td><b>Ctrl+H</b></td><td>Find & Replace</td></tr>"
                 "<tr><td><b>Ctrl+/</b></td><td>Toggle comment</td></tr>"
+                "<tr><td><b>Ctrl+G</b></td><td>Go to line</td></tr>"
+                "<tr><td><b>Ctrl+D</b></td><td>Duplicate line</td></tr>"
+                "<tr><td><b>Alt+Up</b></td><td>Move line up</td></tr>"
+                "<tr><td><b>Alt+Down</b></td><td>Move line down</td></tr>"
                 "<tr><td><b>Ctrl+=</b></td><td>Zoom in</td></tr>"
                 "<tr><td><b>Ctrl+-</b></td><td>Zoom out</td></tr>"
                 "<tr><td><b>Ctrl+0</b></td><td>Reset zoom</td></tr>"
@@ -1865,6 +2696,16 @@ if PYSIDE_AVAILABLE:
             if isinstance(pos, list) and len(pos) == 2:
                 self.move(int(pos[0]), int(pos[1]))
 
+            window_state = s.get("window_state")
+            if isinstance(window_state, str):
+                try:
+                    arr = QByteArray.fromBase64(window_state.encode("ascii"))
+                    self.restoreState(arr)
+                except Exception:
+                    pass
+            else:
+                QTimer.singleShot(50, self._set_default_dock_sizes)
+
             files = s.get("open_files")
             if isinstance(files, list) and files:
                 first = True
@@ -1886,6 +2727,14 @@ if PYSIDE_AVAILABLE:
                 if isinstance(active, int) and 0 <= active < self.tabs.count():
                     self.tabs.setCurrentIndex(active)
 
+        def _set_default_dock_sizes(self) -> None:
+            try:
+                self.resizeDocks([self._console_dock], [220], Qt.Orientation.Vertical)
+                self.resizeDocks([self.var_inspector], [260], Qt.Orientation.Horizontal)
+                self.resizeDocks([self.explorer_dock], [220], Qt.Orientation.Horizontal)
+            except Exception:
+                pass
+
         def _save_session(self) -> None:
             open_files = []
             for i in range(self.tabs.count()):
@@ -1898,6 +2747,11 @@ if PYSIDE_AVAILABLE:
             self._settings["window_pos"] = [self.x(), self.y()]
             self._settings["open_files"] = open_files
             self._settings["active_index"] = self.tabs.currentIndex()
+            try:
+                state = self.saveState()
+                self._settings["window_state"] = bytes(state.toBase64()).decode("ascii")
+            except Exception:
+                pass
             self._save_settings_to_disk()
             self._save_recent_to_disk()
 

@@ -375,7 +375,7 @@ def interpret_code_statements(
                         if isinstance(v, Name):
                             export_value = v.value
                         elif isinstance(v, Variable):
-                            export_value = v.lifetimes[-1].value if v.lifetimes else GulfOfMexicoUndefined()
+                            export_value = v.value if v.lifetimes else GulfOfMexicoUndefined()
                         else:
                             export_value = v
                         target = statement.target_file.value

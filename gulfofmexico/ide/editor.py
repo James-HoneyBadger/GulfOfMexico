@@ -19,7 +19,6 @@ from __future__ import annotations
 from gulfofmexico.ide.qt_compat import (
     QColor,
     QFont,
-    QFontDatabase,
     QPainter,
     QPlainTextEdit,
     QRect,
@@ -27,6 +26,7 @@ from gulfofmexico.ide.qt_compat import (
     Qt,
     QTextEdit,
     QTextFormat,
+    QTextOption,
     QWidget,
 )
 
@@ -112,13 +112,16 @@ class CodeEditor(QPlainTextEdit):
     def __init__(self, parent=None, *, theme: dict | None = None,
                  font_family: str = "", font_size: int = 12,
                  show_indent_guides: bool = True,
-                 bracket_matching: bool = True) -> None:
+                 bracket_matching: bool = True,
+                 word_wrap: bool = False,
+                 show_line_numbers: bool = True) -> None:
         super().__init__(parent)
 
         # Settings
         self._theme = theme or dict(_DEFAULT_THEME)
         self._show_indent_guides = show_indent_guides
         self._bracket_matching = bracket_matching
+        self._show_line_numbers = show_line_numbers
 
         # Font
         self._font_size = font_size
@@ -127,6 +130,10 @@ class CodeEditor(QPlainTextEdit):
 
         # Theme
         self._apply_theme()
+
+        # Word wrap
+        self._word_wrap = word_wrap
+        self._apply_word_wrap()
 
         # Breakpoints
         self._breakpoints: set[int] = set()
@@ -147,7 +154,9 @@ class CodeEditor(QPlainTextEdit):
                        font_family: str | None = None,
                        font_size: int | None = None,
                        show_indent_guides: bool | None = None,
-                       bracket_matching: bool | None = None) -> None:
+                       bracket_matching: bool | None = None,
+                       word_wrap: bool | None = None,
+                       show_line_numbers: bool | None = None) -> None:
         if theme is not None:
             self._theme = dict(theme)
             self._apply_theme()
@@ -161,8 +170,19 @@ class CodeEditor(QPlainTextEdit):
             self._show_indent_guides = show_indent_guides
         if bracket_matching is not None:
             self._bracket_matching = bracket_matching
+        if word_wrap is not None:
+            self._word_wrap = word_wrap
+            self._apply_word_wrap()
+        if show_line_numbers is not None:
+            self._show_line_numbers = show_line_numbers
+            self.update_line_number_area_width(0)
+            self._line_area.setVisible(show_line_numbers)
         self._line_area.update()
         self._on_cursor_changed()
+
+    def _apply_word_wrap(self) -> None:
+        mode = QTextOption.WrapMode.WordWrap if self._word_wrap else QTextOption.WrapMode.NoWrap
+        self.setWordWrapMode(mode)
 
     # ── Breakpoints ───────────────────────────────────────────────────
 
@@ -181,6 +201,8 @@ class CodeEditor(QPlainTextEdit):
     # ── Line number area ──────────────────────────────────────────────
 
     def line_number_area_width(self) -> int:
+        if not self._show_line_numbers:
+            return 0
         digits = max(1, len(str(max(1, self.blockCount()))))
         dw = self.fontMetrics().horizontalAdvance("9") * digits
         return LineNumberArea.BREAKPOINT_MARGIN + 8 + dw + 8
@@ -284,7 +306,6 @@ class CodeEditor(QPlainTextEdit):
             guide_color.setAlpha(60)
             painter.setPen(guide_color)
             char_w = self.fontMetrics().horizontalAdvance(" ")
-            line_h = self.fontMetrics().height()
 
             block = self.firstVisibleBlock()
             top = int(
@@ -392,7 +413,6 @@ class CodeEditor(QPlainTextEdit):
         for p in (pos_a, pos_b):
             sel = QTextEdit.ExtraSelection()
             sel.format.setBackground(color)
-            fmt_str = f"border: 1px solid {border_color.name()}; border-radius: 2px;"
             # QTextCharFormat doesn't support CSS directly; use underline as indicator
             sel.format.setFontUnderline(True)
             sel.format.setUnderlineColor(border_color)
@@ -420,7 +440,7 @@ class CodeEditor(QPlainTextEdit):
             self._dedent_current_line()
             return
 
-        # Ctrl+= / Ctrl+- : zoom
+        # Ctrl+= / Ctrl+- : zoom; Ctrl+D : duplicate line
         if mods & Qt.KeyboardModifier.ControlModifier:
             if key in (Qt.Key.Key_Equal, Qt.Key.Key_Plus):
                 self.zoom_in()
@@ -430,6 +450,18 @@ class CodeEditor(QPlainTextEdit):
                 return
             if key == Qt.Key.Key_0:
                 self.zoom_reset()
+                return
+            if key == Qt.Key.Key_D:
+                self.duplicate_line()
+                return
+
+        # Alt+Up / Alt+Down : move line
+        if mods == Qt.KeyboardModifier.AltModifier:
+            if key == Qt.Key.Key_Up:
+                self.move_line_up()
+                return
+            if key == Qt.Key.Key_Down:
+                self.move_line_down()
                 return
 
         # Enter → auto-indent
@@ -448,13 +480,32 @@ class CodeEditor(QPlainTextEdit):
         # Auto-close brackets
         if not mods:
             _PAIRS = {"(": ")", "{": "}", "[": "]"}
+            _CLOSE_CHARS = set(_PAIRS.values())
             ch = event.text()
             if ch in _PAIRS:
                 cursor = self.textCursor()
+                # If next char already is the closing bracket, just move past it
+                doc = self.document()
+                next_pos = cursor.position()
+                next_ch = doc.characterAt(next_pos) if next_pos < doc.characterCount() else ""
+                if next_ch == _PAIRS[ch]:
+                    cursor.movePosition(cursor.MoveOperation.Right)
+                    self.setTextCursor(cursor)
+                    return
                 cursor.insertText(ch + _PAIRS[ch])
                 cursor.movePosition(cursor.MoveOperation.Left)
                 self.setTextCursor(cursor)
                 return
+            # Skip over a closing bracket if the cursor is right before it and we type it
+            if ch in _CLOSE_CHARS:
+                cursor = self.textCursor()
+                doc = self.document()
+                next_pos = cursor.position()
+                next_ch = doc.characterAt(next_pos) if next_pos < doc.characterCount() else ""
+                if next_ch == ch:
+                    cursor.movePosition(cursor.MoveOperation.Right)
+                    self.setTextCursor(cursor)
+                    return
 
         super().keyPressEvent(event)
 
@@ -539,6 +590,68 @@ class CodeEditor(QPlainTextEdit):
             cursor.movePosition(cursor.MoveOperation.StartOfBlock)
 
         cursor.endEditBlock()
+
+    # ── Duplicate / move line ─────────────────────────────────────────
+
+    def duplicate_line(self) -> None:
+        """Insert a copy of the current line below it."""
+        cursor = self.textCursor()
+        cursor.beginEditBlock()
+        cursor.movePosition(cursor.MoveOperation.StartOfBlock)
+        cursor.movePosition(cursor.MoveOperation.EndOfBlock, cursor.MoveMode.KeepAnchor)
+        line = cursor.selectedText()
+        cursor.movePosition(cursor.MoveOperation.EndOfBlock)
+        cursor.insertText("\n" + line)
+        cursor.endEditBlock()
+
+    def move_line_up(self) -> None:
+        """Swap the current line with the one above it."""
+        cursor = self.textCursor()
+        block = cursor.block()
+        if block.blockNumber() == 0:
+            return
+        col = cursor.positionInBlock()
+        cursor.beginEditBlock()
+        current_text = block.text()
+        prev_block = block.previous()
+        prev_text = prev_block.text()
+        # Select current line and replace with prev text
+        c = self.textCursor()
+        c.setPosition(block.position())
+        c.movePosition(c.MoveOperation.EndOfBlock, c.MoveMode.KeepAnchor)
+        c.insertText(prev_text)
+        # Select prev line and replace with current text
+        c.setPosition(prev_block.position())
+        c.movePosition(c.MoveOperation.EndOfBlock, c.MoveMode.KeepAnchor)
+        c.insertText(current_text)
+        # Restore cursor to same column, one block up
+        c.setPosition(prev_block.position() + min(col, len(current_text)))
+        cursor.endEditBlock()
+        self.setTextCursor(c)
+
+    def move_line_down(self) -> None:
+        """Swap the current line with the one below it."""
+        cursor = self.textCursor()
+        block = cursor.block()
+        next_block = block.next()
+        if not next_block.isValid():
+            return
+        col = cursor.positionInBlock()
+        cursor.beginEditBlock()
+        current_text = block.text()
+        next_text = next_block.text()
+        c = self.textCursor()
+        c.setPosition(next_block.position())
+        c.movePosition(c.MoveOperation.EndOfBlock, c.MoveMode.KeepAnchor)
+        c.insertText(current_text)
+        c.setPosition(block.position())
+        c.movePosition(c.MoveOperation.EndOfBlock, c.MoveMode.KeepAnchor)
+        c.insertText(next_text)
+        # Move cursor to same column in the new (next) block position
+        new_pos = next_block.position() + min(col, len(current_text))
+        c.setPosition(new_pos)
+        cursor.endEditBlock()
+        self.setTextCursor(c)
 
     # ── Drag & drop ───────────────────────────────────────────────────
 

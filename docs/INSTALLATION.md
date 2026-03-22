@@ -114,7 +114,7 @@ pip install -e ".[all]"
 
 | Extra | Package | Feature |
 |-------|---------|---------|
-| `ide` | PySide6 (≥6.6) | Graphical IDE with 5 themes, settings dialog, toolbar, bracket matching, and syntax highlighting |
+| `ide` | PySide6 (≥6.6) | Graphical IDE with 7 themes, movable panels, settings dialog, and syntax highlighting |
 | `input` | pynput (≥1.7.7) | Keyboard input support |
 | `graphics` | Pillow (≥11.0) | Image processing |
 | `yaml` | PyYAML (≥6.0) | YAML configuration files |
@@ -139,16 +139,22 @@ python -m gulfofmexico.ide
 
 ### IDE Features
 
-- **5 built-in themes**: Gulf Dark, Gulf Light, Solarized Dark, Monokai, Nord
-- **Settings dialog** (Ctrl+,) for theme selection
-- **Toolbar** with Run, Stop, New, Open, Save buttons
-- **Bracket matching** with visual highlights
+- **7 built-in themes**: One Dark, Dracula, Nord, Solarized Dark, GitHub Light, Monokai, Catppuccin Mocha
+- **Settings dialog** (Ctrl+,) for theme, font size, word wrap, line numbers, and execution options
+- **Toolbar** with Run, Stop, New, Open, Save, and panel-toggle buttons; movable to any window edge
+- **Closable / floatable panels**: Console and Variables docks can be closed, floated, dragged, nested, and rearranged — layout is saved and restored automatically
+- **Panel toggle buttons**: ⬇ Console and ⊞ Variables checkable buttons in the toolbar; View menu items stay in sync
+- **Bracket matching** with visual highlights in the editor
 - Multi-tab code editor with block-based syntax highlighting
-- Console output panel
-- Run / Stop (Ctrl+R / Ctrl+.)
-- File operations: New (Ctrl+N), Open (Ctrl+O), Save (Ctrl+S)
+- **Word wrap** and **line-number gutter** toggles
+- **Go to Line** (Ctrl+G) dialog
+- **Duplicate Line** (Ctrl+D) and **Move Line Up/Down** (Alt+↑/↓)
+- **Tab right-click menu**: Close, Close Others, Close All, Duplicate Tab, Copy File Path
+- Console output panel with timestamps and optional clear-on-run
+- Run (F5) / Stop (Shift+F5)
+- File operations: New (Ctrl+N), Open (Ctrl+O), Save (Ctrl+S), Save As (Ctrl+Shift+S)
 - Recent files tracking
-- Session persistence (remembers window size, position, and open tabs)
+- Session persistence (window size, position, open tabs, dock layout)
 
 ### PyQt5 Fallback
 

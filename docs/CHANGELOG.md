@@ -4,6 +4,46 @@ All notable changes to the Gulf of Mexico interpreter are documented here.
 
 ---
 
+## v0.4.0 — 2026-03-21
+
+### IDE overhaul — modern GUI, new editor features, configurable panels
+
+#### IDE — visual and UX improvements
+
+- **Modern stylesheet**: overhauled QSS with visible 5px drag handles between panels (accent-coloured on hover), dock title gradient with accent left border, tab close buttons turning red on hover, pill-style status bar labels, and improved focus rings on inputs.
+- **Dock nesting**: panels can be tabbed together or freely nested via drag-and-drop (`setDockNestingEnabled`).
+- **Closable panels**: Console and Variables docks now have a standard title-bar × close button (`DockWidgetClosable`); closed panels can be restored via View menu or toolbar toggle buttons.
+- **Movable toolbar**: toolbar can be dragged to any window edge or detached as a floating window.
+- **Panel toggle buttons**: "⬇ Console" and "⊞ Variables" checkable buttons added to the toolbar. Dock visibility and button / menu-check state are kept in sync bidirectionally.
+- **Dock layout persistence**: dock and toolbar positions are saved to `~/.config/gom-ide/settings.json` on close and restored on next launch. First run uses sensible defaults (Console 220 px, Variables 260 px).
+- **Animated transitions**: panel show/hide uses Qt's built-in animated dock resizing (`setAnimated(True)`).
+
+#### IDE — editor features
+
+- **Word wrap**: the word-wrap setting now correctly applies to all editor tabs via `QTextOption.WrapMode` enum (was previously broken).
+- **Show / hide line numbers**: the line-number gutter can be toggled; hiding it returns the full column width to the editor.
+- **Go to Line** (Ctrl+G): dialog with a spin-box jumps the cursor to any line number.
+- **Duplicate Line** (Ctrl+D): duplicates the current line or selection below. Also available in the Edit menu.
+- **Move Line Up** (Alt+↑) / **Move Line Down** (Alt+↓): swap the current line with the one above or below.
+- **Tab right-click context menu**: Close, Close Others, Close All, Duplicate Tab, Copy File Path.
+- **Auto-close bracket fix**: pressing a closing bracket when the next character is already the matching closer now skips over it instead of inserting a duplicate.
+- **Selection count in status bar**: the cursor-position label appends `(N sel)` when text is selected.
+
+#### IDE — execution and settings
+
+- **Clear-console-on-run** setting: optionally wipe the console output before each run (Settings → Execution tab).
+- **Console timestamps**: each run prints a `─── Run · HH:MM:SS ───` header so successive outputs are clearly separated.
+
+#### Themes
+
+- **Catppuccin Mocha** theme added (total: 7 built-in themes — One Dark, Dracula, Nord, Solarized Dark, GitHub Light, Monokai, Catppuccin Mocha).
+
+#### Bug fixes
+
+- Fixed `setWordWrapMode` crash: the method requires a `QTextOption.WrapMode` enum value, not a plain `int`. Passing `0`/`1` raised a `TypeError` on PySide6 ≥ 6.7.
+
+---
+
 ## v0.3.0 — 2026-03-13
 
 ### DreamBerd spec alignment, new example suite, and IDE overhaul

@@ -38,7 +38,7 @@ from gulfofmexico.builtin import (
 )
 
 from .context import (
-    NUM_EQUALITY_RATIO,
+    NUM_EQUALITY_THRESHOLD,
     STRING_EQUALITY_RATIO,
     LIST_EQUALITY_RATIO,
     MAP_EQUALITY_RATIO,
@@ -64,8 +64,7 @@ def is_approx_equal(left: GulfOfMexicoValue, right: GulfOfMexicoValue) -> GulfOf
                 return GulfOfMexicoBoolean(True)
             if abs(left.value) < FLOAT_TO_INT_PREC and abs(right.value) < FLOAT_TO_INT_PREC:
                 return GulfOfMexicoBoolean(True)
-            ratio = abs(left.value - right.value) / max(abs(left.value), abs(right.value))
-            return GulfOfMexicoBoolean(ratio <= NUM_EQUALITY_RATIO)
+            return GulfOfMexicoBoolean(abs(left.value - right.value) <= NUM_EQUALITY_THRESHOLD)
 
         case GulfOfMexicoString():
             if not isinstance(right, GulfOfMexicoString):

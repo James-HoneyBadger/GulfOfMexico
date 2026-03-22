@@ -346,22 +346,30 @@ Optional graphical IDE built on PySide6 (with PyQt5 fallback).
 
 `MainWindow(QMainWindow)` with:
 - Multi-tab code editor
-- Console output dock
-- Toolbar with Run, Stop, New, Open, Save buttons
-- Settings dialog with theme selection
-- 5 built-in themes: Gulf Dark, Gulf Light, Solarized Dark, Monokai, Nord
-- Menus: File (new/open/save/recent), Edit, Run (run/stop), Settings
-- Keyboard shortcuts (Ctrl+N, Ctrl+O, Ctrl+S, Ctrl+R, Ctrl+comma for settings, etc.)
-- Session persistence (window geometry, open files, active theme)
+- Console output dock (closable, floatable, nestable)
+- Variable inspector dock (closable, floatable, nestable)
+- Toolbar with Run, Stop, New, Open, Save, and panel-toggle buttons; movable to any window edge
+- Settings dialog with theme, font size, word wrap, line-number gutter, and execution options
+- 7 built-in themes: One Dark, Dracula, Nord, Solarized Dark, GitHub Light, Monokai, Catppuccin Mocha
+- Menus: File (new/open/save/recent), Edit (undo/redo/cut/copy/paste/find/replace/duplicate-line/go-to-line), View (zoom/panels/toolbar), Run (run/stop/clear console), Help
+- Complete keyboard shortcuts (Ctrl+N/O/S, F5, Shift+F5, Ctrl+G, Ctrl+D, Alt+↑↓, Ctrl+,, etc.)
+- Panel visibility synced bidirectionally between toolbar toggle buttons and View menu checkboxes
+- Dock layout persistence via `QMainWindow.saveState()` / `restoreState()` (base64-encoded in settings)
+- Session persistence (window geometry, open files, active tab, dock layout, active theme)
 - Threaded code execution via `Worker(QObject)` to keep UI responsive
+- Console timestamps and optional clear-on-run
 
 ### `editor.py` — Code Editor
 
 `CodeEditor(QPlainTextEdit)` with:
-- Line number gutter (`LineNumberArea`)
+- Line number gutter (`LineNumberArea`), toggleable
 - Current-line highlighting
 - Bracket matching with visual highlight
+- Word wrap toggle (`QTextOption.WrapMode`)
 - Tab-width configuration (3 spaces per GOM spec)
+- Auto-close brackets with skip-through on duplicate close
+- Duplicate line (Ctrl+D), move line up/down (Alt+↑/↓)
+- Selection character count reported to status bar
 
 ### `highlighter.py` — Syntax Highlighting
 

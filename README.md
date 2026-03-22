@@ -305,7 +305,7 @@ pip install gulfofmexico[all]       # All optional extras
 
 | Extra | Package | Feature |
 |-------|---------|---------|
-| `ide` | PySide6 | Graphical IDE with 5 themes, settings dialog, toolbar, and syntax highlighting |
+| `ide` | PySide6 | Graphical IDE with 7 themes, movable panels, settings dialog, and syntax highlighting |
 | `input` | pynput | Keyboard input support |
 | `graphics` | Pillow | Image processing |
 | `yaml` | PyYAML | YAML configuration files |

@@ -81,8 +81,9 @@ WhenStatementWatchers: TypeAlias = list[
 # Constants
 # ---------------------------------------------------------------------------
 
-# Approximate-equality ratios
-NUM_EQUALITY_RATIO = 0.1
+# Approximate-equality thresholds
+# NUM_EQUALITY_THRESHOLD: max absolute difference for numbers to be ~equal (spec: "within ~10")
+NUM_EQUALITY_THRESHOLD = 10.0
 STRING_EQUALITY_RATIO = 0.7
 LIST_EQUALITY_RATIO = 0.7
 MAP_EQUALITY_RATIO = 0.6

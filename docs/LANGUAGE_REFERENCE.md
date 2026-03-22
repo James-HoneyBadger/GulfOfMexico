@@ -408,7 +408,7 @@ GOM provides **four levels** of equality precision:
 
 | Operator | Level | Behavior |
 |----------|-------|----------|
-| `=` | Approximate | Numbers: within ~10. Strings: ~70% similar (fuzzy). |
+| `=` | Approximate | Numbers: absolute difference ≤ 10. Strings: ~70% similar (fuzzy). |
 | `==` | Exact value | Standard value equality. |
 | `===` | Type-strict | Same value **and** same type. Mutable objects: same reference. |
 | `====` | Reference identity | Exact same object in memory. |
@@ -416,8 +416,8 @@ GOM provides **four levels** of equality precision:
 Inequality counterpart: `;=` (semicolon-equals, not `!=`).
 
 ```
-10 = 15       // → true   (within ~10%)
-10 = 25       // → false  (not within ~10%)
+10 = 15       // → true   (|15 − 10| = 5 ≤ 10)
+10 = 25       // → false  (|25 − 10| = 15 > 10)
 10 == 10      // → true   (exact match)
 10 == 10.0    // → true   (same numeric value)
 10 === 10     // → true   (same type)
