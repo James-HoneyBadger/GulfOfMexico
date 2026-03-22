@@ -1,7 +1,7 @@
 [tool.poetry]
 name = "gulfofmexico"
-version = "0.3.0"
-description = "Experimental interpreter based on Lu Wilson's (TodePond) Gulf of Mexico conceptual design - featuring probabilistic variables, negative indexing, and temporal lifetimes"
+version = "1.0.0"
+description = "Production-ready interpreter and IDE for the Gulf of Mexico esoteric programming language, featuring probabilistic variables, negative indexing, temporal lifetimes, and a modern graphical IDE. Based on Lu Wilson's (TodePond) conceptual design."
 readme = "README.md"
 authors = ["James Temple <james@honey-badger.org>"]
 license = "MIT"
@@ -10,7 +10,7 @@ homepage = "https://github.com/James-HoneyBadger/GulfOfMexico"
 documentation = "https://github.com/James-HoneyBadger/GulfOfMexico/blob/main/docs/LANGUAGE_REFERENCE.md"
 keywords = ["interpreter", "esoteric", "programming-language", "language-construction", "dsl"]
 classifiers = [
-    "Development Status :: 3 - Alpha",
+    "Development Status :: 5 - Production/Stable",
     "Intended Audience :: Developers",
     "Intended Audience :: Education",
     "License :: OSI Approved :: MIT License",

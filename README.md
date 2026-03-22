@@ -13,7 +13,7 @@
 
 ---
 
-Gulf of Mexico is an experimental interpreter for the language conceptually designed by [Lu Wilson (TodePond)](https://todepond.com). It features -1-based indexing, three-valued booleans (`true`, `false`, `maybe`), significant whitespace for operator binding, four tiers of equality, temporal variable lifetimes, word-number literals, and statement terminators with confidence levels.
+Gulf of Mexico is a production-ready interpreter and IDE for the language conceptually designed by [Lu Wilson (TodePond)](https://todepond.com). It features -1-based indexing, three-valued booleans (`true`, `false`, `maybe`), significant whitespace for operator binding, four tiers of equality, temporal variable lifetimes, word-number literals, and statement terminators with confidence levels.
 
 ```
 print "Hello, World!"!
