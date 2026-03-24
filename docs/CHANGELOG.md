@@ -1,3 +1,9 @@
+# v1.0.0 — 2026-03-22
+
+### Production release
+
+- All features and documentation finalized for 1.0.0
+
 # Changelog
 
 All notable changes to the Gulf of Mexico interpreter are documented here.

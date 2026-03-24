@@ -1,5 +1,6 @@
 """Test suite that runs all GOM example programs and spec compliance tests."""
 
+import os
 import subprocess
 import sys
 from pathlib import Path
@@ -68,3 +69,30 @@ def test_spec_compliance_output() -> None:
     assert "ALL TESTS COMPLETE" in result.stdout, (
         "spec_compliance.gom did not print completion marker"
     )
+
+
+def test_gom_verbose_outputs_completion_message() -> None:
+    """Verbose mode should emit completion message but not block indefinitely."""
+    result = subprocess.run(
+        [sys.executable, "-m", "gulfofmexico", "-s", "examples/01_hello_world.gom"],
+        capture_output=True,
+        text=True,
+        timeout=30,
+        cwd=str(ROOT),
+        env={**os.environ, "GULFOFMEXICO_VERBOSE": "1"},
+    )
+    assert result.returncode == 0
+    assert "Code has finished executing" in result.stderr or "Code has finished executing" in result.stdout
+
+
+def test_gom_wait_flag_blocks_until_interrupt() -> None:
+    """When GULFOFMEXICO_WAIT=1, execution should wait for when/after events."""
+    with pytest.raises(subprocess.TimeoutExpired):
+        subprocess.run(
+            [sys.executable, "-m", "gulfofmexico", "-s", "examples/01_hello_world.gom"],
+            capture_output=True,
+            text=True,
+            timeout=2,
+            cwd=str(ROOT),
+            env={**os.environ, "GULFOFMEXICO_WAIT": "1"},
+        )

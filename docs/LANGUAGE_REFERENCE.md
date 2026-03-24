@@ -1,6 +1,6 @@
 # Gulf of Mexico — Language Reference
 
-Complete syntax and semantics reference for the Gulf of Mexico programming language (v0.3.0).
+Complete syntax and semantics reference for the Gulf of Mexico programming language (v1.0.0).
 
 > **Notation**: Code examples use `// comment` to annotate expected output or behavior. The arrow `→` indicates the result of an expression.
 
@@ -974,7 +974,8 @@ Declaring a variable that already exists with `const`/`var` creates a new bindin
 | Variable | Effect |
 |----------|--------|
 | `GULFOFMEXICO_DEBUG` | Set to any value to print internal debug messages to stderr |
-| `GULFOFMEXICO_VERBOSE` | Set to any value to show completion messages and wait for when-statements |
+| `GULFOFMEXICO_VERBOSE` | Set to any value to show completion messages |
+| `GULFOFMEXICO_WAIT` | Set to any value to wait for when-statements and after-statements |
 
 ---
 
@@ -1013,4 +1014,4 @@ expression     := ... (see expression_tree.py for the full expression grammar)
 
 ---
 
-*This reference describes Gulf of Mexico v0.3.0. For architectural details, see [ARCHITECTURE.md](ARCHITECTURE.md). For installation instructions, see [INSTALLATION.md](INSTALLATION.md).*
+*This reference describes Gulf of Mexico v1.0.0. For architectural details, see [ARCHITECTURE.md](ARCHITECTURE.md). For installation instructions, see [INSTALLATION.md](INSTALLATION.md).*

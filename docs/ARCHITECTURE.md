@@ -515,4 +515,4 @@ Arrays, strings, and numbers all start indexing at `-1` instead of `0` or `1`. T
 
 ---
 
-*This architecture guide describes Gulf of Mexico v0.3.0. For the full language specification, see [LANGUAGE_REFERENCE.md](LANGUAGE_REFERENCE.md).*
+*This architecture guide describes Gulf of Mexico v1.0.0. For the full language specification, see [LANGUAGE_REFERENCE.md](LANGUAGE_REFERENCE.md).*

@@ -1,6 +1,6 @@
-"""Qt compatibility layer — supports PySide6 (preferred) or PyQt5 fallback."""
-
 from __future__ import annotations
+
+"""Qt compatibility layer — supports PySide6 (preferred) or PyQt5 fallback."""
 
 try:
     # ---- PySide6 (preferred) ----

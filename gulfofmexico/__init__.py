@@ -126,13 +126,18 @@ def run_file(main_filename: str) -> None:
     # to allow non-interactive executions (tests, scripts) to complete.
     import os  # pylint: disable=import-outside-toplevel
 
-    if os.environ.get("GULFOFMEXICO_VERBOSE"):
+    verbose = os.environ.get("GULFOFMEXICO_VERBOSE")
+    wait_enabled = os.environ.get("GULFOFMEXICO_WAIT")
+
+    if verbose:
         print(
             "\033[33mCode has finished executing. Press ^C once or twice "
             "to stop waiting for when-statements and "
             "after-statements.\033[039m",
             flush=True,
         )
+
+    if wait_enabled:
         try:
             while True:
                 sleep(1)  # just waiting for any clicks, when statements, etc

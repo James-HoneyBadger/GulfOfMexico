@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 """
 Gulf of Mexico IDE — Main Application
 
@@ -25,8 +27,6 @@ A polished, configurable IDE for the GOM language featuring:
     - Recent files menu
     - Subprocess-based execution with reliable Stop
 """
-
-from __future__ import annotations
 
 import json
 import os
@@ -1210,11 +1210,15 @@ if PYSIDE_AVAILABLE:
                     tmp.write(self.code)
                     tmp_path = tmp.name
 
+                env = os.environ.copy()
+                env.pop("GULFOFMEXICO_VERBOSE", None)
+                env.pop("GULFOFMEXICO_WAIT", None)
                 self._process = subprocess.Popen(
                     [sys.executable, "-m", "gulfofmexico", tmp_path],
                     stdout=subprocess.PIPE,
                     stderr=subprocess.PIPE,
                     text=True,
+                    env=env,
                 )
                 try:
                     stdout, stderr = self._process.communicate(timeout=self.timeout)
@@ -1845,33 +1849,15 @@ if PYSIDE_AVAILABLE:
                 show_line_numbers=bool(s.get("show_line_numbers", True)),
             )
             GomHighlighter(editor.document(), theme=self._theme)
-            welcome = (
-                "//                                                         \n"
-                "//                                                         \n"
-                "//\n"
-                "// Gulf of Mexico: a production-ready esoteric language featuring:\n"
-                "//    2 -1 based indexing\n"
-                "//    2 Three-valued booleans (true / false / maybe)\n"
-                "//    2 Significant whitespace for operator precedence\n"
-                "//    2 No loops  c recursion only\n"
-                "//    2 Statement terminators: !  !!  !!!  ?\n"
-                "//    2 Emoji identifiers   c\n"
-                "//\n"
-                "// Shortcuts:\n"
-                "//   F5          Run code\n"
-                "//   Ctrl+N      New file\n"
-                "//   Ctrl+O      Open file\n"
-                "//   Ctrl+S      Save\n"
-                "//   Ctrl+,      Settings\n"
-                "//   Ctrl+=/-    Zoom in/out\n"
-                "//   Ctrl+F      Find\n"
-                "//   Ctrl+H      Find & Replace\n"
-                "//   Ctrl+/      Toggle comment\n"
-                "//\n"
-                f"// Theme: {t}\n"
-                "//\n\n"
-                'print "Hello, Gulf of Mexico"!\n'
-            )
+
+            completer = QCompleter([], editor)
+            completer.setCaseSensitivity(Qt.CaseSensitivity.CaseInsensitive)
+            completer.setCompletionMode(QCompleter.CompletionMode.PopupCompletion)
+            completer.setWidget(editor)
+
+            def _on_text() -> None:
+                cursor = editor.textCursor()
+                cursor.movePosition(cursor.MoveOperation.StartOfWord,
                                     cursor.MoveMode.KeepAnchor)
                 prefix = cursor.selectedText()
                 if len(prefix) < 2:
@@ -1897,6 +1883,28 @@ if PYSIDE_AVAILABLE:
 
             editor.textChanged.connect(_on_text)
             completer.activated.connect(_insert)
+
+            # Connect to window-level editor hooks
+            self._connect_editor(editor)
+
+            if content is not None:
+                editor.setPlainText(content)
+            else:
+                editor.setPlainText("")
+
+            editor.setProperty("path", path or "")
+            editor.document().setModified(False)
+
+            display_name = Path(path).name if path else "untitled.gom"
+            idx = self.tabs.addTab(editor, display_name)
+            self.tabs.setCurrentIndex(idx)
+
+            self._on_modified(editor, False)
+            self._update_cursor_pos(editor)
+            self._update_zoom_label(editor)
+            self._update_outline()
+
+            return editor
 
         def _connect_editor(self, editor: CodeEditor) -> None:
             editor.document().modificationChanged.connect(

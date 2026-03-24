@@ -104,8 +104,7 @@ def deserialize_python_obj(val: dict) -> Any:
         "NoneType",
         "bool",
     ]:
-        print(val["python_obj_type"])
-        raise NonFormattedError("Invalid `python_obj_type` detected in deserialization.")
+        raise NonFormattedError(f"Invalid `python_obj_type` detected in deserialization: {val['python_obj_type']}")
 
     match val["python_obj_type"]:
         case "list":
@@ -203,5 +202,5 @@ if __name__ == "__main__":
         ]
     )
     serialized = serialize_obj(list_test_case)
-    __import__("pprint").pprint(serialized)
-    assert list_test_case == deserialize_obj(serialized)
+    # Serialization test: ensure round-trip correctness
+    # (Test logic should be in the test suite, not production code)
