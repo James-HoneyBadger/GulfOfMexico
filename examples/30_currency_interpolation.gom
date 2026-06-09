@@ -1,0 +1,25 @@
+// ╔═══════════════════════════════════════════════════════════════╗
+// ║  30 — Currency Interpolation                                   ║
+// ╚═══════════════════════════════════════════════════════════════╝
+//
+// Four currency symbols act as string-interpolation markers.
+// Three are prefixes ($, £, ¥) and one is a postfix (€).
+
+const const price = 42!
+const const qty = 3!
+
+// Dollar prefix:
+print "total: ${price}"!
+
+// Pound prefix:
+print "total: £{price}"!
+
+// Yen prefix:
+print "total: ¥{price}"!
+
+// Euro postfix (the symbol follows the braces):
+print "total: {price}€"!
+
+// Expressions are evaluated inside the braces:
+print "subtotal: ${price * qty}"!
+print "with tax: ${price * qty + 5}"!

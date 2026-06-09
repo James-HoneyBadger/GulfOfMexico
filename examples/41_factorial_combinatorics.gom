@@ -1,0 +1,41 @@
+// ╔═══════════════════════════════════════════════════════════════╗
+// ║  41 — Factorial & Combinatorics                                ║
+// ╚═══════════════════════════════════════════════════════════════╝
+//
+// Counting problems solved with recursion. Remember: pass computed
+// arguments through intermediate variables to avoid infinite recursion,
+// and assign a multi-argument call's result to a variable before
+// printing it.
+
+// ── Factorial: n! ───────────────────────────────────────────────
+function fact(n) => {
+   if (n <= 1) {
+      return 1!
+   }
+   const const prev = n - 1!
+   const const sub = fact(prev)!
+   return n * sub!
+}!
+print fact(5)!                 // 120
+
+// ── Permutations: P(n, r) = n! / (n - r)! ───────────────────────
+function permutations(n, r) => {
+   const const a = fact(n)!
+   const const diff = n - r!
+   const const b = fact(diff)!
+   return a / b!
+}!
+const const perms = permutations(5, 2)!
+print perms!                   // 20.0
+
+// ── Combinations: C(n, r) = n! / (r! * (n - r)!) ────────────────
+function combinations(n, r) => {
+   const const a = fact(n)!
+   const const rf = fact(r)!
+   const const diff = n - r!
+   const const df = fact(diff)!
+   const const denom = rf * df!
+   return a / denom!
+}!
+const const combos = combinations(5, 2)!
+print combos!                  // 10.0

@@ -1,0 +1,21 @@
+// ╔═══════════════════════════════════════════════════════════════╗
+// ║  27 — Escape Sequences                                         ║
+// ╚═══════════════════════════════════════════════════════════════╝
+//
+// Strings support C-style escape sequences for special characters.
+
+// Newline (\n) splits output across lines:
+print "line one\nline two"!
+
+// Tab (\t) inserts horizontal spacing:
+print "name:\tGOM"!
+
+// Backslash (\\) prints a single backslash:
+print "path: C:\\gom\\bin"!
+
+// Carriage return, null, and others are also recognized:
+print "done\r"!
+
+// Escapes combine freely inside interpolated strings:
+const const rows = 3!
+print "rows:\t${rows}\nstatus:\tok"!

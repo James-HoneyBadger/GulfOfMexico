@@ -1,0 +1,23 @@
+// ╔═══════════════════════════════════════════════════════════════╗
+// ║  37 — Multi-File Sections                                      ║
+// ╚═══════════════════════════════════════════════════════════════╝
+//
+// A single source file can hold multiple named sections separated by
+// ===== markers. Data flows between sections with export / import.
+//
+// NOTE: imports carry a 25% "tariff" — running an import may randomly
+// drop one later statement in the importing section. That is an
+// intentional language feature, so output can vary between runs.
+
+===== utils =====
+const const PI = 3.14159!
+const const E = 2.71828!
+export PI to main!
+export E to main!
+
+===== main =====
+import PI from utils!
+import E from utils!
+print "PI = ${PI}"!
+print "E = ${E}"!
+print "PI + E = ${PI + E}"!

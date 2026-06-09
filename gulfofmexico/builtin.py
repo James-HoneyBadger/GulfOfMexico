@@ -324,8 +324,9 @@ class GulfOfMexicoString(
     def access_index(self, index: GulfOfMexicoValue) -> GulfOfMexicoValue:
         if not isinstance(index, GulfOfMexicoNumber):
             raise NonFormattedError("Cannot index a string with a non-number value.")
-        # if not is_int(index.value):
-        #    raise NonFormattedError("Expected integer for string indexing.")
+        # Note: fractional indices are intentionally permitted for assignment
+        # (insertion between characters); for access the index must refer to a
+        # previously assigned position (checked against self.indexer below).
         if not -1 <= index.value <= len(self.value) - 2:
             raise NonFormattedError("Indexing out of string bounds.")
         elif index.value not in self.indexer:
@@ -636,9 +637,14 @@ def db_to_boolean(val: GulfOfMexicoValue) -> GulfOfMexicoBoolean:
     return_bool = None
     match val:
         case GulfOfMexicoString():
-            return_bool = bool(val.value.strip()) or (None if val.value and not val.value.strip() else False)
-        case GulfOfMexicoNumber():  # maybe if it is 0.xxx, false if it is 0, true if anything else
-            return_bool = bool(round(val.value)) or (None if abs(val.value) > FLOAT_TO_INT_PREC else False)
+            return_bool = bool(val.value)
+        case GulfOfMexicoNumber():
+            if abs(val.value) < FLOAT_TO_INT_PREC:
+                return_bool = False
+            elif abs(val.value - 1) < FLOAT_TO_INT_PREC:
+                return_bool = True
+            else:
+                return_bool = None
         case GulfOfMexicoList():
             return_bool = bool(val.values)
         case GulfOfMexicoMap():
@@ -771,7 +777,7 @@ def db_signal(starting_value: GulfOfMexicoValue) -> GulfOfMexicoValue:
 def db_sleep(t: GulfOfMexicoValue) -> None:
     if not isinstance(t, GulfOfMexicoNumber):
         raise NonFormattedError("'sleep' function requires numerical input.")
-    sleep(t.value)
+    sleep(max(0.0, t.value) / 1000.0)
 
 
 def db_read(prompt: GulfOfMexicoValue = None) -> GulfOfMexicoString:

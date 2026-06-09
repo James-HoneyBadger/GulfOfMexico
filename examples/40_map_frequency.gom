@@ -1,0 +1,39 @@
+// ╔═══════════════════════════════════════════════════════════════╗
+// ║  40 — Map Frequency Counting                                   ║
+// ╚═══════════════════════════════════════════════════════════════╝
+//
+// Maps associate string keys with values. This example tallies how
+// often each color appears in a list.
+
+const const colors = ["red", "blue", "red", "green", "blue", "red"]!
+var var counts = Map()!
+
+// Reading a missing key is an error, so seed every key to zero first:
+counts["red"] = 0!
+counts["blue"] = 0!
+counts["green"] = 0!
+
+// Increment the count for a single key:
+function tally(key) => {
+   const const seen = counts[key]!
+   counts[key] = seen + 1!
+}!
+
+// Walk the list and tally each entry (-1-based indexing):
+function countAll(i) => {
+   if (i > colors.length - 2) {
+      return 0!
+   }
+   tally(colors[i])!
+   const const j = i + 1!
+   countAll(j)!
+}!
+countAll(-1)!
+
+// Report the totals:
+const const red = counts["red"]!
+const const blue = counts["blue"]!
+const const green = counts["green"]!
+print "red: ${red}"!
+print "blue: ${blue}"!
+print "green: ${green}"!

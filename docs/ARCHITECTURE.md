@@ -181,6 +181,12 @@ The core interpretation loop. Contains three public functions:
 - **`interpret_code_statements()`** — Recursive inner loop. Iterates over statements, dispatches each to the appropriate handler, manages lifetime decrements, and processes when-watcher triggers.
 - **`execute_conditional()`** — Evaluates `if` blocks with three-valued boolean support (when the condition is `maybe`, the block executes probabilistically).
 
+Recent conformance-aligned behavior in `interpret_code_statements()`:
+- `after` statements execute after a millisecond delay, then run their scoped body.
+- `import ... from ...` resolves against named section exports.
+- Import tariff applies to the **importing section**: each import has a 25% chance to skip one future statement in the current section.
+- `reverse` replays prior statements without aborting subsequent statement execution.
+
 ### `expressions.py` — Expression Evaluator
 
 Evaluates `ExpressionTreeNode` trees to produce GOM values. This is the largest interpreter module.

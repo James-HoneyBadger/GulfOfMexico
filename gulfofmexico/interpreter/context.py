@@ -127,6 +127,7 @@ class InterpreterContext:
     class_instance_counts: dict[str, int] = field(default_factory=dict)
     name_watchers: NameWatchers = field(default_factory=dict)
     is_lifetime_temporal: bool = False
+    tariff_skipped_statement_ids: set[int] = field(default_factory=set)
 
     def reset(self) -> None:
         """Reset mutable state between runs (REPL / multi-file)."""
@@ -135,3 +136,4 @@ class InterpreterContext:
         self.class_instance_counts = {}
         self.name_watchers = {}
         self.is_lifetime_temporal = False
+        self.tariff_skipped_statement_ids = set()

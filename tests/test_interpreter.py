@@ -20,7 +20,13 @@ TIMEOUT = 15  # seconds per test
 # Helpers
 # ---------------------------------------------------------------------------
 
-def run_gom(code: str, *, timeout: int = TIMEOUT) -> subprocess.CompletedProcess:
+def run_gom(
+    code: str,
+    *,
+    timeout: int = TIMEOUT,
+    env: dict[str, str] | None = None,
+    show_traceback: bool = False,
+) -> subprocess.CompletedProcess:
     """Write *code* to a temp file, run via the interpreter, return result."""
     with tempfile.NamedTemporaryFile(
         mode="w", suffix=".gom", delete=False, encoding="utf-8"
@@ -29,12 +35,17 @@ def run_gom(code: str, *, timeout: int = TIMEOUT) -> subprocess.CompletedProcess
         f.flush()
         path = f.name
     try:
+        command = [sys.executable, "-m", "gulfofmexico"]
+        if show_traceback:
+            command.append("-s")
+        command.append(path)
         return subprocess.run(
-            [sys.executable, "-m", "gulfofmexico", path],
+            command,
             capture_output=True,
             text=True,
             timeout=timeout,
             cwd=str(ROOT),
+            env={**os.environ, **(env or {})},
         )
     finally:
         os.unlink(path)
@@ -291,6 +302,11 @@ class TestControlFlow:
             "nested",
         )
 
+    def test_after_statement_executes(self):
+        result = run_gom('after 1 {\n   print "later"!\n}!')
+        assert result.returncode == 0
+        assert result.stdout.strip() == "later"
+
 
 # =========================================================================
 # 8. Functions
@@ -541,6 +557,48 @@ class TestLifetimes:
         assert lines[1] == "10"
         assert lines[2] == "10"
 
+    def test_line_lifetime_expires_after_count(self):
+        code = (
+            "var x <2> = 10!\n"
+            "print x!\n"
+            "print x!\n"
+            "print x!\n"
+        )
+        result = run_gom(code)
+        assert result.returncode != 0
+        lines = [line for line in result.stdout.strip().split("\n") if line]
+        assert lines[0] == "10"
+        assert lines[1] == "10"
+
+    def test_temporal_lifetime_with_seconds_suffix(self):
+        code = (
+            "var x <0.001s> = 10!\n"
+            "sleep 20!\n"
+            "print x!\n"
+        )
+        result = run_gom(code)
+        assert result.returncode != 0
+
+    def test_line_lifetime_expiry_reports_undefined_variable(self):
+        code = (
+            "var x <1> = 10!\n"
+            "print x!\n"
+            "print x!\n"
+        )
+        result = run_gom(code, show_traceback=True)
+        assert result.returncode != 0
+        assert "Variable is undefined" in result.stderr
+
+    def test_temporal_lifetime_expiry_reports_undefined_variable(self):
+        code = (
+            "var x <0.001s> = 10!\n"
+            "sleep 20!\n"
+            "print x!\n"
+        )
+        result = run_gom(code, show_traceback=True)
+        assert result.returncode != 0
+        assert "Variable is undefined" in result.stderr
+
 
 # =========================================================================
 # 16. Multiple Return Values
@@ -618,6 +676,9 @@ class TestBuiltins:
     def test_Boolean_false(self):
         assert_output("print Boolean 0!", "false")
 
+    def test_Boolean_non_binary_number_is_maybe(self):
+        assert_output("print Boolean 2!", "maybe")
+
     def test_exit_zero(self):
         result = run_gom("exit 0!")
         assert result.returncode == 0
@@ -626,6 +687,11 @@ class TestBuiltins:
         result = run_gom("sleep 1!")
         assert result.returncode == 0
 
+    def test_sleep_uses_milliseconds(self):
+        result = run_gom("sleep 10!\nprint 1!")
+        assert result.returncode == 0
+        assert result.stdout.strip() == "1"
+
 
 # =========================================================================
 # 19. Error Handling
@@ -633,11 +699,9 @@ class TestBuiltins:
 
 class TestErrors:
     def test_missing_terminator(self):
-        """A statement without ! silently does nothing in GOM."""
+        """A statement without !/? is a parse error."""
         result = run_gom("print 42")
-        # GOM doesn't error on missing terminator — the statement is not parsed
-        assert result.returncode == 0
-        assert result.stdout.strip() == ""
+        assert result.returncode != 0
 
     def test_undefined_variable(self):
         """Using an undefined variable prints undefined but doesn't crash."""
@@ -648,6 +712,10 @@ class TestErrors:
     def test_bad_indentation(self):
         """Wrong indentation (not 3-space) should be an error."""
         code = "if true {\n  print 1!\n}"  # 2-space indent
+        assert_error(code)
+
+    def test_tab_indentation_is_rejected(self):
+        code = "if true {\n\tprint 1!\n}"
         assert_error(code)
 
 
@@ -805,6 +873,59 @@ class TestImportTariff:
         from gulfofmexico.builtin import BUILTIN_FUNCTION_KEYWORDS
         # This test ensures the import tariff only removes at most one statement. No placeholder assertion needed.
 
+    def test_import_tariff_removes_first_future_statement_when_forced(self):
+        code = (
+            "===== utils =====\n"
+            "const PI = 3.14!\n"
+            "export PI to main!\n"
+            "===== main =====\n"
+            "import PI from utils!\n"
+            "print \"B\"!\n"
+            "print \"C\"!\n"
+        )
+        result = run_gom(
+            code,
+            env={
+                "GOM_FORCE_TARIFF_REMOVE": "1",
+                "GOM_FORCE_TARIFF_INDEX": "0",
+            },
+        )
+        assert result.returncode == 0
+        assert result.stdout.strip() == "C"
+
+    def test_import_tariff_removes_second_future_statement_when_forced(self):
+        code = (
+            "===== utils =====\n"
+            "const PI = 3.14!\n"
+            "export PI to main!\n"
+            "===== main =====\n"
+            "import PI from utils!\n"
+            "print \"B\"!\n"
+            "print \"C\"!\n"
+        )
+        result = run_gom(
+            code,
+            env={
+                "GOM_FORCE_TARIFF_REMOVE": "1",
+                "GOM_FORCE_TARIFF_INDEX": "1",
+            },
+        )
+        assert result.returncode == 0
+        assert result.stdout.strip() == "B"
+
+    def test_import_from_specific_section(self):
+        code = (
+            "===== utils =====\n"
+            "const PI = 3.14!\n"
+            "export PI to main!\n"
+            "===== main =====\n"
+            "import PI from utils!\n"
+            "print PI!\n"
+        )
+        result = run_gom(code, env={"GOM_DISABLE_TARIFF": "1"})
+        assert result.returncode == 0
+        assert result.stdout.strip() == "3.14"
+
 
 # =========================================================================
 # 27. Variable overloading (! priority)
@@ -837,6 +958,22 @@ class TestVariableOverloading:
             'const const x = "c"!!!\n'
             'print x!\n',
             "c",
+        )
+
+    def test_tilde_confidence_marker_overrides_bang_priority(self):
+        assert_output(
+            'const const x = "low"!!!\n'
+            'const const x ~80~ = "high"!\n'
+            'print x!\n',
+            "high",
+        )
+
+    def test_tilde_confidence_marker_parses_float(self):
+        assert_output(
+            'const const y = "a"!!\n'
+            'const const y ~2.5~ = "b"!\n'
+            'print y!\n',
+            "b",
         )
 
 
@@ -991,3 +1128,183 @@ class TestAsyncInterleaving:
             'const const 5 = 4!\nprint  2 + 5!\n',
             "6",
         )
+
+
+# =========================================================================
+# 35. Reverse behavior
+# =========================================================================
+
+class TestReverseBehavior:
+    def test_reverse_does_not_stop_following_statements(self):
+        code = (
+            'print "A"!\n'
+            'print "B"!\n'
+            'reverse!\n'
+            'print "Z"!\n'
+        )
+        result = run_gom(code)
+        assert result.returncode == 0
+        assert result.stdout.strip().split("\n") == ["A", "B", "B", "A", "Z"]
+
+    def test_reverse_inside_function_preserves_following_return(self):
+        code = (
+            'function f() => {\n'
+            '   print "A"!\n'
+            '   print "B"!\n'
+            '   reverse!\n'
+            '   print "C"!\n'
+            '   return 1!\n'
+            '}!\n'
+            'print f()!\n'
+        )
+        result = run_gom(code)
+        assert result.returncode == 0
+        assert result.stdout.strip().split("\n") == ["A", "B", "B", "A", "C", "1"]
+
+    def test_reverse_in_async_scope_does_not_interrupt_queue(self):
+        code = (
+            'async function a() => {\n'
+            '   print "X"!\n'
+            '   reverse!\n'
+            '   print "Y"!\n'
+            '}!\n'
+            'a()!\n'
+            'print "Z"!\n'
+        )
+        result = run_gom(code)
+        assert result.returncode == 0
+        assert result.stdout.strip().split("\n") == ["X", "Z", "Y"]
+
+
+# =========================================================================
+# 40. Type annotations (enforced at declaration)
+# =========================================================================
+
+class TestTypeAnnotations:
+    def test_int_annotation_accepts_integer(self):
+        assert_output("var x: Int = 42!\nprint x!\n", "42")
+
+    def test_string_annotation_accepts_string(self):
+        assert_output('var s: String = "hi"!\nprint s!\n', "hi")
+
+    def test_bool_annotation_accepts_boolean(self):
+        assert_output("var b: Bool = true!\nprint b!\n", "true")
+
+    def test_int_annotation_rejects_string(self):
+        assert_error('var x: Int = "hello"!\n', r"Type mismatch")
+
+    def test_int_annotation_rejects_float(self):
+        assert_error("var x: Int = 3.5!\n", r"Type mismatch")
+
+    def test_string_annotation_rejects_number(self):
+        assert_error("var s: String = 5!\n", r"Type mismatch")
+
+    def test_number_annotation_accepts_float(self):
+        assert_output("var n: Number = 3.5!\nprint n!\n", "3.5")
+
+    def test_unknown_annotation_not_enforced(self):
+        """Custom/unknown type names should not be enforced."""
+        assert_output('var c: Widget = "anything"!\nprint c!\n', "anything")
+
+
+# =========================================================================
+# 41. previous keyword
+# =========================================================================
+
+class TestPreviousKeyword:
+    def test_previous_returns_prior_value(self):
+        assert_output(
+            "var score = 10!\nscore = 20!\nscore = 30!\n"
+            "print score!\nprint previous score!\n",
+            "30\n20",
+        )
+
+    def test_previous_after_single_reassignment(self):
+        assert_output(
+            "var x = 1!\nx = 2!\nprint previous x!\n",
+            "1",
+        )
+
+
+# =========================================================================
+# 42. when statements (reactive re-fire semantics)
+# =========================================================================
+
+class TestWhenSemantics:
+    def test_when_fires_each_time_condition_holds(self):
+        """A when-block re-fires on every qualifying change (reactive)."""
+        code = (
+            "var var x = 0!\n"
+            "when x > 5 {\n"
+            '   print "fired"!\n'
+            "}\n"
+            "x = 10!\n"
+            "x = 11!\n"
+        )
+        result = run_gom(code)
+        assert result.returncode == 0
+        assert result.stdout.strip().split("\n") == ["fired", "fired"]
+
+    def test_when_does_not_fire_until_condition_true(self):
+        code = (
+            "var var x = 0!\n"
+            "when x > 5 {\n"
+            '   print "hit"!\n'
+            "}\n"
+            "x = 1!\n"
+            "x = 6!\n"
+        )
+        result = run_gom(code)
+        assert result.returncode == 0
+        assert result.stdout.strip() == "hit"
+
+
+# =========================================================================
+# 43. Fractional indexing (insertion)
+# =========================================================================
+
+class TestFractionalIndexing:
+    def test_list_fractional_insert(self):
+        code = (
+            "var var lst = [1, 2, 3]!\n"
+            "lst[-0.5] = 99!\n"
+            "print lst[-0.5]!\n"
+        )
+        result = run_gom(code)
+        assert result.returncode == 0
+        # The inserted value is accessible at its fractional index.
+        assert result.stdout.strip() == "99"
+
+    def test_string_fractional_insert(self):
+        code = 'var var s = "ac"!\ns[-0.5] = "b"!\nprint s!\n'
+        result = run_gom(code)
+        assert result.returncode == 0
+        assert result.stdout.strip() == "abc"
+
+
+# =========================================================================
+# 44. Emoji identifiers (extended)
+# =========================================================================
+
+class TestEmojiIdentifiersExtended:
+    def test_emoji_function_name(self):
+        assert_output(
+            "function \U0001f680() => {\n"
+            '   print "launch"!\n'
+            "}!\n"
+            "\U0001f680()!\n",
+            "launch",
+        )
+
+    def test_emoji_in_class_and_property(self):
+        code = (
+            "class \U0001f3e0 {\n"
+            "   const const rooms = 3!\n"
+            "}\n"
+            "const const house = new \U0001f3e0!\n"
+            "print house.rooms!\n"
+        )
+        result = run_gom(code)
+        assert result.returncode == 0
+        assert result.stdout.strip() == "3"
+

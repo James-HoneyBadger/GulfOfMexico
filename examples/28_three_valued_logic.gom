@@ -1,0 +1,29 @@
+// ╔═══════════════════════════════════════════════════════════════╗
+// ║  28 — Three-Valued Logic & maybe                               ║
+// ╚═══════════════════════════════════════════════════════════════╝
+//
+// GOM booleans have THREE values: true, false, and maybe.
+// `maybe` is probabilistic — it resolves to true ~50% of the time.
+
+// The three boolean literals:
+print true!
+print false!
+print maybe!
+
+// Logical operators use & (and), | (or), ; (not):
+const const a = true!
+const const b = false!
+print a & b!          // false
+print a | b!          // true
+print ;a!             // false (not true)
+
+// `maybe` flows through conditions probabilistically:
+if maybe {
+   print "the coin landed heads"!
+}
+print "after the coin flip"!
+
+// Boolean() converts values — 0 is false, 1 is true, other numbers maybe:
+print Boolean(0)!     // false
+print Boolean(1)!     // true
+print Boolean(2)!     // maybe

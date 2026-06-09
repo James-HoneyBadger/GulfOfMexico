@@ -202,7 +202,13 @@ gom -s script.gom            # Show Python traceback on error
 gom --debug script.gom       # Show internal debug messages
 ```
 
-The `python -m gulfofmexico` invocation works identically to `gom`.
+The `python -m gulfofmexico` invocation works identically to `gom`. Run
+`gom --help` for usage modes, environment variables, and examples. Errors are
+reported with source context and clear messages.
+
+The REPL supports persistent history (stored in `~/.gom_history`), tab
+completion for keywords, in-scope names, and meta-commands, and multi-line
+editing that correctly tracks braces across strings and comments.
 
 ### REPL Commands
 
@@ -221,7 +227,7 @@ The `python -m gulfofmexico` invocation works identically to `gom`.
 
 ## Examples
 
-26 example programs are included in [`examples/`](examples/), covering every feature of the language from hello world to recursive algorithms. See [examples/README.md](examples/README.md) for the full program index.
+48 example programs are included in [`examples/`](examples/), covering every feature of the language from hello world to recursive algorithms. See [examples/README.md](examples/README.md) for the full program index.
 
 ```bash
 # Run a single example
@@ -243,7 +249,7 @@ done
 | **[Installation Guide](docs/INSTALLATION.md)** | Platform-specific setup, virtual environments, extras |
 | **[Contributing Guide](CONTRIBUTING.md)** | How to contribute, coding standards, and testing workflow |
 | **[Changelog](docs/CHANGELOG.md)** | Version history and release notes |
-| **[Examples Index](examples/README.md)** | Annotated guide to all 26 example programs |
+| **[Examples Index](examples/README.md)** | Annotated guide to all 48 example programs |
 | **[Code of Conduct](CODE_OF_CONDUCT.md)** | Community standards |
 
 ## Project Structure
@@ -278,7 +284,7 @@ gulfofmexico/                   # Main package
     ├── runner.py               #   Background execution
     └── qt_compat.py            #   PySide6 / PyQt5 compatibility
 
-examples/                       # 26 example programs (.gom)
+examples/                       # 48 example programs (.gom)
 tests/                          # 170 unit + integration tests
 docs/                           # Language reference, architecture, guides
 ```

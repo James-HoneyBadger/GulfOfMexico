@@ -112,9 +112,10 @@ def declare_new_variable(
                         hoist_lines = abs(int(val))
                         duration = 1  # expires after the declaration statement itself
                     else:
-                        temporal_duration = val
-                        duration = 100_000_000_000
-                        is_temporal = True
+                        # Positive <N> lifetimes are statement-count based.
+                        # Temporal lifetimes require an explicit seconds suffix: <Ns>
+                        duration = int(val) + 1
+                        is_temporal = False
             else:
                 duration = int(lifetime)
         except ValueError:
@@ -138,7 +139,16 @@ def declare_new_variable(
     )
 
     if statement.type_annotation:
-        check_type_annotation(statement.type_annotation)
+        if not check_type_annotation(statement.type_annotation, value):
+            type_name = "".join(
+                tok.value for tok in statement.type_annotation
+            ).strip()
+            raise_error_at_token(
+                ctx.filename, ctx.code,
+                f"Type mismatch: value does not match declared type "
+                f"'{type_name}'.",
+                statement.name,
+            )
 
     # const const const → save as immutable global constant
     is_triple_const = len(statement.modifiers) == 3 and all(mod.value == "const" for mod in statement.modifiers)

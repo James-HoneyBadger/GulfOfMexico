@@ -824,6 +824,9 @@ QFrame[frameShape="4"], QFrame[frameShape="5"] {{
 def _format_error_html(err: str, theme: dict[str, str]) -> str:
     color = theme.get("error", "#e06c75")
     link_color = theme.get("info", "#56b6c2")
+    # Strip ANSI color codes so they don't appear as literal escape sequences
+    # in the Qt console (the CLI emits colored errors on stderr).
+    err = _re.sub(r"\x1b\[[0-9;]*m", "", err)
     escaped = _html_escape(err)
     # Make "line N" patterns into clickable links so the user can jump to the error
     linked = _re.sub(

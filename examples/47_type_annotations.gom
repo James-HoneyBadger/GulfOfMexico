@@ -1,0 +1,30 @@
+// ╔═══════════════════════════════════════════════════════════════╗
+// ║  47 — Type Annotations                                         ║
+// ╚═══════════════════════════════════════════════════════════════╝
+//
+// Declarations may carry an optional type annotation after the name.
+// Annotations are checked at declaration time — a mismatched value is
+// an error.
+
+// Recognized annotations include Int, Number, String, Bool, List, Map.
+var x: Int = 42!
+print x!
+
+var pi: Number = 3.14159!
+print pi!
+
+var name: String = "GOM"!
+print name!
+
+var ready: Bool = true!
+print ready!
+
+var nums: List = [1, 2, 3]!
+print nums.length!
+
+// Annotations naming unknown/custom types are not enforced, so they act
+// as documentation:
+var widget: Gadget = "anything"!
+print widget!
+
+// A mismatch such as `var n: Int = "oops"!` would raise a type error.

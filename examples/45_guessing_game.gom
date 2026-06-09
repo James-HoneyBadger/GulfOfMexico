@@ -1,0 +1,30 @@
+// ╔═══════════════════════════════════════════════════════════════╗
+// ║  45 — Guessing Game (Simulation)                               ║
+// ╚═══════════════════════════════════════════════════════════════╝
+//
+// A self-playing number-guessing simulation. Instead of reading from
+// stdin (which would block), it generates guesses and reacts to them
+// with `when` watchers.
+
+const const secret = 7!
+print "secret chosen between 1 and 10"!
+
+var var guess = randomInt(1, 10)!
+print "first guess: ${guess}"!
+
+// React the moment the guess matches the secret:
+when guess == secret {
+   print "correct! the number was ${secret}"!
+}
+
+// Give hints for a wrong first guess:
+if (guess < secret) {
+   print "too low"!
+}
+if (guess > secret) {
+   print "too high"!
+}
+
+// Force a winning guess to demonstrate the watcher firing:
+guess = secret!
+print "game over"!

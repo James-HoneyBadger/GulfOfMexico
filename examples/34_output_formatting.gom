@@ -1,0 +1,27 @@
+// ╔═══════════════════════════════════════════════════════════════╗
+// ║  34 — Output Formatting                                        ║
+// ╚═══════════════════════════════════════════════════════════════╝
+//
+// `print` writes a value to stdout followed by a newline. Combine it
+// with interpolation and escape sequences for rich output.
+
+// Plain values:
+print "hello"!
+print 42!
+print true!
+
+// Interpolated values:
+const const user = "Ada"!
+const const items = 3!
+print "user: ${user}"!
+print "items: ${items}"!
+
+// Multi-line, tab-aligned reports using escapes:
+print "report\n-------"!
+print "name:\t${user}"!
+print "count:\t${items}"!
+
+// Reading input is also supported (shown here as a comment so this
+// example runs without blocking on stdin):
+//   const const name = read "Enter your name: "!
+//   print "hello, ${name}"!

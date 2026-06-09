@@ -1,0 +1,34 @@
+// ╔═══════════════════════════════════════════════════════════════╗
+// ║  44 — Nested Data Structures                                   ║
+// ╚═══════════════════════════════════════════════════════════════╝
+//
+// Lists and maps nest freely, letting you model structured records.
+
+// ── A list of lists (a small grid) ──────────────────────────────
+const const grid = [[1, 2], [3, 4], [5, 6]]!
+const const firstRow = grid[-1]!     // first row, -1-based
+print firstRow!                      // [1, 2]
+print firstRow[-1]!                  // 1  (first cell of first row)
+
+// ── A map of lists ──────────────────────────────────────────────
+var var inventory = Map()!
+inventory["fruits"] = ["apple", "pear"]!
+inventory["veggies"] = ["kale"]!
+
+const const fruits = inventory["fruits"]!
+print fruits!                        // [apple, pear]
+print fruits.length!                 // 2
+
+// ── A list of maps (records) ────────────────────────────────────
+var var alice = Map()!
+alice["name"] = "Alice"!
+alice["age"] = 30!
+
+var var bob = Map()!
+bob["name"] = "Bob"!
+bob["age"] = 25!
+
+const const people = [alice, bob]!
+const const firstPerson = people[-1]!
+const const firstName = firstPerson["name"]!
+print firstName!                     // Alice

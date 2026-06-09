@@ -1,0 +1,36 @@
+// ╔═══════════════════════════════════════════════════════════════╗
+// ║  42 — String Processing                                        ║
+// ╚═══════════════════════════════════════════════════════════════╝
+//
+// Strings support length, concatenation, reversal (unary minus), and
+// -1-based character indexing.
+
+const const word = "racecar"!
+
+// Length and first/last characters:
+print word.length!            // 7
+print word[-1]!               // r  (first character, -1-based)
+
+// Reverse a string with unary minus:
+const const flipped = -word!
+print flipped!                // racecar
+
+// Palindrome check — a word equals its own reversal:
+const const isPalindrome = word == flipped!
+print isPalindrome!           // true
+
+const const other = "hello"!
+const const otherRev = -other!
+const const otherPal = other == otherRev!
+print otherPal!               // false
+
+// Concatenation builds new strings:
+const const greeting = "hi" + " " + "there"!
+print greeting!               // hi there
+
+// Regex helpers take one comma-separated string argument:
+const const firstNum = regex_match "\\d+,order 42 shipped"!
+print firstNum!               // 42
+
+const const allNums = regex_findall "\\d+,a1b22c333"!
+print allNums!                // [1, 22, 333]

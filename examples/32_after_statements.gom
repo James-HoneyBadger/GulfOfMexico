@@ -1,0 +1,19 @@
+// ╔═══════════════════════════════════════════════════════════════╗
+// ║  32 — After Statements                                         ║
+// ╚═══════════════════════════════════════════════════════════════╝
+//
+// `after N { ... }` schedules a block to run after an N-millisecond delay.
+
+print "starting"!
+
+// Run a block after a short delay (10 ms):
+after 10 {
+   print "ran after the delay"!
+}
+
+print "finished"!
+
+// Delays can vary; smaller numbers run sooner:
+after 5 {
+   print "quick follow-up"!
+}

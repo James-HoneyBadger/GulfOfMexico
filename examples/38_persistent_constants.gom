@@ -1,0 +1,19 @@
+// ╔═══════════════════════════════════════════════════════════════╗
+// ║  38 — Persistent Constants (const const const)                ║
+// ╚═══════════════════════════════════════════════════════════════╝
+//
+// A triple-const declaration stores an immutable value that PERSISTS
+// across separate runs of the program (saved to disk by the runtime).
+
+// Declare persistent constants:
+const const const APP_NAME = "Gulf of Mexico"!
+const const const VERSION = "1.0"!
+
+print APP_NAME!
+print VERSION!
+
+// They behave like ordinary immutable constants within the program:
+print "${APP_NAME} v${VERSION}"!
+
+// Because they persist, the first run "seeds" them; later runs reuse the
+// stored value. (Remove the runtime's persistence directory to reset.)

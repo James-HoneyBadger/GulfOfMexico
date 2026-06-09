@@ -1,0 +1,25 @@
+// ╔═══════════════════════════════════════════════════════════════╗
+// ║  35 — Random Numbers                                           ║
+// ╚═══════════════════════════════════════════════════════════════╝
+//
+// GOM provides two randomness builtins.
+
+// random() returns a float in [0, 1):
+const const r = random()!
+const const inRange = r >= 0 & r < 1!
+print inRange!         // true
+
+// randomInt(a, b) returns an integer in [a, b] inclusive:
+const const die = randomInt(1, 6)!
+const const valid = die >= 1 & die <= 6!
+print valid!           // true
+
+// Use randomness to drive a simple decision:
+const const flip = randomInt(0, 1)!
+when flip == 1 {
+   print "heads"!
+}
+when flip == 0 {
+   print "tails"!
+}
+print "coin settled"!

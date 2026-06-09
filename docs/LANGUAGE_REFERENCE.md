@@ -309,13 +309,21 @@ counter = counter + 1!
 
 ### 3.3 Type Annotations
 
-Optional type annotations can be added at declaration. They are checked at the time of declaration:
+Optional type annotations can be added at declaration. They are checked at the
+time of declaration — a value that does not match its declared type raises a
+type error:
 
 ```
 var x: Int = 42!
 var s: String = "hello"!
 var b: Bool = true!
+
+var bad: Int = "oops"!   // ✗ Error — type mismatch
 ```
+
+Recognized annotations are `Int`, `Number`/`Float`, `String`, `Bool`, `List`,
+`Map`, `Object`, and `Function`. Annotations naming an unknown or custom type
+are not enforced and serve purely as documentation.
 
 ### 3.4 Variable Lifetimes
 
@@ -688,7 +696,7 @@ when x > 5 {
 x = 10!    // → triggers the when block
 ```
 
-When-watchers are re-evaluated after every variable assignment. They fire at most once per registration.
+When-watchers are re-evaluated after every variable assignment. The block runs each time an assignment leaves the condition true, so a watcher can fire repeatedly as the watched state keeps qualifying.
 
 ### 8.2 Next Promises
 

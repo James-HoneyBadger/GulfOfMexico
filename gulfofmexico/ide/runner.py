@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import io
+import re
 import sys
 import threading
 from dataclasses import dataclass, field
@@ -79,6 +80,8 @@ def run_code(session: ExecutionSession, code: str, filename: str = "__ide_buffer
             session.importable_names[target_filename][name] = value
         return out.getvalue(), None
     except InterpretationError as e:
-        return out.getvalue(), str(e)
+        # Strip ANSI color codes so callers (e.g. Qt console) don't render them.
+        message = re.sub(r"\x1b\[[0-9;]*m", "", str(e))
+        return out.getvalue(), message
     finally:
         sys.stdout = old_stdout

@@ -1,0 +1,25 @@
+// ╔═══════════════════════════════════════════════════════════════╗
+// ║  33 — Confidence Levels                                        ║
+// ╚═══════════════════════════════════════════════════════════════╝
+//
+// A declaration can carry a confidence percentage written as ~N~.
+// Higher confidence wins when the same name is declared more than once.
+
+// A plain declaration:
+const const answer = 10!
+print answer!
+
+// A higher-confidence redeclaration overrides a lower-priority one,
+// even one declared with a stronger ! terminator:
+const const score = "low"!!!
+const const score ~80~ = "high"!
+print score!          // high
+
+// Confidence accepts fractional percentages too:
+const const pick = "a"!!
+const const pick ~2.5~ = "b"!
+print pick!           // b
+
+// Confidence pairs naturally with maybe-style uncertainty:
+const const guess ~50~ = "coin"!
+print guess!

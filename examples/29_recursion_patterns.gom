@@ -1,0 +1,45 @@
+// ╔═══════════════════════════════════════════════════════════════╗
+// ║  29 — Recursion Patterns                                       ║
+// ╚═══════════════════════════════════════════════════════════════╝
+//
+// GOM has no `for` or `while` loops — iteration is done with recursion.
+//
+// IMPORTANT GOTCHA: a recursive call with a *computed* argument such as
+// `count(n - 1)` recurses forever. Always bind the computed value to an
+// intermediate variable first, then pass that variable.
+
+// ── Countdown ───────────────────────────────────────────────────
+function countdown(n) => {
+   if (n <= 0) {
+      print "liftoff!"!
+      return 0!
+   }
+   print n!
+   const const next = n - 1!      // intermediate variable (required)
+   countdown(next)!
+}!
+countdown(3)!
+
+// ── Sum from 1..n ───────────────────────────────────────────────
+function sumTo(n) => {
+   if (n <= 0) {
+      return 0!
+   }
+   const const prev = n - 1!
+   const const rest = sumTo(prev)!
+   return n + rest!
+}!
+print sumTo(5)!                    // 15
+
+// ── Walking a list with a -1-based index ────────────────────────
+// Valid indices run from -1 (first) to length-2 (last).
+const const items = [10, 20, 30]!
+function walk(i) => {
+   if (i > items.length - 2) {
+      return 0!
+   }
+   print items[i]!
+   const const j = i + 1!
+   walk(j)!
+}!
+walk(-1)!                          // prints 10, 20, 30

@@ -9,11 +9,11 @@ and ``interpret_code_statements`` (the recursive core loop), plus
 from __future__ import annotations
 
 import random
+import os
 import time as _time
 from typing import Optional
 
 from gulfofmexico.base import (
-    raise_error_at_line,
     raise_error_at_token,
 )
 from gulfofmexico.builtin import (
@@ -27,6 +27,7 @@ from gulfofmexico.builtin import (
     Name,
     Variable,
     VariableLifetime,
+    db_to_number,
     db_to_boolean,
 )
 from gulfofmexico.processor.syntax_tree import (
@@ -175,7 +176,11 @@ def interpret_code_statements(
                     namespaces[-1][candidate.name.value] = pre_var
                     break  # only one candidate per statement_tuple matters
 
-    for statement_tuple in statements:
+    for statement_index, statement_tuple in enumerate(statements):
+        if id(statement_tuple) in ctx.tariff_skipped_statement_ids:
+            ctx.tariff_skipped_statement_ids.remove(id(statement_tuple))
+            continue
+
         statement = determine_statement_type(statement_tuple, namespaces, ctx)
         if statement is None:
             continue
@@ -240,10 +245,26 @@ def interpret_code_statements(
                 )
 
             case AfterStatement():
-                raise_error_at_line(
-                    ctx.filename, ctx.code, ctx.current_line,
-                    '"after" with mouse/keyboard events is not supported.',
+                delay_val = evaluate_expression(
+                    statement.expression,
+                    namespaces,
+                    async_statements,
+                    when_statement_watchers,
+                    ctx,
                 )
+                delay_num = db_to_number(delay_val).value
+                _time.sleep(max(0.0, delay_num / 1000.0))
+                result = interpret_code_statements(
+                    statement.code,
+                    namespaces + [{}],
+                    [],
+                    when_statement_watchers + [{}],
+                    importable_names,
+                    exported_names,
+                    ctx,
+                )
+                if isinstance(result, ReturnSentinel):
+                    return result
 
             case FunctionDefinition():
                 func = GulfOfMexicoFunction(
@@ -335,33 +356,61 @@ def interpret_code_statements(
                         [rev_stmt_tuple], namespaces, async_statements,
                         when_statement_watchers, importable_names, exported_names, ctx,
                     )
-                return result
+                    if isinstance(result, ReturnSentinel):
+                        return result
 
             case ImportStatement():
-                _time.sleep(0.025)  # 25ms tariff per spec
+                _time.sleep(random.uniform(0.005, 0.05))  # short random tariff delay
+
+                if statement.source_file is not None:
+                    source_name = statement.source_file.value
+                    source_exports = importable_names.get(source_name)
+                    if source_exports is None:
+                        raise_error_at_token(
+                            ctx.filename,
+                            ctx.code,
+                            f"Cannot find import source: {source_name}",
+                            statement.source_file,
+                        )
+                    import_sources = [source_exports]
+                else:
+                    import_sources = list(importable_names.values())
+
                 for name_token in statement.names:
                     name = name_token.value
                     found = False
-                    for file_dict in importable_names.values():
+                    for file_dict in import_sources:
                         if name in file_dict:
                             imported_val = file_dict[name]
-                            if isinstance(imported_val, GulfOfMexicoFunction) and imported_val.code:
-                                # Per spec: "may randomly remove one statement"
-                                # Remove exactly one random statement with 75% probability
-                                if random.random() < 0.75:
-                                    tariffed_code = list(imported_val.code)
-                                    idx_to_remove = random.randrange(len(tariffed_code))
-                                    tariffed_code.pop(idx_to_remove)
-                                else:
-                                    tariffed_code = list(imported_val.code)
-                                imported_val = GulfOfMexicoFunction(
-                                    imported_val.args, tariffed_code, imported_val.is_async,
-                                )
                             namespaces[-1][name] = Name(name, imported_val)
                             found = True
                             break
                     if not found:
                         raise_error_at_token(ctx.filename, ctx.code, f"Cannot find imported name: {name}", name_token)
+
+                force_remove = os.environ.get("GOM_FORCE_TARIFF_REMOVE") == "1"
+                disable_tariff = os.environ.get("GOM_DISABLE_TARIFF") == "1"
+                should_remove = not disable_tariff and (
+                    force_remove or (random.random() < 0.25)
+                )
+                if should_remove:
+                    future_indices = [
+                        idx
+                        for idx in range(statement_index + 1, len(statements))
+                        if id(statements[idx]) not in ctx.tariff_skipped_statement_ids
+                    ]
+                    if future_indices:
+                        forced_idx_raw = os.environ.get("GOM_FORCE_TARIFF_INDEX")
+                        if forced_idx_raw is not None:
+                            try:
+                                forced_pos = int(forced_idx_raw)
+                            except ValueError:
+                                forced_pos = 0
+                            forced_pos = max(0, min(forced_pos, len(future_indices) - 1))
+                            remove_idx = future_indices[forced_pos]
+                        else:
+                            remove_idx = random.choice(future_indices)
+                        ctx.tariff_skipped_statement_ids.add(id(statements[remove_idx]))
 
             case ExportStatement():
                 for name_token in statement.names:

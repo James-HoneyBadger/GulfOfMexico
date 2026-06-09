@@ -1,0 +1,61 @@
+// ╔═══════════════════════════════════════════════════════════════╗
+// ║  39 — List Algorithms                                          ║
+// ╚═══════════════════════════════════════════════════════════════╝
+//
+// Classic list operations expressed with recursion and -1-based
+// indexing (valid indices: -1 for the first item .. length-2 for last).
+//
+// Two gotchas used throughout:
+//   • Pass computed call arguments through intermediate variables.
+//   • Don't call a multi-argument function directly inside `print` —
+//     assign the result to a variable first, then print it.
+
+const const nums = [4, 8, 15, 16, 23, 42]!
+const const START = 0 - 1!            // first index is -1
+
+// ── Sum of all elements ─────────────────────────────────────────
+function total(i, acc) => {
+   if (i > nums.length - 2) {
+      return acc!
+   }
+   const const next = acc + nums[i]!
+   const const j = i + 1!
+   return total(j, next)!
+}!
+const const sum = total(START, 0)!
+print sum!                     // 108
+
+// ── Maximum element ─────────────────────────────────────────────
+function maxFrom(i, best) => {
+   if (i > nums.length - 2) {
+      return best!
+   }
+   const const v = nums[i]!
+   var var newBest = best!
+   if (v > best) {
+      newBest = v!
+   }
+   const const j = i + 1!
+   return maxFrom(j, newBest)!
+}!
+const const first = nums[-1]!
+const const biggest = maxFrom(START, first)!
+print biggest!                 // 42
+
+// ── Linear search (returns index or -99 if absent) ──────────────
+function indexOf(i, target) => {
+   if (i > nums.length - 2) {
+      return 0 - 99!
+   }
+   const const v = nums[i]!
+   if (v == target) {
+      return i!
+   }
+   const const j = i + 1!
+   return indexOf(j, target)!
+}!
+const const pos = indexOf(START, 16)!
+print pos!                     // 2
+
+// ── Reverse with the unary-minus operator ───────────────────────
+print -nums!                   // [42, 23, 16, 15, 8, 4]

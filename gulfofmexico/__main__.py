@@ -38,7 +38,27 @@ import sys
 from typing import Optional
 
 from gulfofmexico import run_file
+from gulfofmexico.base import InterpretationError, NonFormattedError
 from gulfofmexico.repl import main as repl_main
+
+
+def _report_error(exc: BaseException) -> None:
+    """Print a user-facing error message for a failed run.
+
+    InterpretationError already carries a formatted (and colored) message, so it
+    is printed as-is. Other known error types are given a concise description.
+    """
+    if isinstance(exc, InterpretationError):
+        # Already formatted with source context and ANSI colors.
+        print(str(exc), file=sys.stderr)
+    elif isinstance(exc, NonFormattedError):
+        print(f"\033[31mError: {exc}\033[39m", file=sys.stderr)
+    elif isinstance(exc, FileNotFoundError):
+        print(f"\033[31mError: file not found: {exc.filename}\033[39m", file=sys.stderr)
+    elif isinstance(exc, KeyboardInterrupt):
+        print("\nInterrupted.", file=sys.stderr)
+    else:
+        print(f"\033[31mError during execution: {exc}\033[39m", file=sys.stderr)
 
 
 def _run_inline(code: str, show_tb: bool) -> int:
@@ -107,17 +127,36 @@ def _run_inline(code: str, show_tb: bool) -> int:
             ctx,
         )
         return 0
-    except Exception:  # pylint: disable=broad-exception-caught
+    except Exception as exc:  # pylint: disable=broad-exception-caught
         if show_tb:
             raise
-        print("Error during execution.", file=sys.stderr)
+        _report_error(exc)
         return 1
 
 
 def _main(argv: Optional[list[str]] = None) -> int:
     args = argv if argv is not None else sys.argv[1:]
 
-    parser = argparse.ArgumentParser(prog="gulfofmexico", add_help=True)
+    parser = argparse.ArgumentParser(
+        prog="gom",
+        add_help=True,
+        formatter_class=argparse.RawDescriptionHelpFormatter,
+        description="Gulf of Mexico language interpreter.",
+        epilog=(
+            "modes:\n"
+            "  gom                      start the interactive REPL\n"
+            "  gom script.gom           run a source file\n"
+            "  gom -c \"print(1)!\"       run inline code and exit\n"
+            "  gom -s script.gom        run a file, showing a full Python traceback on error\n"
+            "  gom-ide                  launch the graphical IDE (requires the 'ide' extra)\n\n"
+            "environment variables:\n"
+            "  GULFOFMEXICO_DEBUG=1     show internal debug messages (same as --debug)\n"
+            "  GULFOFMEXICO_VERBOSE=1   show verbose completion messages (same as --verbose)\n\n"
+            "examples:\n"
+            "  gom examples/01_hello_world.gom\n"
+            "  gom -c 'const const name = \"world\"! print(name)!'\n"
+        ),
+    )
     parser.add_argument("file", nargs="?", help="Gulf of Mexico source file (.gom)")
     parser.add_argument(
         "-s",
@@ -158,9 +197,10 @@ def _main(argv: Optional[list[str]] = None) -> int:
         try:
             run_file(ns.file)
             return 0
-        except Exception:  # pylint: disable=broad-exception-caught
+        except Exception as exc:  # pylint: disable=broad-exception-caught
             if ns.show_traceback:
                 raise
+            _report_error(exc)
             return 1
 
     # Default: REPL

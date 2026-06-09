@@ -1,0 +1,32 @@
+// ╔═══════════════════════════════════════════════════════════════╗
+// ║  46 — Reactive Monitor                                         ║
+// ╚═══════════════════════════════════════════════════════════════╝
+//
+// `when` watchers make it easy to react to changing state. Here we
+// model a temperature monitor that alerts on threshold crossings.
+//
+// A when-block re-fires every time an assignment keeps its condition
+// true, so each qualifying reading triggers an alert.
+
+var var temperature = 20!
+
+// Alert whenever the temperature is in the danger zone:
+when temperature > 30 {
+   print "ALERT: high temperature (${temperature})"!
+}
+
+// Alert on freezing readings:
+when temperature < 0 {
+   print "ALERT: freezing (${temperature})"!
+}
+
+print "monitoring started"!
+
+// Simulate a stream of readings:
+temperature = 25!     // safe, no alert
+temperature = 35!     // high alert
+temperature = 40!     // high alert again
+temperature = 10!     // safe
+temperature = 0 - 5!  // freezing alert
+
+print "monitoring finished"!

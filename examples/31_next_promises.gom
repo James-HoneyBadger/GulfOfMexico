@@ -1,0 +1,21 @@
+// ╔═══════════════════════════════════════════════════════════════╗
+// ║  31 — Next Promises                                            ║
+// ╚═══════════════════════════════════════════════════════════════╝
+//
+// `next x` captures the NEXT value a variable will receive. The promise
+// is unresolved until the variable is assigned again.
+
+var var x = 100!
+
+// Capture the next value of x:
+const const future = next x!
+
+// Until x changes, the promise is undefined:
+print future!          // undefined
+
+// Assigning x resolves the promise:
+x = 42!
+print future!          // 42
+
+// The current value and the captured promise are independent:
+print x!               // 42

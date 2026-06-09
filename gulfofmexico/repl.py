@@ -14,6 +14,7 @@ This REPL uses the production interpreter in gulfofmexico/interpreter.py.
 
 from __future__ import annotations
 
+import os
 import re
 import sys
 from pathlib import Path
@@ -44,6 +45,57 @@ from gulfofmexico.processor.syntax_tree import generate_syntax_tree
 PRIMARY_PROMPT = "gom> "
 CONT_PROMPT = " ...> "
 REPL_FILENAME = "__repl__"
+HISTORY_FILE = os.path.expanduser("~/.gom_history")
+HISTORY_MAX_LINES = 1000
+
+
+def _strip_strings_and_comments(code: str) -> str:
+    """Return ``code`` with string literals and comments blanked out.
+
+    Used by the REPL's multi-line completeness heuristic so that braces and
+    statement terminators appearing inside strings or comments are not counted.
+    Quote/comment characters are replaced with spaces to preserve offsets.
+    """
+    out: list[str] = []
+    i = 0
+    n = len(code)
+    quote: Optional[str] = None
+    while i < n:
+        ch = code[i]
+        if quote is not None:
+            # Inside a string literal: blank everything until the closing quote.
+            if ch == quote:
+                quote = None
+            out.append(" " if ch != "\n" else "\n")
+            i += 1
+            continue
+        # Line comment //...
+        if ch == "/" and i + 1 < n and code[i + 1] == "/":
+            while i < n and code[i] != "\n":
+                out.append(" ")
+                i += 1
+            continue
+        # Block comment /* ... */
+        if ch == "/" and i + 1 < n and code[i + 1] == "*":
+            while i < n and not (code[i] == "*" and i + 1 < n and code[i + 1] == "/"):
+                out.append(" " if code[i] != "\n" else "\n")
+                i += 1
+            # Consume the closing */ if present.
+            if i < n:
+                out.append(" ")
+                i += 1
+            if i < n:
+                out.append(" ")
+                i += 1
+            continue
+        if ch in ("\"", "'"):
+            quote = ch
+            out.append(" ")
+            i += 1
+            continue
+        out.append(ch)
+        i += 1
+    return "".join(out)
 
 
 class GomRepl:
@@ -59,6 +111,10 @@ class GomRepl:
         self.importable_names: dict[str, dict[str, GulfOfMexicoValue]] = {}
         self.history: list[str] = []
         self.prefill_lines: list[str] = []
+
+        # readline integration (populated by _setup_readline)
+        self._readline = None
+        self._completion_matches: list[str] = []
 
         # Interpreter context for the REPL session
         self.ctx = InterpreterContext(filename=REPL_FILENAME, code="")
@@ -80,6 +136,73 @@ class GomRepl:
 
     def banner(self) -> str:
         return "Gulf of Mexico REPL (production interpreter)\n" "Type :help for commands, :quit to exit."
+
+    def _setup_readline(self) -> None:
+        """Enable line editing, persistent history, and tab completion.
+
+        Uses the standard-library ``readline`` module when available. Failures
+        are non-fatal: the REPL still works without line editing.
+        """
+        try:
+            import readline  # pylint: disable=import-outside-toplevel
+        except ImportError:  # pragma: no cover - platform without readline
+            self._readline = None
+            return
+        self._readline = readline
+        # Load persisted history if present.
+        try:
+            readline.read_history_file(HISTORY_FILE)
+        except (OSError, FileNotFoundError):
+            pass
+        readline.set_history_length(HISTORY_MAX_LINES)
+        # Wire up tab completion.
+        readline.set_completer(self._complete)
+        readline.set_completer_delims(" \t\n(){}[]!?,:;")
+        # 'libedit' (macOS default) needs different binding syntax.
+        if "libedit" in getattr(readline, "__doc__", ""):
+            readline.parse_and_bind("bind ^I rl_complete")
+        else:
+            readline.parse_and_bind("tab: complete")
+
+    def _save_history(self) -> None:
+        """Persist readline history to disk (best-effort)."""
+        rl = getattr(self, "_readline", None)
+        if rl is None:
+            return
+        try:
+            rl.write_history_file(HISTORY_FILE)
+        except OSError:  # pragma: no cover - disk failure
+            pass
+
+    def _completion_candidates(self) -> list[str]:
+        """Build the list of completable identifiers (keywords + in-scope names)."""
+        names: set[str] = set()
+        for key in KEYWORDS:
+            if isinstance(key, str):
+                names.add(key)
+        for namespace in self.namespaces:
+            for key in namespace:
+                if isinstance(key, str):
+                    names.add(key)
+        # Meta-commands are handy to complete at the start of a line too.
+        names.update(
+            {":help", ":quit", ":reset", ":load", ":vars", ":history", ":save", ":open", ":run", ":clip"}
+        )
+        return sorted(names)
+
+    def _complete(self, text: str, state: int) -> Optional[str]:
+        """readline completer: return the ``state``-th match for ``text``."""
+        if state == 0:
+            if text:
+                self._completion_matches = [
+                    name for name in self._completion_candidates() if name.startswith(text)
+                ]
+            else:
+                self._completion_matches = self._completion_candidates()
+        try:
+            return self._completion_matches[state]
+        except (IndexError, AttributeError):
+            return None
 
     def _read_multiline(self) -> Optional[str]:
         """
@@ -120,11 +243,13 @@ class GomRepl:
                 # If parse succeeds, return buffer
                 return candidate
             except InterpretationError as e:
-                # Heuristic: if likely incomplete input, continue
-                # Check for common trailing characters or unmatched braces
-                open_braces = candidate.count("{") - candidate.count("}")
-                ends_with_open = candidate.rstrip().endswith(("{", ",", ":"))
-                missing_punct = not candidate.rstrip().endswith(("!", "?", "}", ")", "]"))
+                # Heuristic: if likely incomplete input, continue.
+                # Strip string/comment content first so braces or terminators
+                # inside literals don't confuse the completeness check.
+                stripped = _strip_strings_and_comments(candidate)
+                open_braces = stripped.count("{") - stripped.count("}")
+                ends_with_open = stripped.rstrip().endswith(("{", ",", ":"))
+                missing_punct = not stripped.rstrip().endswith(("!", "?", "}", ")", "]"))
                 if open_braces > 0 or ends_with_open or missing_punct:
                     prompt = CONT_PROMPT
                     continue
@@ -421,17 +546,21 @@ class GomRepl:
 
     def loop(self) -> None:
         print(self.banner())
-        while True:
-            block = self._read_multiline()
-            if block is None:
-                # EOF
-                print()
-                return
-            if block.startswith(":"):
-                if not self._dispatch_command(block):
+        self._setup_readline()
+        try:
+            while True:
+                block = self._read_multiline()
+                if block is None:
+                    # EOF
+                    print()
                     return
-                continue
-            self._execute(block)
+                if block.startswith(":"):
+                    if not self._dispatch_command(block):
+                        return
+                    continue
+                self._execute(block)
+        finally:
+            self._save_history()
 
     @staticmethod
     def _copy_to_clipboard(text: str) -> bool:

@@ -1,8 +1,86 @@
+# v1.1.0 — 2026-06-22
+
+### UX, spec conformance, and expanded examples
+
+#### Usability
+
+- CLI now reports errors with source context and clear messages (missing files,
+  type mismatches, runtime errors) instead of a generic "Error during execution."
+- Added a richer `gom --help` with usage modes, environment variables, and examples.
+- REPL gains persistent history (`~/.gom_history`), tab completion for keywords,
+  namespace names, and meta-commands, and more robust multi-line brace detection
+  that ignores braces inside strings and comments.
+- IDE strips ANSI color codes from error output for clean display.
+
+#### Spec conformance
+
+- Type annotations are now **enforced** at declaration: a value that does not
+  match its declared type (`Int`, `Number`, `String`, `Bool`, `List`, `Map`,
+  `Object`, `Function`) raises a type error. Unknown/custom types are not enforced.
+- Documented and tested that `when` watchers **re-fire** every time an assignment
+  leaves the condition true (reactive semantics), rather than firing only once.
+- Added `GOM_DISABLE_TARIFF` env hook to disable the random import tariff for
+  deterministic runs and tests.
+
+#### Examples
+
+- Expanded the example suite from 26 to 48 programs (`27`–`48`), covering escape
+  sequences, three-valued logic, recursion patterns, currency interpolation,
+  `next` promises, `after` scheduling, confidence levels, random numbers,
+  multi-file sections, persistent constants, list/map algorithms, factorials and
+  combinatorics, string processing, stacks/queues, nested data structures, a
+  reactive monitor, type annotations, and Unicode/emoji.
+
+#### Tests
+
+- Added regression coverage for enforced type annotations, the `previous`
+  keyword, reactive `when` re-firing, fractional indexing, and extended emoji
+  identifiers (now 204 passing).
+
 # v1.0.0 — 2026-03-22
 
 ### Production release
 
 - All features and documentation finalized for 1.0.0
+
+# v1.0.1 — 2026-06-09
+
+### Spec conformance alignment
+
+#### Parser and grammar
+
+- Added `import name from section!` parsing and runtime resolution to section-scoped exports.
+- Added declaration confidence marker parsing (`~N~`) for `const`/`var` declarations.
+- Enforced strict statement terminators (`!`, `!!`, `!!!`, or `?`) for non-scoped statements.
+- Enforced indentation contract: tabs in indentation are now rejected; indentation must use multiples of 3 spaces.
+
+#### Runtime semantics
+
+- Implemented executable `after` statements with millisecond delay semantics.
+- Aligned `sleep` to milliseconds (`sleep 1000!` ~= 1 second).
+- Aligned `Boolean(number)` conversion: `0 -> false`, `1 -> true`, any other numeric value -> `maybe`.
+- Aligned positive lifetime semantics: `<N>` is statement-count based; `<Ns>` is temporal seconds-based.
+- Fixed lifetime parsing so `<N>` / `<Ns>` metadata is correctly captured for standard declarations.
+- Updated `reverse` so replay does not prematurely terminate subsequent statements.
+
+#### Import tariff
+
+- Aligned tariff behavior to language reference intent:
+	- import executes with a short random delay;
+	- each import has a 25% chance to remove one future statement from the **importing** section.
+- Added deterministic test hooks for tariff behavior (`GOM_FORCE_TARIFF_REMOVE`, `GOM_FORCE_TARIFF_INDEX`).
+
+#### Tests
+
+- Added regression coverage for:
+	- `after` execution,
+	- `import ... from ...`,
+	- millisecond `sleep`,
+	- numeric Boolean conversion,
+	- line/temporal lifetimes,
+	- `reverse` continuation and function/async edge behavior,
+	- declaration confidence markers,
+	- strict terminator and tab-indentation enforcement.
 
 # Changelog
 

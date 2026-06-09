@@ -1,0 +1,22 @@
+// ╔═══════════════════════════════════════════════════════════════╗
+// ║  36 — Sleep & Timing                                           ║
+// ╚═══════════════════════════════════════════════════════════════╝
+//
+// `sleep N` pauses execution for N milliseconds.
+
+print "step 1"!
+
+// Pause for 50 ms before continuing:
+sleep 50!
+print "step 2 (after 50ms)"!
+
+// Combine sleep with after-statements for simple timelines:
+sleep 25!
+after 10 {
+   print "scheduled tick"!
+}
+print "step 3"!
+
+// Writing to a file is also supported (shown as a comment so this
+// example has no side effects on disk):
+//   write "out.txt", "hello from gom"!

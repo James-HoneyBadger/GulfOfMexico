@@ -79,9 +79,70 @@ def gather_names_or_values(expr: ExpressionTreeNode) -> set[Token]:
 
 
 # ---------------------------------------------------------------------------
-# Type annotation stub
+# Type annotation checking
 # ---------------------------------------------------------------------------
 
-def check_type_annotation(annotation: str) -> bool:  # noqa: ARG001
-    """Placeholder — type annotations are parsed but not enforced at runtime."""
+# Map of documented annotation names to a predicate over a GulfOfMexico value.
+# Unknown annotation names (e.g. user class names) are not enforced.
+def _annotation_name(annotation: Union[str, list]) -> str:
+    """Normalize a parsed annotation (token list or string) to a plain name."""
+    if isinstance(annotation, str):
+        return annotation.strip()
+    # annotation is a list of Tokens
+    return "".join(getattr(tok, "value", str(tok)) for tok in annotation).strip()
+
+
+def check_type_annotation(
+    annotation: Union[str, list],
+    value: object = None,
+) -> bool:
+    """Validate *value* against a declared type *annotation*.
+
+    Returns ``True`` when the value satisfies the annotation (or when the
+    annotation names an unknown/custom type, which is not enforced). Returns
+    ``False`` when a recognized annotation is violated. Uninitialized values
+    (``undefined``) are always accepted.
+
+    The recognized annotation names follow the language reference §3.3:
+    ``Int``/``Integer``, ``Float``/``Number``/``Num``, ``String``/``Str``,
+    ``Bool``/``Boolean``, ``List``/``Array``, ``Map``, ``Object``,
+    ``Function``/``Func``/``Fn``.
+    """
+    from gulfofmexico.builtin import (  # local import avoids circular deps
+        GulfOfMexicoBoolean,
+        GulfOfMexicoFunction,
+        GulfOfMexicoList,
+        GulfOfMexicoMap,
+        GulfOfMexicoNumber,
+        GulfOfMexicoObject,
+        GulfOfMexicoString,
+        GulfOfMexicoUndefined,
+        is_int,
+    )
+
+    name = _annotation_name(annotation)
+    if not name or value is None:
+        return True
+    # Uninitialized declarations carry an undefined value; don't enforce.
+    if isinstance(value, GulfOfMexicoUndefined):
+        return True
+
+    key = name.lower()
+    if key in ("int", "integer"):
+        return isinstance(value, GulfOfMexicoNumber) and is_int(value.value)
+    if key in ("float", "number", "num"):
+        return isinstance(value, GulfOfMexicoNumber)
+    if key in ("string", "str"):
+        return isinstance(value, GulfOfMexicoString)
+    if key in ("bool", "boolean"):
+        return isinstance(value, GulfOfMexicoBoolean)
+    if key in ("list", "array"):
+        return isinstance(value, GulfOfMexicoList)
+    if key == "map":
+        return isinstance(value, GulfOfMexicoMap)
+    if key == "object":
+        return isinstance(value, GulfOfMexicoObject)
+    if key in ("function", "func", "fn"):
+        return isinstance(value, GulfOfMexicoFunction)
+    # Unknown / custom type names are not enforced.
     return True

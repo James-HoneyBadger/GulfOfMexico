@@ -1,0 +1,31 @@
+// ╔═══════════════════════════════════════════════════════════════╗
+// ║  43 — Stacks & Queues                                          ║
+// ╚═══════════════════════════════════════════════════════════════╝
+//
+// Lists provide push (append) and pop (remove last), which is all you
+// need to build a stack (LIFO) and a queue (FIFO).
+
+// ── Stack: last in, first out ───────────────────────────────────
+var var stack = []!
+stack.push("a")!
+stack.push("b")!
+stack.push("c")!
+print stack.length!           // 3
+
+const const top = stack.pop()!
+print top!                    // c  (most recently pushed)
+print stack.length!           // 2
+
+// ── Queue: first in, first out ──────────────────────────────────
+// Start from a literal list so the front element is index-readable,
+// then enqueue new arrivals at the back with push.
+var var queue = ["first", "second", "third"]!
+
+// The front of the queue is the first element (index -1):
+const const front = queue[-1]!
+print front!                  // first
+print queue.length!           // 3
+
+// Enqueue a new arrival at the back:
+queue.push("fourth")!
+print queue.length!           // 4

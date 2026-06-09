@@ -1,0 +1,32 @@
+// ╔═══════════════════════════════════════════════════════════════╗
+// ║  48 — Unicode & Emoji                                          ║
+// ╚═══════════════════════════════════════════════════════════════╝
+//
+// Identifiers and string contents may contain Unicode letters and emoji.
+
+// Emoji variable names:
+const const 🎉 = "party"!
+print 🎉!
+
+// Emoji function names:
+function 🚀(n) => {
+   const const doubled = n * 2!
+   return doubled!
+}!
+print 🚀(21)!                 // 42
+
+// Unicode letters in identifiers:
+const const café = "open"!
+print café!
+
+const const naïve = true!
+print naïve!
+
+// Unicode and emoji inside string values:
+print "café ☕ is open"!
+print "launch 🚀 in 3… 2… 1…"!
+
+// Mixing emoji with alphanumerics in a name:
+var var 🐱score = 0!
+🐱score = 10!
+print 🐱score!                // 10

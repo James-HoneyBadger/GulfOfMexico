@@ -294,13 +294,17 @@ class ExportStatement(CodeStatement, CodeStatementDebuggable):
 class ImportStatement(CodeStatement, CodeStatementKeywordable, CodeStatementDebuggable):
     keyword: Token
     names: list[Token]
+    from_keyword: Optional[Token]
+    source_file: Optional[Token]
     debug: int
 
     # Compatibility init for legacy tests
 
-    def __init__(self, keyword=None, names=None, debug=0):
+    def __init__(self, keyword=None, names=None, from_keyword=None, source_file=None, debug=0):
         self.keyword = keyword
         self.names = names or []
+        self.from_keyword = from_keyword
+        self.source_file = source_file
         self.debug = debug
 
 
@@ -464,11 +468,18 @@ def assert_proper_indentation(filename: str, tokens: list[Token], code: str) -> 
             if t.type == TokenType.NEWLINE:
                 looking_for_whitespace = True
         else:
-            if t.type == TokenType.WHITESPACE and len(t.value.replace("\t", "  ")) % 3:
+            if t.type == TokenType.WHITESPACE and "\t" in t.value:
                 raise_error_at_token(
                     filename,
                     code,
-                    "Invalid indenting detected (must be a multiple of 3). Tabs count as 2 spaces.",
+                    "Invalid indentation detected: tabs are not supported.",
+                    t,
+                )
+            if t.type == TokenType.WHITESPACE and len(t.value) % 3:
+                raise_error_at_token(
+                    filename,
+                    code,
+                    "Invalid indenting detected (must be a multiple of 3 spaces).",
                     t,
                 )
             looking_for_whitespace = False
@@ -700,14 +711,34 @@ def create_unscoped_code_statement(
             ],
         )
 
-    # import statement: import name, name, name!
-    can_be_import = (
+    # import statement (legacy): import name, name, name!
+    can_be_import_legacy = (
         all(t.type in {TokenType.NAME, TokenType.COMMA} for t in without_whitespace[:-1])
         and len(without_whitespace) >= 3
         and is_proper_comma_list(without_whitespace[1:-1])
         and without_whitespace[0].type == TokenType.NAME
         and without_whitespace[1].type == TokenType.NAME
     )
+
+    # import statement (spec): import name, name from source!
+    can_be_import_from = False
+    import_from_idx = -1
+    if len(without_whitespace) >= 5 and without_whitespace[0].type == TokenType.NAME:
+        from_indices = [
+            i
+            for i, tok in enumerate(without_whitespace[1:-1], start=1)
+            if tok.type == TokenType.NAME and tok.value == "from"
+        ]
+        if len(from_indices) == 1:
+            import_from_idx = from_indices[0]
+            name_tokens = without_whitespace[1:import_from_idx]
+            can_be_import_from = (
+                bool(name_tokens)
+                and all(t.type in {TokenType.NAME, TokenType.COMMA} for t in name_tokens)
+                and is_proper_comma_list(name_tokens)
+                and import_from_idx + 2 == len(without_whitespace) - 1
+                and without_whitespace[import_from_idx + 1].type in {TokenType.NAME, TokenType.STRING}
+            )
 
     # -- Compound assignment desugaring (+=, -=, *=, /=, ^=) --
     # Desugar ``name OP= expr!`` into a VariableAssignment where the
@@ -829,9 +860,11 @@ def create_unscoped_code_statement(
                     break
                 else:
                     break
+            if t.value == "~":
+                break
             names_in_row.append(t)
         else:
-            if t.type == TokenType.GREATER_THAN or not 3 <= len(names_in_row) <= 4 or not can_be_var_declaration:
+            if t.type == TokenType.GREATER_THAN or not 2 <= len(names_in_row) <= 4 or not can_be_var_declaration:
                 # Combine all parts into lifetime string
                 if lifetime_parts and not lifetime:
                     lifetime = "<" + "".join(lifetime_parts) + ">"
@@ -839,6 +872,31 @@ def create_unscoped_code_statement(
             lifetime_parts.append(t.value)
 
     can_be_var_declaration &= 2 <= len(names_in_row) <= 4
+
+    declaration_confidence = confidence
+    if can_be_var_declaration:
+        eq_idx_no_ws = next(
+            (i for i, tok in enumerate(without_whitespace) if tok.type == TokenType.EQUAL and tok.value == "="),
+            -1,
+        )
+        if eq_idx_no_ws >= 3:
+            marker = without_whitespace[eq_idx_no_ws - 3:eq_idx_no_ws]
+            if (
+                marker[0].type == TokenType.NAME
+                and marker[0].value == "~"
+                and marker[1].type == TokenType.NAME
+                and marker[2].type == TokenType.NAME
+                and marker[2].value == "~"
+            ):
+                try:
+                    declaration_confidence = int(float(marker[1].value))
+                except ValueError:
+                    raise_error_at_token(
+                        filename,
+                        code,
+                        "Invalid confidence marker. Expected syntax like ~80~.",
+                        marker[1],
+                    )
 
     # make a list of all possible things, starting with plain expression
     possibilities: list[CodeStatement] = [ExpressionStatement(tokens[:-1], debug_level)]
@@ -885,11 +943,23 @@ def create_unscoped_code_statement(
                 debug=debug_level,
             )
         )
-    if can_be_import:
+    if can_be_import_from:
+        possibilities.append(
+            ImportStatement(
+                keyword=without_whitespace[0],
+                names=[t for t in without_whitespace[1:import_from_idx] if t.type == TokenType.NAME],
+                from_keyword=without_whitespace[import_from_idx],
+                source_file=without_whitespace[import_from_idx + 1],
+                debug=debug_level,
+            )
+        )
+    elif can_be_import_legacy:
         possibilities.append(
             ImportStatement(
                 keyword=without_whitespace[0],
                 names=[t for t in without_whitespace[1:-1] if t.type == TokenType.NAME],
+                from_keyword=None,
+                source_file=None,
                 debug=debug_level,
             )
         )
@@ -910,7 +980,7 @@ def create_unscoped_code_statement(
                 modifiers=names_in_row[:-1],
                 lifetime=lifetime,
                 expression=tokens[tokens_is_equal.index(True) + 1 : -1],  # the end should be a puncutation
-                confidence=confidence,
+                confidence=declaration_confidence,
                 debug=debug_level,
                 type_annotation=type_annotation,
                 destructure_names=destructure_names,
@@ -943,6 +1013,18 @@ def generate_syntax_tree(filename: str, tokens: list[Token], code: str) -> list[
         extracted_types, removed_hints
     ):
         without_whitespace = [t for t in tokens if t.type != TokenType.WHITESPACE]
+
+        if without_whitespace and without_whitespace[-1].type not in {
+            TokenType.BANG,
+            TokenType.QUESTION,
+            TokenType.R_CURLY,
+        }:
+            raise_error_at_line(
+                filename,
+                code,
+                without_whitespace[-1].line,
+                "Every statement must end with !, !!, !!!, or ?",
+            )
 
         try:
             # contains an open scope :)

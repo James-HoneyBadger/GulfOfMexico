@@ -122,6 +122,12 @@ def run_file(main_filename: str) -> None:
                 importable_names[target_filename] = {}
             importable_names[target_filename][name] = value
 
+            # Also index exports by the source section name so
+            # `import X from source!` can resolve deterministically.
+            if filename not in importable_names:
+                importable_names[filename] = {}
+            importable_names[filename][name] = value
+
     # Optional wait loop for interactive scenarios; disabled by default
     # to allow non-interactive executions (tests, scripts) to complete.
     import os  # pylint: disable=import-outside-toplevel

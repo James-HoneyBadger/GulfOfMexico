@@ -37,10 +37,32 @@ python -m gulfofmexico examples/01_hello_world.gom
 | 24 | `24_comments.gom` | `//` single-line, `/* */` block comments |
 | 25 | `25_regex.gom` | `regex_match`, `regex_findall`, `regex_replace` |
 | 26 | `26_noop_and_misc.gom` | `noop`, empty value `()`, string multiply, boolean conversion |
+| 27 | `27_escape_sequences.gom` | `\n`, `\t`, `\\`, `\"` and other string escape sequences |
+| 28 | `28_three_valued_logic.gom` | `true`/`false`/`maybe`, logic over the third value |
+| 29 | `29_recursion_patterns.gom` | Countdown, accumulation, and mutual recursion |
+| 30 | `30_currency_interpolation.gom` | `$`/`£`/`¥`/`€` interpolation prefixes |
+| 31 | `31_next_promises.gom` | `next`, deferred values, promise-like sequencing |
+| 32 | `32_after_statements.gom` | `after N { }` scheduled blocks |
+| 33 | `33_confidence_levels.gom` | `!`/`!!`/`!!!` confidence and `?` debug terminator |
+| 34 | `34_output_formatting.gom` | Printing values, interpolation, and formatting |
+| 35 | `35_random_numbers.gom` | `random`, `randomInt`, coin-flip simulation |
+| 36 | `36_sleep_and_timing.gom` | Blocking `after` delays and scheduled ticks |
+| 37 | `37_multifile_sections.gom` | `export`/`import` named sections |
+| 38 | `38_persistent_constants.gom` | `const const const` immutable constants |
+| 39 | `39_list_algorithms.gom` | Recursive sum, max, linear search, reversal |
+| 40 | `40_map_frequency.gom` | Frequency counting with `Map()` |
+| 41 | `41_factorial_combinatorics.gom` | Factorial, permutations, combinations |
+| 42 | `42_string_processing.gom` | Length, reversal, palindrome check, regex |
+| 43 | `43_stack_queue.gom` | Stack (push/pop) and queue (front access) |
+| 44 | `44_nested_data_structures.gom` | Lists of lists, maps of lists, lists of maps |
+| 45 | `45_guessing_game.gom` | Self-playing simulation with `when` watchers |
+| 46 | `46_reactive_monitor.gom` | Threshold alerts via reactive `when` watchers |
+| 47 | `47_type_annotations.gom` | `Int`/`Number`/`String`/`Bool`/`List` annotations |
+| 48 | `48_unicode_and_emoji.gom` | Unicode and emoji in identifiers and strings |
 
 ## Feature Coverage
 
-These 26 programs collectively demonstrate:
+These 48 programs collectively demonstrate:
 - All 4 statement terminators
 - All 8 data types
 - All arithmetic, comparison, and logical operators
@@ -65,3 +87,11 @@ These 26 programs collectively demonstrate:
 - Type conversions
 - Delete
 - Noop and empty value
+- String escape sequences
+- Enforced type annotations (`Int`, `Number`, `String`, `Bool`, `List`, `Map`)
+- Deferred values with `next` and scheduled `after` blocks
+- Random number generation
+- Named-section `export`/`import`
+- Recursive list and map algorithms
+- Stacks, queues, and nested data structures
+- Reactive threshold monitoring with `when`
