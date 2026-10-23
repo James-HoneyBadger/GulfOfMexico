@@ -56,6 +56,7 @@ from .context import (
 )
 from .dispatch import determine_statement_type
 from .expressions import evaluate_expression, print_expression_debug
+from .helpers import statement_expression, statement_indexes
 from .namespaces import get_name_from_namespaces
 from .variables import assign_variable, declare_new_variable
 from .watchers import register_when_statement
@@ -114,15 +115,48 @@ def interpret_code_statements_main_wrapper(
     if ctx is None:
         ctx = InterpreterContext()
     ctx.reset()
-    return interpret_code_statements(
+    result = interpret_code_statements(
         statements, namespaces, async_statements,
         when_statement_watchers, importable_names, exported_names, ctx,
     )
+    # Run any `after` blocks that are still scheduled.
+    if ctx.pending_after:
+        _drain_after(ctx.pending_after, ctx, wait=True)
+    return result
 
 
 # ---------------------------------------------------------------------------
 # Core execution loop
 # ---------------------------------------------------------------------------
+
+def _drain_after(pending: list, ctx: InterpreterContext, *, wait: bool) -> None:
+    """Run scheduled ``after`` blocks whose deadline has arrived.
+
+    With ``wait=True`` (end of program) the scheduler sleeps until each
+    remaining deadline, so finite timers always run and ``GULFOFMEXICO_WAIT``
+    is only needed for open-ended ``when`` watchers.
+    """
+    while pending:
+        pending.sort(key=lambda item: (item[0], item[1]))
+        deadline, _seq, body, scopes = pending[0]
+        remaining = deadline - _time.monotonic()
+        if remaining > 0:
+            if not wait:
+                return
+            _time.sleep(remaining)
+        pending.pop(0)
+        namespaces, when_statement_watchers, importable_names, exported_names = scopes
+        # The body sees the current scopes plus a fresh block scope.
+        interpret_code_statements(
+            body,
+            list(namespaces) + [{}],
+            [],
+            list(when_statement_watchers) + [{}],
+            importable_names,
+            exported_names,
+            ctx,
+        )
+
 
 def _is_negative_lifetime(lifetime: Optional[str]) -> int:
     """Return N if the lifetime is ``<-N>`` (negative/hoisting), else 0."""
@@ -185,6 +219,9 @@ def interpret_code_statements(
         if statement is None:
             continue
 
+        if ctx.pending_after:
+            _drain_after(ctx.pending_after, ctx, wait=False)
+
         # Update current line for error reporting
         if hasattr(statement, "name") and hasattr(statement.name, "line"):
             ctx.current_line = statement.name.line
@@ -193,41 +230,47 @@ def interpret_code_statements(
 
         match statement:
             case ExpressionStatement():
+                expression = statement_expression(statement, ctx)
                 result = evaluate_expression(
-                    statement.expression, namespaces,
+                    expression, namespaces,
                     async_statements, when_statement_watchers, ctx,
                 )
-                print_expression_debug(statement.debug, statement.expression, result, namespaces, ctx)
+                print_expression_debug(statement.debug, expression, result, namespaces, ctx)
 
             case VariableDeclaration():
+                expression = statement_expression(statement, ctx)
                 value = evaluate_expression(
-                    statement.expression, namespaces,
+                    expression, namespaces,
                     async_statements, when_statement_watchers, ctx,
+                )
+                print_expression_debug(
+                    statement.debug, expression, value, namespaces, ctx,
                 )
                 declare_new_variable(statement, value, namespaces, async_statements, when_statement_watchers, ctx)
 
             case VariableAssignment():
                 indexes = [
                     evaluate_expression(expr, namespaces, async_statements, when_statement_watchers, ctx)
-                    for expr in statement.indexes
+                    for expr in statement_indexes(statement, ctx)
                 ]
                 new_value = evaluate_expression(
-                    statement.expression, namespaces,
+                    statement_expression(statement, ctx), namespaces,
                     async_statements, when_statement_watchers, ctx,
                 )
                 assign_variable(statement, indexes, new_value, namespaces, async_statements, when_statement_watchers, ctx)
 
             case ReturnStatement():
+                expression = statement_expression(statement, ctx)
                 result = evaluate_expression(
-                    statement.expression, namespaces,
+                    expression, namespaces,
                     async_statements, when_statement_watchers, ctx,
                 )
-                print_expression_debug(statement.debug, statement.expression, result, namespaces, ctx)
+                print_expression_debug(statement.debug, expression, result, namespaces, ctx)
                 return ReturnSentinel(result)
 
             case Conditional():
                 condition = evaluate_expression(
-                    statement.expression, namespaces,
+                    statement_expression(statement, ctx), namespaces,
                     async_statements, when_statement_watchers, ctx,
                 )
                 result = execute_conditional(
@@ -239,32 +282,33 @@ def interpret_code_statements(
 
             case WhenStatement():
                 register_when_statement(
-                    statement.expression, statement.code, namespaces,
+                    statement_expression(statement, ctx), statement.code, namespaces,
                     async_statements, when_statement_watchers,
                     importable_names, exported_names, ctx,
                 )
 
             case AfterStatement():
                 delay_val = evaluate_expression(
-                    statement.expression,
+                    statement_expression(statement, ctx),
                     namespaces,
                     async_statements,
                     when_statement_watchers,
                     ctx,
                 )
                 delay_num = db_to_number(delay_val).value
-                _time.sleep(max(0.0, delay_num / 1000.0))
-                result = interpret_code_statements(
-                    statement.code,
-                    namespaces + [{}],
-                    [],
-                    when_statement_watchers + [{}],
-                    importable_names,
-                    exported_names,
-                    ctx,
+                # `after` schedules work; it does not block the current block.
+                # The queue is drained at statement boundaries and once more
+                # when the program finishes.
+                deadline = _time.monotonic() + max(0.0, delay_num / 1000.0)
+                ctx.after_sequence += 1
+                ctx.pending_after.append(
+                    (
+                        deadline,
+                        ctx.after_sequence,
+                        statement.code,
+                        (namespaces, when_statement_watchers, importable_names, exported_names),
+                    )
                 )
-                if isinstance(result, ReturnSentinel):
-                    return result
 
             case FunctionDefinition():
                 func = GulfOfMexicoFunction(
@@ -280,6 +324,7 @@ def interpret_code_statements(
 
             case ClassDeclaration():
                 class_obj = GulfOfMexicoObject(statement.name.value, {})
+                class_obj.class_id = id(class_obj)
                 class_namespace: Namespace = {statement.name.value: Name(statement.name.value, class_obj)}
                 interpret_code_statements(
                     statement.code,
@@ -319,9 +364,10 @@ def interpret_code_statements(
                                 pass  # unhashable values (e.g. GulfOfMexicoObject) are skipped
                             # Decrement class instance count so re-instantiation is allowed
                             if isinstance(deleted_val, GulfOfMexicoObject) and deleted_val.class_name:
-                                count = ctx.class_instance_counts.get(deleted_val.class_name, 0)
+                                class_key = deleted_val.class_id or deleted_val.class_name
+                                count = ctx.class_instance_counts.get(class_key, 0)
                                 if count > 0:
-                                    ctx.class_instance_counts[deleted_val.class_name] = count - 1
+                                    ctx.class_instance_counts[class_key] = count - 1
                         elif isinstance(var, Name):
                             try:
                                 ctx.deleted_values.add(var.value)
@@ -329,9 +375,10 @@ def interpret_code_statements(
                                 pass  # unhashable values are skipped
                             # Decrement class instance count so re-instantiation is allowed
                             if isinstance(var.value, GulfOfMexicoObject) and var.value.class_name:
-                                count = ctx.class_instance_counts.get(var.value.class_name, 0)
+                                class_key = var.value.class_id or var.value.class_name
+                                count = ctx.class_instance_counts.get(class_key, 0)
                                 if count > 0:
-                                    ctx.class_instance_counts[var.value.class_name] = count - 1
+                                    ctx.class_instance_counts[class_key] = count - 1
                         if ns:
                             del ns[name]
                     else:
@@ -430,14 +477,18 @@ def interpret_code_statements(
                         target = statement.target_file.value
                         exported_names.append((target, name, export_value))
 
-        # Decrement line-based lifetimes
-        for ns in namespaces:
-            for entry in ns.values():
-                if isinstance(entry, Variable):
-                    for lt in entry.lifetimes:
-                        if lt.lines_left > 0:
-                            lt.lines_left -= 1
-                    entry.clear_outdated_lifetimes()
+        # Decrement line-based lifetimes. Only variables that were declared
+        # with a finite lifetime are tracked, so the common case (no lifetimes)
+        # costs a single falsy check per statement instead of a full scan of
+        # every name in every scope.
+        if ctx.ticking_lifetimes:
+            for key, ticking in list(ctx.ticking_lifetimes.items()):
+                for lt in ticking.lifetimes:  # type: ignore[attr-defined]
+                    if lt.lines_left > 0:
+                        lt.lines_left -= 1
+                ticking.clear_outdated_lifetimes()  # type: ignore[attr-defined]
+                if not ticking.lifetimes:  # type: ignore[attr-defined]
+                    del ctx.ticking_lifetimes[key]
 
         # Per spec: async functions take turns with the caller line-by-line.
         # After each synchronous statement, execute one statement from each

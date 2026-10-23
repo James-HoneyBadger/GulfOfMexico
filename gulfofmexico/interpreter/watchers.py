@@ -45,7 +45,6 @@ from .context import (
     Namespace,
     WhenStatementWatchers,
 )
-from .expressions import evaluate_expression
 from .helpers import (
     gather_names_or_values,
     get_built_expression,
@@ -102,9 +101,7 @@ def register_when_statement(
     exported_names: list[tuple[str, str, GulfOfMexicoValue]],
     ctx: InterpreterContext,
 ) -> None:
-    """Register a ``when`` statement and evaluate its condition immediately."""
-    from .execution import execute_conditional  # noqa: PLC0415
-
+    """Arm a ``when`` statement that runs each time its watched state mutates."""
     built_condition = get_built_expression(condition)
     gathered_names = gather_names_or_values(built_condition)
     caller_names = [n for name in gathered_names if (n := ".".join(name.value.split(".")[:-1]))]
@@ -135,12 +132,9 @@ def register_when_statement(
         captured_ns = deepcopy(namespaces)
         when_statement_watchers[-1][name].append((built_condition, statements_inside_scope, captured_ns))
 
-    condition_value = evaluate_expression(built_condition, namespaces, async_statements, when_statement_watchers, ctx)
-
-    execute_conditional(
-        condition_value, statements_inside_scope, namespaces,
-        when_statement_watchers, importable_names, exported_names, ctx,
-    )
+    # Per the specification, a `when` block runs "each time the variable
+    # mutates". Registration therefore only arms the watcher: the condition is
+    # first evaluated on the next assignment, not here.
 
 
 # ---------------------------------------------------------------------------

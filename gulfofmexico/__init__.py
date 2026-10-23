@@ -24,11 +24,11 @@ Global Variables:
     - Public globals from GitHub repository (if available)
 """
 
-import re
-import sys
+import time
 from time import sleep
 from typing import Optional, Union
 
+from gulfofmexico.base import InterpretationError, configure_recursion_limit
 from gulfofmexico.builtin import KEYWORDS, GulfOfMexicoValue, Name, Variable
 from gulfofmexico.interpreter import (
     InterpreterContext,
@@ -39,18 +39,73 @@ from gulfofmexico.interpreter.persistence import (
     load_globals,
     load_public_global_variables,
 )
+from gulfofmexico.prelude import load_prelude
 from gulfofmexico.processor.lexer import tokenize
 from gulfofmexico.processor.syntax_tree import generate_syntax_tree
+from gulfofmexico.sections import split_sections
+from gulfofmexico.ui import VERSION as __version__
 
 __all__ = [
+    "__version__",
     "run_file",
 ]
 
 __REPL_FILENAME = "__repl__"
-sys.setrecursionlimit(100000)
+configure_recursion_limit()
 
 
-def run_file(main_filename: str) -> None:
+def _snapshot_variables(
+    namespaces: list[dict[str, Union[Variable, Name]]],
+    baseline: set[str],
+) -> list[dict[str, str]]:
+    """Return a JSON-safe snapshot of the variables the program defined.
+
+    *baseline* holds the names that already existed (keywords, built-ins and
+    loaded globals) before the program ran, so the snapshot only reports what
+    the program itself introduced.
+    """
+    from gulfofmexico.builtin import (  # pylint: disable=import-outside-toplevel
+        BuiltinFunction,
+        GulfOfMexicoKeyword,
+        GulfOfMexicoSpecialBlankValue,
+        db_to_string,
+    )
+
+    rows: dict[str, dict[str, str]] = {}
+    for namespace in namespaces:
+        for name, entry in namespace.items():
+            if not name or name in baseline or name in KEYWORDS:
+                continue
+            if name.startswith("__"):
+                continue
+            if isinstance(entry, Variable):
+                if not entry.lifetimes:
+                    continue
+                value = entry.lifetimes[0].value
+            elif isinstance(entry, Name):
+                value = entry.value
+            else:
+                continue
+            if isinstance(
+                value,
+                (GulfOfMexicoKeyword, BuiltinFunction, GulfOfMexicoSpecialBlankValue),
+            ):
+                continue
+            try:
+                rendered = db_to_string(value).value
+            except Exception:  # pragma: no cover - exotic values
+                rendered = "..."
+            if len(rendered) > 120:
+                rendered = rendered[:117] + "..."
+            rows[name] = {
+                "name": name,
+                "type": type(value).__name__.replace("GulfOfMexico", ""),
+                "value": rendered,
+            }
+    return [rows[key] for key in sorted(rows)]
+
+
+def run_file(main_filename: str, *, vars_json_path: Optional[str] = None) -> None:
     """Execute a Gulf of Mexico source file.
 
     Reads the file, splits by ===== markers, tokenizes, parses, and executes
@@ -59,25 +114,19 @@ def run_file(main_filename: str) -> None:
 
     Args:
         main_filename: Path to .gom source file
+        vars_json_path: Optional path; when given, a JSON snapshot of the
+            final variable scope is written there (used by the IDE inspector).
     """
 
+    _started_at = time.perf_counter()
     with open(main_filename, "r", encoding="utf-8") as f:
-        code_lines = f.readlines()  # split up into separate 'files' by finding which lines start with
-    # multiple equal signs
-    files: list[tuple[Optional[str], str]] = []
-    if any(matches := [re.match(r"=====.*", line) for line in code_lines]):
-        for i, match in reversed([*enumerate(matches)]):
-            if match is None:
-                continue
-            name = match.group().strip("=").strip() or None
-            files.insert(0, (name, "".join(code_lines[i + 1 :])))
-            del code_lines[i:]
-        files.insert(0, (None, "".join(code_lines[0:])))
-    else:
-        files = [(None, "".join(code_lines))]
+        code = f.read()
+    files = split_sections(code)
 
     # execute code for each file
     importable_names: dict[str, dict[str, GulfOfMexicoValue]] = {}
+    final_namespaces: list[dict[str, Union[Variable, Name]]] = []
+    final_baseline: set[str] = set()
     for filename, code in files:
         filename = filename or "__unnamed_file__"
 
@@ -100,13 +149,21 @@ def run_file(main_filename: str) -> None:
         )
         load_global_gulfofmexico_variables(namespaces)
         load_public_global_variables(namespaces)
+        load_prelude(namespaces, ctx)
+        baseline_names = {
+            name for namespace in namespaces for name in namespace
+        }
         try:
             interpret_code_statements_main_wrapper(
                 statements, namespaces, [], [{}], importable_names, exported_names, ctx,
             )
+        except (InterpretationError, BrokenPipeError):
+            # Language-level errors are fully explained already; re-raise
+            # without dumping the buffered print trail to stderr.
+            raise
         except Exception:  # pylint: disable=broad-exception-caught
             # Flush any buffered debug logs so debugging information is available
-            # when a program errors out. Re-raise after flushing to preserve
+            # when an internal error occurs. Re-raise after flushing to preserve
             # the original traceback behavior.
             try:
                 import gulfofmexico.builtin as _builtin  # pylint: disable=import-outside-toplevel
@@ -115,6 +172,10 @@ def run_file(main_filename: str) -> None:
             except Exception:
                 pass
             raise
+
+        # Remember the scope of the last executed section for --vars-json.
+        final_namespaces = namespaces
+        final_baseline = baseline_names
 
         # take exported names and put them where they belong
         for target_filename, name, value in exported_names:
@@ -128,6 +189,15 @@ def run_file(main_filename: str) -> None:
                 importable_names[filename] = {}
             importable_names[filename][name] = value
 
+    if vars_json_path:
+        import json  # pylint: disable=import-outside-toplevel
+
+        try:
+            with open(vars_json_path, "w", encoding="utf-8") as fh:
+                json.dump(_snapshot_variables(final_namespaces, final_baseline), fh)
+        except OSError:
+            pass  # the snapshot is a convenience; never fail a run for it
+
     # Optional wait loop for interactive scenarios; disabled by default
     # to allow non-interactive executions (tests, scripts) to complete.
     import os  # pylint: disable=import-outside-toplevel
@@ -136,12 +206,16 @@ def run_file(main_filename: str) -> None:
     wait_enabled = os.environ.get("GULFOFMEXICO_WAIT")
 
     if verbose:
-        print(
-            "\033[33mCode has finished executing. Press ^C once or twice "
-            "to stop waiting for when-statements and "
-            "after-statements.\033[039m",
-            flush=True,
-        )
+        elapsed = time.perf_counter() - _started_at
+        detail = f" in {elapsed * 1000:.0f} ms" if elapsed >= 0 else ""
+        if wait_enabled:
+            print(
+                f"Code has finished executing{detail}. "
+                "Waiting for when/after statements - press Ctrl+C to stop.",
+                flush=True,
+            )
+        else:
+            print(f"Code has finished executing{detail}.", flush=True)
 
     if wait_enabled:
         try:

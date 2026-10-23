@@ -1,0 +1,70 @@
+// ╔═══════════════════════════════════════════════════════════════╗
+// ║  49 — DreamBerd Specification Conformance                    ║
+// ╚═══════════════════════════════════════════════════════════════╝
+//
+// Examples taken directly from the upstream Gulf of Mexico /
+// DreamBerd specification (github.com/TodePond/GulfOfMexico).
+
+// ── Four declaration forms ──────────────────────────────────────
+const const fixed = "Luke"!
+const var editable = "Luke"!
+var const reassignable = "Luke"!
+var var flexible = "Luke"!
+
+editable.pop()!
+reassignable = "Lu"!
+flexible.push("e")!
+print fixed!
+print editable!
+print reassignable!
+print flexible!
+
+// ── Parentheses are whitespace ─────────────────────────────────
+function add(a, b) => a + b!
+print(add(3, 2))!
+print((add (3, 2)))!
+const weird = add)3, 2(!
+print weird!
+print(1 + 2*3)!
+print(1+2 * 3)!
+
+// ── Any number of quotes ───────────────────────────────────────
+const one = 'Lu'!
+const three = '''Lu'''!
+const four = """"Luke""""!
+const nested = ""she said "hi"""!
+print one!
+print three!
+print four!
+print nested!
+
+// ── Loose, precise, and literal equality ───────────────────────
+print(3.14 == "3.14")!
+print(3.14 === "3.14")!
+const pi = 3.14!
+print(pi ==== pi)!
+print(3.14 ==== pi)!
+
+// ── Object literals and regional interpolation ─────────────────
+const player = { name: "Lu", score: 4 }!
+print "Hello {player$name}!"!
+print "Score: {player$score}€"!
+
+// ── Signals ────────────────────────────────────────────────────
+const var [getScore, setScore] = use(0)!
+setScore(9)!
+print getScore()!
+
+// ── Postfix update and previous values ─────────────────────────
+var total = 10!
+total++!
+print total!
+print previous total!
+
+// ── Automatic insertion (AEMI / ABI / AQMI) ────────────────────
+// The statements below are missing their terminators on purpose.
+print "AEMI adds the missing terminator"
+
+print("ABI adds the missing bracket"
+
+print("AQMI adds the missing quote

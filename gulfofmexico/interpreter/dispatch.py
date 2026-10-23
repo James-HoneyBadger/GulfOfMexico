@@ -11,6 +11,7 @@ from __future__ import annotations
 import re
 from typing import Optional
 
+from gulfofmexico.base import raise_error_at_token
 from gulfofmexico.builtin import (
     GulfOfMexicoKeyword,
 )
@@ -54,6 +55,13 @@ def determine_statement_type(
 
     for st in possible_statements:
         if isinstance(st, CodeStatementKeywordable):
+            if st.keyword.value in ctx.deleted_keywords:
+                raise_error_at_token(
+                    ctx.filename,
+                    ctx.code,
+                    f"'{st.keyword.value}' has been deleted.",
+                    st.keyword,
+                )
             val = get_name_from_namespaces(st.keyword.value, namespaces)
             if (
                 val is not None

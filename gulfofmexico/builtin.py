@@ -133,6 +133,179 @@ def db_str_pop(
     return GulfOfMexicoString(retval)
 
 
+def values_equal(left: GulfOfMexicoValue, right: GulfOfMexicoValue) -> bool:
+    """Structural equality used by list/map lookups (numbers compare exactly)."""
+    if type(left) is not type(right):
+        return False
+    match left:
+        case GulfOfMexicoNumber():
+            assert isinstance(right, GulfOfMexicoNumber)
+            return abs(left.value - right.value) < FLOAT_TO_INT_PREC
+        case GulfOfMexicoString():
+            assert isinstance(right, GulfOfMexicoString)
+            return left.value == right.value
+        case GulfOfMexicoBoolean():
+            assert isinstance(right, GulfOfMexicoBoolean)
+            return left.value == right.value
+        case GulfOfMexicoUndefined():
+            return True
+        case GulfOfMexicoList():
+            assert isinstance(right, GulfOfMexicoList)
+            return len(left.values) == len(right.values) and all(
+                values_equal(a, b) for a, b in zip(left.values, right.values)
+            )
+        case GulfOfMexicoMap():
+            assert isinstance(right, GulfOfMexicoMap)
+            return left.self_dict.keys() == right.self_dict.keys() and all(
+                values_equal(left.self_dict[k], right.self_dict[k]) for k in left.self_dict
+            )
+    return left is right
+
+
+def _sort_key(value: GulfOfMexicoValue) -> tuple[int, float, str]:
+    match value:
+        case GulfOfMexicoNumber():
+            return (0, float(value.value), "")
+        case GulfOfMexicoString():
+            return (1, 0.0, value.value)
+        case GulfOfMexicoBoolean():
+            return (2, 0.0 if value.value is None else float(bool(value.value)), "")
+    return (3, 0.0, db_to_string(value).value)
+
+
+# ── list methods ────────────────────────────────────────────────────────
+
+def db_list_index_of(self: GulfOfMexicoList, value: GulfOfMexicoValue) -> GulfOfMexicoValue:
+    for real_index, item in enumerate(self.values):
+        if values_equal(item, value):
+            return GulfOfMexicoNumber(real_index - 1)
+    return GulfOfMexicoUndefined()
+
+
+def db_list_contains(self: GulfOfMexicoList, value: GulfOfMexicoValue) -> GulfOfMexicoBoolean:
+    return GulfOfMexicoBoolean(any(values_equal(item, value) for item in self.values))
+
+
+def db_list_slice(
+    self: GulfOfMexicoList, start: GulfOfMexicoValue, end: GulfOfMexicoValue
+) -> GulfOfMexicoList:
+    if not isinstance(start, GulfOfMexicoNumber) or not isinstance(end, GulfOfMexicoNumber):
+        raise NonFormattedError("slice() expects two numeric indices.")
+    if not is_int(start.value) or not is_int(end.value):
+        raise NonFormattedError("slice() expects integer indices.")
+    last = len(self.values) - 2
+    first_index = max(-1, min(round(start.value), last))
+    last_index = max(first_index, min(round(end.value), last))
+    return GulfOfMexicoList(
+        list(self.values[first_index + 1 : last_index + 2])
+    )
+
+
+def db_list_join(self: GulfOfMexicoList, separator: GulfOfMexicoValue = None) -> GulfOfMexicoString:
+    sep = "" if separator is None else db_to_string(separator).value
+    return GulfOfMexicoString(sep.join(db_to_string(item).value for item in self.values))
+
+
+def db_list_insert(
+    self: GulfOfMexicoList, index: GulfOfMexicoValue, value: GulfOfMexicoValue
+) -> None:
+    if not isinstance(index, GulfOfMexicoNumber) or not is_int(index.value):
+        raise NonFormattedError("insert() expects an integer index.")
+    position = max(0, min(round(index.value) + 1, len(self.values)))
+    self.values.insert(position, value)
+    self.create_namespace()
+
+
+def db_list_sort(self: GulfOfMexicoList) -> None:
+    self.values.sort(key=_sort_key)
+
+
+def db_list_reverse(self: GulfOfMexicoList) -> None:
+    self.values.reverse()
+    self.create_namespace()
+
+
+# ── string methods ──────────────────────────────────────────────────────
+
+def db_str_split(self: GulfOfMexicoString, separator: GulfOfMexicoValue) -> GulfOfMexicoList:
+    sep = db_to_string(separator).value
+    if sep == "":
+        parts = list(self.value)
+    else:
+        parts = self.value.split(sep)
+    return GulfOfMexicoList([GulfOfMexicoString(part) for part in parts])
+
+
+def db_str_upper(self: GulfOfMexicoString) -> GulfOfMexicoString:
+    return GulfOfMexicoString(self.value.upper())
+
+
+def db_str_lower(self: GulfOfMexicoString) -> GulfOfMexicoString:
+    return GulfOfMexicoString(self.value.lower())
+
+
+def db_str_trim(self: GulfOfMexicoString) -> GulfOfMexicoString:
+    return GulfOfMexicoString(self.value.strip())
+
+
+def db_str_replace(
+    self: GulfOfMexicoString, old: GulfOfMexicoValue, new: GulfOfMexicoValue
+) -> GulfOfMexicoString:
+    return GulfOfMexicoString(
+        self.value.replace(db_to_string(old).value, db_to_string(new).value)
+    )
+
+
+def db_str_contains(self: GulfOfMexicoString, part: GulfOfMexicoValue) -> GulfOfMexicoBoolean:
+    return GulfOfMexicoBoolean(db_to_string(part).value in self.value)
+
+
+def db_str_starts_with(self: GulfOfMexicoString, part: GulfOfMexicoValue) -> GulfOfMexicoBoolean:
+    return GulfOfMexicoBoolean(self.value.startswith(db_to_string(part).value))
+
+
+def db_str_ends_with(self: GulfOfMexicoString, part: GulfOfMexicoValue) -> GulfOfMexicoBoolean:
+    return GulfOfMexicoBoolean(self.value.endswith(db_to_string(part).value))
+
+
+def db_str_index_of(self: GulfOfMexicoString, part: GulfOfMexicoValue) -> GulfOfMexicoValue:
+    position = self.value.find(db_to_string(part).value)
+    if position < 0:
+        return GulfOfMexicoUndefined()
+    return GulfOfMexicoNumber(position - 1)
+
+
+# ── map methods ─────────────────────────────────────────────────────────
+
+def map_key(value: GulfOfMexicoValue) -> Union[str, int, float]:
+    """Normalise a map key the way indexing does."""
+    if isinstance(value, (GulfOfMexicoString, GulfOfMexicoNumber)):
+        return value.value
+    raise NonFormattedError("Keys of a map must be an index or a number.")
+
+
+def db_map_keys(self: GulfOfMexicoMap) -> GulfOfMexicoList:
+    keys: list[GulfOfMexicoValue] = []
+    for key in self.self_dict:
+        keys.append(
+            GulfOfMexicoString(key) if isinstance(key, str) else GulfOfMexicoNumber(key)
+        )
+    return GulfOfMexicoList(keys)
+
+
+def db_map_values(self: GulfOfMexicoMap) -> GulfOfMexicoList:
+    return GulfOfMexicoList(list(self.self_dict.values()))
+
+
+def db_map_has(self: GulfOfMexicoMap, key: GulfOfMexicoValue) -> GulfOfMexicoBoolean:
+    return GulfOfMexicoBoolean(map_key(key) in self.self_dict)
+
+
+def db_map_delete(self: GulfOfMexicoMap, key: GulfOfMexicoValue) -> None:
+    self.self_dict.pop(map_key(key), None)
+    self.create_namespace()
+
+
 # Note: Consider metaclass approach for future extensibility
 # class Value(metaclass=ABCMeta):   # Could allow for more objects without much complexity
 #     @abstractmethod
@@ -177,6 +350,11 @@ class BuiltinFunction(GulfOfMexicoValue):
     arg_count: int
     function: Callable
     modifies_caller: bool = False
+    #: Instance this method belongs to, for read-only methods such as
+    #: ``"abc".upper()``. The receiver is prepended to the arguments at call
+    #: time, so the callee signature is ``(self, *args)``. Unlike
+    #: ``modifies_caller`` this needs no write permission on the binding.
+    receiver: object | None = field(default=None, compare=False, repr=False)
 
 
 @dataclass
@@ -188,7 +366,7 @@ class GulfOfMexicoList(
 ):
     values: list[GulfOfMexicoValue]
     indexer: dict[float, int] = field(init=False)  # used for converting the user decimal indecies to the real indecies
-    namespace: dict[str, Union[Name, Variable]] = field(default_factory=dict)
+    namespace: dict[str, Union[Name, Variable]] = field(default_factory=dict, compare=False)
 
     def __post_init__(self):
         self.create_namespace(False)
@@ -200,10 +378,20 @@ class GulfOfMexicoList(
             self.indexer[i - 1] = i  # user (i-1) → real i
 
     def create_namespace(self, is_update: bool = True) -> None:
+        def method(name: str, arg_count: int, func: Callable) -> Name:
+            return Name(name, BuiltinFunction(arg_count, func, receiver=self))
+
         if not is_update:
             self.namespace = {
                 "push": Name("push", BuiltinFunction(2, db_list_push, True)),
                 "pop": Name("pop", BuiltinFunction(2, db_list_pop, True)),
+                "insert": Name("insert", BuiltinFunction(3, db_list_insert, True)),
+                "sort": Name("sort", BuiltinFunction(1, db_list_sort, True)),
+                "reverse": Name("reverse", BuiltinFunction(1, db_list_reverse, True)),
+                "indexOf": method("indexOf", 2, db_list_index_of),
+                "contains": method("contains", 2, db_list_contains),
+                "slice": method("slice", 3, db_list_slice),
+                "join": method("join", 2, db_list_join),
                 "length": Name("length", GulfOfMexicoNumber(len(self.values))),
             }
         elif is_update:
@@ -303,7 +491,9 @@ class GulfOfMexicoString(
         init=False, hash=False
     )  # used for converting the user decimal indecies to the real indecies
     # tuple stores the real index in the first slot and any extra characters in the second
-    namespace: dict[str, Union[Name, Variable]] = field(default_factory=dict, hash=False)
+    namespace: dict[str, Union[Name, Variable]] = field(
+        default_factory=dict, hash=False, compare=False
+    )
 
     def __post_init__(self):
         self.create_namespace(False)
@@ -312,10 +502,22 @@ class GulfOfMexicoString(
             self.indexer[index - 1] = (index - 1, "")
 
     def create_namespace(self, is_update: bool = True):
+        def method(name: str, arg_count: int, func: Callable) -> Name:
+            return Name(name, BuiltinFunction(arg_count, func, receiver=self))
+
         if not is_update:
             self.namespace |= {
                 "push": Name("push", BuiltinFunction(2, db_str_push, True)),
                 "pop": Name("pop", BuiltinFunction(2, db_str_pop, True)),
+                "split": method("split", 2, db_str_split),
+                "upper": method("upper", 1, db_str_upper),
+                "lower": method("lower", 1, db_str_lower),
+                "trim": method("trim", 1, db_str_trim),
+                "replace": method("replace", 3, db_str_replace),
+                "contains": method("contains", 2, db_str_contains),
+                "startsWith": method("startsWith", 2, db_str_starts_with),
+                "endsWith": method("endsWith", 2, db_str_ends_with),
+                "indexOf": method("indexOf", 2, db_str_index_of),
                 "length": Name("length", GulfOfMexicoNumber(len(self.value))),
             }
         else:
@@ -396,6 +598,10 @@ class GulfOfMexicoSpecialBlankValue(GulfOfMexicoValue):
 class GulfOfMexicoObject(GulfOfMexicoNamespaceable, GulfOfMexicoValue):
     class_name: str
     namespace: dict[str, Union[Name, Variable]] = field(default_factory=dict)
+    # Identity of the class declaration that produced this object/instance.
+    # Nested classes with the same name get distinct ids, so the
+    # one-instance-per-class rule is scoped to the declaration.
+    class_id: int = 0
 
 
 @dataclass(unsafe_hash=True)
@@ -407,8 +613,26 @@ class GulfOfMexicoPendingInit(GulfOfMexicoValue):
 
 
 @dataclass
-class GulfOfMexicoMap(GulfOfMexicoIndexable, GulfOfMexicoValue):
+class GulfOfMexicoMap(GulfOfMexicoIndexable, GulfOfMexicoNamespaceable, GulfOfMexicoValue):
     self_dict: dict[Union[int, float, str], GulfOfMexicoValue]
+    namespace: dict[str, Union[Name, Variable]] = field(
+        default_factory=dict, hash=False, compare=False
+    )
+
+    def __post_init__(self) -> None:
+        self.create_namespace()
+
+    def create_namespace(self, is_update: bool = True) -> None:
+        def method(name: str, arg_count: int, func: Callable) -> Name:
+            return Name(name, BuiltinFunction(arg_count, func, receiver=self))
+
+        self.namespace = {
+            "keys": method("keys", 1, db_map_keys),
+            "values": method("values", 1, db_map_values),
+            "has": method("has", 2, db_map_has),
+            "delete": Name("delete", BuiltinFunction(2, db_map_delete, True)),
+            "length": Name("length", GulfOfMexicoNumber(len(self.self_dict))),
+        }
 
     def access_index(self, index: GulfOfMexicoValue) -> GulfOfMexicoValue:
         if not isinstance(index, (GulfOfMexicoString, GulfOfMexicoNumber)):
@@ -421,6 +645,7 @@ class GulfOfMexicoMap(GulfOfMexicoIndexable, GulfOfMexicoValue):
         if not isinstance(index, (GulfOfMexicoString, GulfOfMexicoNumber)):
             raise NonFormattedError("Keys of a map must be an index or a number.")
         self.self_dict[index.value] = val
+        self.create_namespace()
 
 
 @dataclass
@@ -617,7 +842,7 @@ def db_new(val: GulfOfMexicoValue, *args: GulfOfMexicoValue) -> GulfOfMexicoValu
             elif isinstance(entry, Name):
                 new_namespace[key] = Name(key, deepcopy(entry.value))
 
-        instance = GulfOfMexicoObject(val.class_name, new_namespace)
+        instance = GulfOfMexicoObject(val.class_name, new_namespace, val.class_id)
 
         # If args provided and init exists, return pending init wrapper
         if args and "init" in new_namespace:
@@ -679,6 +904,10 @@ def db_to_string(val: GulfOfMexicoValue) -> GulfOfMexicoString:
             return_string = val.value
         case GulfOfMexicoMap():
             return_string = f'{{{", ".join([f"{k}: {db_to_string(v).value}" for k, v in val.self_dict.items()])}}}'
+        case GulfOfMexicoPromise():
+            return_string = (
+                "undefined" if val.value is None else db_to_string(val.value).value
+            )
     return GulfOfMexicoString(return_string)
 
 

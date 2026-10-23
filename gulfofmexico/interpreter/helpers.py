@@ -16,6 +16,9 @@ from gulfofmexico.processor.expression_tree import (
     FunctionNode,
     IndexNode,
     ListNode,
+    MapLiteralNode,
+    MemberAccessNode,
+    MethodCallNode,
     SingleOperatorNode,
     ValueNode,
     build_expression_tree,
@@ -27,12 +30,44 @@ from gulfofmexico.processor.expression_tree import (
 # ---------------------------------------------------------------------------
 
 def get_built_expression(expr: Union[list[Token], ExpressionTreeNode]) -> ExpressionTreeNode:
-    """Ensure *expr* is an ``ExpressionTreeNode``, building one if needed."""
+    """Ensure *expr* is an ``ExpressionTreeNode``, building one if needed.
+
+    Callers that have access to the statement should prefer
+    :func:`statement_expression`, which compiles once and caches the tree on
+    the statement instead of rebuilding it on every evaluation.
+    """
     if isinstance(expr, list):
-        # We don't have filename/code here; callers should pass pre-built trees
-        # when possible.  This fall-back keeps the original contract.
         return build_expression_tree("", expr, "")
     return expr
+
+
+def statement_expression(statement: object, ctx: object) -> ExpressionTreeNode:
+    """Return (and cache) the compiled expression tree of *statement*.
+
+    Parsing produces token lists; this compiles the tokens once and stores the
+    tree back on the statement, so repeated evaluation (loops are expressed as
+    recursion, so this happens constantly) reuses it.
+    """
+    expr = getattr(statement, "expression", None)
+    if isinstance(expr, list):
+        expr = build_expression_tree(getattr(ctx, "filename", ""), expr, getattr(ctx, "code", ""))
+        statement.expression = expr  # type: ignore[attr-defined]
+    return expr  # type: ignore[return-value]
+
+
+def statement_indexes(statement: object, ctx: object) -> list[ExpressionTreeNode]:
+    """Return (and cache) the compiled index expressions of *statement*."""
+    indexes = getattr(statement, "indexes", None)
+    if not isinstance(indexes, list):
+        return []
+    compiled: list[ExpressionTreeNode] = []
+    for index in indexes:
+        if isinstance(index, list):
+            index = build_expression_tree(getattr(ctx, "filename", ""), index, getattr(ctx, "code", ""))
+        compiled.append(index)
+    if hasattr(statement, "indexes"):
+        statement.indexes = compiled  # type: ignore[attr-defined]
+    return compiled
 
 
 # ---------------------------------------------------------------------------
@@ -67,6 +102,15 @@ def gather_names_or_values(expr: ExpressionTreeNode) -> set[Token]:
         case ListNode():
             for val in expr.values:
                 names |= gather_names_or_values(val)
+        case MapLiteralNode():
+            for _, val in expr.pairs:
+                names |= gather_names_or_values(val)
+        case MethodCallNode():
+            names |= gather_names_or_values(expr.receiver)
+            for arg in expr.args:
+                names |= gather_names_or_values(arg)
+        case MemberAccessNode():
+            names |= gather_names_or_values(expr.receiver)
         case ExpressionNode():
             names |= gather_names_or_values(expr.right) | gather_names_or_values(expr.left)
         case IndexNode():

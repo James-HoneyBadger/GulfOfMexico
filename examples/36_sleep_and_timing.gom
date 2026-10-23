@@ -10,12 +10,14 @@ print "step 1"!
 sleep 50!
 print "step 2 (after 50ms)"!
 
-// Combine sleep with after-statements for simple timelines:
+// `sleep` blocks; `after` schedules. Combine them for simple timelines:
 sleep 25!
 after 10 {
    print "scheduled tick"!
 }
 print "step 3"!
+
+// Output: step 1, step 2 (after 50ms), step 3, scheduled tick
 
 // Writing to a file is also supported (shown as a comment so this
 // example has no side effects on disk):

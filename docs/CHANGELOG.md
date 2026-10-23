@@ -1,3 +1,168 @@
+# v1.2.0 — 2026-10-23
+
+### Interfaces
+
+- **New terminal presentation layer** (`gulfofmexico/ui.py`). One module now
+  owns colour policy and layout, so the CLI and REPL share a visual language.
+- **Compiler-style diagnostics.** Errors render as a labelled message, an
+  `--> file:line:col` location, a gutter, the source line, a caret under the
+  offending token, and a hint when one helps.
+- **Colour is terminal-aware.** ANSI is emitted only for TTYs, so piped output
+  and CI logs are plain. `NO_COLOR` and `--no-color` opt out; `FORCE_COLOR`
+  opts in.
+- **CLI additions.** `--version`, `--no-color`, and `-q/--quiet`; grouped help
+  output with sections for running code, output, modes, and environment
+  variables; friendly messages for missing files and directories; documented
+  exit codes (`0` success, `1` program error, `2` usage error).
+- **Verbose runs report elapsed time** (`Code has finished executing in 4 ms.`)
+  and no longer imply the process is waiting when it is not.
+- **REPL polish.** Versioned banner with a command cheat sheet, coloured
+  prompts, grouped `:help` with language hints, a `:vars` table (name, type,
+  value), results rendered as language values instead of Python objects, errors
+  on stderr, and a farewell on quit.
+- **IDE polish.** The window title tracks the active file and modified state,
+  tab tooltips show full paths, the status bar reports run duration and whether
+  errors occurred, and the welcome buffer is a compact quick-reference.
+- **Working Variables inspector.** The IDE now runs programs with
+  `--vars-json` and populates the inspector from the snapshot, so the panel
+  shows the program's variables (name, type, value) instead of staying empty.
+  Variables and Outline show friendly empty states, the console is padded for
+  readability, and harmless Qt SVG warnings no longer flood the terminal.
+- **Documentation.** `examples/README.md` is now a categorized index with links
+  and a feature-coverage summary; README and `docs/INSTALLATION.md` document the
+  new flags, colour controls, and REPL commands.
+
+### Language
+
+- **Parentheses now group.** Previously `print(1 + 2*3)` printed `1` and
+  `add(3, 2)` failed when nested; now parenthesised groups and argument lists
+  evaluate as the spec's examples require. Stray/unmatched parentheses are
+  still treated as whitespace, so `add)3, 2(!` works.
+- **Arbitrary quote counts.** `'''Lu'''`, `""""Luke""""`, and the spec's
+  `""she said "hi"""` example now scan correctly. `""` remains the empty
+  string.
+- **Four declaration forms.** `const const`, `const var`, `var const`, and
+  `var var` now have the spec's distinct edit/re-assign permissions.
+- **Loose `==`.** `3.14 == "3.14"` is `true`; `===` remains type-precise and
+  `====` now compares literal expressions (`3.14 ==== 3.14` is true,
+  `3.14 ==== pi` is false).
+- **Automatic insertion (AEMI/ABI/AQMI).** Missing `!` terminators, closing
+  brackets, and closing quotes are repaired automatically per the spec.
+- **Object literals and Cape Verdean interpolation.** `{ name: "Lu" }` creates
+  a map, dot access works, and `"{player$name}"` interpolates properties.
+- **Postfix `++`/`--`** now update the variable (and record `previous`).
+- **`await next`** no longer errors.
+- **Emoji identifiers** now accept combining marks, so keycap emoji such as
+  `1️⃣` are valid names.
+- **Equal-spacing operator ties** now fall back to normal precedence
+  (`2 * 1 + 3` → `5`), which is what makes the spec's `2 + 2 === 5` true.
+- **Deleted keywords raise errors.** After `delete class!`, using `class`
+  reports that the keyword has been deleted.
+- **Class instance counting** is scoped to the class declaration, so nested
+  class declarations in factory functions can each create an instance.
+
+### Tooling
+
+- **`gom --check FILE`** parses a program — including every `===== name =====`
+  section — and reports problems without running it. Expression trees are
+  compiled too, so errors that would otherwise only appear mid-run are caught
+  up front. Works with `-c`, with `-` (stdin), and with several files at once.
+- **`gom --fmt FILE`** prints a program in canonical layout and `gom --fmt -w
+  FILE` rewrites it in place. Formatting only touches leading indentation
+  (remapped to 3-space levels, so block structure is preserved), trailing
+  whitespace, runs of blank lines, and the final newline. Spacing *inside* a
+  line is never changed, because it decides operator-precedence ties, and lines
+  inside triple-quoted strings are left exactly as written.
+- **`gom --check --fmt FILE`** fails when a file is not canonically formatted.
+  It is used by CI to keep every bundled example formatted.
+- **`gom -`** reads a program from standard input and names errors `<stdin>`.
+
+### Standard library
+
+- **Collection methods.** Lists gain `insert`, `sort`, `reverse`, `indexOf`,
+  `contains`, `slice`, and `join` alongside `push`/`pop`/`length`; strings gain
+  `split`, `upper`, `lower`, `trim`, `replace`, `contains`, `startsWith`,
+  `endsWith`, and `indexOf`; maps gain `keys`, `values`, `has`, `delete`, and
+  `length`. Methods are reachable with a dot on a name *or* on a literal
+  (`"a,b".split(",")`), and a map method wins over an entry of the same name.
+- **`gulfofmexico/prelude.py` — a standard helper library** written in GOM:
+  `range`, `rangeFrom`, `map`, `filter`, `reduce`, `zip`, `take`, `reverseOf`,
+  `concat`, `sortBy`, `sum`, `maxOf`, and `minOf`. Loaded into the base
+  namespace at startup, shadowable by user declarations, and skipped entirely
+  with `GOM_NO_PRELUDE=1`.
+
+### Execution
+
+- **`after` no longer blocks.** A scheduled block is queued and runs when its
+  deadline arrives, drained at statement boundaries and at program end, in
+  deadline order with FIFO tie-breaking. Use `sleep` when blocking is wanted.
+- **`when` is armed at declaration** and fires only on mutation, never at
+  registration, which is what the specification describes.
+- **Persistence is hardened.** The runtime directory is created `0700` (the
+  store file was already `0600`); an unparseable store is renamed to
+  `store.json.corrupt` before being rebuilt instead of being overwritten; a
+  store written by a *newer* schema is reported and never overwritten; a single
+  malformed entry no longer hides the rest; and persisted maps with numeric
+  keys keep their key type instead of silently becoming strings.
+- **Persistent immutables use JSON.** `const const const` values are stored in
+  `store.json` under `GOM_HOME` (default `~`) instead of a pickle, written
+  atomically with `0600` permissions under an exclusive lock. An existing
+  pickle store is left untouched and reported once; migrate it with
+  `GOM_ALLOW_LEGACY_PICKLE=1`.
+- **Recursion depth is bounded by default** (`GOM_RECURSION_LIMIT`, 10000) and
+  reports an actionable error instead of a raw Python `RecursionError`.
+
+### Performance
+
+- **Expression trees are compiled once per statement** instead of on every
+  evaluation. Recursion-heavy programs improve by an order of magnitude
+  (`fib`-style recursion 2000 deep: ~2.9 s → ~0.6 s).
+- **Temporal lifetimes only tick for variables that have one**, replacing a
+  full-scope sweep per statement (164k sweeps to one scan per statement).
+- **Deep recursion no longer degrades super-linearly.** A 20 000-deep recursion
+  went from over a minute to under a second.
+
+### IDE
+
+- **Autocomplete** (`Ctrl+Space`) for keywords, builtins, prelude helpers, and
+  every `const`/`var`/function/class name in the current file.
+- **Run with Input** (`Shift+F5`) runs a program with a text box wired to stdin.
+- **Stop** (`F6`) terminates a running program, and the status bar reports how
+  long the last run took.
+- **Find in Files** (`Ctrl+Shift+F`), **Go to Symbol** (`Ctrl+Shift+O`), and
+  **Rename Symbol** (`F2`).
+- **Live diagnostics**: the active editor is re-checked as you type and shows
+  the first problem inline, in the status bar, and on the gutter.
+
+### Packaging and CI
+
+- The package ships `py.typed` and advertises `Typing :: Typed`.
+- **Fixed ruff ruleset** (`E4`, `E7`, `E9`, `F`, `target-version = "py310"`) so
+  local and CI lint results no longer drift with the ruff release; the fourteen
+  existing findings in `ide/app.py` are fixed.
+- **CI tests Python 3.10 through 3.14** (was 3.12 only), publishes coverage
+  (measuring subprocess runs, ~68 %) with a floor, and validates that every
+  bundled example parses and is canonically formatted.
+- `pyproject.toml` gains coverage, mypy, and pytest-cov configuration, and the
+  Python 3.14 classifier.
+- Stale `poetry.lock` ignore rule removed from `.gitignore`.
+
+### Tests and docs
+
+- Added `tests/test_dreamb_spec.py` (~70 conformance tests),
+  `tests/test_ux.py` (30 presentation tests covering colour policy, diagnostic
+  layout, CLI flags, and REPL output), `tests/test_tools.py` (82 tests for the
+  checker, formatter, section splitter, and stdin mode),
+  `tests/test_persistence.py`, and `tests/test_collections_and_scheduler.py`.
+  The suite now stands at 485 tests. `tests/test_persistence.py` was rewritten
+  around behaviour rather than source text (the pickle guard now asserts that
+  the JSON path never unpickles, structurally and at runtime) and covers
+  concurrency, corrupt-store recovery, newer-schema refusal, per-entry
+  resilience, codec error paths, typed map keys, non-ASCII round-trips, and the
+  legacy `.inf_vars` format.
+- The language reference documents collection methods, the prelude (§18), and
+  the new environment variables; the README documents the new CLI modes.
+
 # v1.1.0 — 2026-06-22
 
 ### UX, spec conformance, and expanded examples

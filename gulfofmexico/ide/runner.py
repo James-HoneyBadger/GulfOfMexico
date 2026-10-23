@@ -64,6 +64,8 @@ def run_code(session: ExecutionSession, code: str, filename: str = "__ide_buffer
         exported_names: list[tuple[str, str, GulfOfMexicoValue]] = []
         # Ensure globals present
         session.init_globals(filename, code)
+        from gulfofmexico.prelude import load_prelude  # noqa: PLC0415
+        load_prelude(session.namespaces, interpreter.InterpreterContext(filename=filename, code=code))
 
         _ = interpreter.interpret_code_statements_main_wrapper(
             statements,

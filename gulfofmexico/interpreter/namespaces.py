@@ -17,6 +17,7 @@ from gulfofmexico.base import (
 )
 from gulfofmexico.builtin import (
     GulfOfMexicoBoolean,
+    GulfOfMexicoMap,
     GulfOfMexicoNamespaceable,
     GulfOfMexicoNumber,
     GulfOfMexicoString,
@@ -57,6 +58,17 @@ def get_name_from_namespaces(name: str, namespaces: list[Namespace]) -> Optional
     current_value: GulfOfMexicoValue = base_entry.value  # type: ignore[attr-defined]
     current_entry: Optional[Union[Variable, Name]] = base_entry
     for seg in parts[1:]:
+        if isinstance(current_value, GulfOfMexicoMap):
+            # Methods first ("m.keys()"), then map entries ("m.name").
+            if seg in current_value.namespace:
+                current_entry = current_value.namespace[seg]
+                current_value = current_entry.value  # type: ignore[attr-defined]
+                continue
+            if seg not in current_value.self_dict:
+                return None
+            current_entry = Name(seg, current_value.self_dict[seg])
+            current_value = current_entry.value
+            continue
         if not isinstance(current_value, GulfOfMexicoNamespaceable):
             return None
         if seg not in current_value.namespace:

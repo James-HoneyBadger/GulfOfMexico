@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "gulfofmexico"
-version = "1.0.0"
+version = "1.2.0"
 description = "Production-ready interpreter and IDE for the Gulf of Mexico esoteric programming language, featuring probabilistic variables, negative indexing, temporal lifetimes, and a modern graphical IDE. Based on Lu Wilson's (TodePond) conceptual design."
 readme = "README.md"
 authors = ["James Temple <james@honey-badger.org>"]
@@ -19,8 +19,10 @@ classifiers = [
     "Programming Language :: Python :: 3.11",
     "Programming Language :: Python :: 3.12",
     "Programming Language :: Python :: 3.13",
+    "Programming Language :: Python :: 3.14",
     "Topic :: Software Development :: Compilers",
     "Topic :: Software Development :: Interpreters",
+    "Typing :: Typed",
     "Operating System :: OS Independent",
 ]
 
@@ -40,6 +42,8 @@ gom-ide = "gulfofmexico.ide.app:run"
 
 [tool.poetry.group.dev.dependencies]
 pytest = "^8.3.0"
+pytest-cov = "^6.0.0"
+mypy = "^1.13.0"
 pylint = "^3.3.0"
 ruff = "^0.7.4"
 pre-commit = "^4.0.0"
@@ -54,12 +58,36 @@ all = ["pynput", "pygithub", "PySide6", "Pillow", "pyyaml"]
 
 [tool.ruff]
 line-length = 120
+target-version = "py310"
 
 [tool.ruff.lint]
+select = ["E4", "E7", "E9", "F"]
 ignore = ["E203"]
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
+
+[tool.coverage.run]
+branch = true
+source = ["gulfofmexico"]
+omit = ["gulfofmexico/ide/*"]
+# The example and CLI tests run programs in subprocesses; measure those too.
+patch = ["subprocess"]
+parallel = true
+
+[tool.coverage.report]
+exclude_also = [
+    "if TYPE_CHECKING:",
+    "raise NotImplementedError",
+    "\\.\\.\\.",
+]
+
+[tool.mypy]
+python_version = "3.10"
+files = ["gulfofmexico"]
+ignore_missing_imports = true
+warn_unused_ignores = true
+check_untyped_defs = true
 
 [build-system]
 requires = ["poetry_core>=1.0.0"]

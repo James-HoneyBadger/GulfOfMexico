@@ -46,7 +46,8 @@ This installs the core interpreter and registers the `gom` and `gulfofmexico` co
 After installation:
 
 ```bash
-gom                           # Start the REPL
+gom --version                     # Confirm the version
+gom                               # Start the REPL
 gom examples/01_hello_world.gom   # Run a program (if you have the examples)
 ```
 
@@ -151,7 +152,11 @@ python -m gulfofmexico.ide
 - **Duplicate Line** (Ctrl+D) and **Move Line Up/Down** (Alt+↑/↓)
 - **Tab right-click menu**: Close, Close Others, Close All, Duplicate Tab, Copy File Path
 - Console output panel with timestamps and optional clear-on-run
-- Run (F5) / Stop (Shift+F5)
+- **Autocomplete** (Ctrl+Space) for keywords, builtins, and names in the file
+- **Find in Files** (Ctrl+Shift+F), **Go to Symbol** (Ctrl+Shift+O), **Rename
+  Symbol** (F2)
+- **Live diagnostics**: the active editor is re-checked as you type
+- Run (F5) / **Run with Input** (Shift+F5) / Stop (F6)
 - File operations: New (Ctrl+N), Open (Ctrl+O), Save (Ctrl+S), Save As (Ctrl+Shift+S)
 - Recent files tracking
 - Session persistence (window size, position, open tabs, dock layout)
@@ -281,7 +286,8 @@ gom examples/01_hello_world.gom
 gom
 ```
 
-Type `print "it works!"!` and press Enter. Type `:quit` to exit.
+Type `print "it works!"!` and press Enter. Type `:quit` to exit. The banner
+shows the version and a short cheat sheet; `:help` lists every command.
 
 ### Run the test suite
 
@@ -289,7 +295,32 @@ Type `print "it works!"!` and press Enter. Type `:quit` to exit.
 python -m pytest
 ```
 
-All 170 tests should pass.
+All tests should pass (the exact count grows as coverage is added).
+
+### Check and format programs
+
+```bash
+gom --check examples/01_hello_world.gom        # parse without running
+gom --check --fmt examples/*.gom              # CI gate: parsed and canonical
+gom --fmt -w examples/01_hello_world.gom      # rewrite in canonical layout
+```
+
+The formatter never reflows a line — it only normalises indentation levels,
+trailing whitespace, blank runs, and the final newline — so it is safe on
+programs that rely on significant spacing.
+
+### Developer tooling
+
+```bash
+python -m pytest --cov=gulfofmexico           # coverage (measures subprocess runs)
+ruff check gulfofmexico/                      # lint (ruleset pinned in pyproject)
+mypy                                          # type-check (incremental; not a gate yet)
+```
+
+`pytest-cov`, `ruff`, and `mypy` are declared in the `dev` Poetry group; with
+plain `pip` install them alongside pytest. Lint and coverage are enforced in CI;
+the package ships `py.typed`, but the interpreter is not fully annotated yet, so
+`mypy` is advisory.
 
 ### Run the spec compliance test
 
@@ -309,6 +340,51 @@ Should print `42`.
 
 ---
 
+## Command-Line Reference
+
+```text
+gom [options] [FILE]
+```
+
+| Option | Description |
+|--------|-------------|
+| `-c CODE` | Run inline code and exit |
+| `-s`, `--show-traceback` | Print the full Python traceback when the program fails |
+| `--debug` | Show internal debug messages (same as `GULFOFMEXICO_DEBUG=1`) |
+| `--verbose` | Show a completion message with elapsed time (same as `GULFOFMEXICO_VERBOSE=1`) |
+| `--no-color` | Disable ANSI colour (same as `NO_COLOR=1`) |
+| `-q`, `--quiet` | Suppress non-essential informational messages |
+| `--vars-json PATH` | Write a JSON snapshot of the final variables (used by the IDE) |
+| `--check` | Parse and validate the program without running it |
+| `--fmt` | Print the program in canonical layout |
+| `-w`, `--write` | With `--fmt`, rewrite the file in place |
+| `-V`, `--version` | Print the interpreter version and exit |
+| `-h`, `--help` | Show grouped help |
+
+Exit codes: `0` success, `1` program error, `2` usage error.
+
+### Colour
+
+Diagnostics are coloured only when written to a terminal, so redirected output
+and CI logs stay plain. `NO_COLOR=1` or `--no-color` disables colour
+everywhere, and `FORCE_COLOR=1` forces it on.
+
+### Environment variables
+
+| Variable | Effect |
+|----------|--------|
+| `GULFOFMEXICO_DEBUG=1` | Internal debug messages on stderr |
+| `GULFOFMEXICO_VERBOSE=1` | Completion message with elapsed time |
+| `GULFOFMEXICO_WAIT=1` | Keep the process alive for pending `after` statements |
+| `GOM_DISABLE_TARIFF=1` | Disable the random import tariff |
+| `GOM_NO_PRELUDE=1` | Skip the standard helper library |
+| `GOM_HOME=DIR` | Directory holding runtime state (default `~`) |
+| `GOM_RECURSION_LIMIT=N` | Maximum interpreter recursion depth (default `10000`) |
+| `GOM_ALLOW_LEGACY_PICKLE=1` | Migrate a pre-1.2 pickle store to JSON (once) |
+| `NO_COLOR=1` | Disable ANSI colour |
+
+---
+
 ## Uninstalling
 
 ```bash
@@ -318,7 +394,7 @@ pip uninstall gulfofmexico
 To also remove persistent `const const const` variables stored on disk:
 
 ```bash
-rm -rf ~/.gulfofmexico_runtime
+rm -rf ~/.gulfofmexico_runtime     # or $GOM_HOME/.gulfofmexico_runtime
 ```
 
 ---

@@ -5,9 +5,9 @@
 // GOM provides FOUR levels of equality precision:
 //
 //   =     Approximate: numbers within ~10%, strings ~70% similar
-//   ==    Exact value: standard value equality
-//   ===   Type-strict: same value AND same type
-//   ====  Reference identity: exact same object
+//   ==    Loose: same type compares normally; different types are coerced
+//   ===   Precise: same value AND same type
+//   ====  Most precise: the same literal expression / object identity
 //
 // Inequality uses ;= (NOT !=).
 
@@ -19,14 +19,14 @@ print r1!
 const r2 = 10 = 100!
 print r2!
 
-// ── Double == (exact value) ─────────────────────────────────────
+// ── Double == (loose) ───────────────────────────────────────────
 const r3 = 10 == 10!
 print r3!
 
 const r4 = 10 == 11!
 print r4!
 
-// ── Triple === (type-strict) ────────────────────────────────────
+// ── Triple === (precise) ────────────────────────────────────────
 const r5 = 10 === 10!
 print r5!
 

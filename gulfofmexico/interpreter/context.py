@@ -128,6 +128,12 @@ class InterpreterContext:
     name_watchers: NameWatchers = field(default_factory=dict)
     is_lifetime_temporal: bool = False
     tariff_skipped_statement_ids: set[int] = field(default_factory=set)
+    #: Variables with a finite lifetime. Only these tick down after each
+    #: statement, so programs that never use lifetimes pay nothing.
+    ticking_lifetimes: dict[int, object] = field(default_factory=dict)
+    #: Work scheduled by `after` statements: (deadline, sequence, body, scopes).
+    pending_after: list[tuple[float, int, object, object]] = field(default_factory=list)
+    after_sequence: int = 0
 
     def reset(self) -> None:
         """Reset mutable state between runs (REPL / multi-file)."""
@@ -137,3 +143,6 @@ class InterpreterContext:
         self.name_watchers = {}
         self.is_lifetime_temporal = False
         self.tariff_skipped_statement_ids = set()
+        self.ticking_lifetimes = {}
+        self.pending_after = []
+        self.after_sequence = 0

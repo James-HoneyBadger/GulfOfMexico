@@ -25,6 +25,7 @@ Complete syntax and semantics reference for the Gulf of Mexico programming langu
 15. [DreamBerd Extensions](#15-dreamberd-extensions)
 16. [Environment Variables](#16-environment-variables)
 17. [Grammar Summary](#17-grammar-summary)
+18. [Standard Helpers (Prelude)](#18-standard-helpers-prelude)
 
 ---
 
@@ -49,6 +50,23 @@ const x = 42?            // assigns and prints debug info
 ```
 
 All confidence levels currently execute identically. The distinction is semantic and may gain behavioral meaning in future versions.
+
+#### 1.1.1 Automatic Insertion (AEMI, ABI, AQMI)
+
+The spec's "AI" features are implemented as error recovery, so forgotten
+punctuation is repaired instead of rejected:
+
+| Feature | Name | What it does |
+|---------|------|--------------|
+| AEMI | Automatic Exclamation Mark Insertion | A statement with no `!`/`?` gets one at the end of its line. |
+| ABI | Automatic Bracket Insertion | Unclosed `(`, `[`, and `{` are closed at end of file. |
+| AQMI | Automatic Quotation Marks Insertion | An unterminated string is closed at the end of its line (or end of file for triple-quoted strings). |
+
+```
+print("Hello world")     // AEMI adds the !
+print("Hello world"      // ABI adds the )
+print("Hello world       // AQMI adds the "
+```
 
 ### 1.2 Comments
 
@@ -82,8 +100,13 @@ Whitespace between tokens controls operator precedence. In binary expressions, *
 ```
 2 * 1+3       // → 2 * (1+3) → 8     (+ binds tighter — no spaces)
 2*1 + 3       // → (2*1) + 3 → 5     (* binds tighter — no spaces)
-2 * 1 + 3     // → (2*1) + 3 → 5     (equal spacing — left to right)
+2 * 1 + 3     // → (2*1) + 3 → 5     (equal spacing — normal precedence)
 ```
+
+When two operators have exactly the same surrounding whitespace, normal
+operator precedence breaks the tie (`*` before `+`, arithmetic before
+comparison, comparison before equality, and so on). This is what makes the
+spec's `2 + 2 === 5` evaluate as `(2 + 2) === 5`.
 
 This also affects function call parsing. A **single space** between a name and an argument is interpreted as a function call:
 
@@ -93,9 +116,24 @@ func n - 1          // calls func(n), then subtracts 1
 func  n - 1         // calls func(n - 1) — double space = wider gap
 ```
 
-### 1.5 Parentheses as Whitespace
+### 1.5 Parentheses
 
-Parentheses are treated as whitespace for grouping purposes. They do not change evaluation order beyond their whitespace contribution.
+Parentheses act as whitespace, but a parenthesised group is evaluated as a
+single unit. This preserves the spec's claim that parentheses "do nothing"
+(`add)3, 2(!` still calls `add(3, 2)`) while making the spec's worked examples
+behave as written:
+
+```
+add(3, 2)          // parenthesised call
+add 3, 2           // space-separated call — same result
+(add (3, 2))       // extra parentheses are harmless
+add)3, 2(!         // stray parentheses are treated as whitespace
+add(3, (add (5, 6)))   // nested calls build nested groups
+print(1 + 2*3)     // → 7   (the group is the argument to print)
+```
+
+Stray, unmatched parentheses are ignored. This means the Lisp-style forms in
+the spec (and the deliberately mismatched ones) all evaluate the same way.
 
 ---
 
@@ -132,15 +170,25 @@ const a = "hello"!
 const b = 'hello'!      // identical to above
 ```
 
-GOM supports **matched quote nesting**: the number of opening quotes must match the number of closing quotes. This allows embedding quotes without escaping:
+Strings may use **any number of quotes**, and the number of opening quotes
+must match the number of closing quotes. This allows embedding quotes without
+escaping:
 
 ```
+const a = 'Lu'!                 // Lu
+const b = '''Lu'''!             // Lu
+const c = """"Luke""""!         // Luke
 const s = ""she said "hi"""!    // she said "hi"
+const empty = ""!               // empty string
 ```
+
+A quote run with no matching closing run is an empty string when it is even
+in length, and an unterminated string is auto-closed (AQMI) otherwise. A bare
+word with no quotes at all (`const name = Luke!`) is also a string.
 
 #### 2.2.1 String Interpolation
 
-Three currency symbols work as interpolation prefixes inside strings:
+Currency symbols mark interpolated expressions inside strings:
 
 | Prefix | Symbol | Example |
 |--------|--------|---------|
@@ -148,6 +196,7 @@ Three currency symbols work as interpolation prefixes inside strings:
 | Pound | `£` | `"value: £{x}"` |
 | Yen | `¥` | `"value: ¥{x}"` |
 | Euro | `€` | `"value: {x}€"` (postfix) |
+| Cape Verdean escudo | `$` | `"Hello {player$name}!"` (property access) |
 
 Expressions inside braces are evaluated:
 
@@ -155,6 +204,14 @@ Expressions inside braces are evaluated:
 const x = 42!
 print "${x + 1}"!     // "43"
 print "£{x * 2}"!     // "84"
+```
+
+The Cape Verdean escudo form places `$` in the decimal-separator position and
+acts as property access, so `{player$name}` reads `player.name`:
+
+```
+const player = { name: "Lu" }!
+print "Hello {player$name}!"!    // Hello Lu!
 ```
 
 #### 2.2.2 Escape Sequences
@@ -181,6 +238,21 @@ s.length              // → 5
 -"hello"              // → "olleh"   (unary minus reverses)
 s[-1]                 // → "h"       (first character, -1-based)
 ```
+
+Strings also answer to the following methods. They are reached with a dot,
+either on a name (`s.upper()`) or directly on a literal (`"a,b".split(",")`):
+
+| Method | Result |
+|--------|--------|
+| `length` | number of characters (property) |
+| `split(sep)` | list of the pieces around `sep` |
+| `upper()` / `lower()` | case conversion |
+| `trim()` | leading/trailing whitespace removed |
+| `replace(old, new)` | every occurrence replaced |
+| `contains(part)` | boolean |
+| `startsWith(prefix)` / `endsWith(suffix)` | boolean |
+| `indexOf(part)` | -1-based index, or `undefined` |
+| `push(value)` / `pop()` | mutate in place (as for lists) |
 
 ### 2.3 Booleans (Three-Valued)
 
@@ -245,6 +317,17 @@ list.pop()!              // remove last → [1, 2, 3], returns 4
 list.length              // → 3  (property, not method)
 ```
 
+| Method | Result |
+|--------|--------|
+| `push(value)` / `pop()` | append / remove the last element (mutates) |
+| `insert(index, value)` | insert at a -1-based index (mutates) |
+| `sort()` / `reverse()` | sort / reverse in place (mutates) |
+| `indexOf(value)` | -1-based index, or `undefined` |
+| `contains(value)` | boolean |
+| `slice(from, to)` | new list from `from` up to `to` |
+| `join(separator)` | string |
+| `length` | element count (property) |
+
 #### 2.4.3 List Operations
 
 ```
@@ -254,13 +337,28 @@ list.length              // → 3  (property, not method)
 
 ### 2.5 Maps
 
-Key-value data structure:
+Key-value data structure. Maps can be created with `Map()` or with an object
+literal using braces:
 
 ```
 var m = Map()!
 m["key"] = "value"!       // set via bracket notation
 print m["key"]!            // → "value"
+
+const player = { name: "Lu", age: 29 }!
+print player["name"]!      // → "Lu"
+print player.name!         // → "Lu"  (dot access)
 ```
+
+Maps have methods too. Methods win over entries when a name collides:
+
+| Method | Result |
+|--------|--------|
+| `keys()` | list of keys |
+| `values()` | list of values |
+| `has(key)` | boolean |
+| `delete(key)` | remove the entry (mutates) |
+| `length` | entry count (property) |
 
 ### 2.6 Undefined
 
@@ -278,7 +376,7 @@ const nothing = undefined!
 | String | `"hello"`, `'world'` | No | By character |
 | Boolean | `true`, `false`, `maybe` | No | No |
 | List | `[1, 2, 3]` | Yes | By element |
-| Map | `Map()` | Yes | By key |
+| Map | `Map()`, `{ key: value }` | Yes | By key / property |
 | Function | `function f() => { ... }!` | No | No |
 | Object | `new ClassName` | Yes | By property |
 | Undefined | `undefined` | No | No |
@@ -289,14 +387,27 @@ const nothing = undefined!
 
 ### 3.1 Declaration
 
-Two declaration keywords control mutability:
+There are four declaration forms, built from the `const` and `var` keywords.
+The first keyword controls **re-assignment** (via `=`) and the last controls
+**editing** (mutating a value in place, e.g. `list.push`):
+
+| Form | Re-assignable | Editable | Example |
+|------|---------------|----------|---------|
+| `const const` | No | No | `const const name = "Luke"!` |
+| `const var` | No | Yes | `const var name = "Luke"! name.pop()!` |
+| `var const` | Yes | No | `var const name = "Luke"! name = "Lu"!` |
+| `var var` | Yes | Yes | `var var name = "Luke"! name.push("e")!` |
+
+A single `const` declares an immutable binding and a single `var` a mutable
+one:
 
 ```
 const x = 42!          // immutable — cannot be reassigned
 var y = 10!            // mutable — can be reassigned
 ```
 
-Attempting to reassign a `const` variable raises an error.
+Attempting a disallowed operation raises an error. Three `const`s make a
+value permanently persistent (see §3.8).
 
 ### 3.2 Reassignment
 
@@ -337,10 +448,10 @@ print temp!              // ✓ statement 3
 print temp!              // ✗ Error — temp has expired
 ```
 
-Lifetimes can also be specified in seconds using a decimal:
+Lifetimes can also be specified in seconds by appending `s`:
 
 ```
-var flash <2.5> = "brief"!     // expires after 2.5 seconds
+var flash <2.5s> = "brief"!    // expires after 2.5 seconds
 ```
 
 ### 3.5 Confidence Levels
@@ -351,15 +462,31 @@ Variables can be declared with a confidence percentage:
 var x ~80~ = "probably here"!   // 80% confidence
 ```
 
-### 3.6 Previous Values
+### 3.6 Previous, Current, and Next Values
 
-Access the prior value of a variable using `previous`:
+Access the prior value of a variable using `previous`, the present value with
+`current`, and the next value with `next`:
 
 ```
 var x = 100!
 x = 200!
 print x!                  // → 200
 print previous x!         // → 100
+print current x!          // → 200
+
+const future = next x!    // promise for the next assigned value
+x = 42!
+print future!             // → 42
+```
+
+Postfix `++` and `--` update a variable in place, which also records a
+`previous` value:
+
+```
+var score = 5!
+score++!                  // score → 6
+print previous score!     // → 5
+score--!                  // score → 5
 ```
 
 ### 3.7 Delete
@@ -417,21 +544,25 @@ GOM provides **four levels** of equality precision:
 | Operator | Level | Behavior |
 |----------|-------|----------|
 | `=` | Approximate | Numbers: absolute difference ≤ 10. Strings: ~70% similar (fuzzy). |
-| `==` | Exact value | Standard value equality. |
-| `===` | Type-strict | Same value **and** same type. Mutable objects: same reference. |
-| `====` | Reference identity | Exact same object in memory. |
+| `==` | Loose | Same type: normal value equality. Different types: coerced (string) comparison. |
+| `===` | Precise | Same value **and** same type. Mutable objects: same reference. |
+| `====` | Most precise | The same literal expression / object identity. |
 
 Inequality counterpart: `;=` (semicolon-equals, not `!=`).
 
 ```
-10 = 15       // → true   (|15 − 10| = 5 ≤ 10)
-10 = 25       // → false  (|25 − 10| = 15 > 10)
-10 == 10      // → true   (exact match)
-10 == 10.0    // → true   (same numeric value)
-10 === 10     // → true   (same type)
-"hi" === 42   // → false  (different types)
-10 ;= 5       // → true   (not approximately equal)
-10 ;= 10      // → false  (approximately equal)
+10 = 15        // → true   (|15 − 10| = 5 ≤ 10)
+10 = 25        // → false  (|25 − 10| = 15 > 10)
+3.14 == "3.14" // → true   (loose — different types are coerced)
+10 == 10.0     // → true   (same numeric value)
+3.14 === "3.14" // → false  (precise — types differ)
+10 === 10      // → true   (same type and value)
+"hi" === 42    // → false  (different types)
+const pi = 3.14!
+3.14 ==== 3.14  // → true   (the same literal)
+3.14 ==== pi    // → false  (a literal is not the variable's value)
+10 ;= 5        // → true   (not approximately equal)
+10 ;= 10       // → false  (approximately equal)
 ```
 
 ### 4.4 Tilde Equality (Approximate Match Operators)
@@ -482,7 +613,7 @@ Three-valued logic truth tables:
 
 ### 4.6 Compound Assignment
 
-Modify-in-place operators (requires `var var` for reassignment):
+Modify-in-place operators (requires a re-assignable binding):
 
 | Operator | Equivalent |
 |----------|------------|
@@ -491,12 +622,15 @@ Modify-in-place operators (requires `var var` for reassignment):
 | `x *= 2!` | `x = x * 2!` |
 | `x /= 4!` | `x = x / 4!` |
 | `x ^= 2!` | `x = x ^ 2!` |
+| `x++!` | `x = x + 1!` (postfix, updates the variable) |
+| `x--!` | `x = x - 1!` (postfix, updates the variable) |
 
 ```
 var var score = 100!
 score += 50!
 score -= 20!
-print score!     // → 130
+score++!
+print score!     // → 131
 ```
 
 ---
@@ -505,7 +639,10 @@ print score!     // → 130
 
 ### 5.1 Definition
 
-Functions use the `function` keyword (or aliases `fn`, `func`, `f`) followed by `=>` and a curly-brace body:
+Functions may be declared with *any letters of the word `function` in order*:
+`function`, `functi`, `func`, `fun`, `fn`, and `f` all work (as do
+combinations such as `functn`). A function is followed by `=>` and either a
+curly-brace body or a single expression:
 
 ```
 function add(a, b) => {
@@ -696,7 +833,23 @@ when x > 5 {
 x = 10!    // → triggers the when block
 ```
 
-When-watchers are re-evaluated after every variable assignment. The block runs each time an assignment leaves the condition true, so a watcher can fire repeatedly as the watched state keeps qualifying.
+A `when` block is *armed* when it is declared and runs on the next mutation of
+the values it reads — never at registration, even if the condition is already
+true. It is re-evaluated after every assignment and runs each time an assignment
+leaves the condition true, so it can fire repeatedly as the watched state keeps
+qualifying.
+
+```
+var health = 10!
+when health == 0 {
+   print "You lose"!
+}
+// nothing runs here
+health = 0!    // → You lose
+```
+
+> Use `==` in conditions. The approximate `=` operator treats values within 10
+> as equal, so `when health = 0` is true for any `health` up to 10.
 
 ### 8.2 Next Promises
 
@@ -712,13 +865,20 @@ print future!           // → 42
 
 ### 8.3 After Statements
 
-Schedule code to run after a delay:
+`after` **schedules** a block; it does not block the current code. Scheduled
+blocks run when their deadline arrives, in deadline order, and the program
+waits for pending blocks before exiting:
 
 ```
+print "start"!
 after 1000 {
    print "one second later"!
 }
+print "end"!
+// Output: start, end, one second later
 ```
+
+Use `sleep` when you actually want to block (see §14.5).
 
 ### 8.4 Signals (`use`)
 
@@ -906,15 +1066,29 @@ const replaced = regex_replace "\\d,X,a1b2"!
 
 `()` represents the empty value (equivalent to `undefined` in most contexts).
 
-### 14.4 Inverted Exclamation Mark
+### 14.4 Sleep
 
-`¡` is a valid token (treated as a statement-level no-op character).
+`sleep N` blocks for N milliseconds. Use it when ordering matters; prefer
+`after` (§8.3) for scheduling work without stopping the program.
+
+```
+print "waiting"!
+sleep 500!
+print "half a second later"!
+```
+
+### 14.5 Inverted Exclamation Mark
+
+`¡` is an inverted exclamation mark. It acts as a statement terminator with
+*negative priority*, so a declaration ending in `¡` loses to otherwise
+equal declarations (see §15.6).
 
 ---
 
 ## 15. DreamBerd Extensions
 
-These features align GOM with the [DreamBerd](https://github.com/TodePond/DreamBerd) specification.
+These features align GOM with the [DreamBerd / Gulf of Mexico](https://github.com/TodePond/GulfOfMexico)
+specification.
 
 ### 15.1 Emoji Identifiers
 
@@ -975,6 +1149,62 @@ print "first"!
 
 Declaring a variable that already exists with `const`/`var` creates a new binding that shadows the previous one. The value from `previous` still accesses the old value.
 
+### 15.7 Object Literals
+
+Braces create maps, and `$` inside an interpolated brace performs property
+access (Cape Verdean escudo syntax from the spec):
+
+```
+const player = { name: "Lu", age: 29 }!
+print player.name!                // → Lu
+print "Hello {player$name}!"!     // → Hello Lu!
+```
+
+### 15.8 Signals
+
+`use(value)` creates a signal. Calling it with a value sets it and calling it
+with no arguments gets it. Signals can be destructured into a getter/setter
+pair, and the split can be nested arbitrarily:
+
+```
+const var score = use(0)!
+score(9)!          // set
+print score()!     // → 9 (get)
+
+const var [[getScore, setScore], setScore2] = use(0)!
+setScore(4)!
+print getScore()!  // → 4
+```
+
+### 15.9 Automatic Insertion (AEMI / ABI / AQMI)
+
+Missing terminators, brackets, and quotes are repaired automatically. See
+§1.1.1. AEMI applies at the end of every line; ABI and AQMI apply at the end
+of the file (AQMI also closes a simple string at end of line).
+
+### 15.10 Reference Equality (`====`)
+
+`====` compares literal expressions rather than runtime values:
+
+```
+const pi = 3.14!
+print 3.14 ==== 3.14!   // → true  (same literal)
+print 3.14 ==== pi!     // → false (literal vs variable)
+print pi ==== pi!       // → true  (same expression)
+```
+
+### 15.11 What Is Not Implemented
+
+The upstream specification also contains deliberately unimplementable or
+meta features. These are **not** part of the interpreter:
+
+- DBX (`<div>Hello</div>`) and rich-text identifiers — GOM is a terminal
+  interpreter, not a browser framework.
+- SI/AI auto-completion that e-mails unfinished code to the language author.
+- Vision Pro, edutainment, and installation-inception jokes.
+
+Everything else in the specification's language sections is implemented.
+
 ---
 
 ## 16. Environment Variables
@@ -983,7 +1213,12 @@ Declaring a variable that already exists with `const`/`var` creates a new bindin
 |----------|--------|
 | `GULFOFMEXICO_DEBUG` | Set to any value to print internal debug messages to stderr |
 | `GULFOFMEXICO_VERBOSE` | Set to any value to show completion messages |
-| `GULFOFMEXICO_WAIT` | Set to any value to wait for when-statements and after-statements |
+| `GULFOFMEXICO_WAIT` | Set to any value to wait for pending after-statements at exit |
+| `GOM_DISABLE_TARIFF` | Set to `1` to disable the random import tariff in §13.1 |
+| `GOM_NO_PRELUDE` | Set to `1` to skip the standard helpers in §18 |
+| `GOM_HOME` | Directory holding runtime state (default `~`) |
+| `GOM_RECURSION_LIMIT` | Maximum interpreter recursion depth (default `10000`) |
+| `GOM_ALLOW_LEGACY_PICKLE` | Set to `1` once to migrate a pre-1.2 pickle store to JSON |
 
 ---
 
@@ -994,8 +1229,8 @@ This is a simplified description of GOM's grammar. The actual parser handles man
 ```
 program        := section*
 section        := ("=====" name "=====")? statement*
-statement      := stmt_body terminator
-terminator     := "!" | "!!" | "!!!" | "?"
+statement      := stmt_body terminator?          // AEMI inserts a missing terminator
+terminator     := "!" | "!!" | "!!!" | "?" | "¡"
 stmt_body      := declaration | assignment | conditional | function_def
                |  class_decl | return_stmt | delete_stmt | reverse_stmt
                |  when_stmt | after_stmt | export_stmt | import_stmt
@@ -1007,6 +1242,7 @@ assignment     := name "=" expression
                |  name "[" expression "]" "=" expression
                |  name "." name "=" expression
                |  name ("+=" | "-=" | "*=" | "/=" | "^=") expression
+               |  name ("++" | "--")
 conditional    := "if" expression "{" statement* "}"
 function_def   := ("function"|"fn"|"func"|"f") name "(" params? ")" "=>" "{" statement* "}"
 class_decl     := "class" name "{" (declaration | function_def)* "}"
@@ -1018,8 +1254,44 @@ after_stmt     := "after" expression "{" statement* "}"
 export_stmt    := "export" name "to" name
 import_stmt    := "import" name "from" name
 expression     := ... (see expression_tree.py for the full expression grammar)
+map_literal    := "{" (name ":" expression ("," name ":" expression)*)? "}"
 ```
+
+## 18. Standard Helpers (Prelude)
+
+GOM has no loops, so list work is written as recursion — and the same five
+recursive helpers get rewritten in every program. They are loaded into the base
+namespace at startup, written in GOM itself, so they behave exactly like user
+code and can be shadowed by any declaration.
+
+| Helper | Result |
+|--------|--------|
+| `range(n)` | `[0, 1, ... n-1]` |
+| `rangeFrom(start, count)` | `count` numbers starting at `start` |
+| `map(list, fn)` | transform every element |
+| `filter(list, fn)` | keep elements where `fn` is true |
+| `reduce(list, fn, acc)` | fold left |
+| `zip(a, b)` | pairs of elements |
+| `take(list, n)` | first `n` elements |
+| `reverseOf(list)` | reversed copy |
+| `concat(a, b)` | `a + b` |
+| `sortBy(list, fn)` | stable sort by a key function |
+| `sum(list)`, `maxOf(list)`, `minOf(list)` | aggregates |
+
+```
+function double(n) => {
+   return n * 2!
+}!
+
+const numbers = map(range(5), double)!
+print numbers!        // → [0, 2, 4, 6, 8]
+print sum(numbers)!   // → 20
+```
+
+Set `GOM_NO_PRELUDE=1` for a bare namespace.
 
 ---
 
-*This reference describes Gulf of Mexico v1.0.0. For architectural details, see [ARCHITECTURE.md](ARCHITECTURE.md). For installation instructions, see [INSTALLATION.md](INSTALLATION.md).*
+---
+
+*This reference describes Gulf of Mexico v1.2.0. For architectural details, see [ARCHITECTURE.md](ARCHITECTURE.md). For installation instructions, see [INSTALLATION.md](INSTALLATION.md).*

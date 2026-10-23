@@ -85,8 +85,15 @@ def declare_new_variable(
     confidence = statement.confidence
     lifetime = statement.lifetime
 
-    can_be_reset = "var" in [mod.value for mod in statement.modifiers]
-    can_edit_value = "const" not in [mod.value for mod in statement.modifiers]
+    modifiers = [mod.value for mod in statement.modifiers]
+    # Per DreamBerd's four declaration forms:
+    #   const const  -> neither re-assignable nor editable
+    #   const var    -> editable, not re-assignable
+    #   var const    -> re-assignable, not editable
+    #   var var      -> both
+    # The first keyword controls re-assignment, the last controls editing.
+    can_be_reset = modifiers[0] == "var"
+    can_edit_value = modifiers[-1] == "var" if len(modifiers) > 1 else True
 
     # Parse lifetime
     duration = 100_000_000_000
@@ -137,6 +144,10 @@ def declare_new_variable(
         value, confidence, duration, can_be_reset, can_edit_value,
         is_temporal=is_temporal, temporal_duration=temporal_duration,
     )
+
+    # Only variables that can actually expire need a per-statement tick.
+    if is_temporal or duration < 100_000_000_000:
+        ctx.ticking_lifetimes[id(var)] = var
 
     if statement.type_annotation:
         if not check_type_annotation(statement.type_annotation, value):

@@ -6,18 +6,18 @@ try:
     # ---- PySide6 (preferred) ----
     from PySide6.QtCore import (  # noqa: F401
         QByteArray, QDir, QModelIndex, QObject, QRect, QSize,
-        QSortFilterProxyModel, Qt, QThread, QTimer,
+        QSortFilterProxyModel, QStringListModel, Qt, QThread, QTimer,
         Signal, QPropertyAnimation, QEasingCurve,
     )
     from PySide6.QtGui import (  # noqa: F401
-        QAction, QColor, QFont, QFontDatabase, QFontMetricsF,
+        QAction, QBrush, QColor, QFont, QFontDatabase, QFontMetricsF,
         QGuiApplication, QKeySequence, QPainter, QPalette, QShortcut,
-        QSyntaxHighlighter, QTextCharFormat, QTextFormat, QTextOption,
+        QSyntaxHighlighter, QTextCharFormat, QTextCursor, QTextFormat, QTextOption,
     )
     from PySide6.QtWidgets import (  # noqa: F401
         QApplication, QCheckBox, QComboBox, QCompleter, QDialog,
         QDialogButtonBox, QDockWidget, QFileDialog, QFileSystemModel,
-        QFormLayout, QFrame, QGridLayout, QGroupBox, QHBoxLayout,
+        QFormLayout, QFrame, QGridLayout, QGroupBox, QHBoxLayout, QInputDialog,
         QHeaderView, QLabel, QLineEdit, QListWidget, QListWidgetItem,
         QMainWindow, QMenu, QMessageBox, QPlainTextEdit, QPushButton,
         QScrollArea, QSizePolicy, QSpinBox, QSplitter, QStackedWidget,
@@ -30,11 +30,12 @@ except ImportError:
     # ---- PyQt5 fallback ----
     from PyQt5.QtCore import (  # noqa: F401
         QByteArray, QDir, QModelIndex, QObject, QPropertyAnimation,
-        QEasingCurve, QRect, QSize, QSortFilterProxyModel, Qt, QThread, QTimer,
+        QEasingCurve, QRect, QSize, QSortFilterProxyModel, QStringListModel, Qt, QThread,
+        QTimer,
     )
     from PyQt5.QtCore import pyqtSignal as Signal  # noqa: F401
     from PyQt5.QtGui import (  # noqa: F401
-        QColor, QFont, QFontDatabase, QFontMetricsF,
+        QBrush, QColor, QFont, QFontDatabase, QFontMetricsF,
         QGuiApplication, QKeySequence, QPainter, QPalette, QShortcut,
         QSyntaxHighlighter, QTextCharFormat, QTextFormat, QTextOption,
     )

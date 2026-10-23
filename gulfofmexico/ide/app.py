@@ -1,5 +1,3 @@
-from __future__ import annotations
-
 """
 Gulf of Mexico IDE — Main Application
 
@@ -28,26 +26,33 @@ A polished, configurable IDE for the GOM language featuring:
     - Subprocess-based execution with reliable Stop
 """
 
+from __future__ import annotations
+
 import json
 import os
 import re as _re
 import subprocess
 import sys
 import tempfile
+import time
 from datetime import datetime
 from functools import partial
 from html import escape as _html_escape
 from pathlib import Path
 
+from gulfofmexico.ide.runner import ExecutionSession
+
 try:
     from gulfofmexico.ide.qt_compat import (
-        QAction, QApplication, QByteArray, QCheckBox, QComboBox, QCompleter,
+        QAction, QApplication, QBrush, QByteArray, QCheckBox, QColor, QComboBox, QCompleter,
         QDialog, QDir, QDockWidget, QFileDialog, QFileSystemModel, QFont,
         QFontDatabase, QFormLayout, QFrame, QGuiApplication,
-        QHBoxLayout, QHeaderView, QLabel, QLineEdit, QListWidget,
+        QHBoxLayout, QHeaderView, QInputDialog, QLabel, QLineEdit, QListWidget,
         QListWidgetItem, QMainWindow,
-        QMenu, QMessageBox, QModelIndex, QObject, QPushButton,
-        QSortFilterProxyModel, QSpinBox, Qt, QTabWidget, QTextBrowser, QTextEdit, QThread,
+        QMenu, QMessageBox, QObject, QPushButton,
+        QKeySequence, QShortcut, QStringListModel, QSpinBox, Qt,
+        QTabWidget, QTextBrowser,
+        QTextEdit, QThread,
         QTimer, QToolButton, QTreeView, QTreeWidget, QTreeWidgetItem,
         QVBoxLayout, QWidget, Signal,
     )
@@ -57,7 +62,6 @@ except ImportError as _e:
     print(f"Qt not available: {_e}")
     print("Install with: pip install PySide6")
 
-from gulfofmexico.ide.runner import ExecutionSession
 
 # ══════════════════════════════════════════════════════════════════════
 # Theme definitions
@@ -426,6 +430,15 @@ QTextEdit, QPlainTextEdit {{
     background-color: {t['bg']};
     color: {t['fg']};
     border: none;
+    selection-background-color: {t['selection']};
+    selection-color: {t['fg_bright']};
+}}
+
+QTextBrowser {{
+    background-color: {t['bg']};
+    color: {t['fg']};
+    border: none;
+    padding: 6px 10px;
     selection-background-color: {t['selection']};
     selection-color: {t['fg_bright']};
 }}
@@ -1196,13 +1209,15 @@ if PYSIDE_AVAILABLE:
     # Worker — subprocess execution
     # ──────────────────────────────────────────────────────────────
     class Worker(QObject):
-        finished = Signal(str, str)
+        finished = Signal(str, str, str)  # stdout, stderr, variable snapshot JSON
 
-        def __init__(self, code: str, filename: str, *, timeout: int = 30) -> None:
+        def __init__(self, code: str, filename: str, *, timeout: int = 30,
+                     stdin_text: str = "") -> None:
             super().__init__()
             self.code = code
             self.filename = filename
             self.timeout = timeout
+            self.stdin_text = stdin_text
             self._process: subprocess.Popen | None = None
 
         def run(self) -> None:
@@ -1216,15 +1231,22 @@ if PYSIDE_AVAILABLE:
                 env = os.environ.copy()
                 env.pop("GULFOFMEXICO_VERBOSE", None)
                 env.pop("GULFOFMEXICO_WAIT", None)
+                vars_path = tmp_path + ".vars.json"
                 self._process = subprocess.Popen(
-                    [sys.executable, "-m", "gulfofmexico", tmp_path],
+                    [
+                        sys.executable, "-m", "gulfofmexico",
+                        "--vars-json", vars_path, tmp_path,
+                    ],
+                    stdin=subprocess.PIPE,
                     stdout=subprocess.PIPE,
                     stderr=subprocess.PIPE,
                     text=True,
                     env=env,
                 )
                 try:
-                    stdout, stderr = self._process.communicate(timeout=self.timeout)
+                    stdout, stderr = self._process.communicate(
+                        input=self.stdin_text or "", timeout=self.timeout
+                    )
                 except subprocess.TimeoutExpired:
                     self._process.kill()
                     stdout, stderr = self._process.communicate()
@@ -1235,12 +1257,24 @@ if PYSIDE_AVAILABLE:
                     except OSError:
                         pass
 
+                vars_json = ""
+                try:
+                    with open(vars_path, "r", encoding="utf-8") as fh:
+                        vars_json = fh.read()
+                except OSError:
+                    pass
+                finally:
+                    try:
+                        os.unlink(vars_path)
+                    except OSError:
+                        pass
+
                 if self._process.returncode != 0 and stderr:
-                    self.finished.emit(stdout or "", stderr)
+                    self.finished.emit(stdout or "", stderr, vars_json)
                 else:
-                    self.finished.emit(stdout or "", "")
+                    self.finished.emit(stdout or "", "", vars_json)
             except Exception as e:
-                self.finished.emit("", str(e))
+                self.finished.emit("", str(e), "")
 
         def kill(self) -> None:
             if self._process and self._process.poll() is None:
@@ -1260,6 +1294,7 @@ if PYSIDE_AVAILABLE:
                 | QDockWidget.DockWidgetFeature.DockWidgetFloatable
                 | QDockWidget.DockWidgetFeature.DockWidgetClosable
             )
+            self._dim_color = "#636d83"
             self.tree = QTreeWidget()
             self.tree.setHeaderLabels(["Name", "Type", "Value"])
             self.tree.setColumnCount(3)
@@ -1274,34 +1309,41 @@ if PYSIDE_AVAILABLE:
                 pass
             self.setWidget(self.tree)
 
-        def update_variables(self, session: ExecutionSession) -> None:
+        def _clear_with_placeholder(self, message: str) -> None:
             self.tree.clear()
-            if not session.namespaces:
+            item = QTreeWidgetItem(["", "", ""])
+            item.setText(0, message)
+            item.setFirstColumnSpanned(True)
+            item.setFlags(Qt.ItemFlag.NoItemFlags)
+            item.setForeground(0, QBrush(QColor(self._dim_color)))
+            self.tree.addTopLevelItem(item)
+
+        def set_dim_color(self, color: str) -> None:
+            self._dim_color = color
+
+        def update_variables_json(self, payload: str) -> None:
+            """Populate the tree from the snapshot emitted by ``--vars-json``."""
+            self.tree.clear()
+            rows: list[dict] = []
+            if payload:
+                try:
+                    loaded = json.loads(payload)
+                    if isinstance(loaded, list):
+                        rows = [r for r in loaded if isinstance(r, dict)]
+                except (ValueError, TypeError):
+                    rows = []
+            if not rows:
+                self._clear_with_placeholder("No variables yet - run the program")
                 return
-            from gulfofmexico.builtin import (
-                GulfOfMexicoKeyword, Name, Variable, db_to_string,
-            )
-            seen: set[str] = set()
-            for ns in reversed(session.namespaces):
-                for name, entry in sorted(ns.items()):
-                    if name in seen:
-                        continue
-                    seen.add(name)
-                    if isinstance(entry, (Variable, Name)):
-                        val = (
-                            entry.value if isinstance(entry, Name)
-                            else (entry.lifetimes[0].value if entry.lifetimes else None)
-                        )
-                        if val is None or isinstance(val, GulfOfMexicoKeyword):
-                            continue
-                        type_name = type(val).__name__.replace("GulfOfMexico", "")
-                        try:
-                            vs = db_to_string(val).value
-                            if len(vs) > 80:
-                                vs = vs[:77] + "…"
-                        except Exception:
-                            vs = "…"
-                        self.tree.addTopLevelItem(QTreeWidgetItem([name, type_name, vs]))
+            for row in rows:
+                item = QTreeWidgetItem([
+                    str(row.get("name", "")),
+                    str(row.get("type", "")),
+                    str(row.get("value", "")),
+                ])
+                item.setToolTip(0, str(row.get("name", "")))
+                item.setToolTip(2, str(row.get("value", "")))
+                self.tree.addTopLevelItem(item)
 
     # ──────────────────────────────────────────────────────────────
     # Console widget (output panel)
@@ -1432,6 +1474,10 @@ if PYSIDE_AVAILABLE:
             self._path_label.setText(base)
             self._path_label.setToolTip(path)
 
+        def current_root(self) -> str:
+            """Directory currently shown in the explorer."""
+            return getattr(self, "_current_root", os.getcwd())
+
         def _go_up(self) -> None:
             parent = os.path.dirname(self._current_root)
             if parent and parent != self._current_root:
@@ -1487,10 +1533,14 @@ if PYSIDE_AVAILABLE:
                 | QDockWidget.DockWidgetFeature.DockWidgetFloatable
                 | QDockWidget.DockWidgetFeature.DockWidgetClosable
             )
+            self._dim_color = "#636d83"
             self._list = QListWidget()
             self._list.setStyleSheet("border: none; font-size: 12px;")
             self._list.itemActivated.connect(self._on_item)
             self.setWidget(self._list)
+
+        def set_dim_color(self, color: str) -> None:
+            self._dim_color = color
 
         def update_outline(self, text: str) -> None:
             self._list.clear()
@@ -1502,6 +1552,12 @@ if PYSIDE_AVAILABLE:
                 line = text[: m.start()].count("\n") + 1
                 symbols.append((line, "cls", m.group(1)))
             symbols.sort(key=lambda x: x[0])
+            if not symbols:
+                placeholder = QListWidgetItem("No functions or classes yet")
+                placeholder.setFlags(Qt.ItemFlag.NoItemFlags)
+                placeholder.setForeground(QBrush(QColor(self._dim_color)))
+                self._list.addItem(placeholder)
+                return
             for line, kind, name in symbols:
                 label = f"⚡ {name}()" if kind == "fn" else f"◈ {name}"
                 item = QListWidgetItem(label)
@@ -1597,6 +1653,31 @@ if PYSIDE_AVAILABLE:
     # ──────────────────────────────────────────────────────────────
     # Main window
     # ──────────────────────────────────────────────────────────────
+    _DIAG_LINE_RE = _re.compile(r"-->\s*(?P<file>[^:]+):(?P<line>\d+):(?P<col>\d+)")
+    _SYMBOL_RE = _re.compile(
+        r"^\s*(?:function|fn|func|fun|functi|f|functn)\s+([A-Za-z_\w]+)",
+        _re.MULTILINE,
+    )
+    _DECL_RE = _re.compile(
+        r"^\s*(?:const|var)\s+(?:const\s+|var\s+)*([A-Za-z_\w]+)\s*[=:]",
+        _re.MULTILINE,
+    )
+    _CLASS_DECL_RE = _re.compile(r"^\s*(?:class|className)\s+([A-Za-z_\w]+)", _re.MULTILINE)
+
+    def completion_words(text: str, extra: list[str] | None = None) -> list[str]:
+        """Identifiers offered by autocomplete: keywords, prelude, and locals."""
+        from gulfofmexico.builtin import KEYWORDS  # noqa: PLC0415
+
+        words: set[str] = set()
+        for name in KEYWORDS:
+            if name and not name.startswith("__"):
+                words.add(name)
+        words.update(_SYMBOL_RE.findall(text))
+        words.update(_DECL_RE.findall(text))
+        words.update(_CLASS_DECL_RE.findall(text))
+        words.update(extra or [])
+        return sorted(words)
+
     class MainWindow(QMainWindow):
         def __init__(self) -> None:
             super().__init__()
@@ -1716,6 +1797,13 @@ if PYSIDE_AVAILABLE:
             # ── Runtime state ───────────────────────────────────
             self.worker: Worker | None = None
             self.thread: QThread | None = None
+            self._run_started_at: float | None = None
+            self._scope_names: list[str] = []
+            self._stdin_text: str = ""
+            self._diag_timer = QTimer(self)
+            self._diag_timer.setSingleShot(True)
+            self._diag_timer.setInterval(350)
+            self._diag_timer.timeout.connect(self._recheck_active_editor)
 
             # ── Initial tab ────────────────────────────────────
             self._new_tab()
@@ -1764,6 +1852,12 @@ if PYSIDE_AVAILABLE:
             # Theme label
             self._status_theme.setText(self._current_theme_name)
 
+            # Empty-state text in the inspector docks
+            for dock in (self.var_inspector, self.outline_dock):
+                setter = getattr(dock, "set_dim_color", None)
+                if setter:
+                    setter(t.get("fg_dim", "#636d83"))
+
             # Toolbar visibility
             self._toolbar.setVisible(bool(self._settings.get("show_toolbar", True)))
 
@@ -1805,37 +1899,33 @@ if PYSIDE_AVAILABLE:
             ed = self._current_editor()
             if not ed or ed.toPlainText().strip() or (ed.property("path") or ""):
                 return
-            t = self._current_theme_name
             welcome = (
-                "// ╔═══════════════════════════════════════════════════════╗\n"
-                "// ║       Welcome to the Gulf of Mexico IDE              ║\n"
-                "// ╚═══════════════════════════════════════════════════════╝\n"
+                "// Gulf of Mexico — a language where arrays start at -1.\n"
                 "//\n"
-                "// An experimental language featuring:\n"
-                "//   • -1 based indexing\n"
-                "//   • Three-valued booleans (true / false / maybe)\n"
-                "//   • Significant whitespace for operator precedence\n"
-                "//   • No loops — recursion only\n"
-                "//   • Statement terminators: !  !!  !!!  ?\n"
-                "//   • Emoji identifiers  🎉\n"
+                "// Run the program below with F5.\n"
                 "//\n"
-                "// Shortcuts:\n"
-                "//   F5          Run code\n"
-                "//   Ctrl+N      New file\n"
-                "//   Ctrl+O      Open file\n"
-                "//   Ctrl+S      Save\n"
-                "//   Ctrl+,      Settings\n"
-                "//   Ctrl+=/-    Zoom in/out\n"
-                "//   Ctrl+F      Find\n"
-                "//   Ctrl+H      Find & Replace\n"
-                "//   Ctrl+/      Toggle comment\n"
+                "// Quick reference\n"
+                "//   Declarations   const const, const var, var const, var var\n"
+                "//   Terminators    !  !!  !!!  ?          (AEMI adds a missing !)\n"
+                "//   Truth values   true  false  maybe    (maybe is probabilistic)\n"
+                "//   Indexing       list[-1] is the first element\n"
+                "//   Equality       =   ==   ===   ====   (loosest to most precise)\n"
+                "//   Negation       ;value                (semicolon, not !)\n"
+                "//   Iteration      recursion — there are no loops\n"
                 "//\n"
-                f"// Theme: {t}\n"
-                "//\n\n"
+                "// Shortcuts\n"
+                "//   F5  run        Shift+F5  run with input   F6  stop\n"
+                "//   Ctrl+F  find   Ctrl+H  replace    Ctrl+/  comment   Ctrl+,  settings\n"
+                "//   Ctrl+Space  complete   F2  rename   Ctrl+Shift+O  symbol\n"
+                "//\n"
+                "// Examples live in the Explorer (examples/) and docs/ has the reference.\n"
+                "\n"
                 'print "Hello, Gulf of Mexico"!\n'
             )
             ed.setPlainText(welcome)
             ed.document().setModified(False)
+            self._update_window_title()
+            self.statusBar().showMessage("Ready — press F5 to run")
 
         # ── Tab management ────────────────────────────────────
 
@@ -1857,8 +1947,15 @@ if PYSIDE_AVAILABLE:
             completer.setCaseSensitivity(Qt.CaseSensitivity.CaseInsensitive)
             completer.setCompletionMode(QCompleter.CompletionMode.PopupCompletion)
             completer.setWidget(editor)
+            model = QStringListModel([], completer)
+            completer.setModel(model)
+            editor.setProperty("completer", completer)
+            editor.setProperty("completer_model", model)
 
             def _on_text() -> None:
+                if not bool(self._settings.get("auto_complete", True)):
+                    completer.popup().hide()
+                    return
                 cursor = editor.textCursor()
                 cursor.movePosition(cursor.MoveOperation.StartOfWord,
                                     cursor.MoveMode.KeepAnchor)
@@ -1866,6 +1963,7 @@ if PYSIDE_AVAILABLE:
                 if len(prefix) < 2:
                     completer.popup().hide()
                     return
+                model.setStringList(completion_words(editor.toPlainText(), self._scope_names))
                 completer.setCompletionPrefix(prefix)
                 if completer.completionCount() == 0:
                     completer.popup().hide()
@@ -1920,6 +2018,11 @@ if PYSIDE_AVAILABLE:
                 lambda: self._update_cursor_pos(editor)
             )
             editor.textChanged.connect(self._update_outline)
+            editor.textChanged.connect(lambda: self._diag_timer.start())
+            editor.textChanged.connect(lambda: editor.clear_diagnostic())
+
+            completion_shortcut = QShortcut(QKeySequence("Ctrl+Space"), editor)
+            completion_shortcut.activated.connect(self._trigger_completion)
 
         def _current_editor(self) -> CodeEditor | None:
             w = self.tabs.currentWidget()
@@ -1931,6 +2034,70 @@ if PYSIDE_AVAILABLE:
                 self._update_cursor_pos(ed)
                 self._update_zoom_label(ed)
                 self._update_outline()
+            self._update_window_title()
+
+        # ── Live diagnostics ──────────────────────────────────
+
+        def _recheck_active_editor(self) -> None:
+            """Parse the active buffer and underline the first error."""
+            ed = self._current_editor()
+            if ed is None:
+                return
+            from gulfofmexico.base import InterpretationError  # noqa: PLC0415
+            from gulfofmexico.processor.lexer import tokenize  # noqa: PLC0415
+            from gulfofmexico.processor.syntax_tree import (  # noqa: PLC0415
+                generate_syntax_tree,
+            )
+
+            code = ed.toPlainText()
+            if not code.strip():
+                ed.clear_diagnostic()
+                return
+            try:
+                tokens = tokenize("<editor>", code)
+                generate_syntax_tree("<editor>", tokens, code)
+            except InterpretationError as exc:
+                match = _DIAG_LINE_RE.search(str(exc))
+                if not match:
+                    ed.clear_diagnostic()
+                    return
+                message = str(exc).splitlines()[0]
+                ed.set_diagnostic(
+                    int(match.group("line")),
+                    int(match.group("col")),
+                    1,
+                    message.replace("error: ", ""),
+                )
+                return
+            except Exception:  # noqa: BLE001 - never break typing
+                ed.clear_diagnostic()
+                return
+            ed.clear_diagnostic()
+
+        def _update_scope_names(self, vars_json: str) -> None:
+            self._scope_names = []
+            if not vars_json:
+                return
+            try:
+                rows = json.loads(vars_json)
+            except (ValueError, TypeError):
+                return
+            if isinstance(rows, list):
+                self._scope_names = [
+                    str(row.get("name", "")) for row in rows
+                    if isinstance(row, dict) and row.get("name")
+                ]
+
+        def _update_window_title(self) -> None:
+            """Mirror the active tab in the window title (file · modified)."""
+            ed = self._current_editor()
+            if ed is None:
+                self.setWindowTitle("Gulf of Mexico IDE")
+                return
+            path = ed.property("path") or ""
+            name = Path(path).name if path else "untitled.gom"
+            marker = " •" if ed.document().isModified() else ""
+            self.setWindowTitle(f"{name}{marker} — Gulf of Mexico IDE")
 
         def _update_cursor_pos(self, ed: CodeEditor) -> None:
             if ed != self._current_editor():
@@ -2096,17 +2263,20 @@ if PYSIDE_AVAILABLE:
             if bool(self._settings.get("clear_console_on_run", True)):
                 self.console.clear()
             self.thread = QThread(self)
-            self.worker = Worker(code, str(path), timeout=timeout)
+            self.worker = Worker(
+                code, str(path), timeout=timeout, stdin_text=self._stdin_text
+            )
             self.worker.moveToThread(self.thread)
             self.thread.started.connect(self.worker.run)
             self.worker.finished.connect(self._run_done)
             self.worker.finished.connect(self.thread.quit)
             self.worker.finished.connect(self.worker.deleteLater)
             self.thread.finished.connect(self.thread.deleteLater)
-            self.statusBar().showMessage("⏳ Running…")
+            self._run_started_at = time.perf_counter()
+            self.statusBar().showMessage("Running…")
             self.thread.start()
 
-        def _run_done(self, out: str, err: str) -> None:
+        def _run_done(self, out: str, err: str, vars_json: str = "") -> None:
             t = self._theme
             ts = datetime.now().strftime("%H:%M:%S")
             header_color = t.get("fg_dim", "#636d83")
@@ -2122,12 +2292,18 @@ if PYSIDE_AVAILABLE:
                 )
             if err:
                 self.console.append(_format_error_html(err, self._theme))
-            self.statusBar().showMessage("✓ Ready")
+            elapsed = ""
+            if self._run_started_at is not None:
+                elapsed = f" · {int((time.perf_counter() - self._run_started_at) * 1000)} ms"
+                self._run_started_at = None
+            self.var_inspector.update_variables_json(vars_json)
+            self._update_scope_names(vars_json)
+            self.statusBar().showMessage(("Ready" if not err else "Ready (with errors)") + elapsed)
 
         def _stop_current(self) -> None:
             if self.worker:
                 self.worker.kill()
-                self.statusBar().showMessage("■ Stopped")
+                self.statusBar().showMessage("Stopped")
 
         def run_current(self) -> None:
             self._run_current()
@@ -2140,7 +2316,14 @@ if PYSIDE_AVAILABLE:
                 return
             path = ed.property("path") or "untitled.gom"
             name = Path(path).name
+            # A leading dot marks unsaved changes on the tab itself; the
+            # window title carries the same signal for the active tab.
             self.tabs.setTabText(idx, ("● " + name) if modified else name)
+            self.tabs.setTabToolTip(
+                idx,
+                f"{path}{'  (unsaved changes)' if modified else ''}",
+            )
+            self._update_window_title()
 
         # ── Toolbar ───────────────────────────────────────────
 
@@ -2170,7 +2353,7 @@ if PYSIDE_AVAILABLE:
             )
             tb.addWidget(run_btn)
 
-            stop_btn = _tb_btn("  ■ Stop  ", "Stop Execution  (Shift+F5)", self._stop_current, "stopButton")
+            stop_btn = _tb_btn("  ■ Stop  ", "Stop Execution  (F6)", self._stop_current, "stopButton")
             stop_btn.setStyleSheet(
                 f"QToolButton {{ background: {self._theme['error']}; color: #fff; "
                 f"font-weight: bold; border-radius: 6px; padding: 6px 16px; border: none; }}"
@@ -2256,6 +2439,10 @@ if PYSIDE_AVAILABLE:
             em.addSeparator()
             self._add_action(em, "Go to Line…",    "Ctrl+G",       self._goto_line)
             em.addSeparator()
+            self._add_action(em, "Find in Files…",   "Ctrl+Shift+F", self._find_in_files)
+            self._add_action(em, "Go to Symbol…",    "Ctrl+Shift+O", self._go_to_symbol)
+            self._add_action(em, "Rename Symbol…",   "F2",           self._rename_symbol)
+            em.addSeparator()
             self._add_action(em, "Command Palette…", "Ctrl+Shift+P", self._open_command_palette)
 
             # ── View ──
@@ -2298,15 +2485,113 @@ if PYSIDE_AVAILABLE:
 
             # ── Run ──
             rm = mb.addMenu("Run")
-            self._add_action(rm, "Run",           "F5",       self._run_current)
-            self._add_action(rm, "Stop",          "Shift+F5", self._stop_current)
+            self._add_action(rm, "Run",              "F5",       self._run_current)
+            self._add_action(rm, "Stop",             "F6",       self._stop_current)
+            self._add_action(rm, "Run with Input…",  "Shift+F5", self._run_with_input)
             rm.addSeparator()
-            self._add_action(rm, "Clear Console", "Ctrl+L",   self._clear_console)
+            self._add_action(rm, "Clear Console",    "Ctrl+L",   self._clear_console)
 
             # ── Help ──
             hm = mb.addMenu("Help")
             self._add_action(hm, "Keyboard Shortcuts", "", self._show_shortcuts)
             self._add_action(hm, "About",              "", self._show_about)
+
+        # ── Program input, search, symbols, rename ────────────────────
+
+        def _run_with_input(self) -> None:
+            """Run the active file, feeding the text as standard input."""
+            text, ok = QInputDialog.getMultiLineText(
+                self,
+                "Run with Input",
+                "Standard input passed to the program (one line per read):",
+                self._stdin_text,
+            )
+            if not ok:
+                return
+            self._stdin_text = text
+            self._run_current()
+
+        def _go_to_symbol(self) -> None:
+            ed = self._current_editor()
+            if ed is None:
+                return
+            symbols = sorted(
+                set(_SYMBOL_RE.findall(ed.toPlainText()))
+                | set(_CLASS_DECL_RE.findall(ed.toPlainText()))
+            )
+            if not symbols:
+                QMessageBox.information(self, "Go to Symbol", "No functions or classes in this file.")
+                return
+            name, ok = QInputDialog.getItem(
+                self, "Go to Symbol", "Symbol:", symbols, 0, False
+            )
+            if not ok or not name:
+                return
+            pattern = _re.compile(rf"\b{_re.escape(name)}\b")
+            match = pattern.search(ed.toPlainText())
+            if match:
+                self._goto_line_number(ed.toPlainText()[: match.start()].count("\n") + 1)
+
+        def _find_in_files(self) -> None:
+            query, ok = QInputDialog.getText(self, "Find in Files", "Search for:")
+            if not ok or not query:
+                return
+            root = Path(self.explorer_dock.current_root())
+            hits: list[str] = []
+            for path in sorted(root.rglob("*.gom")):
+                try:
+                    text = path.read_text(encoding="utf-8", errors="replace")
+                except OSError:
+                    continue
+                for number, line in enumerate(text.splitlines(), start=1):
+                    if query in line:
+                        relative = path.relative_to(root)
+                        hits.append(f"{relative}:{number}: {line.strip()[:120]}")
+            self.console.append(
+                f"<span style='font-size:10px;'>Find in Files: {len(hits)} match(es)"
+                f" for '{_html_escape(query)}'</span>"
+            )
+            for hit in hits[:200]:
+                self.console.append(f"<pre style='margin:0'>{_html_escape(hit)}</pre>")
+            self._console_dock.show()
+
+        def _rename_symbol(self) -> None:
+            ed = self._current_editor()
+            if ed is None:
+                return
+            cursor = ed.textCursor()
+            cursor.select(cursor.SelectionType.WordUnderCursor)
+            current = cursor.selectedText()
+            if not current:
+                QMessageBox.information(self, "Rename", "Put the cursor on a name first.")
+                return
+            new_name, ok = QInputDialog.getText(self, "Rename", f"Rename '{current}' to:")
+            if not ok or not new_name or new_name == current:
+                return
+            text = ed.toPlainText()
+            updated, count = _re.subn(rf"\b{_re.escape(current)}\b", new_name, text)
+            if count == 0:
+                return
+            position = ed.textCursor().position()
+            ed.setPlainText(updated)
+            restored = ed.textCursor()
+            restored.setPosition(min(position, len(updated)))
+            ed.setTextCursor(restored)
+            self.statusBar().showMessage(f"Renamed {count} occurrence(s)", 4000)
+
+        def _trigger_completion(self) -> None:
+            ed = self._current_editor()
+            if ed is None:
+                return
+            completer = ed.property("completer")
+            model = ed.property("completer_model")
+            if completer is None or model is None:
+                return
+            model.setStringList(completion_words(ed.toPlainText(), self._scope_names))
+            completer.setCompletionPrefix("")
+            rect = ed.cursorRect()
+            rect.setWidth(completer.popup().sizeHintForColumn(0) + 24)
+            completer.complete(rect)
 
         def _add_action(self, menu, text, shortcut, slot) -> QAction:
             act = QAction(text, self)
@@ -2440,7 +2725,7 @@ if PYSIDE_AVAILABLE:
         def _open_command_palette(self) -> None:
             commands = [
                 ("Run Code",             "F5",           self._run_current),
-                ("Stop Execution",       "Shift+F5",     self._stop_current),
+                ("Stop Execution",       "F6",           self._stop_current),
                 ("New File",             "Ctrl+N",       lambda: self._new_tab()),
                 ("Open File…",           "Ctrl+O",       self._open_file),
                 ("Save",                 "Ctrl+S",       self._save_file),
@@ -2448,6 +2733,11 @@ if PYSIDE_AVAILABLE:
                 ("Find…",                "Ctrl+F",       self.find_bar.show_find),
                 ("Find & Replace…",      "Ctrl+H",       self.find_bar.show_replace),
                 ("Go to Line…",          "Ctrl+G",       self._goto_line),
+                ("Go to Symbol…",        "Ctrl+Shift+O", self._go_to_symbol),
+                ("Find in Files…",       "Ctrl+Shift+F", self._find_in_files),
+                ("Rename Symbol…",       "F2",           self._rename_symbol),
+                ("Run with Input…",      "Shift+F5",     self._run_with_input),
+                ("Complete",             "Ctrl+Space",   self._trigger_completion),
                 ("Toggle Comment",       "Ctrl+/",       self._toggle_comment),
                 ("Duplicate Line",       "Ctrl+D",       self._duplicate_line),
                 ("Zoom In",              "Ctrl+=",       self._zoom_in),
@@ -2624,14 +2914,19 @@ if PYSIDE_AVAILABLE:
                 "<h3>Keyboard Shortcuts</h3>"
                 "<table cellpadding='4'>"
                 "<tr><td><b>F5</b></td><td>Run code</td></tr>"
-                "<tr><td><b>Shift+F5</b></td><td>Stop execution</td></tr>"
+                "<tr><td><b>Shift+F5</b></td><td>Run with program input</td></tr>"
+                "<tr><td><b>F6</b></td><td>Stop execution</td></tr>"
                 "<tr><td><b>Ctrl+N</b></td><td>New file</td></tr>"
                 "<tr><td><b>Ctrl+O</b></td><td>Open file</td></tr>"
                 "<tr><td><b>Ctrl+S</b></td><td>Save</td></tr>"
                 "<tr><td><b>Ctrl+Shift+S</b></td><td>Save As</td></tr>"
                 "<tr><td><b>Ctrl+,</b></td><td>Settings</td></tr>"
                 "<tr><td><b>Ctrl+F</b></td><td>Find</td></tr>"
-                "<tr><td><b>Ctrl+H</b></td><td>Find & Replace</td></tr>"
+                "<tr><td><b>Ctrl+H</b></td><td>Find &amp; Replace</td></tr>"
+                "<tr><td><b>Ctrl+Shift+F</b></td><td>Find in files</td></tr>"
+                "<tr><td><b>Ctrl+Shift+O</b></td><td>Go to symbol</td></tr>"
+                "<tr><td><b>F2</b></td><td>Rename symbol</td></tr>"
+                "<tr><td><b>Ctrl+Space</b></td><td>Complete</td></tr>"
                 "<tr><td><b>Ctrl+/</b></td><td>Toggle comment</td></tr>"
                 "<tr><td><b>Ctrl+G</b></td><td>Go to line</td></tr>"
                 "<tr><td><b>Ctrl+D</b></td><td>Duplicate line</td></tr>"
@@ -2779,12 +3074,39 @@ def _get_qt_version() -> str:
 # Entry point
 # ══════════════════════════════════════════════════════════════════════
 
+def _install_quiet_qt_logging() -> None:
+    """Filter harmless Qt warnings that would otherwise spam the terminal.
+
+    Qt emits one ``duplicate unique style id`` line per SVG when the icon theme
+    is loaded, which buries any real diagnostic.
+    """
+
+    def handler(mode, context, message) -> None:  # noqa: ANN001 - Qt signature
+        if "duplicate unique style id" in message.lower():
+            return
+        if mode in (
+            QtMsgType.QtDebugMsg,
+            QtMsgType.QtInfoMsg,
+            QtMsgType.QtWarningMsg,
+            QtMsgType.QtCriticalMsg,
+            QtMsgType.QtFatalMsg,
+        ):
+            print(message, file=sys.stderr)
+
+    try:
+        from PySide6.QtCore import qInstallMessageHandler, QtMsgType  # noqa: PLC0415
+    except ImportError:  # pragma: no cover - PyQt5 or no Qt
+        return
+    qInstallMessageHandler(handler)
+
+
 def run(open_files: list[str] | None = None, run_on_open: bool = False) -> None:
     if not PYSIDE_AVAILABLE:
         raise RuntimeError(
             "PySide6 is not installed.  Install with 'pip install PySide6' "
             "or enable the optional extra: poetry install -E ide."
         )
+    _install_quiet_qt_logging()
     app = QApplication.instance() or QApplication([])
     app.setApplicationName("Gulf of Mexico IDE")
     win = MainWindow()

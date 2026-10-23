@@ -18,6 +18,8 @@ from __future__ import annotations
 
 from gulfofmexico.ide.qt_compat import (
     QColor,
+    QTextCharFormat,
+    QTextCursor,
     QFont,
     QPainter,
     QPlainTextEdit,
@@ -144,9 +146,59 @@ class CodeEditor(QPlainTextEdit):
         self.updateRequest.connect(self.update_line_number_area)
         self.cursorPositionChanged.connect(self._on_cursor_changed)
         self.update_line_number_area_width(0)
+
+        # Live diagnostics (populated by the parse-on-type timer)
+        self._diagnostic: tuple[int, int, int, str] | None = None
+        self._diagnostic_selections_cache: list = []
+
         self._highlight_current_line()
 
         self.setAcceptDrops(True)
+
+    # ── Diagnostics ───────────────────────────────────────────────────
+
+    def set_diagnostic(self, line: int, column: int, length: int, message: str) -> None:
+        """Underline a span with a squiggle and show *message* as a tooltip."""
+        self._diagnostic = (line, column, length, message)
+        self.setToolTip(message)
+        self._refresh_diagnostic_selections()
+
+    def clear_diagnostic(self) -> None:
+        if self._diagnostic is None:
+            return
+        self._diagnostic = None
+        self.setToolTip("")
+        self._refresh_diagnostic_selections()
+
+    def _refresh_diagnostic_selections(self) -> None:
+        self._diagnostic_selections_cache = self._diagnostic_selections("")
+        self._highlight_current_line()
+
+    def diagnostic_message(self) -> str:
+        return self._diagnostic[3] if self._diagnostic else ""
+
+    def _diagnostic_selections(self, _text: str) -> list:  # noqa: ARG002
+        selections = []
+        if self._diagnostic is None:
+            return selections
+        line, column, length, _message = self._diagnostic
+        block = self.document().findBlockByNumber(max(0, line - 1))
+        if not block.isValid():
+            return selections
+        start = block.position() + max(0, column - 1)
+        span = max(1, length)
+        cursor = QTextCursor(self.document())
+        cursor.setPosition(min(start, block.position() + max(0, len(block.text()) - 1)))
+        cursor.setPosition(min(start + span, block.position() + len(block.text())),
+                           QTextCursor.MoveMode.KeepAnchor)
+        fmt = QTextCharFormat()
+        fmt.setUnderlineStyle(QTextCharFormat.UnderlineStyle.WaveUnderline)
+        fmt.setUnderlineColor(QColor(self._theme.get("error", "#e06c75")))
+        selection = QTextEdit.ExtraSelection()
+        selection.cursor = cursor
+        selection.format = fmt
+        selections.append(selection)
+        return selections
 
     # ── Public configuration ──────────────────────────────────────────
 
@@ -349,6 +401,7 @@ class CodeEditor(QPlainTextEdit):
             if self._bracket_matching:
                 extra.extend(self._bracket_match_selections())
 
+        extra.extend(self._diagnostic_selections_cache)
         self.setExtraSelections(extra)
 
     def _bracket_match_selections(self) -> list:

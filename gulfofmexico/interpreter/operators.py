@@ -191,6 +191,17 @@ def is_equal(left: GulfOfMexicoValue, right: GulfOfMexicoValue) -> GulfOfMexicoB
             return GulfOfMexicoBoolean(left == right)
 
 
+def is_loose_equal(left: GulfOfMexicoValue, right: GulfOfMexicoValue) -> GulfOfMexicoBoolean:
+    """Loose equality (``==``): like JavaScript's ``==``.
+
+    Values of the same type are compared normally. Values of different types
+    are coerced to strings and compared, so ``3.14 == "3.14"`` is true.
+    """
+    if isinstance(left, type(right)):
+        return is_equal(left, right)
+    return GulfOfMexicoBoolean(db_to_string(left).value == db_to_string(right).value)
+
+
 def is_really_equal(left: GulfOfMexicoValue, right: GulfOfMexicoValue) -> GulfOfMexicoBoolean:
     """Really equal — checks identity for mutable objects."""
     if not isinstance(left, type(right)):
@@ -410,8 +421,8 @@ def perform_two_value_operation(
 
         case OperatorType.EE | OperatorType.NE:
             if operator == OperatorType.EE:
-                return is_equal(left, right)
-            return db_not(is_equal(left, right))
+                return is_loose_equal(left, right)
+            return db_not(is_loose_equal(left, right))
 
         case OperatorType.EEE | OperatorType.NEE:
             if operator == OperatorType.EEE:

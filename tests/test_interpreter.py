@@ -698,10 +698,11 @@ class TestBuiltins:
 # =========================================================================
 
 class TestErrors:
-    def test_missing_terminator(self):
-        """A statement without !/? is a parse error."""
+    def test_missing_terminator_is_auto_inserted(self):
+        """AEMI: a statement without !/? gets one inserted automatically."""
         result = run_gom("print 42")
-        assert result.returncode != 0
+        assert result.returncode == 0
+        assert result.stdout.strip() == "42"
 
     def test_undefined_variable(self):
         """Using an undefined variable prints undefined but doesn't crash."""
@@ -848,9 +849,9 @@ class TestBaseTypes:
 # =========================================================================
 
 class TestOperatorEdgeCases:
-    def test_equal_spacing_right_to_left(self):
-        """Equal spacing picks leftmost operator as root (right-to-left evaluation)."""
-        assert_output("const r = 2 * 1 + 3! print r!", "8")
+    def test_equal_spacing_uses_operator_precedence(self):
+        """Equal spacing falls back to normal precedence (multiplication first)."""
+        assert_output("const r = 2 * 1 + 3! print r!", "5")
 
     def test_list_addition(self):
         assert_output("const r = [1, 2] + [3, 4]! print r!", "[1, 2, 3, 4]")
@@ -868,10 +869,23 @@ class TestOperatorEdgeCases:
 class TestImportTariff:
     def test_import_removes_at_most_one_statement(self):
         """Import tariff should remove at most one statement."""
-        # This is a statistical test; we just verify the logic path exists
-        # and doesn't crash. Full behavior is probabilistic.
-        from gulfofmexico.builtin import BUILTIN_FUNCTION_KEYWORDS
-        # This test ensures the import tariff only removes at most one statement. No placeholder assertion needed.
+        # The tariff is probabilistic, so assert the structural property that
+        # always holds: the import succeeds and the importing section never
+        # loses more than one statement.
+        code = (
+            "===== utils =====\n"
+            "const PI = 3.14!\n"
+            "export PI to main!\n"
+            "===== main =====\n"
+            "import PI from utils!\n"
+            'print "A"!\n'
+            'print "B"!\n'
+            'print "C"!\n'
+        )
+        result = run_gom(code)
+        assert result.returncode == 0, result.stderr
+        printed = [line for line in result.stdout.splitlines() if line in {"A", "B", "C"}]
+        assert len(printed) >= 2
 
     def test_import_tariff_removes_first_future_statement_when_forced(self):
         code = (

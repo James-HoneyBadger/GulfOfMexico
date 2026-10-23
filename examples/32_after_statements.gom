@@ -3,6 +3,8 @@
 // ╚═══════════════════════════════════════════════════════════════╝
 //
 // `after N { ... }` schedules a block to run after an N-millisecond delay.
+// It does NOT block: the rest of the program keeps running, and scheduled
+// blocks fire in deadline order once their delay has elapsed.
 
 print "starting"!
 
@@ -13,7 +15,9 @@ after 10 {
 
 print "finished"!
 
-// Delays can vary; smaller numbers run sooner:
+// Delays can vary; the shorter delay fires first:
 after 5 {
    print "quick follow-up"!
 }
+
+// Output: starting, finished, quick follow-up, ran after the delay

@@ -16,7 +16,15 @@ if __name__ == "__main__":
     import argparse
     import os
 
+    from gulfofmexico.ui import VERSION
+
     parser = argparse.ArgumentParser(description="Gulf of Mexico IDE")
+    parser.add_argument(
+        "-V",
+        "--version",
+        action="version",
+        version=f"gom-ide {VERSION}",
+    )
     parser.add_argument(
         "-o",
         "--open",

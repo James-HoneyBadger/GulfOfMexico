@@ -35,15 +35,15 @@ artifacts/
 validation_results.txt
 validate_run_output.txt
 
-# Type checking / linting caches
+# Type checking / linting / coverage caches
 .mypy_cache/
 .ruff_cache/
+.coverage
+.coverage.*
+htmlcov/
 
 # Local CMake build artifacts
 compiler/build/
-# Poetry
-poetry.lock
-
 # Secrets
 secrets.txt
 *.key

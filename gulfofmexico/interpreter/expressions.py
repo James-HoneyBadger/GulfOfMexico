@@ -27,10 +27,12 @@ from gulfofmexico.base import (
 )
 from gulfofmexico.builtin import (
     BuiltinFunction,
+    GulfOfMexicoBoolean,
     GulfOfMexicoFunction,
     GulfOfMexicoIndexable,
     GulfOfMexicoKeyword,
     GulfOfMexicoList,
+    GulfOfMexicoMap,
     GulfOfMexicoNamespaceable,
     GulfOfMexicoNumber,
     GulfOfMexicoObject,
@@ -51,6 +53,9 @@ from gulfofmexico.processor.expression_tree import (
     FunctionNode,
     IndexNode,
     ListNode,
+    MapLiteralNode,
+    MemberAccessNode,
+    MethodCallNode,
     SingleOperatorNode,
     ValueNode,
     build_expression_tree,
@@ -137,6 +142,10 @@ def evaluate_normal_function(
     from .execution import interpret_code_statements  # noqa: PLC0415
 
     if isinstance(func, BuiltinFunction):
+        # Read-only methods ("abc".upper()) carry their receiver instead of
+        # receiving it as a mutation target.
+        if func.receiver is not None:
+            args = [func.receiver] + list(args)  # type: ignore[list-item]
         if func.arg_count > len(args):
             raise_error_at_token(
                 ctx.filename, ctx.code,
@@ -187,13 +196,14 @@ def evaluate_normal_function(
 
         # Enforce single-instance class constraint per spec
         if isinstance(result, GulfOfMexicoObject) and result.class_name:
-            if ctx.class_instance_counts.get(result.class_name, 0) >= 1:
+            class_key = result.class_id or result.class_name
+            if ctx.class_instance_counts.get(class_key, 0) >= 1:
                 raise_error_at_token(
                     ctx.filename, ctx.code,
                     f"Error: Can't have more than one '{result.class_name}' instance!",
                     expr.name,
                 )
-            ctx.class_instance_counts[result.class_name] = ctx.class_instance_counts.get(result.class_name, 0) + 1
+            ctx.class_instance_counts[class_key] = ctx.class_instance_counts.get(class_key, 0) + 1
 
         return result
 
@@ -323,13 +333,22 @@ def interpret_formatted_string(
                 elif string_value[j] == "}":
                     brace_count -= 1
                 j += 1
+            content = string_value[i + 1 : j - 1]
             if brace_count == 0 and j < len(string_value) and string_value[j] == "€":
-                expr_str = string_value[i + 1 : j - 1].replace("$", ".")
+                expr_str = content.replace("$", ".")
                 tokens = db_tokenize(ctx.filename, expr_str)
                 expr_tree = build_expression_tree(ctx.filename, tokens, ctx.code)
                 value = evaluate_expression(expr_tree, namespaces, async_statements, when_statement_watchers, ctx)
                 result += db_to_string(value).value
                 i = j + len("€")
+            elif brace_count == 0 and "$" in content:
+                # Cape Verdean escudo notation: {player$name} == player.name
+                expr_str = content.replace("$", ".")
+                tokens = db_tokenize(ctx.filename, expr_str)
+                expr_tree = build_expression_tree(ctx.filename, tokens, ctx.code)
+                value = evaluate_expression(expr_tree, namespaces, async_statements, when_statement_watchers, ctx)
+                result += db_to_string(value).value
+                i = j
             else:
                 result += string_value[i]
                 i += 1
@@ -344,8 +363,37 @@ def interpret_formatted_string(
 # Main expression evaluator
 # ---------------------------------------------------------------------------
 
-def evaluate_expression(
-    expr: Union[list[Token], ExpressionTreeNode],
+def _lookup_member(
+    receiver: GulfOfMexicoValue, name: str, token: Token, ctx: InterpreterContext
+) -> GulfOfMexicoValue:
+    """Resolve ``name`` on *receiver* (method, property, or map entry)."""
+    if isinstance(receiver, GulfOfMexicoNamespaceable) and name in receiver.namespace:
+        entry = receiver.namespace[name]
+        return entry.value if isinstance(entry, (Name, Variable)) else entry
+    if isinstance(receiver, GulfOfMexicoMap) and name in receiver.self_dict:
+        return receiver.self_dict[name]
+    raise_error_at_token(
+        ctx.filename, ctx.code,
+        f"'{type(receiver).__name__.replace('GulfOfMexico', '')}' has no member '{name}'",
+        token,
+    )
+
+
+def _same_literal(left: ExpressionTreeNode, right: ExpressionTreeNode) -> bool:
+    """Whether two operands are the very same literal expression.
+
+    DreamBerd's ``====`` operator is "even more precise" than ``===``:
+    ``pi ==== pi`` and ``3.14 ==== 3.14`` are true, but ``3.14 ==== pi`` is
+    false even though both hold the same number. Comparing the source
+    literal rather than the runtime value reproduces that behaviour.
+    """
+    if not isinstance(left, ValueNode) or not isinstance(right, ValueNode):
+        return False
+    l_tok, r_tok = left.name_or_value, right.name_or_value
+    return l_tok.type == r_tok.type and l_tok.value == r_tok.value
+
+
+def evaluate_expression(    expr: Union[list[Token], ExpressionTreeNode],
     namespaces: list[dict[str, Union[Variable, Name]]],
     async_statements: AsyncStatements,
     when_statement_watchers: WhenStatementWatchers,
@@ -389,21 +437,21 @@ def _evaluate_expression_impl(
 
             force_execute_sync = False
 
-            if isinstance(func.value, GulfOfMexicoKeyword):
+            if isinstance(func.value, GulfOfMexicoKeyword) and func.value.value == "await":
                 # await keyword
-                if func.value.value == "await":
-                    if len(expr.args) != 1:
-                        raise_error_at_token(ctx.filename, ctx.code, "Expected only one argument for await function.", expr.name)
-                    if not isinstance(expr.args[0], FunctionNode):
-                        raise_error_at_token(ctx.filename, ctx.code, "Expected argument of await function to be a function call.", expr.name)
-                    force_execute_sync = True
-                    expr = expr.args[0]
-                    func = get_name_from_namespaces(expr.name.value, namespaces)
-                    if func is None:
-                        raise_error_at_token(ctx.filename, ctx.code, "Cannot find token in namespaces.", expr.name)
+                if len(expr.args) != 1:
+                    raise_error_at_token(ctx.filename, ctx.code, "Expected only one argument for await function.", expr.name)
+                if not isinstance(expr.args[0], FunctionNode):
+                    raise_error_at_token(ctx.filename, ctx.code, "Expected argument of await function to be a function call.", expr.name)
+                force_execute_sync = True
+                expr = expr.args[0]
+                func = get_name_from_namespaces(expr.name.value, namespaces)
+                if func is None:
+                    raise_error_at_token(ctx.filename, ctx.code, "Cannot find token in namespaces.", expr.name)
 
+            if isinstance(func.value, GulfOfMexicoKeyword):
                 # previous keyword
-                elif isinstance(func.value, GulfOfMexicoKeyword) and func.value.value == "previous":
+                if func.value.value == "previous":
                     if len(expr.args) != 1:
                         raise_error_at_token(ctx.filename, ctx.code, "Expected only one argument for previous function.", expr.name)
                     if not isinstance(expr.args[0], ValueNode):
@@ -416,7 +464,7 @@ def _evaluate_expression_impl(
                     return val.prev_values[-1]
 
                 # next keyword
-                elif isinstance(func.value, GulfOfMexicoKeyword) and func.value.value == "next":
+                if func.value.value == "next":
                     if len(expr.args) != 1:
                         raise_error_at_token(ctx.filename, ctx.code, "Expected only one argument for next function.", expr.name)
                     if not isinstance(expr.args[0], ValueNode):
@@ -508,6 +556,15 @@ def _evaluate_expression_impl(
                 [evaluate_expression(x, namespaces, async_statements, when_statement_watchers, ctx) for x in expr.values]
             )
 
+        # ----- Map/object literals -----
+        case MapLiteralNode():
+            return GulfOfMexicoMap(
+                {
+                    key: evaluate_expression(value, namespaces, async_statements, when_statement_watchers, ctx)
+                    for key, value in expr.pairs
+                }
+            )
+
         # ----- Value nodes -----
         case ValueNode():
             if expr.name_or_value.type == TokenType.STRING:
@@ -516,6 +573,45 @@ def _evaluate_expression_impl(
                 # process_escape_sequences(); no second pass needed.
                 return retval
             return get_value_from_namespaces(expr.name_or_value, namespaces, ctx)
+
+        # ----- Method call on a value ("a,b".split(",")) -----
+        case MethodCallNode():
+            receiver = evaluate_expression(
+                expr.receiver, namespaces, async_statements, when_statement_watchers, ctx
+            )
+            member = _lookup_member(receiver, expr.name.value, expr.name, ctx)
+            args = [
+                evaluate_expression(arg, namespaces, async_statements, when_statement_watchers, ctx)
+                for arg in expr.args
+            ]
+            if isinstance(member, BuiltinFunction):
+                if member.receiver is not None or member.modifies_caller:
+                    args = [receiver] + args
+                if member.arg_count > len(args):
+                    raise_error_at_token(
+                        ctx.filename, ctx.code,
+                        f"Expected {member.arg_count} argument"
+                        f"{'s' if member.arg_count != 1 else ''} for "
+                        f"'{expr.name.value}', got {len(args)}.",
+                        expr.name,
+                    )
+                result = member.function(*args)
+                return result if result is not None else GulfOfMexicoUndefined()
+            if isinstance(member, GulfOfMexicoFunction):
+                return evaluate_normal_function(
+                    FunctionNode(expr.name, []), member, namespaces, args,
+                    when_statement_watchers, ctx,
+                )
+            raise_error_at_token(
+                ctx.filename, ctx.code, f"'{expr.name.value}' is not callable", expr.name
+            )
+
+        # ----- Property access on a value ("abc".length) -----
+        case MemberAccessNode():
+            receiver = evaluate_expression(
+                expr.receiver, namespaces, async_statements, when_statement_watchers, ctx
+            )
+            return _lookup_member(receiver, expr.name.value, expr.name, ctx)
 
         # ----- Index access -----
         case IndexNode():
@@ -527,6 +623,8 @@ def _evaluate_expression_impl(
 
         # ----- Binary expressions -----
         case ExpressionNode():
+            if expr.operator == OperatorType.EEEE and _same_literal(expr.left, expr.right):
+                return GulfOfMexicoBoolean(True)
             left = evaluate_expression(expr.left, namespaces, async_statements, when_statement_watchers, ctx)
             if db_to_boolean(left).value is True and expr.operator == OperatorType.OR:
                 return left

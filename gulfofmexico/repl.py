@@ -31,7 +31,7 @@ from gulfofmexico.interpreter.persistence import (
     load_globals,
     load_public_global_variables,
 )
-from gulfofmexico.base import InterpretationError
+from gulfofmexico.base import InterpretationError, configure_recursion_limit
 from gulfofmexico.builtin import (
     KEYWORDS,
     GulfOfMexicoUndefined,
@@ -39,11 +39,43 @@ from gulfofmexico.builtin import (
     Name,
     Variable,
 )
+from gulfofmexico.prelude import load_prelude
 from gulfofmexico.processor.lexer import tokenize
 from gulfofmexico.processor.syntax_tree import generate_syntax_tree
+from gulfofmexico.ui import (
+    VERSION,
+    color_enabled,
+    heading,
+    paint,
+    print_error,
+    print_info,
+    print_success,
+    rule,
+    table,
+)
 
-PRIMARY_PROMPT = "gom> "
-CONT_PROMPT = " ...> "
+_PRIMARY_TEXT = "gom> "
+_CONT_TEXT = " ...> "
+
+_PROMPT_COLORS = {"cyan": 36, "grey": 90}
+
+
+def _styled_prompt(text: str, color: str) -> str:
+    """Wrap *text* in colour, marking escapes as non-printing for readline."""
+    if not color_enabled(sys.stdout):
+        return text
+    code = _PROMPT_COLORS[color]
+    return "\x01\033[" + str(code) + "m\x02" + text + "\x01\033[0m\x02"
+
+
+def primary_prompt() -> str:
+    return _styled_prompt(_PRIMARY_TEXT, "cyan")
+
+
+def continuation_prompt() -> str:
+    return _styled_prompt(_CONT_TEXT, "grey")
+
+
 REPL_FILENAME = "__repl__"
 HISTORY_FILE = os.path.expanduser("~/.gom_history")
 HISTORY_MAX_LINES = 1000
@@ -119,7 +151,7 @@ class GomRepl:
         # Interpreter context for the REPL session
         self.ctx = InterpreterContext(filename=REPL_FILENAME, code="")
 
-        sys.setrecursionlimit(100000)
+        configure_recursion_limit()
 
         # Load global, public, and runtime globals into namespaces
         exported_names: list[tuple[str, str, GulfOfMexicoValue]] = []
@@ -133,9 +165,32 @@ class GomRepl:
         )
         load_global_gulfofmexico_variables(self.namespaces)
         load_public_global_variables(self.namespaces)
+        load_prelude(self.namespaces, self.ctx)
 
     def banner(self) -> str:
-        return "Gulf of Mexico REPL (production interpreter)\n" "Type :help for commands, :quit to exit."
+        """The REPL greeting: product banner plus a short cheat sheet."""
+        width = 72
+        lines = [
+            "",
+            paint("Gulf of Mexico", "bold", "bright_cyan"),
+            paint(f"v{VERSION}  ·  interactive session", "dim"),
+            rule(width, "─"),
+            paint("  -1-based indexing   three-valued booleans   no loops", "dim"),
+            paint("  End statements with !   Use ; for NOT   Type ? to inspect", "dim"),
+            rule(width, "─"),
+            table(
+                [
+                    (":help", "show all commands"),
+                    (":vars", "inspect current variables"),
+                    (":load <file>", "run a .gom file"),
+                    (":reset", "clear all state"),
+                    (":quit", "leave the session"),
+                ],
+                indent=2,
+            ),
+            "",
+        ]
+        return "\n".join(lines)
 
     def _setup_readline(self) -> None:
         """Enable line editing, persistent history, and tab completion.
@@ -210,7 +265,7 @@ class GomRepl:
         Returns None on EOF (Ctrl-D).
         """
         lines: list[str] = []
-        prompt = PRIMARY_PROMPT
+        prompt = primary_prompt()
         # If we have a prefilled buffer (from :open), seed it into the editor
         if self.prefill_lines:
             # Show a small notice and the prefilled content
@@ -219,12 +274,22 @@ class GomRepl:
                 print(line_text)
             lines = self.prefill_lines.copy()
             self.prefill_lines.clear()
-            prompt = CONT_PROMPT
+            prompt = continuation_prompt()
         while True:
             try:
                 line = input(prompt)
             except EOFError:
                 return None
+            except KeyboardInterrupt:
+                # Ctrl+C abandons the current block but keeps the session.
+                print()
+                if lines:
+                    print_info("input cleared - press Ctrl+D to exit")
+                    lines = []
+                    prompt = primary_prompt()
+                else:
+                    print_info("press Ctrl+D or :quit to exit")
+                continue
             # Meta-commands handled only when first and as a single block
             if not lines and line.strip().startswith(":"):
                 return line.strip()
@@ -251,58 +316,83 @@ class GomRepl:
                 ends_with_open = stripped.rstrip().endswith(("{", ",", ":"))
                 missing_punct = not stripped.rstrip().endswith(("!", "?", "}", ")", "]"))
                 if open_braces > 0 or ends_with_open or missing_punct:
-                    prompt = CONT_PROMPT
+                    prompt = continuation_prompt()
                     continue
-                # Otherwise, show error and reset buffer
-                print(f"\x1b[31m{e}\x1b[0m")
+                # Otherwise, show the diagnostic and reset the buffer
+                print(e, file=sys.stderr)
                 return ""
 
     def _cmd_help(self) -> None:
+        width = 72
+        print()
+        print(heading("Commands", width=width))
         print(
-            "\n".join(
+            table(
                 [
-                    ":help              Show this help",
-                    ":quit | :q         Exit the REPL",
-                    ":reset             Reset all REPL state",
-                    ":load <file>       Load and execute a .gom file",
-                    ":vars              List current variables",
-                    ":history [n]       Show history (list or full block n)",
-                    ":save <file> [all|last|<n>]  Save history (default: all)",
-                    ":open <file>       Prefill next input with file contents",
-                    ":run [n|last]      Re-execute a history block",
-                    "                   (no arg = last)",
-                    ":clip [last|<n>]   Copy block to clipboard if available",
-                ]
+                    (":help", "Show this help"),
+                    (":quit, :q", "Exit the REPL"),
+                    (":reset", "Reset all REPL state"),
+                    (":vars", "List current variables"),
+                    (":load <file>", "Load and execute a .gom file"),
+                    (":open <file>", "Stage a file as the next input"),
+                    (":history [n]", "List history, or show block n"),
+                    (":run [n|last]", "Re-execute a history block"),
+                    (":save <file> [all|last|<n>]", "Save history to a file"),
+                    (":clip [last|<n>]", "Copy a block to the clipboard"),
+                ],
+                indent=2,
             )
         )
+        print()
+        print(heading("Writing code", width=width))
+        print(
+            table(
+                [
+                    ("print \"hi\"!", "Print (parentheses optional)"),
+                    ("const x = 1!", "Declare; use var to allow reassignment"),
+                    ("if cond { ... }", "Blocks indent by exactly 3 spaces"),
+                    ("function f(a) => a + 1!", "Functions return an expression"),
+                    ("2 * 1+3", "Tighter spacing binds first (prints 8)"),
+                    ("?", "Inspect the value of a statement"),
+                ],
+                indent=2,
+            )
+        )
+        print()
 
     def _cmd_reset(self) -> None:
         self.namespaces = [KEYWORDS.copy()]  # type: ignore
         self.async_statements = []
         self.when_statement_watchers = [{}]
         self.importable_names.clear()
-        print("State reset.")
+        print_info("state reset - all variables and watchers cleared")
 
     def _cmd_vars(self) -> None:
         top = self.namespaces[-1] if self.namespaces else {}
         vars_only = {k: v for k, v in top.items() if isinstance(v, Variable)}
         if not vars_only:
-            print("<no variables>")
+            print_info("no variables defined yet")
             return
-        for k, v in vars_only.items():
-            # Variable may wrap a value; best-effort display
-            current = v.value.value if hasattr(v.value, "value") else v.value
-            print(f"{k} = {current}")
+        rows = []
+        for name, var in vars_only.items():
+            value = var.value
+            rendered = builtin.db_to_string(value).value
+            if len(rendered) > 48:
+                rendered = rendered[:45] + "..."
+            rows.append((name, type(value).__name__.removeprefix("GulfOfMexico"), rendered))
+        print()
+        print(table(rows, header=("name", "type", "value"), indent=2))
+        print()
 
     def _cmd_load(self, path: str) -> None:
         file = Path(path).expanduser()
         if not file.exists():
-            print(f"No such file: {file}")
+            print_error(f"no such file: {file}")
             return
         try:
             code = file.read_text(encoding="utf-8")
         except OSError as e:
-            print(f"Failed to read {file}: {e}")
+            print_error(f"cannot read {file}: {e}")
             return
         # Support multi-file sections using ===== markers (same as run_file)
         code_lines = code.splitlines(keepends=True)
@@ -341,7 +431,7 @@ class GomRepl:
                     ctx,
                 )
             except InterpretationError as e:
-                print(f"\x1b[31m{e}\x1b[0m")
+                print(e, file=sys.stderr)
                 any_error = True
                 break
 
@@ -354,8 +444,7 @@ class GomRepl:
         # Record load command in history (avoid dumping entire file into history)
         self.history.append(f":load {str(file)}")
         if not any_error:
-            # Optionally provide a small ack
-            pass
+            print_success(f"loaded {file} ({len(files)} section(s))")
 
     def _dispatch_command(self, cmd: str) -> bool:
         """
@@ -378,24 +467,24 @@ class GomRepl:
             return True
         if op == ":load":
             if len(parts) < 2:
-                print("Usage: :load <file>")
+                print_info("usage: :load <file>")
                 return True
             self._cmd_load(" ".join(parts[1:]))
             return True
         if op == ":history":
             if not self.history:
-                print("<empty history>")
+                print_info("history is empty")
                 return True
             # :history [n] → show full block n or list if no n
             if len(parts) >= 2:
                 try:
                     idx = int(parts[1])
                     if idx <= 0 or idx > len(self.history):
-                        print(f"No history entry {idx}.")
+                        print_error(f"no history entry {idx}")
                         return True
                     print(self.history[idx - 1])
                 except ValueError:
-                    print("Usage: :history [n]")
+                    print_info("usage: :history [n]")
                 return True
             for i, block in enumerate(self.history, start=1):
                 first = block.splitlines()[0] if block.strip() else ""
@@ -405,7 +494,7 @@ class GomRepl:
         if op == ":save":
             # :save <file> [all|last|<n>]
             if len(parts) < 2:
-                print("Usage: :save <file> [all|last|<n>]")
+                print_info("usage: :save <file> [all|last|<n>]")
                 return True
             target = parts[1]
             mode = parts[2] if len(parts) >= 3 else "all"
@@ -422,34 +511,34 @@ class GomRepl:
                         return True
                     content = self.history[idx - 1]
                 Path(target).expanduser().write_text(content, encoding="utf-8")
-                print(f"Saved to {target}")
+                print_success(f"saved to {target}")
             except ValueError:
                 print("Usage: :save <file> [all|last|<n>]")
             except OSError as e:
-                print(f"Failed to save to {target}: {e}")
+                print_error(f"cannot save {target}: {e}")
             return True
         if op == ":open":
             if len(parts) < 2:
-                print("Usage: :open <file>")
+                print_info("usage: :open <file>")
                 return True
             file = Path(" ".join(parts[1:])).expanduser()
             if not file.exists():
-                print(f"No such file: {file}")
+                print_error(f"no such file: {file}")
                 return True
             try:
                 content = file.read_text(encoding="utf-8")
             except OSError as e:
-                print(f"Failed to read {file}: {e}")
+                print_error(f"cannot read {file}: {e}")
                 return True
             # Stage for next input; do not execute now
             self.prefill_lines = content.splitlines()
-            print(f"Staged {len(self.prefill_lines)} line(s) for next input.")
+            print_info(f"staged {len(self.prefill_lines)} line(s) as the next input")
             return True
         if op == ":run":
             try:
                 if len(parts) < 2:
                     if not self.history:
-                        print("<empty history>")
+                        print_info("history is empty")
                         return True
                     idx = len(self.history)
                 elif parts[1] == "last":
@@ -462,12 +551,12 @@ class GomRepl:
                 code = self.history[idx - 1]
                 self._execute(code, filename=REPL_FILENAME)
             except ValueError:
-                print("Usage: :run [n|last]")
+                print_info("usage: :run [n|last]")
             return True
         if op == ":clip":
             # :clip [last|<n>] → copy block to clipboard if possible
             if not self.history:
-                print("<empty history>")
+                print_info("history is empty")
                 return True
             mode = parts[1] if len(parts) >= 2 else "last"
             try:
@@ -480,15 +569,15 @@ class GomRepl:
                         return True
                     content = self.history[n - 1]
             except ValueError:
-                print("Usage: :clip [last|<n>]")
+                print_info("usage: :clip [last|<n>]")
                 return True
             if self._copy_to_clipboard(content):
-                print("Copied to clipboard.")
+                print_success("copied to clipboard")
             else:
-                msg = "Clipboard not available. Printed block below; " + "copy manually:\n"
+                msg = "clipboard unavailable - copy the block below manually:\n"
                 print(msg + content)
             return True
-        print(f"Unknown command: {op}. Try :help")
+        print_error(f"unknown command: {op}", hint="type :help for the command list")
         return True
 
     def _execute(self, code: str, *, filename: Optional[str] = None) -> None:
@@ -514,12 +603,9 @@ class GomRepl:
                 ctx,
             )
         except InterpretationError as e:
-            # Flush any buffered debug logs to assist troubleshooting
-            try:
-                builtin.flush_debug_logs()
-            except Exception:
-                pass
-            print(f"\x1b[31m{e}\x1b[0m")
+            # The diagnostic explains the problem; keep stderr free of the
+            # buffered print trail.
+            print(e, file=sys.stderr)
             return
         except Exception:
             # Unexpected exception: flush debug logs and re-raise to show
@@ -538,8 +624,7 @@ class GomRepl:
 
         # Only print meaningful results (suppress implicit 'undefined')
         if result is not None and not isinstance(result, GulfOfMexicoUndefined):
-            # Best-effort print of result
-            print(result)
+            print(builtin.db_to_string(result).value)
 
         # Record successful block in history
         self.history.append(code)
@@ -551,11 +636,12 @@ class GomRepl:
             while True:
                 block = self._read_multiline()
                 if block is None:
-                    # EOF
-                    print()
+                    # EOF (Ctrl+D)
+                    print(paint("bye.", "dim"))
                     return
                 if block.startswith(":"):
                     if not self._dispatch_command(block):
+                        print(paint("bye.", "dim"))
                         return
                     continue
                 self._execute(block)

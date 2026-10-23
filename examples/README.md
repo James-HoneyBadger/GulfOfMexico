@@ -1,97 +1,111 @@
-# Gulf of Mexico — Example Programs
+# Example Programs
 
-A comprehensive demo suite covering every feature of the GOM language. Each program runs independently and exits cleanly.
+Forty-nine self-contained programs that walk through the Gulf of Mexico
+language from first output to full algorithms. Every file runs on its own and
+exits cleanly, so they double as a regression suite for the interpreter.
 
-Run any example:
 ```bash
-python -m gulfofmexico examples/01_hello_world.gom
+gom examples/01_hello_world.gom
+gom examples/23_algorithms.gom
 ```
 
-## Programs
+> Run them all at once with `pytest tests/test_examples.py`.
 
-| # | File | Features Covered |
-|---|------|-----------------|
-| 01 | `01_hello_world.gom` | `print`, statement terminators (`!`, `!!`, `!!!`) |
-| 02 | `02_variables.gom` | `const`, `var`, reassignment, `previous`, type annotations |
-| 03 | `03_types.gom` | Numbers, strings, booleans, lists, `undefined`, type conversion |
-| 04 | `04_operators.gom` | Arithmetic, significant whitespace precedence, unary minus, `++`/`--` |
-| 05 | `05_tiered_equality.gom` | `=`/`==`/`===`/`====`, `;=` (inequality), `~=`/`~==`/`~===` (AEMI/ABI/AQMI) |
-| 06 | `06_comparison_and_logic.gom` | `>`/`<`/`>=`/`<=`, `&` (AND), `\|` (OR), `;` (NOT), three-valued logic |
-| 07 | `07_control_flow.gom` | `if` blocks, recursion (no loops), sequential conditionals |
-| 08 | `08_functions.gom` | `function`/`fn`, space call syntax, higher-order, multiple returns |
-| 09 | `09_strings.gom` | String interpolation (`$`/`£`/`¥`), `.length`, reversal, indexing |
-| 10 | `10_lists.gom` | -1-based indexing, `.push()`/`.pop()`/`.length`, concatenation, reversal |
-| 11 | `11_maps.gom` | `Map()`, bracket notation, read/update |
-| 12 | `12_classes.gom` | `class`, `new`, single-instance rule, properties, methods |
-| 13 | `13_word_numbers.gom` | `zero`–`nineteen`, `twenty()`–`million()`, `half`/`third`/`quarter` |
-| 14 | `14_number_indexing.gom` | Digit indexing on numbers with -1-based indices |
-| 15 | `15_lifetimes.gom` | `<N>` variable lifetimes, `<-N>` negative lifetime hoisting |
-| 16 | `16_delete_and_confidence.gom` | `delete`, confidence overloading (`!`/`!!`/`!!!`), `?` debug |
-| 17 | `17_compound_assignment.gom` | `+=`, `-=`, `*=`, `/=`, `^=` |
-| 18 | `18_emoji_identifiers.gom` | Emoji variable names, emoji function names |
-| 19 | `19_reactive.gom` | `when` watchers, `reverse`, `use` signals |
-| 20 | `20_math_builtins.gom` | `abs`, `floor`, `ceil`, `round`, `sqrt`, `sin`/`cos`/`tan`, `log`, `exp`, `pow`, `min`/`max`, `degrees`/`radians` |
-| 21 | `21_negative_indentation.gom` | Cosmetic leading `}` (DreamBerd spec) |
-| 22 | `22_async_and_redefinition.gom` | `async` functions, number literal redefinition |
-| 23 | `23_algorithms.gom` | Fibonacci, recursive power, list sum, GCD |
-| 24 | `24_comments.gom` | `//` single-line, `/* */` block comments |
-| 25 | `25_regex.gom` | `regex_match`, `regex_findall`, `regex_replace` |
-| 26 | `26_noop_and_misc.gom` | `noop`, empty value `()`, string multiply, boolean conversion |
-| 27 | `27_escape_sequences.gom` | `\n`, `\t`, `\\`, `\"` and other string escape sequences |
-| 28 | `28_three_valued_logic.gom` | `true`/`false`/`maybe`, logic over the third value |
-| 29 | `29_recursion_patterns.gom` | Countdown, accumulation, and mutual recursion |
-| 30 | `30_currency_interpolation.gom` | `$`/`£`/`¥`/`€` interpolation prefixes |
-| 31 | `31_next_promises.gom` | `next`, deferred values, promise-like sequencing |
-| 32 | `32_after_statements.gom` | `after N { }` scheduled blocks |
-| 33 | `33_confidence_levels.gom` | `!`/`!!`/`!!!` confidence and `?` debug terminator |
-| 34 | `34_output_formatting.gom` | Printing values, interpolation, and formatting |
-| 35 | `35_random_numbers.gom` | `random`, `randomInt`, coin-flip simulation |
-| 36 | `36_sleep_and_timing.gom` | Blocking `after` delays and scheduled ticks |
-| 37 | `37_multifile_sections.gom` | `export`/`import` named sections |
-| 38 | `38_persistent_constants.gom` | `const const const` immutable constants |
-| 39 | `39_list_algorithms.gom` | Recursive sum, max, linear search, reversal |
-| 40 | `40_map_frequency.gom` | Frequency counting with `Map()` |
-| 41 | `41_factorial_combinatorics.gom` | Factorial, permutations, combinations |
-| 42 | `42_string_processing.gom` | Length, reversal, palindrome check, regex |
-| 43 | `43_stack_queue.gom` | Stack (push/pop) and queue (front access) |
-| 44 | `44_nested_data_structures.gom` | Lists of lists, maps of lists, lists of maps |
-| 45 | `45_guessing_game.gom` | Self-playing simulation with `when` watchers |
-| 46 | `46_reactive_monitor.gom` | Threshold alerts via reactive `when` watchers |
-| 47 | `47_type_annotations.gom` | `Int`/`Number`/`String`/`Bool`/`List` annotations |
-| 48 | `48_unicode_and_emoji.gom` | Unicode and emoji in identifiers and strings |
+## Start here
 
-## Feature Coverage
+| # | Program | What it teaches |
+|---|---------|-----------------|
+| 01 | [`01_hello_world.gom`](01_hello_world.gom) | `print` and statement terminators (`!`, `!!`, `!!!`) |
+| 02 | [`02_variables.gom`](02_variables.gom) | `const`, `var`, reassignment, `previous`, type annotations |
+| 03 | [`03_types.gom`](03_types.gom) | Numbers, strings, booleans, lists, `undefined`, conversions |
+| 04 | [`04_operators.gom`](04_operators.gom) | Arithmetic and significant-whitespace precedence |
 
-These 48 programs collectively demonstrate:
-- All 4 statement terminators
-- All 8 data types
-- All arithmetic, comparison, and logical operators
-- Tiered equality (4 levels + 3 tilde variants)
-- Significant whitespace operator precedence
-- Three-valued boolean logic
-- -1-based indexing (lists, strings, numbers)
-- Variable lifetimes and negative lifetime hoisting
-- Variable confidence overloading
-- Compound assignment operators
-- Emoji identifiers
-- Negative indentation
-- Async functions and number redefinition
-- Recursive algorithms (no loops)
-- Classes with single-instance rule
-- Reactive primitives (when, reverse, use)
-- Word numbers and named fractions
-- String interpolation with 3 currency symbols
-- 17 math built-in functions
-- Regular expressions
-- Comments (single-line and block)
-- Type conversions
-- Delete
-- Noop and empty value
-- String escape sequences
-- Enforced type annotations (`Int`, `Number`, `String`, `Bool`, `List`, `Map`)
-- Deferred values with `next` and scheduled `after` blocks
-- Random number generation
-- Named-section `export`/`import`
-- Recursive list and map algorithms
-- Stacks, queues, and nested data structures
-- Reactive threshold monitoring with `when`
+## Language fundamentals
+
+| # | Program | What it teaches |
+|---|---------|-----------------|
+| 05 | [`05_tiered_equality.gom`](05_tiered_equality.gom) | `=` `==` `===` `====`, `;=`, and the `~` AEMI/ABI/AQMI operators |
+| 06 | [`06_comparison_and_logic.gom`](06_comparison_and_logic.gom) | `>` `<` `>=` `<=`, `&`, `\|`, `;`, three-valued logic |
+| 07 | [`07_control_flow.gom`](07_control_flow.gom) | `if` blocks and recursion instead of loops |
+| 08 | [`08_functions.gom`](08_functions.gom) | Function declarations, space-call syntax, higher-order use |
+| 09 | [`09_strings.gom`](09_strings.gom) | Interpolation, `.length`, reversal, `-1`-based indexing |
+| 10 | [`10_lists.gom`](10_lists.gom) | `-1`-based indexing, `push`/`pop`, concatenation, reversal |
+| 11 | [`11_maps.gom`](11_maps.gom) | `Map()`, bracket access, updates |
+| 12 | [`12_classes.gom`](12_classes.gom) | `class`, `new`, the single-instance rule, methods |
+| 13 | [`13_word_numbers.gom`](13_word_numbers.gom) | `zero`–`nineteen`, `twenty()`, `hundred()`, `half` |
+| 14 | [`14_number_indexing.gom`](14_number_indexing.gom) | Digits of a number are indexable |
+| 15 | [`15_lifetimes.gom`](15_lifetimes.gom) | `<N>` lives for N statements, `<-N>` hoists backwards |
+| 16 | [`16_delete_and_confidence.gom`](16_delete_and_confidence.gom) | `delete`, `!`-priority overloading, `?` inspection |
+| 17 | [`17_compound_assignment.gom`](17_compound_assignment.gom) | `+=` `-=` `*=` `/=` `^=` |
+| 18 | [`18_emoji_identifiers.gom`](18_emoji_identifiers.gom) | Emoji names for variables and functions |
+| 19 | [`19_reactive.gom`](19_reactive.gom) | `when` watchers, `reverse`, `use` signals |
+| 20 | [`20_math_builtins.gom`](20_math_builtins.gom) | The 17 math built-ins |
+| 21 | [`21_negative_indentation.gom`](21_negative_indentation.gom) | Cosmetic leading `}` |
+| 22 | [`22_async_and_redefinition.gom`](22_async_and_redefinition.gom) | `async` functions and redefining number literals |
+| 24 | [`24_comments.gom`](24_comments.gom) | `//` and `/* */` comments |
+| 25 | [`25_regex.gom`](25_regex.gom) | `regex_match`, `regex_findall`, `regex_replace` |
+| 26 | [`26_noop_and_misc.gom`](26_noop_and_misc.gom) | `noop`, the empty value `()`, boolean conversion |
+
+## Strings, numbers, and values
+
+| # | Program | What it teaches |
+|---|---------|-----------------|
+| 27 | [`27_escape_sequences.gom`](27_escape_sequences.gom) | `\n`, `\t`, `\\`, `\"` and friends |
+| 28 | [`28_three_valued_logic.gom`](28_three_valued_logic.gom) | Reasoning about the third truth value |
+| 30 | [`30_currency_interpolation.gom`](30_currency_interpolation.gom) | `$` `£` `¥` `€` interpolation forms |
+| 33 | [`33_confidence_levels.gom`](33_confidence_levels.gom) | Confidence terminators and `?` |
+| 34 | [`34_output_formatting.gom`](34_output_formatting.gom) | Printing values and interpolation |
+| 35 | [`35_random_numbers.gom`](35_random_numbers.gom) | `random`, `randomInt`, simulated coin flips |
+| 48 | [`48_unicode_and_emoji.gom`](48_unicode_and_emoji.gom) | Unicode inside identifiers and strings |
+
+## Control flow and time
+
+| # | Program | What it teaches |
+|---|---------|-----------------|
+| 29 | [`29_recursion_patterns.gom`](29_recursion_patterns.gom) | Countdown, accumulation, mutual recursion |
+| 31 | [`31_next_promises.gom`](31_next_promises.gom) | `next` and deferred values |
+| 32 | [`32_after_statements.gom`](32_after_statements.gom) | `after N { … }` scheduled blocks |
+| 36 | [`36_sleep_and_timing.gom`](36_sleep_and_timing.gom) | Blocking delays and scheduled ticks |
+| 45 | [`45_guessing_game.gom`](45_guessing_game.gom) | A self-playing simulation driven by `when` |
+| 46 | [`46_reactive_monitor.gom`](46_reactive_monitor.gom) | Threshold alerts with reactive `when` |
+
+## Programs and data
+
+| # | Program | What it teaches |
+|---|---------|-----------------|
+| 23 | [`23_algorithms.gom`](23_algorithms.gom) | Fibonacci, recursive power, list sum, GCD |
+| 37 | [`37_multifile_sections.gom`](37_multifile_sections.gom) | `=====` sections with `export`/`import` |
+| 38 | [`38_persistent_constants.gom`](38_persistent_constants.gom) | `const const const` values that outlive a run |
+| 39 | [`39_list_algorithms.gom`](39_list_algorithms.gom) | Recursive sum, max, search, reversal |
+| 40 | [`40_map_frequency.gom`](40_map_frequency.gom) | Frequency counting with `Map()` |
+| 41 | [`41_factorial_combinatorics.gom`](41_factorial_combinatorics.gom) | Factorials, permutations, combinations |
+| 42 | [`42_string_processing.gom`](42_string_processing.gom) | Length, reversal, palindromes, regex |
+| 43 | [`43_stack_queue.gom`](43_stack_queue.gom) | Stack and queue implementations |
+| 44 | [`44_nested_data_structures.gom`](44_nested_data_structures.gom) | Lists of lists, maps of lists, lists of maps |
+| 47 | [`47_type_annotations.gom`](47_type_annotations.gom) | `Int`, `Number`, `String`, `Bool`, `List` |
+
+## Spec conformance
+
+| # | Program | What it teaches |
+|---|---------|-----------------|
+| 49 | [`49_dreamb_spec.gom`](49_dreamb_spec.gom) | Examples lifted from the upstream specification: the four declaration forms, arbitrary quoting, parentheses-as-whitespace, loose/precise/literal equality, object literals, Cape Verdean interpolation, signals, and automatic insertion (AEMI/ABI/AQMI) |
+
+## Feature coverage
+
+Across the 49 programs, every documented language feature appears at least once:
+
+- **Syntax** — all four terminators, automatic insertion, comments, 3-space
+  indentation, negative indentation, significant whitespace, parentheses
+- **Declarations** — `const const`, `const var`, `var const`, `var var`,
+  `const const const`, lifetimes, hoisting, confidence overloading, `delete`
+- **Types** — numbers, strings, booleans (`true`/`false`/`maybe`), lists, maps,
+  object literals, functions, classes, `undefined`, `noop`, the empty value
+- **Operators** — arithmetic, unary minus/reversal, comparison, logical
+  operators, four equality tiers, three tilde operators, `;=`, compound
+  assignment, postfix `++`/`--`
+- **Text** — arbitrary quote counts, escape sequences, regex, five currency
+  interpolation forms including `{obj$prop}`
+- **Flow** — `if`, recursion, `async`, `after`, `when`, `reverse`, `next`,
+  `use` signals, `export`/`import` across named sections
+- **Libraries** — 17 math built-ins, word numbers and fractions, type
+  conversions, file I/O, random numbers

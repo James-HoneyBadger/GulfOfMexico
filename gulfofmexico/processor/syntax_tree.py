@@ -34,7 +34,6 @@ from dataclasses import dataclass
 from typing import Optional, Union
 
 from gulfofmexico.base import (
-    STR_TO_OPERATOR,
     Token,
     TokenType,
     raise_error_at_line,
@@ -313,7 +312,8 @@ def split_into_statements(tokens: list[Token]) -> list[list[Token]]:
     statements: list[list[Token]] = [[]]
     bracket_layers = 0
     square_bracket_layers = 0
-    for token in tokens:
+    paren_layers = 0
+    for token_index, token in enumerate(tokens):
         # check for expression-ending newlines
         if (
             token.type == TokenType.WHITESPACE and not statements[-1]
@@ -333,9 +333,27 @@ def split_into_statements(tokens: list[Token]) -> list[list[Token]]:
             square_bracket_layers += 1
         elif token.type == TokenType.R_SQUARE:
             square_bracket_layers -= 1
+        elif token.type == TokenType.L_PAREN:
+            paren_layers += 1
+        elif token.type == TokenType.R_PAREN:
+            paren_layers -= 1
 
         if (token.type in [TokenType.R_CURLY, TokenType.BANG, TokenType.QUESTION]
-                and bracket_layers == 0 and square_bracket_layers == 0):
+                and bracket_layers == 0 and square_bracket_layers == 0 and paren_layers <= 0):
+            if token.type == TokenType.R_CURLY:
+                # A closing brace may end a map literal rather than a block;
+                # if a terminator follows, let that terminator end the
+                # statement instead so the brace stays with it.
+                nxt = next(
+                    (t for t in tokens[token_index + 1 :] if t.type != TokenType.WHITESPACE),
+                    None,
+                )
+                if nxt is not None and nxt.type in (
+                    TokenType.BANG,
+                    TokenType.QUESTION,
+                    TokenType.DOT,
+                ):
+                    continue
             while statements[-1][-1].type == TokenType.NEWLINE:  # remove newlines at the end of a statement
                 statements[-1].pop()
             statements.append([])
@@ -405,6 +423,14 @@ def extract_type_annotations(
 
 
 def remove_type_hints(filename: str, code: str, statements: list[list[Token]]) -> list[list[Token]]:
+    """Strip ``: Type`` annotations from declarations.
+
+    Annotations are documentation only, so everything between the colon and
+    the declaration's ``=`` is discarded. Generic annotations such as
+    ``RegExp<...>`` may contain operators, quotes, and even ``=`` signs, so
+    angle brackets are skipped with a depth counter instead of relying on
+    token types alone.
+    """
     new_statements = []
     for tokens in statements:
         new_tokens = []
@@ -416,7 +442,6 @@ def remove_type_hints(filename: str, code: str, statements: list[list[Token]]) -
         while curr < len(tokens):
             t = tokens[curr]
 
-            # handle brackets
             if t.type == TokenType.L_CURLY:
                 scope_layers += 1
             elif t.type == TokenType.R_CURLY:
@@ -426,32 +451,37 @@ def remove_type_hints(filename: str, code: str, statements: list[list[Token]]) -
             elif t.type == TokenType.R_SQUARE:
                 square_bracket_layers -= 1
 
-            # must be in the right place to consider removal
             if t.type == TokenType.COLON and scope_layers == 0:
                 adding_tokens = False
-                ref_square_bracket_layers = square_bracket_layers  # prob gonna be zero but idek imma just do this
+                ref_square_bracket_layers = square_bracket_layers
             if not adding_tokens:
-                # check if it is at an operator
-                if STR_TO_OPERATOR.get(t.value) and square_bracket_layers == ref_square_bracket_layers:
+                # Skip a generic annotation (Name<...>) as a unit so that
+                # operators or '=' inside it cannot end the annotation.
+                if t.type == TokenType.NAME and curr + 1 < len(tokens) and tokens[curr + 1].type == TokenType.LESS_THAN:
+                    depth = 0
+                    while curr + 1 < len(tokens):
+                        curr += 1
+                        nxt = tokens[curr]
+                        if nxt.type == TokenType.LESS_THAN:
+                            depth += 1
+                        elif nxt.type == TokenType.GREATER_THAN:
+                            depth -= 1
+                            if depth <= 0:
+                                break
+                        elif nxt.type == TokenType.EQUAL and nxt.value == "=":
+                            # Annotation is malformed/unbalanced; stop before
+                            # the declaration's assignment.
+                            curr -= 1
+                            break
+                elif (
+                    t.type == TokenType.EQUAL
+                    and t.value == "="
+                    and square_bracket_layers == ref_square_bracket_layers
+                ):
+                    # End of the annotation: the declaration's assignment.
                     adding_tokens = True
 
-                # adjust for Name<...> things, which also allows regex to pass too
-                elif (
-                    t.type == TokenType.NAME and curr + 1 < len(tokens) and tokens[curr + 1].type == TokenType.LESS_THAN
-                ):
-                    try:
-                        while tokens[curr + 1].type != TokenType.GREATER_THAN:
-                            curr += 1
-                        curr += 1
-                    except IndexError:
-                        raise_error_at_token(
-                            filename,
-                            code,
-                            "Something went wrong parsing type hints (a.k.a. removing them).",
-                            t,
-                        )
-
-            if adding_tokens:  # cannot be elif because adding_tokens can be modified in the previous statement
+            if adding_tokens:
                 new_tokens.append(t)
 
             curr += 1
@@ -536,8 +566,8 @@ def create_function_definition(
         elif token.type in {TokenType.FUNC_POINT, TokenType.L_CURLY}:
             # Stop when we hit the => or { that starts the function body
             break
-        elif token.type != TokenType.COMMA:
-            # If we hit something unexpected (not a comma), stop parsing
+        elif token.type not in {TokenType.COMMA, TokenType.L_PAREN, TokenType.R_PAREN}:
+            # If we hit something unexpected (not a comma/paren), stop parsing
             break
         i += 1
 
@@ -759,13 +789,20 @@ def create_unscoped_code_statement(
         op_type = _COMPOUND_TO_OP[compound_tok.value]
         op_char = compound_tok.value[0]
         name_tok = without_whitespace[0]
-        # Build synthetic expression tokens: <name> <SPACE> <OP> <SPACE> <rhs_tokens...>
+        # Build synthetic expression tokens: <lhs> <SPACE> <OP> <SPACE> <rhs_tokens...>
+        # The whole left-hand side is kept so that calls such as
+        # ``Date.now() -= 3600000`` desugar to ``Date.now() - 3600000``.
+        lhs_tokens = tokens[:compound_token_idx]
         rhs_tokens = tokens[compound_token_idx + 1 : -1]  # everything between OP= and terminator
-        synthetic_expr: list[Token] = [
-            Token(TokenType.NAME, name_tok.value, name_tok.line, name_tok.col),
-            Token(TokenType.WHITESPACE, " ", compound_tok.line, compound_tok.col),
-            Token(op_type, op_char, compound_tok.line, compound_tok.col),
-        ] + rhs_tokens
+        synthetic_expr: list[Token] = (
+            lhs_tokens
+            + [
+                Token(TokenType.WHITESPACE, " ", compound_tok.line, compound_tok.col),
+                Token(op_type, op_char, compound_tok.line, compound_tok.col),
+                Token(TokenType.WHITESPACE, " ", compound_tok.line, compound_tok.col),
+            ]
+            + rhs_tokens
+        )
         return (
             VariableAssignment(
                 name=name_tok,
@@ -775,6 +812,34 @@ def create_unscoped_code_statement(
                 confidence=confidence,
             ),
         )
+
+    # -- Postfix increment/decrement desugaring (x++!, x--!) --
+    postfix_idx = next(
+        (i for i, t in enumerate(tokens) if t.type in {TokenType.INCREMENT, TokenType.DECREMENT}),
+        -1,
+    )
+    if postfix_idx != -1:
+        after = [t for t in tokens[postfix_idx + 1 :] if t.type not in {TokenType.WHITESPACE, TokenType.NEWLINE, TokenType.BANG, TokenType.QUESTION}]
+        before = [t for t in tokens[:postfix_idx] if t.type not in {TokenType.WHITESPACE, TokenType.NEWLINE}]
+        if not after and len(before) == 1 and before[0].type == TokenType.NAME:
+            name_tok = before[0]
+            op_type = TokenType.ADD if tokens[postfix_idx].type == TokenType.INCREMENT else TokenType.SUBTRACT
+            synthetic: list[Token] = [
+                Token(TokenType.NAME, name_tok.value, name_tok.line, name_tok.col),
+                Token(TokenType.WHITESPACE, " ", name_tok.line, name_tok.col),
+                Token(op_type, "+" if op_type == TokenType.ADD else "-", name_tok.line, name_tok.col),
+                Token(TokenType.WHITESPACE, " ", name_tok.line, name_tok.col),
+                Token(TokenType.NAME, "1", name_tok.line, name_tok.col),
+            ]
+            return (
+                VariableAssignment(
+                    name=name_tok,
+                    expression=synthetic,
+                    debug=debug_level,
+                    indexes=[],
+                    confidence=confidence,
+                ),
+            )
 
     # export statement: export name, name, name to string/name!
     can_be_export = (
@@ -1028,7 +1093,37 @@ def generate_syntax_tree(filename: str, tokens: list[Token], code: str) -> list[
 
         try:
             # contains an open scope :)
-            if any(t.type == TokenType.L_CURLY for t in tokens):
+            first_curly = next(
+                (i for i, t in enumerate(tokens) if t.type == TokenType.L_CURLY),
+                -1,
+            )
+            # A brace is a map literal (not a code block) when it appears after
+            # "=" or inside parentheses/brackets, e.g. `const m = { a: 1 }!` or
+            # `print({ a: 1 }.keys())!`.
+            eq_index = next(
+                (i for i, t in enumerate(tokens) if t.type == TokenType.EQUAL and t.value == "="),
+                -1,
+            )
+            nested = False
+            depth = 0
+            for token in tokens[: max(first_curly, 0)]:
+                if token.type in (TokenType.L_PAREN, TokenType.L_SQUARE):
+                    depth += 1
+                elif token.type in (TokenType.R_PAREN, TokenType.R_SQUARE):
+                    depth -= 1
+            nested = depth > 0
+            map_literal = first_curly != -1 and (
+                nested
+                or (
+                    eq_index != -1
+                    and eq_index < first_curly
+                    and all(
+                        t.type == TokenType.WHITESPACE
+                        for t in tokens[eq_index + 1 : first_curly]
+                    )
+                )
+            )
+            if any(t.type == TokenType.L_CURLY for t in tokens) and not map_literal:
                 final_statements.append(
                     create_scoped_code_statement(filename, tokens, without_whitespace, code, type_annotation)
                 )

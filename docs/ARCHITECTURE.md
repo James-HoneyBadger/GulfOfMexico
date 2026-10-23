@@ -73,8 +73,13 @@ gulfofmexico/                     # Top-level package
 ├── __main__.py                   #   CLI entry point (argparse)
 ├── base.py                       #   Core types: Token, TokenType, OperatorType, errors
 ├── builtin.py                    #   All GOM value types, built-in functions, KEYWORDS dict
+├── py.typed                      #   PEP 561 marker: the package is typed
+├── prelude.py                    #   Standard helpers, written in GOM and loaded at startup
 ├── repl.py                       #   Interactive REPL with meta-commands
+├── sections.py                   #   ===== name ===== section splitting
 ├── serialize.py                  #   JSON-safe serialization/deserialization of GOM values
+├── tools.py                      #   Static tooling: --check and --fmt
+├── ui.py                         #   Terminal presentation: colour policy, diagnostics, tables
 │
 ├── processor/                    #   FRONT-END (source → AST)
 │   ├── __init__.py               #     Re-exports: tokenize, generate_syntax_tree
@@ -107,6 +112,49 @@ gulfofmexico/                     # Top-level package
 
 ---
 
+## Presentation: `ui.py`
+
+All terminal-facing output flows through `gulfofmexico/ui.py`, which keeps the
+CLI and REPL visually consistent and makes output safe to pipe:
+
+- **Colour policy** — `NO_COLOR`, `CLICOLOR`, `FORCE_COLOR`, `TERM=dumb`, and
+  TTY detection, resolved per stream. Diagnostics are plain text in CI.
+- **Diagnostics** — compiler-style `error:` / `warning:` / `info:` blocks with
+  `--> file:line:col`, a gutter, a caret under the offending token, and an
+  optional hint. `base.py` builds these from `Token` positions, so every
+  interpreter error shares one layout.
+- **Structure** — `banner()`, `heading()`, `rule()`, `table()`, `kv_block()`,
+  and `bullet_list()` for the REPL greeting, `:help`, and `:vars`.
+- **Version** — `VERSION` is read from installed package metadata so the CLI,
+  REPL banner, and `--version` never drift apart.
+
+---
+
+## Static Tooling: `tools.py`
+
+`gom --check` and `gom --fmt` are thin CLI front-ends over two pure functions,
+so both modes share the interpreter's own lexer and parser and can never drift
+from the language:
+
+- **`check_source(filename, code)`** splits `===== name =====` sections through
+  `sections.split_sections()` (the same helper `run_file()` uses), parses each
+  section, then *compiles* every alternative interpretation of every statement.
+  Parsing is lazy — an expression tree is normally built the first time a
+  statement runs — so compiling here surfaces errors that would otherwise only
+  appear mid-run. Non-`InterpretationError` failures from rejected
+  interpretations are ignored, which keeps the checker free of false alarms.
+- **`format_source(filename, code)`** normalises layout only: it remaps
+  distinct indentation widths to `0, 3, 6, …` spaces (order-preserving, so
+  block structure is unchanged), converts tabs, strips trailing whitespace,
+  collapses blank runs, and guarantees one final newline. Spacing inside a line
+  is never touched because it breaks operator-precedence ties, and lines inside
+  triple-quoted strings are located with the real tokenizer and copied
+  verbatim. The function is idempotent.
+
+`gom --check --fmt` combines the two into a formatting gate for CI.
+
+---
+
 ## Front-End: Processor Package
 
 The processor package converts source text into an abstract syntax tree. It has no runtime dependencies — it only imports from `base.py`.
@@ -116,11 +164,16 @@ The processor package converts source text into an abstract syntax tree. It has 
 Converts source code into a flat list of `Token` objects. Each token carries its type, value, line number, column, and the **amount of whitespace before it** (critical for significant-whitespace operator precedence).
 
 Key features:
-- Matched quote counting (number of opening quotes must equal closing quotes)
+- Arbitrary-length quote delimiters (the opening run length must equal the
+  closing run length, so single-, triple-, and quadruple-quoted strings all
+  work)
 - Single-line (`//`) and block (`/* */`) comments
-- Triple-quoted strings
+- Multi-line triple-quoted strings
 - Escape sequence processing
-- Parentheses-as-whitespace
+- Parenthesis/bracket tokens that the expression builder turns back into
+  grouping and argument lists (stray parens behave as whitespace)
+- Automatic insertion: AEMI (missing `!` at end of line), ABI (unclosed
+  brackets at end of line/file), AQMI (unterminated strings)
 - The empty value `()`
 - Inverted exclamation mark `¡`
 
@@ -131,11 +184,16 @@ Converts a token stream into a list of `CodeStatement` tuples. Each `CodeStateme
 Also defines all 13 statement AST node types (see [Statement Types](#statement-types)).
 
 Key features:
-- Statement splitting by `!`, `?`, and `}` terminators
+- Statement splitting by `!`, `?`, and `}` terminators (a `}` directly
+  followed by a terminator stays with its statement, which keeps map literals
+  intact)
 - Indentation validation (multiples of 3 spaces)
 - Scoped block parsing (curly braces)
+- Map/object literal routing (a brace directly after `=` is an expression)
+- Postfix `++`/`--` desugaring to assignments
 - Type annotation extraction and removal
-- Function definition parsing
+- Function definition parsing (including expression bodies and any
+  `function`-prefix keyword)
 
 ### `expression_tree.py` — Expression Tree Builder
 
@@ -145,8 +203,10 @@ Also defines all 6 expression node types (see [Expression Tree Nodes](#expressio
 
 Key features:
 - Whitespace-based operator precedence (wider spacing = lower precedence)
-- Function call detection via spacing heuristics
-- List literal parsing
+- Ties broken by conventional precedence (`2 + 2 === 5` parses as `(2 + 2) === 5`)
+- Parenthesised groups collapsed into single nodes before tree building
+- Function call detection via spacing heuristics and argument lists
+- List and map literal parsing
 - Index expression parsing
 - Unary operator handling
 
@@ -253,14 +313,37 @@ Key features:
 - Async-next blocking wait
 - Temporary namespace cleanup
 
-### `persistence.py` — File I/O
+### `persistence.py` — Persistent state
 
 Manages persistent variable storage on disk.
 
 Key features:
-- `const const const` immutable globals (saved/loaded via `pickle` in `~/.gulfofmexico_runtime/`)
+- `const const const` immutable globals, stored as JSON in
+  `$GOM_HOME/.gulfofmexico_runtime/store.json` (default `$HOME`). Writes are
+  atomic (temp file + `os.replace`), locked with `flock` around the whole
+  read-modify-write cycle, and the runtime directory is created `0700` with the
+  store `0600`.
+- A value codec that turns GOM values into JSON and back, because the generic
+  serializer cannot represent maps with non-string keys or namespaces. Maps
+  with string keys keep a plain JSON object; maps with numeric keys use a
+  `pairs` form so keys keep their type. Malformed payloads raise
+  `UnsupportedPersistedValue`, which callers treat as "skip this entry".
+- Damage is preserved, not destroyed: an unparseable store is renamed to
+  `store.json.corrupt` before a rebuild, and a store carrying a newer schema is
+  reported once and never overwritten.
+- Legacy pickle stores are never read silently: they are reported once, and
+  migrated with `GOM_ALLOW_LEGACY_PICKLE=1`. A `.inf_vars` index from early
+  versions is still readable, though nothing writes that format any more.
 - Infinite-lifetime variable persistence
 - GitHub-based public global variable loading (optional, requires `pygithub`)
+
+### `execution.py` — Scheduler
+
+`after` does not block. A scheduled block gets a deadline on
+`ctx.pending_after`, and the statement loop drains due blocks at statement
+boundaries (deadline order, FIFO for ties) and again, with `wait=True`, at
+program end. Temporal lifetimes are swept through `ctx.ticking_lifetimes`, so
+only variables that actually have a lifetime are checked per statement.
 
 ### `helpers.py` — Utilities
 
@@ -358,7 +441,8 @@ Optional graphical IDE built on PySide6 (with PyQt5 fallback).
 - Settings dialog with theme, font size, word wrap, line-number gutter, and execution options
 - 7 built-in themes: One Dark, Dracula, Nord, Solarized Dark, GitHub Light, Monokai, Catppuccin Mocha
 - Menus: File (new/open/save/recent), Edit (undo/redo/cut/copy/paste/find/replace/duplicate-line/go-to-line), View (zoom/panels/toolbar), Run (run/stop/clear console), Help
-- Complete keyboard shortcuts (Ctrl+N/O/S, F5, Shift+F5, Ctrl+G, Ctrl+D, Alt+↑↓, Ctrl+,, etc.)
+- Complete keyboard shortcuts (Ctrl+N/O/S, F5, Shift+F5, F6, Ctrl+G, Ctrl+D, Alt+↑↓, Ctrl+,, F2, Ctrl+Space, Ctrl+Shift+O/F, etc.)
+- Autocomplete, find-in-files, go-to-symbol, rename-symbol, run-with-input, and live diagnostics
 - Panel visibility synced bidirectionally between toolbar toggle buttons and View menu checkboxes
 - Dock layout persistence via `QMainWindow.saveState()` / `restoreState()` (base64-encoded in settings)
 - Session persistence (window geometry, open files, active tab, dock layout, active theme)
@@ -468,6 +552,7 @@ Defined in `processor/expression_tree.py`:
 | `FunctionNode` | Function call — function expr, argument exprs |
 | `IndexNode` | Index access — target expr, index expr |
 | `ListNode` | List literal — list of element exprs |
+| `MapLiteralNode` | Map/object literal — key/value expression pairs |
 
 ---
 

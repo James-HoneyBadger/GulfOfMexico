@@ -144,6 +144,53 @@ class IndexNode(ExpressionTreeNode):
         )
 
 
+class MethodCallNode(ExpressionTreeNode):
+    """A method call on a value that is not a plain name: ``"a,b".split(",")``."""
+
+    def __init__(self, receiver: ExpressionTreeNode, name: Token, args: list[ExpressionTreeNode]):
+        self.receiver = receiver
+        self.name = name
+        self.args = args
+
+    def to_string(self, tabs: int = 0) -> str:
+        return (
+            f"{'  ' * tabs}Method call: {self.name.value}\n"
+            f"{'  ' * (tabs + 1)}Receiver: \n{self.receiver.to_string(tabs + 2)}\n"
+            f"{'  ' * (tabs + 1)}Arguments: \n"
+            + "\n".join(arg.to_string(tabs + 2) for arg in self.args)
+        )
+
+
+class MemberAccessNode(ExpressionTreeNode):
+    """Property access on a value that is not a plain name: ``"abc".length``."""
+
+    def __init__(self, receiver: ExpressionTreeNode, name: Token):
+        self.receiver = receiver
+        self.name = name
+
+    def to_string(self, tabs: int = 0) -> str:
+        return (
+            f"{'  ' * tabs}Member: {self.name.value}\n"
+            f"{self.receiver.to_string(tabs + 1)}"
+        )
+
+
+class MapLiteralNode(ExpressionTreeNode):
+    """An object/map literal such as ``{ name: "Lu" }``."""
+
+    def __init__(self, pairs: list[tuple[str, ExpressionTreeNode]]):
+        self.pairs = pairs
+
+    def to_string(self, tabs: int = 0) -> str:
+        return (
+            f"{'  ' * tabs}Map: \n"
+            + "\n".join(
+                f"{'  ' * (tabs + 1)}{key}: \n{value.to_string(tabs + 2)}"
+                for key, value in self.pairs
+            )
+        )
+
+
 class ValueNode(ExpressionTreeNode):
     def __init__(self, name_or_value: Token):
         self.name_or_value = name_or_value
@@ -162,11 +209,219 @@ def get_expr_first_token(expr: ExpressionTreeNode) -> Optional[Token]:
             return expr.name
         case ListNode():
             return None if not expr.values else get_expr_first_token(expr.values[0])
+        case MapLiteralNode():
+            return None if not expr.pairs else get_expr_first_token(expr.pairs[0][1])
+        case MethodCallNode():
+            return get_expr_first_token(expr.receiver) or expr.name
+        case MemberAccessNode():
+            return get_expr_first_token(expr.receiver) or expr.name
         case ValueNode():
             return expr.name_or_value
         case IndexNode():
             return get_expr_first_token(expr.value) or get_expr_first_token(expr.index)
     return None
+
+
+def _blank_value_node(line: int, col: int) -> ValueNode:
+    """The value of () - a blank name that resolves to the empty value."""
+    return ValueNode(Token(TokenType.NAME, "", line, col))
+
+
+def _split_top_level_commas(tokens: list[Token]) -> list[list[Token]]:
+    """Split *tokens* on commas that are not nested in brackets or parens."""
+    parts: list[list[Token]] = [[]]
+    depth = 0
+    for token in tokens:
+        if token.type in (TokenType.L_PAREN, TokenType.L_SQUARE):
+            depth += 1
+        elif token.type in (TokenType.R_PAREN, TokenType.R_SQUARE):
+            depth = max(0, depth - 1)
+        if token.type == TokenType.COMMA and depth == 0:
+            parts.append([])
+        else:
+            parts[-1].append(token)
+    return parts
+
+
+def _match_parens(tokens: list[Token]) -> dict[int, int]:
+    """Map the index of each matched opening paren to its closing paren."""
+    stack: list[int] = []
+    matched: dict[int, int] = {}
+    for i, token in enumerate(tokens):
+        if token.type == TokenType.L_PAREN:
+            stack.append(i)
+        elif token.type == TokenType.R_PAREN and stack:
+            matched[stack.pop()] = i
+    return matched
+
+
+def _group_token(node: ExpressionTreeNode, source: Token, value: str = "(...)") -> Token:
+    return Token(TokenType.PAREN_GROUP, value, source.line, source.col, tree=node)
+
+
+def _normalise_new_empty_call(tokens: list[Token]) -> list[Token]:
+    """Turn ``new Class()`` into ``new Class``.
+
+    The empty-value tokenisation of ``()`` makes ``new Class()`` look like a
+    call to ``Class`` with a blank argument, which would try to call a class
+    object. Dropping the empty argument keeps the intended ``new`` behaviour.
+    """
+    meaningful = [i for i, t in enumerate(tokens) if t.type != TokenType.WHITESPACE]
+    if len(meaningful) < 3:
+        return tokens
+    new_idx, cls_idx, blank_idx = meaningful[-3], meaningful[-2], meaningful[-1]
+    if not (
+        tokens[new_idx].type == TokenType.NAME
+        and tokens[new_idx].value == "new"
+        and tokens[cls_idx].type == TokenType.NAME
+        and tokens[blank_idx].type == TokenType.NAME
+        and tokens[blank_idx].value == ""
+    ):
+        return tokens
+    return tokens[: cls_idx + 1]
+
+
+def _collapse_parens(filename: str, tokens: list[Token], code: str) -> list[Token]:
+    """Replace parenthesised groups with single PAREN_GROUP tokens.
+
+    A group that directly follows a name is a function call (its contents are
+    the comma-separated arguments). Any other group is a grouped expression.
+    Stray, unmatched parentheses are treated as whitespace, matching the
+    spec's "parentheses do nothing" rule.
+    """
+    if not any(t.type in (TokenType.L_PAREN, TokenType.R_PAREN) for t in tokens):
+        return tokens
+
+    matched = _match_parens(tokens)
+    closing = set(matched.values())
+    out: list[Token] = []
+    i = 0
+    while i < len(tokens):
+        token = tokens[i]
+        if token.type == TokenType.R_PAREN:
+            if i not in closing:  # stray closing paren -> whitespace
+                i += 1
+                continue
+            out.append(token)
+            i += 1
+            continue
+        if token.type != TokenType.L_PAREN:
+            out.append(token)
+            i += 1
+            continue
+        if i not in matched:  # stray opening paren -> whitespace
+            i += 1
+            continue
+
+        close = matched[i]
+        inner = tokens[i + 1 : close]
+        j = len(out) - 1
+        while j >= 0 and out[j].type == TokenType.WHITESPACE:
+            j -= 1
+        attached = j >= 0 and out[j].type == TokenType.NAME
+
+        if attached and j - 1 >= 0 and out[j - 1].type == TokenType.DOT:
+            # "receiver".method(args) - the receiver is everything before the dot.
+            name_token = out[j]
+            receiver_tokens = [t for t in out[: j - 1] if t.type != TokenType.WHITESPACE]
+            receiver_node: ExpressionTreeNode = (
+                build_expression_tree(filename, receiver_tokens, code)
+                if receiver_tokens
+                else ValueNode(Token(TokenType.NAME, "undefined", name_token.line, name_token.col))
+            )
+            segments = _split_top_level_commas(inner)
+            arg_tokens = [seg for seg in segments if any(t.type != TokenType.WHITESPACE for t in seg)]
+            args = [build_expression_tree(filename, seg, code) for seg in arg_tokens] if arg_tokens else []
+            node = MethodCallNode(receiver_node, name_token, args)
+            source = receiver_tokens[0] if receiver_tokens else name_token
+            out = [_group_token(node, source, "method(...)")]
+            i = close + 1
+            continue
+
+        if attached:
+            name_token = out[j]
+            segments = _split_top_level_commas(inner)
+            arg_tokens = [seg for seg in segments if any(t.type != TokenType.WHITESPACE for t in seg)]
+            if not arg_tokens:
+                args = [_blank_value_node(token.line, token.col)]
+            else:
+                args = [build_expression_tree(filename, seg, code) for seg in arg_tokens]
+
+            k = j - 1
+            while k >= 0 and out[k].type == TokenType.WHITESPACE:
+                k -= 1
+            if k >= 0 and out[k].type == TokenType.NAME and out[k].value == "new":
+                node = FunctionNode(out[k], [ValueNode(name_token)] + args)
+                del out[k:]
+            else:
+                node = FunctionNode(name_token, args)
+                del out[j:]
+            out.append(_group_token(node, name_token, name_token.value + "(...)"))
+        else:
+            node = build_expression_tree(filename, inner, code)
+            out.append(_group_token(node, token))
+        i = close + 1
+    return out
+
+
+# Lower value = binds more loosely = becomes the root of the expression.
+# Used only to break ties when two operators have the same surrounding
+# whitespace (Gulf of Mexico's primary precedence mechanism).
+_OPERATOR_BINDING_POWER = {
+    OperatorType.COM: 0,
+    OperatorType.OR: 1,
+    OperatorType.AND: 2,
+    OperatorType.E: 3,
+    OperatorType.EE: 3,
+    OperatorType.EEE: 3,
+    OperatorType.EEEE: 3,
+    OperatorType.NE: 3,
+    OperatorType.NEE: 3,
+    OperatorType.NEEE: 3,
+    OperatorType.TE: 3,
+    OperatorType.TEE: 3,
+    OperatorType.TEEE: 3,
+    OperatorType.GT: 4,
+    OperatorType.GE: 4,
+    OperatorType.LT: 4,
+    OperatorType.LE: 4,
+    OperatorType.ADD: 5,
+    OperatorType.SUB: 5,
+    OperatorType.MUL: 6,
+    OperatorType.DIV: 6,
+    OperatorType.EXP: 7,
+}
+
+
+def _build_map_literal(filename: str, tokens: list[Token], code: str) -> MapLiteralNode:
+    """Build a map literal from the tokens between braces."""
+    depth = 0
+    entries: list[list[Token]] = [[]]
+    for token in tokens:
+        if token.type in (TokenType.L_CURLY, TokenType.L_PAREN, TokenType.L_SQUARE):
+            depth += 1
+        elif token.type in (TokenType.R_CURLY, TokenType.R_PAREN, TokenType.R_SQUARE):
+            depth -= 1
+        if token.type == TokenType.COMMA and depth == 0:
+            entries.append([])
+        else:
+            entries[-1].append(token)
+
+    pairs: list[tuple[str, ExpressionTreeNode]] = []
+    for entry in entries:
+        colon = next(
+            (i for i, t in enumerate(entry) if t.type == TokenType.COLON),
+            -1,
+        )
+        if colon == -1:
+            continue
+        key_tokens = [t for t in entry[:colon] if t.type not in (TokenType.WHITESPACE,)]
+        value_tokens = entry[colon + 1 :]
+        if not key_tokens:
+            continue
+        key = key_tokens[-1].value
+        pairs.append((key, build_expression_tree(filename, value_tokens, code)))
+    return MapLiteralNode(pairs)
 
 
 def build_expression_tree(filename: str, tokens: list[Token], code: str) -> ExpressionTreeNode:
@@ -195,6 +450,9 @@ def build_expression_tree(filename: str, tokens: list[Token], code: str) -> Expr
                 token,
             )
 
+    # Parentheses become grouped expressions / function-call argument lists.
+    tokens = _collapse_parens(filename, _normalise_new_empty_call(tokens), code)
+
     # create a new list consisting and tokens and a brand new type: the list
     tokens_without_whitespace = [token for token in tokens if token.type != TokenType.WHITESPACE]
     if not tokens_without_whitespace:
@@ -206,6 +464,16 @@ def build_expression_tree(filename: str, tokens: list[Token], code: str) -> Expr
         and tokens_without_whitespace[1].type == TokenType.R_SQUARE
     ):
         return ListNode([])  # easy way out xD
+    if (
+        len(tokens_without_whitespace) >= 2
+        and tokens_without_whitespace[0].type == TokenType.L_CURLY
+        and tokens_without_whitespace[-1].type == TokenType.R_CURLY
+    ):
+        return _build_map_literal(
+            filename,
+            tokens_without_whitespace[1:-1],
+            code,
+        )
     starts_with_whitespace = tokens[0].type == TokenType.WHITESPACE
     ends_with_whitespace = tokens[-1].type == TokenType.WHITESPACE
 
@@ -246,7 +514,12 @@ def build_expression_tree(filename: str, tokens: list[Token], code: str) -> Expr
                         "Whitespace must be equal on either side of an operator.",
                         tokens[i],
                     )
-                if r_len > max_width:
+                if r_len > max_width or (
+                    r_len == max_width
+                    and max_index != -1
+                    and _OPERATOR_BINDING_POWER.get(updated_list[i], 0)
+                    < _OPERATOR_BINDING_POWER.get(updated_list[max_index], 0)
+                ):
                     max_width = r_len
                     max_index = i
 
@@ -271,6 +544,7 @@ def build_expression_tree(filename: str, tokens: list[Token], code: str) -> Expr
             TokenType.NAME,
             TokenType.L_SQUARE,
             TokenType.STRING,
+            TokenType.PAREN_GROUP,
             TokenType.SUBTRACT,
             TokenType.SEMICOLON,
             TokenType.INCREMENT,
@@ -300,13 +574,37 @@ def build_expression_tree(filename: str, tokens: list[Token], code: str) -> Expr
 
     # value, like a list, name, or anything else
     if max_index == -1:
+        # "value".property / "value".method() - receiver is not a name.
+        # A zero-argument call is tokenised as a trailing blank name.
+        meaningful = tokens_without_whitespace
+        zero_arg_call = (
+            len(meaningful) >= 2
+            and meaningful[-1].type == TokenType.NAME
+            and meaningful[-1].value == ""
+        )
+        if zero_arg_call:
+            meaningful = meaningful[:-1]
+        if (
+            len(meaningful) >= 3
+            and meaningful[-2].type == TokenType.DOT
+            and meaningful[-1].type == TokenType.NAME
+        ):
+            receiver = build_expression_tree(filename, meaningful[:-2], code)
+            member = meaningful[-1]
+            if zero_arg_call:
+                return MethodCallNode(receiver, member, [])
+            return MemberAccessNode(receiver, member)
+
         # just making sure the input is correct
         try:
             name_or_value = tokens_without_whitespace[0]
+            if name_or_value.type == TokenType.PAREN_GROUP and name_or_value.tree is not None:
+                return name_or_value.tree
             if name_or_value.type not in [
                 TokenType.NAME,
                 TokenType.L_SQUARE,
                 TokenType.STRING,
+                TokenType.PAREN_GROUP,
             ]:
                 raise_error_at_token(
                     filename,
