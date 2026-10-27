@@ -33,7 +33,7 @@ Thank you for your interest in contributing to Gulf of Mexico! This guide covers
 
 ### Prerequisites
 
-- Python 3.10+
+- Python 3.11+
 - Git
 
 ### Clone and install
@@ -120,7 +120,8 @@ See [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) for a full architecture guide.
 
 - Use type annotations on all public function signatures.
 - Use `from __future__ import annotations` for forward references.
-- Prefer `Optional[X]` over `X | None` for Python 3.10 compatibility.
+- PEP 604 unions (`X | None`) are available at the 3.11 floor; match the
+  surrounding style rather than converting existing `Optional[X]` annotations.
 
 ### Linting
 

@@ -297,7 +297,7 @@ class TestPackaging:
     def test_ruff_ruleset_is_pinned(self):
         pyproject = (ROOT / "pyproject.toml").read_text(encoding="utf-8")
         assert 'select = ["E4", "E7", "E9", "F"]' in pyproject
-        assert 'target-version = "py310"' in pyproject
+        assert 'target-version = "py311"' in pyproject
 
     def test_coverage_measures_subprocesses(self):
         pyproject = (ROOT / "pyproject.toml").read_text(encoding="utf-8")

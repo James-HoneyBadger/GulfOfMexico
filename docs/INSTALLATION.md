@@ -21,7 +21,7 @@ Step-by-step instructions for installing and running the Gulf of Mexico interpre
 
 ## Requirements
 
-- **Python 3.10 or later** (tested on 3.10, 3.11, 3.12, 3.13, 3.14)
+- **Python 3.11 or later** (tested on 3.11, 3.12, 3.13, 3.14)
 - **pip** (included with Python)
 - **Git** (only needed for source installation)
 
@@ -117,7 +117,7 @@ pip install -e ".[all]"
 |-------|---------|---------|
 | `ide` | PySide6 (≥6.6) | Graphical IDE with 7 themes, movable panels, settings dialog, and syntax highlighting |
 | `input` | pynput (≥1.7.7) | Keyboard input support |
-| `graphics` | Pillow (≥11.0) | Image processing |
+| `graphics` | Pillow (≥13.0) | Image processing |
 | `yaml` | PyYAML (≥6.0) | YAML configuration files |
 | `globals` | PyGithub (≥2.5) | GitHub-based public variable sharing |
 
@@ -176,7 +176,7 @@ gom-ide
 
 ### Linux
 
-Most Linux distributions include Python 3.10+. Install via your package manager if needed:
+Most Linux distributions include Python 3.11+. Install via your package manager if needed:
 
 ```bash
 # Debian / Ubuntu
@@ -201,7 +201,7 @@ sudo dnf install mesa-libGL mesa-libEGL
 
 ### macOS
 
-Python 3.10+ can be installed via [python.org](https://www.python.org/downloads/) or Homebrew:
+Python 3.11+ can be installed via [python.org](https://www.python.org/downloads/) or Homebrew:
 
 ```bash
 brew install python@3.12
@@ -451,7 +451,7 @@ pip install --user gulfofmexico
 
 ### Python version too old
 
-Gulf of Mexico requires Python 3.10+. Check your version:
+Gulf of Mexico requires Python 3.11+. Check your version:
 
 ```bash
 python --version

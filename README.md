@@ -6,7 +6,7 @@
   <p align="center">
     <a href="https://github.com/James-HoneyBadger/GulfOfMexico/blob/main/LICENSE"><img alt="License: MIT" src="https://img.shields.io/badge/license-MIT-blue.svg"></a>
     <a href="https://pypi.org/project/gulfofmexico/"><img alt="PyPI" src="https://img.shields.io/pypi/v/gulfofmexico.svg"></a>
-    <a href="https://www.python.org/downloads/"><img alt="Python 3.10+" src="https://img.shields.io/badge/python-3.10%2B-blue.svg"></a>
+    <a href="https://www.python.org/downloads/"><img alt="Python 3.11+" src="https://img.shields.io/badge/python-3.11%2B-blue.svg"></a>
     <a href="https://github.com/James-HoneyBadger/GulfOfMexico/actions"><img alt="Tests" src="https://img.shields.io/github/actions/workflow/status/James-HoneyBadger/GulfOfMexico/ci.yml?label=tests"></a>
   </p>
 </p>

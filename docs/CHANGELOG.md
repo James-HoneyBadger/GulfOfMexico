@@ -1,3 +1,26 @@
+# Unreleased
+
+### Compatibility
+
+- **Python 3.10 support is dropped.** The minimum supported version is now 3.11;
+  CI tests 3.11 through 3.14, and the Ruff/mypy target versions and the Trove
+  classifiers follow. Python 3.10 reached end-of-life in October 2026, and two
+  of its resolution pins (`Pillow` < 13.0.0, `filelock` < 4.2.1) have no patched
+  release for that version, so continuing to support 3.10 would leave
+  permanently unfixable advisories in `poetry.lock`.
+
+### Security
+
+- **Dependency advisory sweep.** `poetry.lock` no longer resolves any package to
+  a release with an open GitHub/OSV advisory:
+  `cryptography` 46.0.5 → 50.0.2 (CVE-2026-39892, CVE-2026-34073),
+  `requests` 2.32.5 → 2.34.2 (CVE-2026-25645), `urllib3` 2.6.3 → 2.8.0,
+  `certifi` 2024.12.14 → 2026.10.23, `idna` 3.11 → 3.20,
+  `pygments` 2.19.2 → 2.21.0, `pyjwt` 2.8.0 → 2.15.1,
+  `virtualenv` 20.36.1 → 21.15.0 (with `filelock` 3.24.2 → 4.2.4), and
+  `Pillow` 12.1.1 → 13.0.0.
+- `pytest` moves to `^9.0.3` (CVE-2025-71176, insecure temporary directory).
+
 # v1.2.0 — 2026-10-23
 
 ### Interfaces
